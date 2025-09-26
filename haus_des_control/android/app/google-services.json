@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "190346465365",
+    "project_id": "controlapp-23df2",
+    "storage_bucket": "controlapp-23df2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:190346465365:android:ee67abb89708a4123e04dc",
+        "android_client_info": {
+          "package_name": "com.example.haus_des_control"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_Z2Eu0joFKgEqrVFc57qwjfjBlkmCwNA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
