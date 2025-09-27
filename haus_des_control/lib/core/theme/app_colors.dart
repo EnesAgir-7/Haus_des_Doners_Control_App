@@ -16,6 +16,7 @@ class AppColors {
   /// Utility methods for color opacity variations
   static Color redWithOpacity(double opacity) => primaryRed.withOpacity(opacity);
   static Color darkWithOpacity(double opacity) => primaryDark.withOpacity(opacity);
+  static Color whiteWithOpacity(double opacity) => white.withOpacity(opacity);
   
   /// Light theme color scheme
   static final ColorScheme lightColorScheme = ColorScheme(
