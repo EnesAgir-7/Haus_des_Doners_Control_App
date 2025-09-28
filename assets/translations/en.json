@@ -1,0 +1,17 @@
+{
+  "panel": "Panel",
+  "subsidiaries": "Subsidiaries",
+  "fleet": "Fleet",
+  "route": "Route",
+  "file": "File",
+  "tasks": "Tasks",
+  "change_language": "Change Language",
+  "select_language": "Select Language",
+  "take_photo": "Take Photo",
+  "terms_and_privacy": "Cleanliness & Hygiene",
+  "personal_and_service": "Staff & Service",
+  "product_quality": "Product Quality",
+  "store_rating": "Store Layout", 
+  "control": "Control", 
+  "cancel": "Cancel"
+}
