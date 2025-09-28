@@ -1,6 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+
 import '../../routes/app_routes.dart';
-import '../../core/theme/app_colors.dart';
+import '../core/constants/app_assets.dart';
+import '../core/constants/app_colors.dart';
+import '../translations/locale_keys.g.dart';
+import 'language_button.dart';
+
+//TODO: locale
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String currentRoute;
@@ -21,65 +28,85 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       color: AppColors.primaryRed,
       child: SafeArea(
         child: Column(
-        children: [
-          // Logo and title section
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
+          children: [
+            // Logo and title section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Image.asset(
-                        'assets/logo.png',
-                        height: 36,
-                      ),
-                    ),
-                    
-                  ],
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Image.asset(kAppLogo, height: 36),
+                  ),
                 ),
+
+                // Language button — opens dialog
+                LanguageButton(),
               ],
             ),
-          ),
-          
-          // Navigation bar
-          Container(
-            color: AppColors.primaryDark,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  _buildNavLink(context, 'Panel', RouteNames.panel),
-                  _buildNavLink(context, 'Şubeler', RouteNames.subsidiaries),
-                  _buildNavLink(context, 'Kontrol', RouteNames.control),
-                  _buildNavLink(context, 'Rota', RouteNames.route),
-                  _buildNavLink(context, 'Filo', RouteNames.fleet),
-                  _buildNavLink(context, 'Görevler', RouteNames.tasks),
-                ],
+
+            // Navigation bar
+            Container(
+              color: AppColors.primaryDark,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    _buildNavLink(
+                      context,
+                      LocaleKeys.panel.tr(),
+                      RouteNames.panel,
+                    ),
+                    _buildNavLink(
+                      context,
+                      LocaleKeys.subsidiaries.tr(),
+                      RouteNames.subsidiaries,
+                    ),
+                    _buildNavLink(
+                      context,
+                      LocaleKeys.control.tr(),
+                      RouteNames.control,
+                    ),
+                    _buildNavLink(
+                      context,
+                      LocaleKeys.route.tr(),
+                      RouteNames.route,
+                    ),
+                    _buildNavLink(
+                      context,
+                      LocaleKeys.file.tr(),
+                      RouteNames.fleet,
+                    ),
+                    _buildNavLink(
+                      context,
+                      LocaleKeys.tasks.tr(),
+                      RouteNames.tasks,
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      )),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildNavLink(BuildContext context, String title, String route) {
-    bool isCurrentRoute = currentRoute == route;
-    
+    final bool isCurrentRoute = currentRoute == route;
+
     return TextButton(
       onPressed: () => onRouteSelected(route),
       style: TextButton.styleFrom(
-        backgroundColor: isCurrentRoute ? AppColors.primaryRed : Colors.transparent,
-        foregroundColor: isCurrentRoute ? AppColors.white : AppColors.white,
+        backgroundColor: isCurrentRoute
+            ? AppColors.primaryRed
+            : Colors.transparent,
+        foregroundColor: AppColors.white,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         textStyle: const TextStyle(fontSize: 14),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero, // Köşeleri düz yapıyor
-        ),
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
       ),
       child: Text(title),
     );

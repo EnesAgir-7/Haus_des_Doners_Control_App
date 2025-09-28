@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/core/theme/app_colors.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+
+import '../../core/constants/app_colors.dart';
+
+//TODO: locale
 
 class ControlPage extends StatefulWidget {
   const ControlPage({super.key});

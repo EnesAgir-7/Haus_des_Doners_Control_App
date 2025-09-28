@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/screens/user/panel_page.dart';
+
 import '../routes/app_routes.dart';
 import '../widgets/custom_app_bar.dart';
 
@@ -58,7 +59,10 @@ class _MainLayoutState extends State<MainLayout> {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
         const curve = Curves.easeInOut;
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween = Tween(
+          begin: begin,
+          end: end,
+        ).chain(CurveTween(curve: curve));
         var offsetAnimation = animation.drive(tween);
         return SlideTransition(position: offsetAnimation, child: child);
       },

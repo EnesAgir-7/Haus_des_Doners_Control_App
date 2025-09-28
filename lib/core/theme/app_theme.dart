@@ -2,7 +2,7 @@
 /// It defines the visual properties for various Material widgets.
 
 import 'package:flutter/material.dart';
-import 'app_colors.dart';
+import '../constants/app_colors.dart';
 
 /// A utility class that provides theme data for the application
 class AppTheme {
