@@ -37,7 +37,6 @@ class SubsidiariesPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.black,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -78,4 +77,3 @@ class SubsidiariesPage extends StatelessWidget {
     );
   }
 }
-

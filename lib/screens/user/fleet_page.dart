@@ -7,7 +7,6 @@ class FleetPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primaryDark,
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(

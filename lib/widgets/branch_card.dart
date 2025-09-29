@@ -10,7 +10,6 @@ class Branch {
   Branch({required this.name, required this.lastControl, required this.score});
 }
 
-
 class BranchCard extends StatelessWidget {
   final Branch branch;
 

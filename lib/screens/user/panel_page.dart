@@ -9,7 +9,6 @@ class PanelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

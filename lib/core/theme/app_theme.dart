@@ -74,7 +74,7 @@ class AppTheme {
       ),
     );
   }
-
+      
   /// Dark theme configuration
   /// Uses primaryDark as the main background color and adjusts all components accordingly
   static ThemeData get dark {
@@ -82,7 +82,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: AppColors.darkColorScheme,
       scaffoldBackgroundColor: AppColors.primaryDark,
-
+      
       // AppBar teması
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primaryDark,
