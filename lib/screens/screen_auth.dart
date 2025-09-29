@@ -1,0 +1,209 @@
+import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/app_assets.dart';
+import '../../core/constants/app_colors.dart';
+import '../routes/app_routes.dart';
+
+class ScreenAuth extends StatefulWidget {
+  const ScreenAuth({super.key});
+
+  @override
+  State<ScreenAuth> createState() => _ScreenAuthState();
+}
+
+class _ScreenAuthState extends State<ScreenAuth> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.primaryDark,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // 🔐 App Icon / Logo
+                    Image.asset(kAppLogo, width: 300),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Hoş Geldiniz",
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Hesabınıza giriş yapın",
+                      style: TextStyle(
+                        color: AppColors.lightGrey,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // 📧 Email Field
+                    _InputField(
+                      controller: _emailController,
+                      label: "E-posta",
+                      hint: "ornek@mail.com",
+                      icon: Icons.email_outlined,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty)
+                          return "E-posta gerekli";
+                        if (!value.contains("@"))
+                          return "Geçerli bir e-posta girin";
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    // 🔑 Password Field
+                    _InputField(
+                      controller: _passwordController,
+                      label: "Şifre",
+                      hint: "••••••••",
+                      icon: Icons.lock_outline,
+                      obscureText: _obscurePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColors.lightGrey,
+                        ),
+                        onPressed: () {
+                          setState(() => _obscurePassword = !_obscurePassword);
+                        },
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty)
+                          return "Şifre gerekli";
+                        if (value.length < 6) return "En az 6 karakter olmalı";
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+
+                    // 🔗 Forgot Password
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          "Şifremi Unuttum?",
+                          style: TextStyle(
+                            color: AppColors.primaryRed,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // 🚀 Login Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryRed,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: () {
+                          // if (_formKey.currentState!.validate()) {
+                          Navigator.pushNamed(context, RouteNames.mainLayout);
+                          // }
+                        },
+                        child: const Text(
+                          "Giriş Yap",
+                          style: TextStyle(
+                            color: AppColors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// 🌟 Reusable Input Field Widget
+class _InputField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String hint;
+  final IconData icon;
+  final bool obscureText;
+  final TextInputType keyboardType;
+  final String? Function(String?)? validator;
+  final Widget? suffixIcon;
+
+  const _InputField({
+    required this.controller,
+    required this.label,
+    required this.hint,
+    required this.icon,
+    this.obscureText = false,
+    this.keyboardType = TextInputType.text,
+    this.validator,
+    this.suffixIcon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      style: const TextStyle(color: AppColors.white),
+      validator: validator,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon, color: AppColors.lightGrey),
+        suffixIcon: suffixIcon,
+        labelStyle: const TextStyle(color: AppColors.lightGrey),
+        hintStyle: const TextStyle(color: AppColors.lightGrey),
+        filled: true,
+        fillColor: AppColors.lightBlack,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.lightRed, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: AppColors.primaryRed, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
+      ),
+    );
+  }
+}

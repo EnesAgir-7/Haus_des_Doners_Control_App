@@ -5,8 +5,9 @@ import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 
 import 'core/theme/app_theme.dart';
-import 'layouts/main_layout.dart';
 import 'providers/report_photo_provider.dart';
+import 'routes/app_routes.dart';
+import 'screens/screen_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -45,7 +46,8 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         themeMode: ThemeMode.dark,
-        home: MainLayout(),
+        home: ScreenAuth(),
+        routes: AppRouter.routes,
       ),
     );
   }

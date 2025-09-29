@@ -1,6 +1,8 @@
 /// Defines all the routes available in the application.
 
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/layouts/main_layout.dart';
+import '../screens/screen_auth.dart';
 import '../screens/user/control_page.dart';
 import '../screens/user/subsidiaries_page.dart';
 import '../screens/user/panel_page.dart';
@@ -16,6 +18,8 @@ class RouteNames {
   static const String route = '/route';
   static const String fleet = '/fleet';
   static const String tasks = '/tasks';
+  static const String auth = '/auth';
+  static const String mainLayout = '/mainLayout';
 }
 
 /// Route generator class for the application
@@ -27,5 +31,7 @@ class AppRouter {
     RouteNames.route: (context) => RoutePage(),
     RouteNames.fleet: (context) => const FleetPage(),
     RouteNames.tasks: (context) => const TasksPage(),
+    RouteNames.auth: (context) => const ScreenAuth(),
+    RouteNames.mainLayout: (context) => const MainLayout(),
   };
 }
