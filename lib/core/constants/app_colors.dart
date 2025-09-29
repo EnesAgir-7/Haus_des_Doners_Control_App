@@ -11,7 +11,10 @@ class AppColors {
   /// Primary Colors
   static const Color primaryDark = Color(0xFF1C1818);    // Dark grey/black
   static const Color primaryRed = Color(0xFFC2292B);     // Brand red
+  static const Color lightRed = Color(0xff362424);     // Brand red
   static const Color white = Color(0xFFFFFFFF);          // Pure white
+  static const Color lightBlack = Color(0xFF1A1A1A);          // Pure white
+  static const Color lightGrey = Color(0xFFC2C0B6);          // Pure white
 
   /// Utility methods for color opacity variations
   static Color redWithOpacity(double opacity) => primaryRed.withOpacity(opacity);

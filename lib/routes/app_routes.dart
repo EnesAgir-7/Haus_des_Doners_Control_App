@@ -24,7 +24,7 @@ class AppRouter {
     RouteNames.panel: (context) => const PanelPage(),
     RouteNames.subsidiaries: (context) => const SubsidiariesPage(),
     RouteNames.control: (context) => const ControlPage(),
-    RouteNames.route: (context) => const RoutePage(),
+    RouteNames.route: (context) => RoutePage(),
     RouteNames.fleet: (context) => const FleetPage(),
     RouteNames.tasks: (context) => const TasksPage(),
   };

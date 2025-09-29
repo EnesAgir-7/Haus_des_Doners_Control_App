@@ -11,12 +11,17 @@ import 'providers/report_photo_provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+
   runApp(
     EasyLocalization(
+      path: 'assets/translations',
       assetLoader: CodegenLoader(),
       supportedLocales: [Locale('en'), Locale('de'), Locale('tr')],
-      path: 'assets/translations',
-      fallbackLocale: Locale('en', 'US'),
+      fallbackLocale: Locale('en'),
+      saveLocale: true,
+      startLocale: Locale('en'),
+      useOnlyLangCode: true,
+      useFallbackTranslationsForEmptyResources: true,
       child: const MyApp(),
     ),
   );

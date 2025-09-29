@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 
 import '../translations/locale_keys.g.dart';
 
-//TODO: locale
 class LanguageButton extends StatelessWidget {
   const LanguageButton({super.key});
 
-  // Supported languages: key => display name
   static const Map<String, String> _languages = {
     'en': 'English',
     'tr': 'Türkçe',
