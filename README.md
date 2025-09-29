@@ -1,16 +1,57 @@
-# haus_des_control
+📁 1. Add New Keys to Translation Files
+All translation files are located here:
+assets/translations/
+├── en.json   // English
+├── tr.json   // Turkish
+└── de.json   // German
+Whenever you add a new UI text or label, make sure to add the same key in all three files:
 
-A new Flutter project.
+✅ Example:
 
-## Getting Started
+// en.json
+{
+  "welcome": "Welcome",
+  "login_to_account": "Login to your account"
+}
 
-This project is a starting point for a Flutter application.
+// tr.json
+{
+  "welcome": "Hoş Geldiniz",
+  "login_to_account": "Hesabınıza giriş yapın"
+}
 
-A few resources to get you started if this is your first Flutter project:
+// de.json
+{
+  "welcome": "Willkommen",
+  "login_to_account": "Melden Sie sich bei Ihrem Konto an"
+}
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+⚠️ Important:
+Use identical keys in every language file.
+Keep the structure consistent.
+Double-check for missing commas or invalid JSON syntax.
+
+⚙️ 2. Generate Translations for the App:
+After updating the JSON files, run this command to generate translation data in Dart:
+
+dart run easy_localization:generate -S "assets/translations" -O "lib/translations"
+✅ This will generate a Dart file that the app can use internally for loading translations.
+
+🗝️ 3. Generate Translation Keys (CodeGen):
+Next, run this command to create the strongly-typed keys file:
+
+dart run easy_localization:generate -S "assets/translations" -O "lib/translations" -o "locale_keys.g.dart" -f keys
+
+
+✅ This will create a locale_keys.g.dart file in lib/translations/
+Now you can reference translation keys in code with autocomplete and type safety.
+
+💻 4. Use the Translations in Your UI
+
+Import the keys file and call the translation like this:
+
+import 'package:easy_localization/easy_localization.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
+
+Text(LocaleKeys.welcome.tr()); // ✅ Translated text
