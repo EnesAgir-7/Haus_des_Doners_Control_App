@@ -6,10 +6,10 @@ import '../translations/locale_keys.g.dart';
 class LanguageButton extends StatelessWidget {
   const LanguageButton({super.key});
 
-  static const Map<String, String> _languages = {
-    'en': 'English',
-    'tr': 'Türkçe',
-    'de': 'German',
+  static const Map<String, Map<String, String>> _languages = {
+    'en': {'name': 'English', 'flag': '🇬🇧'},
+    'tr': {'name': 'Türkçe', 'flag': '🇹🇷'},
+    'de': {'name': 'German', 'flag': '🇩🇪'},
   };
 
   @override
@@ -31,7 +31,11 @@ class LanguageButton extends StatelessWidget {
             child: ListBody(
               children: _languages.entries.map((entry) {
                 return ListTile(
-                  title: Text(entry.value),
+                  leading: Text(
+                    entry.value['flag']!,
+                    style: const TextStyle(fontSize: 24),
+                  ),
+                  title: Text(entry.value['name']!),
                   onTap: () {
                     context.setLocale(Locale(entry.key));
                     Navigator.of(context).pop();
