@@ -4,8 +4,6 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../core/constants/app_colors.dart';
 
-//TODO: locale
-
 class ControlPage extends StatefulWidget {
   const ControlPage({super.key});
 
@@ -16,10 +14,26 @@ class ControlPage extends StatefulWidget {
 class _ControlPageState extends State<ControlPage> {
   // List of questions for store evaluation with photos
   final List<Map<String, dynamic>> questions = [
-    {'question': 'Temizlik & Hijyen', 'rating': null, 'photos': <File>[]},      // Cleanliness & Hygiene
-    {'question': 'Personel & Hizmet', 'rating': null, 'photos': <File>[]},      // Personnel & Service
-    {'question': 'Ürün Kalitesi', 'rating': null, 'photos': <File>[]},          // Product Quality
-    {'question': 'Mağaza Düzeni', 'rating': null, 'photos': <File>[]},          // Store Organization
+    {
+      'question': 'Temizlik & Hijyen',
+      'rating': null,
+      'photos': <File>[],
+    }, // Cleanliness & Hygiene
+    {
+      'question': 'Personel & Hizmet',
+      'rating': null,
+      'photos': <File>[],
+    }, // Personnel & Service
+    {
+      'question': 'Ürün Kalitesi',
+      'rating': null,
+      'photos': <File>[],
+    }, // Product Quality
+    {
+      'question': 'Mağaza Düzeni',
+      'rating': null,
+      'photos': <File>[],
+    }, // Store Organization
   ];
 
   final ImagePicker _picker = ImagePicker();
@@ -31,7 +45,7 @@ class _ControlPageState extends State<ControlPage> {
         source: ImageSource.camera,
         preferredCameraDevice: CameraDevice.rear,
       );
-      
+
       if (photo != null) {
         setState(() {
           List<File> photos = question['photos'] as List<File>;
@@ -59,11 +73,14 @@ class _ControlPageState extends State<ControlPage> {
     );
   }
 
-
   // Builds a single question card with rating options and photo section
+  // Animated Rating Button with emoji inside
   Widget _buildQuestionCard(Map<String, dynamic> question) {
     List<File> photos = question['photos'] as List<File>;
-    
+
+    // Emojis corresponding to ratings 1-4
+    final List<String> emojis = ['😃', '🙂', '😐', '😞'];
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -71,7 +88,7 @@ class _ControlPageState extends State<ControlPage> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -83,7 +100,9 @@ class _ControlPageState extends State<ControlPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
             ),
             child: Row(
               children: [
@@ -97,62 +116,79 @@ class _ControlPageState extends State<ControlPage> {
               ],
             ),
           ),
-          // Rating options
+          // Rating options with emojis inside buttons
           Container(
             padding: const EdgeInsets.all(16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(4, (index) {
                 final rating = index + 1;
-                return InkWell(
+                final bool isSelected = question['rating'] == rating;
+
+                return GestureDetector(
                   onTap: () {
                     setState(() {
                       question['rating'] = rating;
                     });
                   },
-                  child: Container(
-                    width: 60,
-                    height: 60,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: isSelected ? 80 : 70,
+                    height: isSelected ? 80 : 70,
                     decoration: BoxDecoration(
-                      color: question['rating'] == rating
+                      color: isSelected
                           ? AppColors.primaryRed
                           : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Center(
-                      child: Text(
-                        rating.toString(),
-                        style: TextStyle( 
-                          color: question['rating'] == rating
-                              ? AppColors.whiteWithOpacity(0.9)
-                              : Colors.black,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          rating.toString(),
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: isSelected
+                                ? AppColors.whiteWithOpacity(0.9)
+                                : Colors.black,
+                          ),
                         ),
-                      ),
+                        if (isSelected)
+                          AnimatedScale(
+                            scale: isSelected ? 1.3 : 1.0,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.elasticOut,
+                            child: Text(
+                              emojis[index],
+                              style: const TextStyle(fontSize: 24),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 );
               }),
             ),
           ),
-          // Photo section
+          // Photo section (remains same)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+              borderRadius: const BorderRadius.vertical(
+                bottom: Radius.circular(12),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Photo capture button
                 ElevatedButton.icon(
                   onPressed: () => _takePhoto(question),
                   icon: const Icon(Icons.camera_alt),
@@ -165,7 +201,6 @@ class _ControlPageState extends State<ControlPage> {
                 ),
                 if (photos.isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  // Photo grid
                   Container(
                     height: 120,
                     decoration: BoxDecoration(
@@ -173,11 +208,12 @@ class _ControlPageState extends State<ControlPage> {
                     ),
                     child: GridView.builder(
                       scrollDirection: Axis.horizontal,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 1,
-                        mainAxisSpacing: 8,
-                        childAspectRatio: 1,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 1,
+                            mainAxisSpacing: 8,
+                            childAspectRatio: 1,
+                          ),
                       itemCount: photos.length,
                       itemBuilder: (context, index) {
                         return Stack(
