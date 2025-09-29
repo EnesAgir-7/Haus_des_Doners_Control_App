@@ -53,10 +53,10 @@ class RoutePage extends StatelessWidget {
             children: [
               Row(
                 children: const [
-                  Icon(Icons.apartment, color: Colors.lightBlueAccent),
+                  Icon(Icons.book, color: Colors.lightBlueAccent),
                   SizedBox(width: 6),
                   Text(
-                    "Şubelerim (40 Şube)",
+                    "Bugünkü Rota Planı",
                     style: TextStyle(
                       color: AppColors.primaryRed,
                       fontWeight: FontWeight.bold,
