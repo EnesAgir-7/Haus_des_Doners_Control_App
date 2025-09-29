@@ -17,21 +17,21 @@ class AppColors {
   static const Color lightGrey = Color(0xFFC2C0B6);          // Pure white
 
   /// Utility methods for color opacity variations
-  static Color redWithOpacity(double opacity) => primaryRed.withOpacity(opacity);
-  static Color darkWithOpacity(double opacity) => primaryDark.withOpacity(opacity);
-  static Color whiteWithOpacity(double opacity) => white.withOpacity(opacity);
+  static Color redWithOpacity(double opacity) => primaryRed.withValues(alpha:  opacity);
+  static Color darkWithOpacity(double opacity) => primaryDark.withValues(alpha: opacity);
+  static Color whiteWithOpacity(double opacity) => white.withValues(alpha: opacity);
   
   /// Light theme color scheme
   static final ColorScheme lightColorScheme = ColorScheme(
     primary: primaryRed,
     secondary: primaryDark,
     surface: white,
-    background: white,
+    surfaceBright: white,
     error: const Color(0xFFB00020),
     onPrimary: white,
     onSecondary: white,
     onSurface: primaryDark,
-    onBackground: primaryDark,
+    onSurfaceVariant: primaryDark,
     onError: white,
     brightness: Brightness.light,
   );
@@ -41,12 +41,12 @@ class AppColors {
     primary: primaryRed,
     secondary: white,
     surface: primaryDark,
-    background: primaryDark,
+    surfaceBright: primaryDark,
     error: const Color(0xFFCF6679),
     onPrimary: white,
     onSecondary: primaryDark,
     onSurface: white,
-    onBackground: white,
+    onSurfaceVariant: white,
     onError: primaryDark,
     brightness: Brightness.dark,
   );

@@ -18,7 +18,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: AppColors.lightColorScheme,
       scaffoldBackgroundColor: AppColors.white,
-      
+
       // AppBar teması
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primaryDark,
@@ -31,9 +31,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryRed,
           foregroundColor: AppColors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: _defaultBorderRadius,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: _defaultBorderRadius),
         ),
       ),
 
@@ -45,18 +43,14 @@ class AppTheme {
 
       // IconButton teması
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          foregroundColor: AppColors.primaryDark,
-        ),
+        style: IconButton.styleFrom(foregroundColor: AppColors.primaryDark),
       ),
 
       // Card teması
       cardTheme: CardThemeData(
         color: AppColors.white,
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: _defaultBorderRadius,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: _defaultBorderRadius),
       ),
 
       // Input Decoration teması
@@ -69,7 +63,9 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: _defaultBorderRadius,
-          borderSide: BorderSide(color: AppColors.primaryDark.withOpacity(0.3)),
+          borderSide: BorderSide(
+            color: AppColors.primaryDark.withValues(alpha: 0.3),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: _defaultBorderRadius,
@@ -86,7 +82,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: AppColors.darkColorScheme,
       scaffoldBackgroundColor: AppColors.primaryDark,
-      
+
       // AppBar teması
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primaryDark,
@@ -99,9 +95,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryRed,
           foregroundColor: AppColors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: _defaultBorderRadius,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: _defaultBorderRadius),
         ),
       ),
 
@@ -113,18 +107,14 @@ class AppTheme {
 
       // IconButton teması
       iconButtonTheme: IconButtonThemeData(
-        style: IconButton.styleFrom(
-          foregroundColor: AppColors.white,
-        ),
+        style: IconButton.styleFrom(foregroundColor: AppColors.white),
       ),
 
       // Card teması
       cardTheme: CardThemeData(
         color: AppColors.primaryDark,
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: _defaultBorderRadius,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: _defaultBorderRadius),
       ),
 
       // Input Decoration teması
@@ -137,14 +127,14 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: _defaultBorderRadius,
-          borderSide: BorderSide(color: AppColors.white.withOpacity(0.3)),
+          borderSide: BorderSide(color: AppColors.white.withValues(alpha: 0.3)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: _defaultBorderRadius,
           borderSide: const BorderSide(color: AppColors.primaryRed),
         ),
         labelStyle: const TextStyle(color: AppColors.white),
-        hintStyle: TextStyle(color: AppColors.white.withOpacity(0.7)),
+        hintStyle: TextStyle(color: AppColors.white.withValues(alpha: 0.7)),
       ),
     );
   }

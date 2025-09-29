@@ -7,8 +7,6 @@ import '../core/constants/app_colors.dart';
 import '../translations/locale_keys.g.dart';
 import 'language_button.dart';
 
-//TODO: locale
-
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String currentRoute;
   final Function(String) onRouteSelected;
