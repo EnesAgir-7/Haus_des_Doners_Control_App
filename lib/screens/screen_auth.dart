@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/core/constants/app_assets.dart';
+import 'package:haus_des_control/widgets/language_button.dart';
 import '../../core/constants/app_colors.dart';
 import '../routes/app_routes.dart';
+import '../../translations/locale_keys.g.dart';
 
 class ScreenAuth extends StatefulWidget {
   const ScreenAuth({super.key});
@@ -20,6 +23,7 @@ class _ScreenAuthState extends State<ScreenAuth> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
+      appBar: AppBar(actions: const [LanguageButton()]),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -30,21 +34,25 @@ class _ScreenAuthState extends State<ScreenAuth> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // 🔐 App Icon / Logo
+                    // 🔐 App Logo
                     Image.asset(kAppLogo, width: 300),
                     const SizedBox(height: 16),
-                    const Text(
-                      "Hoş Geldiniz",
-                      style: TextStyle(
+
+                    // 🧑‍💻 Welcome
+                    Text(
+                      LocaleKeys.welcome.tr(),
+                      style: const TextStyle(
                         color: AppColors.white,
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      "Hesabınıza giriş yapın",
-                      style: TextStyle(
+
+                    // 👤 Login subtitle
+                    Text(
+                      LocaleKeys.login_to_account.tr(),
+                      style: const TextStyle(
                         color: AppColors.lightGrey,
                         fontSize: 15,
                       ),
@@ -54,15 +62,17 @@ class _ScreenAuthState extends State<ScreenAuth> {
                     // 📧 Email Field
                     _InputField(
                       controller: _emailController,
-                      label: "E-posta",
-                      hint: "ornek@mail.com",
+                      label: LocaleKeys.email.tr(),
+                      hint: LocaleKeys.email_hint.tr(),
                       icon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || value.isEmpty)
-                          return "E-posta gerekli";
-                        if (!value.contains("@"))
-                          return "Geçerli bir e-posta girin";
+                        if (value == null || value.isEmpty) {
+                          return LocaleKeys.email_required.tr();
+                        }
+                        if (!value.contains("@")) {
+                          return LocaleKeys.email_invalid.tr();
+                        }
                         return null;
                       },
                     ),
@@ -71,8 +81,8 @@ class _ScreenAuthState extends State<ScreenAuth> {
                     // 🔑 Password Field
                     _InputField(
                       controller: _passwordController,
-                      label: "Şifre",
-                      hint: "••••••••",
+                      label: LocaleKeys.password.tr(),
+                      hint: LocaleKeys.password_hint.tr(),
                       icon: Icons.lock_outline,
                       obscureText: _obscurePassword,
                       suffixIcon: IconButton(
@@ -87,9 +97,12 @@ class _ScreenAuthState extends State<ScreenAuth> {
                         },
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty)
-                          return "Şifre gerekli";
-                        if (value.length < 6) return "En az 6 karakter olmalı";
+                        if (value == null || value.isEmpty) {
+                          return LocaleKeys.password_required.tr();
+                        }
+                        if (value.length < 6) {
+                          return LocaleKeys.password_min_length.tr();
+                        }
                         return null;
                       },
                     ),
@@ -100,9 +113,9 @@ class _ScreenAuthState extends State<ScreenAuth> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {},
-                        child: const Text(
-                          "Şifremi Unuttum?",
-                          style: TextStyle(
+                        child: Text(
+                          LocaleKeys.forgot_password.tr(),
+                          style: const TextStyle(
                             color: AppColors.primaryRed,
                             fontSize: 13,
                           ),
@@ -123,13 +136,13 @@ class _ScreenAuthState extends State<ScreenAuth> {
                           ),
                         ),
                         onPressed: () {
-                          // if (_formKey.currentState!.validate()) {
-                          Navigator.pushNamed(context, RouteNames.mainLayout);
-                          // }
+                          if (_formKey.currentState!.validate()) {
+                            Navigator.pushNamed(context, RouteNames.mainLayout);
+                          }
                         },
-                        child: const Text(
-                          "Giriş Yap",
-                          style: TextStyle(
+                        child: Text(
+                          LocaleKeys.login.tr(),
+                          style: const TextStyle(
                             color: AppColors.white,
                             fontSize: 17,
                             fontWeight: FontWeight.bold,

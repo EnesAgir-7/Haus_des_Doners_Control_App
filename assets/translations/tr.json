@@ -11,7 +11,19 @@
   "terms_and_privacy": "Temizlik & Hijyen",
   "personal_and_service": "Personel & Hizmet",
   "product_quality": "Ürün Kalitesi",
-  "store_rating": "Mağaza Düzeni", 
-  "control": "Kontrol", 
-  "cancel": "İptal"
+  "store_rating": "Mağaza Düzeni",
+  "control": "Kontrol",
+  "cancel": "İptal",
+  "welcome": "Hoş Geldiniz",
+  "login_to_account": "Hesabınıza giriş yapın",
+  "email": "E-posta",
+  "email_hint": "ornek@mail.com",
+  "email_required": "E-posta gerekli",
+  "email_invalid": "Geçerli bir e-posta girin",
+  "password": "Şifre",
+  "password_hint": "••••••••",
+  "password_required": "Şifre gerekli",
+  "password_min_length": "En az 6 karakter olmalı",
+  "forgot_password": "Şifremi Unuttum?",
+  "login": "Giriş Yap"
 }

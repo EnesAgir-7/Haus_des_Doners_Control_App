@@ -11,7 +11,19 @@
   "terms_and_privacy": "Cleanliness & Hygiene",
   "personal_and_service": "Staff & Service",
   "product_quality": "Product Quality",
-  "store_rating": "Store Layout", 
-  "control": "Control", 
-  "cancel": "Cancel"
+  "store_rating": "Store Layout",
+  "control": "Control",
+  "cancel": "Cancel",
+  "welcome": "Welcome",
+  "login_to_account": "Log in to your account",
+  "email": "Email",
+  "email_hint": "example@mail.com",
+  "email_required": "Email is required",
+  "email_invalid": "Enter a valid email",
+  "password": "Password",
+  "password_hint": "••••••••",
+  "password_required": "Password is required",
+  "password_min_length": "Must be at least 6 characters",
+  "forgot_password": "Forgot Password?",
+  "login": "Login"
 }
