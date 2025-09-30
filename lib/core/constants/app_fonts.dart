@@ -1,0 +1,1 @@
+const kAppFont = "GTWalsheimPro-Regular.ttf";

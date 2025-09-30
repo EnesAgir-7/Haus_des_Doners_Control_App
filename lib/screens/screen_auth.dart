@@ -34,11 +34,9 @@ class _ScreenAuthState extends State<ScreenAuth> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // 🔐 App Logo
                     Image.asset(kAppLogo, width: 300),
                     const SizedBox(height: 16),
 
-                    // 🧑‍💻 Welcome
                     Text(
                       LocaleKeys.welcome.tr(),
                       style: const TextStyle(
@@ -49,7 +47,6 @@ class _ScreenAuthState extends State<ScreenAuth> {
                     ),
                     const SizedBox(height: 8),
 
-                    // 👤 Login subtitle
                     Text(
                       LocaleKeys.login_to_account.tr(),
                       style: const TextStyle(
@@ -59,7 +56,6 @@ class _ScreenAuthState extends State<ScreenAuth> {
                     ),
                     const SizedBox(height: 32),
 
-                    // 📧 Email Field
                     _InputField(
                       controller: _emailController,
                       label: LocaleKeys.email.tr(),
@@ -78,7 +74,6 @@ class _ScreenAuthState extends State<ScreenAuth> {
                     ),
                     const SizedBox(height: 16),
 
-                    // 🔑 Password Field
                     _InputField(
                       controller: _passwordController,
                       label: LocaleKeys.password.tr(),
@@ -108,7 +103,6 @@ class _ScreenAuthState extends State<ScreenAuth> {
                     ),
                     const SizedBox(height: 12),
 
-                    // 🔗 Forgot Password
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
@@ -124,7 +118,6 @@ class _ScreenAuthState extends State<ScreenAuth> {
                     ),
                     const SizedBox(height: 24),
 
-                    // 🚀 Login Button
                     SizedBox(
                       width: double.infinity,
                       height: 52,
@@ -136,9 +129,9 @@ class _ScreenAuthState extends State<ScreenAuth> {
                           ),
                         ),
                         onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            Navigator.pushNamed(context, RouteNames.mainLayout);
-                          }
+                          // if (_formKey.currentState!.validate()) {
+                          Navigator.pushNamed(context, RouteNames.mainLayout);
+                          // }
                         },
                         child: Text(
                           LocaleKeys.login.tr(),
@@ -161,7 +154,6 @@ class _ScreenAuthState extends State<ScreenAuth> {
   }
 }
 
-// 🌟 Reusable Input Field Widget
 class _InputField extends StatelessWidget {
   final TextEditingController controller;
   final String label;

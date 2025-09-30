@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../constants/app_fonts.dart';
 
 /// A utility class that provides theme data for the application
 class AppTheme {
@@ -18,6 +19,7 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: AppColors.lightColorScheme,
       scaffoldBackgroundColor: AppColors.white,
+      fontFamily: kAppFont,
 
       // AppBar teması
       appBarTheme: const AppBarTheme(
@@ -74,7 +76,7 @@ class AppTheme {
       ),
     );
   }
-      
+
   /// Dark theme configuration
   /// Uses primaryDark as the main background color and adjusts all components accordingly
   static ThemeData get dark {
@@ -82,7 +84,8 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: AppColors.darkColorScheme,
       scaffoldBackgroundColor: AppColors.primaryDark,
-      
+      fontFamily: kAppFont,
+
       // AppBar teması
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primaryDark,
