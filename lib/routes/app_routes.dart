@@ -31,7 +31,7 @@ class AppRouter {
     RouteNames.route: (context) => RoutePage(),
     RouteNames.fleet: (context) => const FleetPage(),
     RouteNames.tasks: (context) => const TasksPage(),
-    RouteNames.auth: (context) => const ScreenAuth(),
+    RouteNames.auth: (context) =>  ScreenAuth(),
     RouteNames.mainLayout: (context) => const MainLayout(),
   };
 }

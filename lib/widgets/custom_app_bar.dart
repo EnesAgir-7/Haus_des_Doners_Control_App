@@ -1,10 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../routes/app_routes.dart';
 import '../core/constants/app_assets.dart';
 import '../core/constants/app_colors.dart';
 import '../translations/locale_keys.g.dart';
+import '../providers/provider_auth.dart';
 import 'language_button.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -27,6 +29,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: SafeArea(
         child: Column(
           children: [
+            // Top row with logo, language button, and logout button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -38,10 +41,24 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
 
-                LanguageButton(),
+                Row(
+                  children: [
+                    LanguageButton(),
+                    const SizedBox(width: 12),
+                    IconButton(
+                      onPressed: () {
+                        // Logout via ProviderAuth
+                        context.read<ProviderAuth>().logout();
+                      },
+                      icon: const Icon(Icons.logout, color: AppColors.white),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                ),
               ],
             ),
 
+            // Navigation row
             Container(
               color: AppColors.primaryDark,
               child: SingleChildScrollView(
