@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../widgets/app_button.dart';
 
 class ControlPage extends StatefulWidget {
   const ControlPage({super.key});
@@ -189,16 +190,15 @@ class _ControlPageState extends State<ControlPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ElevatedButton.icon(
+                AppButton(
+                  text: 'Fotoğraf Çek',
+                  icon: Icons.camera_alt,
                   onPressed: () => _takePhoto(question),
-                  icon: const Icon(Icons.camera_alt),
-                  label: const Text('Fotoğraf Çek'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    backgroundColor: AppColors.primaryRed,
-                    foregroundColor: AppColors.whiteWithOpacity(0.9),
-                  ),
+                  backgroundColor: AppColors.primaryRed,
+                  textStyle: TextStyle(color: AppColors.whiteWithOpacity(0.9)),
+                  height: 48,
                 ),
+
                 if (photos.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Container(

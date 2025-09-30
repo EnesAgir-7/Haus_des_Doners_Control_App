@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:haus_des_control/firebase_options.dart';
 import 'package:haus_des_control/providers/provider_auth.dart';
 import 'package:haus_des_control/providers/provider_language.dart';
@@ -16,20 +17,24 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await EasyLocalization.ensureInitialized();
-
-  runApp(
-    EasyLocalization(
-      path: 'assets/translations',
-      assetLoader: CodegenLoader(),
-      supportedLocales: [Locale('en'), Locale('de'), Locale('tr')],
-      fallbackLocale: Locale('en'),
-      saveLocale: true,
-      startLocale: Locale('en'),
-      useOnlyLangCode: true,
-      useFallbackTranslationsForEmptyResources: true,
-      child: const MyApp(),
-    ),
-  );
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((v) {
+    runApp(
+      EasyLocalization(
+        path: 'assets/translations',
+        assetLoader: CodegenLoader(),
+        supportedLocales: [Locale('en'), Locale('de'), Locale('tr')],
+        fallbackLocale: Locale('en'),
+        saveLocale: true,
+        startLocale: Locale('en'),
+        useOnlyLangCode: true,
+        useFallbackTranslationsForEmptyResources: true,
+        child: const MyApp(),
+      ),
+    );
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -67,9 +72,9 @@ class AuthWrapper extends StatelessWidget {
     return Consumer<ProviderAuth>(
       builder: (context, providerAuth, _) {
         if (providerAuth.currentUser != null) {
-          return const MainLayout(); 
+          return const MainLayout();
         } else {
-          return ScreenAuth(); 
+          return ScreenAuth();
         }
       },
     );

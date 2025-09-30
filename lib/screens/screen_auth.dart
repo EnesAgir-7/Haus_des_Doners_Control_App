@@ -7,7 +7,9 @@ import 'package:provider/provider.dart';
 
 import '../../translations/locale_keys.g.dart';
 import '../providers/provider_auth.dart';
+import '../widgets/app_button.dart';
 import '../widgets/custom_field.dart';
+import '../widgets/custom_toast.dart';
 
 class ScreenAuth extends StatefulWidget {
   const ScreenAuth({super.key});
@@ -133,52 +135,25 @@ class _ScreenAuthState extends State<ScreenAuth> {
                           ),
                         ),
                         const SizedBox(height: 24),
+                        AppButton(
+                          isLoading: provider.isLoading,
+                          text: LocaleKeys.login.tr(),
+                          onPressed: () async {
+                            if (_formKey.currentState!.validate()) {
+                              bool success = await provider.login(
+                                email: _emailController.text.trim(),
+                                password: _passwordController.text.trim(),
+                              );
 
-                        SizedBox(
-                          width: double.infinity,
-                          height: 52,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryRed,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                            onPressed: provider.isLoading
-                                ? null
-                                : () async {
-                                    if (_formKey.currentState!.validate()) {
-                                      bool success = await provider.login(
-                                        email: _emailController.text.trim(),
-                                        password: _passwordController.text
-                                            .trim(),
-                                      );
-
-                                      if (!success && provider.error != null) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(provider.error!),
-                                          ),
-                                        );
-                                      }
-                                    }
-                                  },
-
-                            child: provider.isLoading
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white,
-                                  )
-                                : Text(
-                                    LocaleKeys.login.tr(),
-                                    style: const TextStyle(
-                                      color: AppColors.white,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                          ),
+                              if (!success && provider.error != null) {
+                                showSnakBarr(
+                                  provider.error!,
+                                  context: context,
+                                  type: ToastType.error,
+                                );
+                              }
+                            }
+                          },
                         ),
                       ],
                     ),

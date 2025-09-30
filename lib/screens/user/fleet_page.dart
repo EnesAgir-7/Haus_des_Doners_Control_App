@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
+import '../../widgets/app_button.dart';
 
 class FleetPage extends StatelessWidget {
   const FleetPage({super.key});
@@ -26,7 +27,7 @@ class FleetPage extends StatelessWidget {
               SizedBox(height: 12),
               _OtherVehiclesList(),
               SizedBox(height: 16),
-              _ActionButtons(),
+              _ActionButtons(isUpdating: false, isChangingVehicle: false),
             ],
           ),
         ),
@@ -350,52 +351,34 @@ class _OtherVehiclesList extends StatelessWidget {
   }
 }
 
-// -------------------- Action Buttons --------------------
-
 class _ActionButtons extends StatelessWidget {
-  const _ActionButtons();
+  final bool isUpdating;
+  final bool isChangingVehicle;
+
+  const _ActionButtons({
+    this.isUpdating = false,
+    this.isChangingVehicle = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.lightRed,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+          child: AppButton(
+            text: "KM Güncelle",
+            isLoading: isUpdating,
             onPressed: () {},
-            child: const Text(
-              "KM Güncelle",
-              style: TextStyle(
-                color: AppColors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            backgroundColor: AppColors.lightRed,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryRed,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+          child: AppButton(
+            text: "Araç Değiştir",
+            isLoading: isChangingVehicle,
             onPressed: () {},
-            child: const Text(
-              "Araç Değiştir",
-              style: TextStyle(
-                color: AppColors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            backgroundColor: AppColors.primaryRed,
           ),
         ),
       ],

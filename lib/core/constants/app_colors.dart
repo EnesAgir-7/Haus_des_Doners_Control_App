@@ -9,12 +9,14 @@ class AppColors {
   AppColors._();
 
   /// Primary Colors
-  static const Color primaryDark = Color(0xFF1C1818);    // Dark grey/black
-  static const Color primaryRed = Color(0xFFC2292B);     // Brand red
-  static const Color lightRed = Color(0xff362424);     // Brand red
-  static const Color white = Color(0xFFFFFFFF);          // Pure white
-  static const Color lightBlack = Color(0xFF1A1A1A);          // Pure white
-  static const Color lightGrey = Color(0xFFC2C0B6);          // Pure white
+  static const Color primaryDark = Color(0xFF1C1818);    
+  static const Color primaryRed = Color(0xFFC2292B);     
+  static const Color lightRed = Color(0xff362424);    
+  static const Color white = Color(0xFFFFFFFF);        
+  static const Color lightBlack = Color(0xFF1A1A1A);          
+  static const Color lightGrey = Color(0xFFC2C0B6);     
+  static const Color amber = Colors.amber;         
+  static const Color alertColor = Color(0xFFFF0000);         
 
   /// Utility methods for color opacity variations
   static Color redWithOpacity(double opacity) => primaryRed.withValues(alpha:  opacity);
