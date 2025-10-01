@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:haus_des_control/firebase_options.dart';
 import 'package:haus_des_control/providers/provider_auth.dart';
-import 'package:haus_des_control/providers/provider_language.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
+
 import 'core/theme/app_theme.dart';
 import 'layouts/main_layout.dart';
 import 'providers/report_photo_provider.dart';
@@ -44,7 +44,6 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ReportPhotoProvider()),
-        ChangeNotifierProvider(create: (_) => ProviderLanguage()),
         ChangeNotifierProvider(create: (_) => ProviderAuth()),
       ],
       child: MaterialApp(
