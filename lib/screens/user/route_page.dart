@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/widgets/statistic_card.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../translations/locale_keys.g.dart';
 
 class RoutePage extends StatelessWidget {
   RoutePage({super.key});
@@ -51,11 +53,11 @@ class RoutePage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                children: const [
+                children: [
                   Icon(Icons.book, color: Colors.lightBlueAccent),
                   SizedBox(width: 6),
                   Text(
-                    "Bugünkü Rota Planı",
+                    LocaleKeys.today_route_plan.tr(),
                     style: TextStyle(
                       color: AppColors.primaryRed,
                       fontWeight: FontWeight.bold,

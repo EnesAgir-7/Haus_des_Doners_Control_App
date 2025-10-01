@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../widgets/app_button.dart';
+import '../../translations/locale_keys.g.dart';
 
 class ControlPage extends StatefulWidget {
   const ControlPage({super.key});
@@ -13,33 +15,31 @@ class ControlPage extends StatefulWidget {
 }
 
 class _ControlPageState extends State<ControlPage> {
-  // List of questions for store evaluation with photos
   final List<Map<String, dynamic>> questions = [
     {
-      'question': 'Temizlik & Hijyen',
+      'question': LocaleKeys.cleanliness_hygiene.tr(),
       'rating': null,
       'photos': <File>[],
-    }, // Cleanliness & Hygiene
+    },
     {
-      'question': 'Personel & Hizmet',
+      'question': LocaleKeys.personnel_service.tr(),
       'rating': null,
       'photos': <File>[],
-    }, // Personnel & Service
+    },
     {
-      'question': 'Ürün Kalitesi',
+      'question': LocaleKeys.product_quality.tr(),
       'rating': null,
       'photos': <File>[],
-    }, // Product Quality
+    },
     {
-      'question': 'Mağaza Düzeni',
+      'question': LocaleKeys.store_organization.tr(),
       'rating': null,
       'photos': <File>[],
-    }, // Store Organization
+    },
   ];
 
   final ImagePicker _picker = ImagePicker();
 
-  // Function to handle taking photos for a specific question
   Future<void> _takePhoto(Map<String, dynamic> question) async {
     try {
       final XFile? photo = await _picker.pickImage(
@@ -66,7 +66,6 @@ class _ControlPageState extends State<ControlPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Questions and Ratings
             ...questions.map((question) => _buildQuestionCard(question)),
           ],
         ),
@@ -74,12 +73,8 @@ class _ControlPageState extends State<ControlPage> {
     );
   }
 
-  // Builds a single question card with rating options and photo section
-  // Animated Rating Button with emoji inside
   Widget _buildQuestionCard(Map<String, dynamic> question) {
     List<File> photos = question['photos'] as List<File>;
-
-    // Emojis corresponding to ratings 1-4
     final List<String> emojis = ['😃', '🙂', '😐', '😞'];
 
     return Container(
@@ -97,7 +92,6 @@ class _ControlPageState extends State<ControlPage> {
       ),
       child: Column(
         children: [
-          // Question header
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -117,7 +111,6 @@ class _ControlPageState extends State<ControlPage> {
               ],
             ),
           ),
-          // Rating options with emojis inside buttons
           Container(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -179,7 +172,6 @@ class _ControlPageState extends State<ControlPage> {
               }),
             ),
           ),
-          // Photo section (remains same)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -191,14 +183,13 @@ class _ControlPageState extends State<ControlPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 AppButton(
-                  text: 'Fotoğraf Çek',
+                  text: LocaleKeys.take_photo.tr(),
                   icon: Icons.camera_alt,
                   onPressed: () => _takePhoto(question),
                   backgroundColor: AppColors.primaryRed,
                   textStyle: TextStyle(color: AppColors.whiteWithOpacity(0.9)),
                   height: 48,
                 ),
-
                 if (photos.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Container(

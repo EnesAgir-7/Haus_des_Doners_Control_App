@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../firebase_helpers/firebase_auth_helper.dart';
+import '../firebase_services/firebase_auth_service.dart';
 
 class ProviderAuth extends ChangeNotifier {
   final FirebaseAuthHelper _authHelper = FirebaseAuthHelper();

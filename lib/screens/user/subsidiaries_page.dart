@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../translations/locale_keys.g.dart';
 import '../../widgets/branch_card.dart';
 
 class SubsidiariesPage extends StatelessWidget {
@@ -44,11 +46,11 @@ class SubsidiariesPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                children: const [
+                children: [
                   Icon(Icons.apartment, color: Colors.lightBlueAccent),
                   SizedBox(width: 6),
                   Text(
-                    "Şubelerim (40 Şube)",
+                    LocaleKeys.my_branches.tr(),
                     style: TextStyle(
                       color: AppColors.primaryRed,
                       fontWeight: FontWeight.bold,

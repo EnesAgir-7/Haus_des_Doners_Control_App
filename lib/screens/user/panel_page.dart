@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../translations/locale_keys.g.dart';
 import '../../widgets/statistic_card.dart';
 
 class PanelPage extends StatelessWidget {
@@ -42,12 +44,12 @@ class DashboardCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
-              Icon(Icons.search, color: Colors.lightBlueAccent, size: 20),
-              SizedBox(width: 6),
+            children: [
+              const Icon(Icons.search, color: Colors.lightBlueAccent, size: 20),
+              const SizedBox(width: 6),
               Text(
-                "Mehmet Yılmaz - Kontrolcü",
-                style: TextStyle(
+                LocaleKeys.controller_name.tr(),
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -56,9 +58,9 @@ class DashboardCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          const Text(
-            "Bölge: İstanbul Avrupa",
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+          Text(
+            LocaleKeys.region.tr(),
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 16),
 
@@ -69,11 +71,11 @@ class DashboardCard extends StatelessWidget {
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
             childAspectRatio: 2.2,
-            children: const [
-              StatBox(number: "40", label: "Toplam Şube"),
-              StatBox(number: "12", label: "Bu Hafta Kontrol"),
-              StatBox(number: "3", label: "Bekleyen Görev"),
-              StatBox(number: "8.5", label: "Ortalama Puan"),
+            children: [
+              StatBox(number: "40", label: LocaleKeys.total_branch.tr()),
+              StatBox(number: "12", label: LocaleKeys.this_week_check.tr()),
+              StatBox(number: "3", label: LocaleKeys.pending_task.tr()),
+              StatBox(number: "8.5", label: LocaleKeys.average_score.tr()),
             ],
           ),
         ],
@@ -127,12 +129,12 @@ class DailySummarySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          children: const [
-            Icon(Icons.insert_chart, color: Colors.purpleAccent),
-            SizedBox(width: 6),
+          children: [
+            const Icon(Icons.insert_chart, color: Colors.purpleAccent),
+            const SizedBox(width: 6),
             Text(
-              "Günlük Özet",
-              style: TextStyle(
+              LocaleKeys.daily_summary.tr(),
+              style: const TextStyle(
                 color: AppColors.primaryRed,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
@@ -143,17 +145,17 @@ class DailySummarySection extends StatelessWidget {
         const SizedBox(height: 12),
         StatisticCard(
           time: "09:30",
-          title: "Haus des Döners - Beyoğlu",
-          status: "Tamamlandı",
+          title: LocaleKeys.haus_beyoglu.tr(),
+          status: LocaleKeys.completed.tr(),
           statusColor: Colors.green,
-          subtitle: "Puan: 9.2",
+          subtitle: LocaleKeys.score_92.tr(),
           icon: Icons.check_box,
         ),
         const SizedBox(height: 10),
         StatisticCard(
           time: "14:00",
-          title: "Haus des Döners - Şişli",
-          status: "Bekliyor",
+          title: LocaleKeys.haus_sisli.tr(),
+          status: LocaleKeys.waiting.tr(),
           statusColor: Colors.amber,
           subtitle: "",
           icon: Icons.hourglass_bottom,

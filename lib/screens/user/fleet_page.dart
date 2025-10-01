@@ -1,5 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_colors.dart';
+import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
 
 class FleetPage extends StatelessWidget {
@@ -13,21 +16,24 @@ class FleetPage extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              _SectionTitle(icon: Icons.local_shipping, title: "Filo Yönetimi"),
-              SizedBox(height: 12),
-              _CurrentVehicleCard(),
-              SizedBox(height: 16),
-              _VehicleDetailsCard(),
-              SizedBox(height: 24),
+            children: [
+              _SectionTitle(
+                icon: Icons.local_shipping,
+                title: LocaleKeys.fleet_management.tr(),
+              ),
+              const SizedBox(height: 12),
+              const _CurrentVehicleCard(),
+              const SizedBox(height: 16),
+              const _VehicleDetailsCard(),
+              const SizedBox(height: 24),
               _SectionTitle(
                 icon: Icons.directions_car,
-                title: "Diğer Kontrolcü Araçları",
+                title: LocaleKeys.other_controller_vehicles.tr(),
               ),
-              SizedBox(height: 12),
-              _OtherVehiclesList(),
-              SizedBox(height: 16),
-              _ActionButtons(isUpdating: false, isChangingVehicle: false),
+              const SizedBox(height: 12),
+              const _OtherVehiclesList(),
+              const SizedBox(height: 16),
+              const _ActionButtons(isUpdating: false, isChangingVehicle: false),
             ],
           ),
         ),
@@ -60,6 +66,7 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
+// -------------------- Current Vehicle Card --------------------
 class _CurrentVehicleCard extends StatelessWidget {
   const _CurrentVehicleCard();
 
@@ -72,16 +79,16 @@ class _CurrentVehicleCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.primaryRed),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(Icons.vpn_key, color: AppColors.primaryRed, size: 18),
-              SizedBox(width: 6),
+              const Icon(Icons.vpn_key, color: AppColors.primaryRed, size: 18),
+              const SizedBox(width: 6),
               Text(
-                "Mevcut Kiralık Araç",
-                style: TextStyle(
+                LocaleKeys.current_rented_vehicle.tr(),
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
@@ -89,10 +96,10 @@ class _CurrentVehicleCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           Text(
-            "Kontrolcü: Mehmet Yılmaz",
-            style: TextStyle(color: AppColors.white, fontSize: 13),
+            LocaleKeys.controller_name.tr(),
+            style: const TextStyle(color: AppColors.white, fontSize: 13),
           ),
         ],
       ),
@@ -100,6 +107,7 @@ class _CurrentVehicleCard extends StatelessWidget {
   }
 }
 
+// -------------------- Vehicle Details Card --------------------
 class _VehicleDetailsCard extends StatelessWidget {
   const _VehicleDetailsCard();
 
@@ -118,13 +126,16 @@ class _VehicleDetailsCard extends StatelessWidget {
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
+            children:  [
               Expanded(
-                child: _StatBox(value: "15,420", label: "Mevcut KM"),
+                child: _StatBox(
+                  value: "15,420",
+                  label: LocaleKeys.current_km.tr(),
+                ),
               ),
               SizedBox(width: 16),
               Expanded(
-                child: _StatBox(value: "25,000", label: "Maksimum KM"),
+                child: _StatBox(value: "25,000", label: LocaleKeys.max_km.tr()),
               ),
             ],
           ),
@@ -138,6 +149,7 @@ class _VehicleDetailsCard extends StatelessWidget {
   }
 }
 
+// -------------------- Vehicle Info --------------------
 class _VehicleInfo extends StatelessWidget {
   const _VehicleInfo();
 
@@ -169,6 +181,7 @@ class _VehicleInfo extends StatelessWidget {
   }
 }
 
+// -------------------- Stat Box --------------------
 class _StatBox extends StatelessWidget {
   final String value;
   final String label;
@@ -205,6 +218,7 @@ class _StatBox extends StatelessWidget {
   }
 }
 
+// -------------------- Remaining KM --------------------
 class _RemainingKm extends StatelessWidget {
   const _RemainingKm();
 
@@ -219,18 +233,18 @@ class _RemainingKm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Kalan KM:",
-            style: TextStyle(
+          Text(
+            LocaleKeys.remaining_km.tr(),
+            style: const TextStyle(
               color: AppColors.white,
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            "9,580 km",
-            style: TextStyle(
+          Text(
+            LocaleKeys.remaining_km_value.tr(),
+            style: const TextStyle(
               color: AppColors.primaryRed,
               fontWeight: FontWeight.bold,
             ),
@@ -246,9 +260,9 @@ class _RemainingKm extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            "%62 kullanıldı",
-            style: TextStyle(color: AppColors.lightGrey, fontSize: 12),
+          Text(
+            LocaleKeys.used_percentage.tr(),
+            style: const TextStyle(color: AppColors.lightGrey, fontSize: 12),
           ),
         ],
       ),
@@ -256,6 +270,7 @@ class _RemainingKm extends StatelessWidget {
   }
 }
 
+// -------------------- Return Date --------------------
 class _ReturnDate extends StatelessWidget {
   const _ReturnDate();
 
@@ -263,48 +278,54 @@ class _ReturnDate extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: const [
+      children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "İade Tarihi",
-              style: TextStyle(
+              LocaleKeys.return_date.tr(),
+              style: const TextStyle(
                 color: AppColors.primaryRed,
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Text(
-              "15 Ekim 2025",
-              style: TextStyle(
+              LocaleKeys.return_date_value.tr(),
+              style: const TextStyle(
                 color: AppColors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.warning, color: AppColors.primaryRed, size: 16),
-                SizedBox(width: 4),
+                const Icon(
+                  Icons.warning,
+                  color: AppColors.primaryRed,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
                 Text(
-                  "5 gün kaldı",
-                  style: TextStyle(color: AppColors.primaryRed, fontSize: 13),
+                  LocaleKeys.days_left.tr(),
+                  style: const TextStyle(
+                    color: AppColors.primaryRed,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
           ],
         ),
-        Icon(Icons.calendar_month, color: AppColors.white, size: 32),
+        const Icon(Icons.calendar_month, color: AppColors.white, size: 32),
       ],
     );
   }
 }
 
 // -------------------- Other Vehicles List --------------------
-
 class _OtherVehiclesList extends StatelessWidget {
   const _OtherVehiclesList();
 
@@ -313,34 +334,34 @@ class _OtherVehiclesList extends StatelessWidget {
     return ListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      children: const [
+      children:  [
         _OtherVehicleCard(
-          name: "Ahmet Demir - Renault Kangoo",
-          plate: "34 DEF 5678",
+          name: LocaleKeys.vehicle_ahmet.tr(),
+          plate: LocaleKeys.plate_ahmet.tr(),
           currentKm: 8500,
           maxKm: 20000,
           returnDate: "22 Ekim",
           progressColor: Colors.green,
         ),
         _OtherVehicleCard(
-          name: "Fatma Özkan - Ford Transit",
-          plate: "34 GHI 9012",
+          name: LocaleKeys.vehicle_fatma.tr(),
+          plate: LocaleKeys.plate_fatma.tr(),
           currentKm: 18200,
           maxKm: 25000,
           returnDate: "30 Ekim",
           progressColor: Colors.amber,
         ),
         _OtherVehicleCard(
-          name: "Osman Kaya - Fiat Doblo",
-          plate: "34 JKL 3456",
+          name: LocaleKeys.vehicle_osman.tr(),
+          plate: LocaleKeys.plate_osman.tr(),
           currentKm: 22800,
           maxKm: 24000,
           returnDate: "12 Ekim",
           progressColor: AppColors.primaryRed,
         ),
         _OtherVehicleCard(
-          name: "Zehra Aksoy - Opel Combo",
-          plate: "34 MNO 7890",
+          name: LocaleKeys.vehicle_zehra.tr(),
+          plate: LocaleKeys.plate_zehra.tr(),
           currentKm: 5300,
           maxKm: 18000,
           returnDate: "05 Kasım",
@@ -351,6 +372,7 @@ class _OtherVehiclesList extends StatelessWidget {
   }
 }
 
+// -------------------- Action Buttons --------------------
 class _ActionButtons extends StatelessWidget {
   final bool isUpdating;
   final bool isChangingVehicle;
@@ -366,7 +388,7 @@ class _ActionButtons extends StatelessWidget {
       children: [
         Expanded(
           child: AppButton(
-            text: "KM Güncelle",
+            text: LocaleKeys.update_km.tr(),
             isLoading: isUpdating,
             onPressed: () {},
             backgroundColor: AppColors.lightRed,
@@ -375,7 +397,7 @@ class _ActionButtons extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: AppButton(
-            text: "Araç Değiştir",
+            text: LocaleKeys.change_vehicle.tr(),
             isLoading: isChangingVehicle,
             onPressed: () {},
             backgroundColor: AppColors.primaryRed,
@@ -385,6 +407,7 @@ class _ActionButtons extends StatelessWidget {
     );
   }
 }
+
 
 // -------------------- Other Vehicle Card --------------------
 
