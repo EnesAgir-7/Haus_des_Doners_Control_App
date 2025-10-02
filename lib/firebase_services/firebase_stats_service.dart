@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../models/inspector_stats_model.dart';
 
 class StatsService {

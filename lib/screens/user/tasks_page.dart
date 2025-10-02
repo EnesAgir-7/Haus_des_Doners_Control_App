@@ -29,7 +29,6 @@ class _TasksPageState extends State<TasksPage> {
             child: CircularProgressIndicator(color: Color(0xFFE53935)),
           );
         }
-
         return Column(
           children: [
             // Filter chips

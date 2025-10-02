@@ -1,28 +1,45 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../core/console.dart';
 import '../models/route_model.dart';
 
 class RouteService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collection = 'routes';
 
-  // Get today's route for inspector
+  // Get today's route for inspectorimport 'package:cloud_firestore/cloud_firestore.dart'; // Make sure you have this import
+
   Future<RouteModel?> getTodaysRoute(String inspectorId) async {
     try {
+      // 1. Define the start and end of the day in UTC for consistent queries
       final now = DateTime.now();
-      final startOfDay = DateTime(now.year, now.month, now.day);
+      final startOfDay = DateTime.utc(
+        now.year,
+        now.month,
+        now.day,
+      ); // Midnight today, UTC
+      final endOfDay = DateTime.utc(
+        now.year,
+        now.month,
+        now.day + 1,
+      ); // Midnight tomorrow, UTC
 
       final snapshot = await _db
           .collection(_collection)
           .where('inspectorId', isEqualTo: inspectorId)
-          .where('date', isEqualTo: startOfDay)
+          // 2. Query for a date within the range
+          .where('date', isGreaterThanOrEqualTo: startOfDay)
+          .where('date', isLessThan: endOfDay)
           .limit(1)
           .get();
 
-      if (snapshot.docs.isEmpty) return null;
+      if (snapshot.docs.isEmpty) {
+        print("No route found for today.");
+        return null;
+      }
       return RouteModel.fromFirestore(snapshot.docs.first);
     } catch (e) {
-      print('Error getting today\'s route: $e');
+      console('Error getting today\'s route: $e'); 
       return null;
     }
   }
@@ -59,7 +76,7 @@ class RouteService {
       if (snapshot.docs.isEmpty) return null;
       return RouteModel.fromFirestore(snapshot.docs.first);
     } catch (e) {
-      print('Error getting route by date: $e');
+      console('Error getting route by date: $e');
       return null;
     }
   }
@@ -86,7 +103,7 @@ class RouteService {
 
       return snapshot.docs.map((doc) => RouteModel.fromFirestore(doc)).toList();
     } catch (e) {
-      print('Error getting routes by inspector: $e');
+      console('Error getting routes by inspector: $e');
       return [];
     }
   }
@@ -97,7 +114,7 @@ class RouteService {
       final docRef = await _db.collection(_collection).add(route.toMap());
       return docRef.id;
     } catch (e) {
-      print('Error creating route: $e');
+      console('Error creating route: $e');
       rethrow;
     }
   }
@@ -108,7 +125,7 @@ class RouteService {
       data['updatedAt'] = FieldValue.serverTimestamp();
       await _db.collection(_collection).doc(routeId).update(data);
     } catch (e) {
-      print('Error updating route: $e');
+      console('Error updating route: $e');
       rethrow;
     }
   }
@@ -142,7 +159,7 @@ class RouteService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Error updating stop status: $e');
+      console('Error updating stop status: $e');
       rethrow;
     }
   }

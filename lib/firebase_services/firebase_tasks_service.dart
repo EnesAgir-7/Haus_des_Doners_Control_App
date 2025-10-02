@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/console.dart';
 import '../models/task_model.dart';
 
 class TaskService {
@@ -16,7 +17,7 @@ class TaskService {
 
       return snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();
     } catch (e) {
-      print('Error getting tasks by inspector: $e');
+      console('Error getting tasks by inspector: $e');
       return [];
     }
   }
@@ -49,7 +50,7 @@ class TaskService {
 
       return snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();
     } catch (e) {
-      print('Error getting tasks by status: $e');
+      console('Error getting tasks by status: $e');
       return [];
     }
   }
@@ -64,7 +65,7 @@ class TaskService {
 
       return snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();
     } catch (e) {
-      print('Error getting all tasks: $e');
+      console('Error getting all tasks: $e');
       return [];
     }
   }
@@ -76,7 +77,7 @@ class TaskService {
       if (!doc.exists) return null;
       return TaskModel.fromFirestore(doc);
     } catch (e) {
-      print('Error getting task: $e');
+      console('Error getting task: $e');
       return null;
     }
   }
@@ -87,7 +88,7 @@ class TaskService {
       final docRef = await _db.collection(_collection).add(task.toMap());
       return docRef.id;
     } catch (e) {
-      print('Error creating task: $e');
+      console('Error creating task: $e');
       rethrow;
     }
   }
@@ -98,7 +99,7 @@ class TaskService {
       data['updatedAt'] = FieldValue.serverTimestamp();
       await _db.collection(_collection).doc(taskId).update(data);
     } catch (e) {
-      print('Error updating task: $e');
+      console('Error updating task: $e');
       rethrow;
     }
   }
@@ -111,7 +112,7 @@ class TaskService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Error updating task status: $e');
+      console('Error updating task status: $e');
       rethrow;
     }
   }
@@ -124,7 +125,7 @@ class TaskService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Error adding task comment: $e');
+      console('Error adding task comment: $e');
       rethrow;
     }
   }
@@ -134,7 +135,7 @@ class TaskService {
     try {
       await _db.collection(_collection).doc(taskId).delete();
     } catch (e) {
-      print('Error deleting task: $e');
+      console('Error deleting task: $e');
       rethrow;
     }
   }

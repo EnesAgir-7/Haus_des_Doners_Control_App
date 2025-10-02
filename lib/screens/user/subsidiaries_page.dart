@@ -240,28 +240,30 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
 
     if (provider.branches.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.apartment, size: 80, color: Colors.white24),
-            SizedBox(height: 16),
-            Text(
-              provider.searchQuery.isEmpty
-                  ? 'Henüz şube atanmamış'
-                  : 'Şube bulunamadı',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
-            ),
-            if (provider.searchQuery.isNotEmpty) ...[
-              SizedBox(height: 8),
-              TextButton(
-                onPressed: () => provider.setSearchQuery(''),
-                child: Text(
-                  'Aramayı temizle',
-                  style: TextStyle(color: AppColors.primaryRed),
-                ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.apartment, size: 80, color: Colors.white24),
+              SizedBox(height: 16),
+              Text(
+                provider.searchQuery.isEmpty
+                    ? 'Henüz şube atanmamış'
+                    : 'Şube bulunamadı',
+                style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
+              if (provider.searchQuery.isNotEmpty) ...[
+                SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => provider.setSearchQuery(''),
+                  child: Text(
+                    'Aramayı temizle',
+                    style: TextStyle(color: AppColors.primaryRed),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       );
     }

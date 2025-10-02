@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/console.dart';
 
 import '../models/branch_model.dart';
 
@@ -20,7 +21,7 @@ class BranchService {
           .map((doc) => BranchModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error getting branches by inspector: $e');
+      console('Error getting branches by inspector: $e');
       return [];
     }
   }
@@ -49,7 +50,7 @@ class BranchService {
           .map((doc) => BranchModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error getting all branches: $e');
+      console('Error getting all branches: $e');
       return [];
     }
   }
@@ -74,7 +75,7 @@ class BranchService {
       if (!doc.exists) return null;
       return BranchModel.fromFirestore(doc);
     } catch (e) {
-      print('Error getting branch: $e');
+      console('Error getting branch: $e');
       return null;
     }
   }
@@ -85,7 +86,7 @@ class BranchService {
       final docRef = await _db.collection(_collection).add(branch.toMap());
       return docRef.id;
     } catch (e) {
-      print('Error creating branch: $e');
+      console('Error creating branch: $e');
       rethrow;
     }
   }
@@ -96,7 +97,7 @@ class BranchService {
       data['updatedAt'] = FieldValue.serverTimestamp();
       await _db.collection(_collection).doc(branchId).update(data);
     } catch (e) {
-      print('Error updating branch: $e');
+      console('Error updating branch: $e');
       rethrow;
     }
   }
@@ -106,7 +107,7 @@ class BranchService {
     try {
       await _db.collection(_collection).doc(branchId).delete();
     } catch (e) {
-      print('Error deleting branch: $e');
+      console('Error deleting branch: $e');
       rethrow;
     }
   }
@@ -122,7 +123,7 @@ class BranchService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print('Error assigning branch: $e');
+      console('Error assigning branch: $e');
       rethrow;
     }
   }

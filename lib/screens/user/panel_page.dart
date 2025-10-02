@@ -300,7 +300,7 @@ class DailySummarySection extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.insert_chart, color: Colors.purpleAccent),
+                  const Icon(Icons.insert_chart),
                   const SizedBox(width: 6),
                   Text(
                     LocaleKeys.daily_summary.tr(),
@@ -400,7 +400,7 @@ class DailySummarySection extends StatelessWidget {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: StatisticCard(
-                  time: stop.timeSlot.split(' - ')[0], 
+                  time: stop.timeSlot.split(' - ')[0],
                   title: stop.branchName,
                   status: statusText,
                   statusColor: statusColor,
