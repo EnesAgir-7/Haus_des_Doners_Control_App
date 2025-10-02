@@ -1,19 +1,837 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
+import 'package:provider/provider.dart';
+
+import '../../models/task_model.dart';
+import '../../providers/provider_tasks.dart';
 
 class TasksPage extends StatefulWidget {
-  const TasksPage({super.key});
-
   @override
-  State<TasksPage> createState() => _TasksPageState();
+  _TasksPageState createState() => _TasksPageState();
 }
 
 class _TasksPageState extends State<TasksPage> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProviderTasks>().initialize();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Tasks Page'),
+    return Consumer<ProviderTasks>(
+      builder: (context, provider, child) {
+        if (provider.isLoading) {
+          return Center(
+            child: CircularProgressIndicator(color: Color(0xFFE53935)),
+          );
+        }
+
+        return Column(
+          children: [
+            // Filter chips
+            _buildFilterSection(provider),
+
+            // Task list
+            Expanded(
+              child: provider.tasks.isEmpty
+                  ? _buildEmptyState()
+                  : _buildTaskList(provider),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildFilterSection(ProviderTasks provider) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      color: Color(0xFF1A1A1A),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            LocaleKeys.tasks.tr(),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 12),
+
+          // Status filter chips
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildFilterChip(
+                  label: 'Tümü',
+                  count: provider.totalTasks,
+                  isSelected: provider.statusFilter == 'all',
+                  onTap: () => provider.setStatusFilter('all'),
+                ),
+                SizedBox(width: 8),
+                _buildFilterChip(
+                  label: 'Bekleyen',
+                  count: provider.pendingTasksCount,
+                  isSelected: provider.statusFilter == 'pending',
+                  onTap: () => provider.setStatusFilter('pending'),
+                ),
+                SizedBox(width: 8),
+                _buildFilterChip(
+                  label: 'Devam Eden',
+                  count: provider.inProgressTasksCount,
+                  isSelected: provider.statusFilter == 'in_progress',
+                  onTap: () => provider.setStatusFilter('in_progress'),
+                ),
+                SizedBox(width: 8),
+                _buildFilterChip(
+                  label: 'Tamamlanan',
+                  count: provider.completedTasksCount,
+                  isSelected: provider.statusFilter == 'completed',
+                  onTap: () => provider.setStatusFilter('completed'),
+                ),
+              ],
+            ),
+          ),
+
+          if (provider.overdueTasksCount > 0) ...[
+            SizedBox(height: 12),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Color(0xFFE53935).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Color(0xFFE53935), width: 1),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Color(0xFFE53935),
+                    size: 18,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    '${provider.overdueTasksCount} görev süresi geçti',
+                    style: TextStyle(
+                      color: Color(0xFFE53935),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required int count,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? Color(0xFFE53935) : Color(0xFF2A2A2A),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? Color(0xFFE53935) : Color(0xFF3A3A3A),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? Colors.white : Color(0xFFB0B0B0),
+                fontSize: 14,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+            SizedBox(width: 6),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Color(0xFF3A3A3A),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                count.toString(),
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Color(0xFFB0B0B0),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTaskList(ProviderTasks provider) {
+    return RefreshIndicator(
+      onRefresh: provider.refresh,
+      color: Color(0xFFE53935),
+      backgroundColor: Color(0xFF2A2A2A),
+      child: ListView.builder(
+        padding: EdgeInsets.all(16),
+        itemCount: provider.tasks.length,
+        itemBuilder: (context, index) {
+          final task = provider.tasks[index];
+          return _buildTaskCard(task, provider);
+        },
+      ),
+    );
+  }
+
+  Widget _buildTaskCard(TaskModel task, ProviderTasks provider) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Color(0xFF2A2A2A),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: task.isOverdue
+              ? Color(0xFFE53935).withValues(alpha: 0.5)
+              : Color(0xFF3A3A3A),
+          width: 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _showTaskDetails(context, task, provider),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    // Priority indicator
+                    Container(
+                      width: 4,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: _getPriorityColor(task.priority),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    SizedBox(width: 12),
+
+                    // Task info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            task.title,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            task.description,
+                            style: TextStyle(
+                              color: Color(0xFF808080),
+                              fontSize: 13,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Status badge
+                    _buildStatusBadge(task.status),
+                  ],
+                ),
+
+                SizedBox(height: 12),
+
+                // Meta info
+                Row(
+                  children: [
+                    if (task.dueDate != null) ...[
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 14,
+                        color: task.isOverdue
+                            ? Color(0xFFE53935)
+                            : Color(0xFF808080),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        _formatDueDate(task.dueDate!),
+                        style: TextStyle(
+                          color: task.isOverdue
+                              ? Color(0xFFE53935)
+                              : Color(0xFF808080),
+                          fontSize: 12,
+                          fontWeight: task.isOverdue
+                              ? FontWeight.w600
+                              : FontWeight.normal,
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                    ],
+
+                    if (task.relatedBranchId != null) ...[
+                      Icon(
+                        Icons.location_on_outlined,
+                        size: 14,
+                        color: Color(0xFF808080),
+                      ),
+                      SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Şube ile ilgili',
+                          style: TextStyle(
+                            color: Color(0xFF808080),
+                            fontSize: 12,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+
+                    if (task.comments.isNotEmpty) ...[
+                      SizedBox(width: 8),
+                      Icon(
+                        Icons.comment_outlined,
+                        size: 14,
+                        color: Color(0xFF808080),
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        task.comments.length.toString(),
+                        style: TextStyle(
+                          color: Color(0xFF808080),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String status) {
+    Color color;
+    String text;
+    IconData icon;
+
+    switch (status) {
+      case 'completed':
+        color = Color(0xFF4CAF50);
+        text = 'Tamamlandı';
+        icon = Icons.check_circle;
+        break;
+      case 'in_progress':
+        color = Color(0xFFFFA726);
+        text = 'Devam Ediyor';
+        icon = Icons.pending;
+        break;
+      case 'pending':
+      default:
+        color = Color(0xFF808080);
+        text = 'Bekliyor';
+        icon = Icons.hourglass_empty;
+        break;
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getPriorityColor(String priority) {
+    switch (priority) {
+      case 'high':
+        return Color(0xFFE53935);
+      case 'medium':
+        return Color(0xFFFFA726);
+      case 'low':
+      default:
+        return Color(0xFF4CAF50);
+    }
+  }
+
+  String _formatDueDate(DateTime dueDate) {
+    final now = DateTime.now();
+    final difference = dueDate.difference(now).inDays;
+
+    if (difference < 0) {
+      return '${difference.abs()} gün gecikmiş';
+    } else if (difference == 0) {
+      return 'Bugün';
+    } else if (difference == 1) {
+      return 'Yarın';
+    } else if (difference <= 7) {
+      return '$difference gün sonra';
+    } else {
+      return '${dueDate.day}/${dueDate.month}/${dueDate.year}';
+    }
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.task_alt, size: 80, color: Color(0xFF3A3A3A)),
+          SizedBox(height: 16),
+          Text(
+            'Görev bulunamadı',
+            style: TextStyle(
+              color: Color(0xFF808080),
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Henüz size atanmış görev yok',
+            style: TextStyle(color: Color(0xFF606060), fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showTaskDetails(
+    BuildContext context,
+    TaskModel task,
+    ProviderTasks provider,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Color(0xFF1A1A1A),
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => TaskDetailsSheet(task: task, provider: provider),
+    );
+  }
+}
+
+// Task Details Bottom Sheet
+class TaskDetailsSheet extends StatelessWidget {
+  final TaskModel task;
+  final ProviderTasks provider;
+
+  TaskDetailsSheet({required this.task, required this.provider});
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.9,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) {
+        return Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle bar
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Color(0xFF3A3A3A),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Title
+              Text(
+                task.title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 12),
+
+              // Status and Priority
+              Row(
+                children: [
+                  _buildDetailBadge(
+                    icon: Icons.flag,
+                    label: _getPriorityText(task.priority),
+                    color: _getPriorityColor(task.priority),
+                  ),
+                  SizedBox(width: 12),
+                  _buildDetailBadge(
+                    icon: Icons.schedule,
+                    label: _getStatusText(task.status),
+                    color: _getStatusColor(task.status),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+
+              // Description
+              Text(
+                'Açıklama',
+                style: TextStyle(
+                  color: Color(0xFFB0B0B0),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                task.description,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Meta info
+              if (task.dueDate != null) ...[
+                _buildInfoRow(
+                  icon: Icons.calendar_today,
+                  label: 'Bitiş Tarihi',
+                  value:
+                      '${task.dueDate!.day}/${task.dueDate!.month}/${task.dueDate!.year}',
+                ),
+                SizedBox(height: 12),
+              ],
+
+              _buildInfoRow(
+                icon: Icons.person,
+                label: 'Atanan',
+                value: task.assignedInspectorName,
+              ),
+
+              SizedBox(height: 24),
+              Divider(color: Color(0xFF3A3A3A)),
+              SizedBox(height: 16),
+
+              // Comments section
+              Expanded(child: _buildCommentsSection(scrollController)),
+
+              // Status update buttons
+              if (!task.isCompleted) ...[
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    if (task.isPending)
+                      Expanded(
+                        child: _buildActionButton(
+                          label: 'Başlat',
+                          icon: Icons.play_arrow,
+                          color: Color(0xFFFFA726),
+                          onPressed: () {
+                            provider.markAsInProgress(task.id);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    if (task.isInProgress) ...[
+                      Expanded(
+                        child: _buildActionButton(
+                          label: 'Tamamla',
+                          icon: Icons.check_circle,
+                          color: Color(0xFF4CAF50),
+                          onPressed: () {
+                            provider.markAsCompleted(task.id);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailBadge({
+    required IconData icon,
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: Color(0xFF808080)),
+        SizedBox(width: 12),
+        Text(
+          '$label: ',
+          style: TextStyle(color: Color(0xFF808080), fontSize: 14),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCommentsSection(ScrollController scrollController) {
+    if (task.comments.isEmpty) {
+      return Center(
+        child: Text(
+          'Henüz yorum yok',
+          style: TextStyle(color: Color(0xFF606060), fontSize: 14),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      controller: scrollController,
+      itemCount: task.comments.length,
+      itemBuilder: (context, index) {
+        final comment = task.comments[index];
+        return Container(
+          margin: EdgeInsets.only(bottom: 12),
+          padding: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Color(0xFF2A2A2A),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 16,
+                    backgroundColor: Color(0xFFE53935),
+                    child: Text(
+                      comment.userName[0].toUpperCase(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          comment.userName,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          _formatTimestamp(comment.timestamp),
+                          style: TextStyle(
+                            color: Color(0xFF606060),
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              if (comment.text.isNotEmpty) ...[
+                SizedBox(height: 8),
+                Text(
+                  comment.text,
+                  style: TextStyle(color: Color(0xFFE0E0E0), fontSize: 13),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildActionButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 20),
+      label: Text(
+        label,
+        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  Color _getPriorityColor(String priority) {
+    switch (priority) {
+      case 'high':
+        return Color(0xFFE53935);
+      case 'medium':
+        return Color(0xFFFFA726);
+      case 'low':
+      default:
+        return Color(0xFF4CAF50);
+    }
+  }
+
+  String _getPriorityText(String priority) {
+    switch (priority) {
+      case 'high':
+        return 'Yüksek';
+      case 'medium':
+        return 'Orta';
+      case 'low':
+      default:
+        return 'Düşük';
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'completed':
+        return Color(0xFF4CAF50);
+      case 'in_progress':
+        return Color(0xFFFFA726);
+      case 'pending':
+      default:
+        return Color(0xFF808080);
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'completed':
+        return 'Tamamlandı';
+      case 'in_progress':
+        return 'Devam Ediyor';
+      case 'pending':
+      default:
+        return 'Bekliyor';
+    }
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    final now = DateTime.now();
+    final difference = now.difference(timestamp);
+
+    if (difference.inMinutes < 1) {
+      return 'Şimdi';
+    } else if (difference.inHours < 1) {
+      return '${difference.inMinutes} dakika önce';
+    } else if (difference.inDays < 1) {
+      return '${difference.inHours} saat önce';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} gün önce';
+    } else {
+      return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
+    }
   }
 }

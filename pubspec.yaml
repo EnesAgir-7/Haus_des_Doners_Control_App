@@ -43,6 +43,7 @@ dependencies:
   easy_localization: ^3.0.8
   firebase_auth: ^6.1.0
   firebase_storage: ^13.0.2
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_launcher_icons: "^0.14.4"

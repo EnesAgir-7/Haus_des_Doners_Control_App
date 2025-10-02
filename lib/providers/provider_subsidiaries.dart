@@ -7,7 +7,7 @@ import '../models/branch_model.dart';
 import '../models/inspection_model.dart';
 /// Provider for Subsidiaries (Branches) screen
 /// Shows list of branches assigned to inspector
-class SubsidiariesProvider extends ChangeNotifier {
+class ProviderSubsidiaries extends ChangeNotifier {
   final BranchService _branchService = BranchService();
   final InspectionService _inspectionService = InspectionService();
 

@@ -4,12 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:haus_des_control/firebase_options.dart';
 import 'package:haus_des_control/providers/provider_auth.dart';
+import 'package:haus_des_control/providers/provider_fleet.dart';
+import 'package:haus_des_control/providers/provider_route.dart';
+import 'package:haus_des_control/providers/provider_tasks.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 
+import 'admin/screen_admin_dashboard.dart';
 import 'core/theme/app_theme.dart';
 import 'layouts/main_layout.dart';
-import 'providers/report_photo_provider.dart';
+import 'providers/provider_panel.dart';
+import 'providers/provider_report_photo.dart';
+import 'providers/provider_subsidiaries.dart';
 import 'routes/app_routes.dart';
 import 'screens/screen_auth.dart';
 
@@ -43,8 +49,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => ReportPhotoProvider()),
         ChangeNotifierProvider(create: (_) => ProviderAuth()),
+        ChangeNotifierProvider(create: (_) => ProviderPanel()),
+        ChangeNotifierProvider(create: (_) => ProviderSubsidiaries()),
+        ChangeNotifierProvider(create: (_) => ProviderReportPhoto()),
+        ChangeNotifierProvider(create: (_) => ProviderFleet()),
+        ChangeNotifierProvider(create: (_) => ProviderTasks()),
+        ChangeNotifierProvider(create: (_) => ProviderRoute()),
       ],
       child: MaterialApp(
         localizationsDelegates: context.localizationDelegates,
@@ -62,7 +73,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// Reactive wrapper that listens to Firebase auth changes
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
@@ -70,11 +80,23 @@ class AuthWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ProviderAuth>(
       builder: (context, providerAuth, _) {
-        if (providerAuth.currentUser != null) {
-          return const MainLayout();
-        } else {
-          return ScreenAuth();
+        final currentUser = providerAuth.currentUser;
+
+        if (currentUser == null) {
+          return const ScreenAuth();
         }
+
+        final user = providerAuth.userModel;
+        if (user != null) {
+          return user.isAdmin ? AdminDashboard() : const MainLayout();
+        }
+
+        providerAuth.fetchUserModel().then((fetchedUser) {
+          providerAuth.userModel = fetchedUser;
+          (context as Element).markNeedsBuild();
+        });
+
+        return const Center(child: CircularProgressIndicator());
       },
     );
   }

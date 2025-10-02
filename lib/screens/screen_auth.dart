@@ -26,8 +26,8 @@ class _ScreenAuthState extends State<ScreenAuth> {
   @override
   void initState() {
     super.initState();
-    _emailController = TextEditingController(text: "sara.khan@example.com");
-    _passwordController = TextEditingController(text: "123456");
+    _emailController = TextEditingController(text: "salam@test.com");
+    _passwordController = TextEditingController(text: "112233");
   }
 
   @override
@@ -146,11 +146,7 @@ class _ScreenAuthState extends State<ScreenAuth> {
                               );
 
                               if (!success && provider.error != null) {
-                                showSnakBarr(
-                                  provider.error!,
-                                  context: context,
-                                  type: ToastType.error,
-                                );
+                                showSnakBarr(context, provider.error!);
                               }
                             }
                           },

@@ -68,5 +68,32 @@ abstract class  LocaleKeys {
   static const change_vehicle = 'change_vehicle';
   static const my_branches = 'my_branches';
   static const today_route_plan = 'today_route_plan';
+  static const all = 'all';
+  static const pending = 'pending';
+  static const in_progress = 'in_progress';
+  static const overdue_tasks = 'overdue_tasks';
+  static const related_branch = 'related_branch';
+  static const status_completed = 'status_completed';
+  static const status_in_progress = 'status_in_progress';
+  static const status_pending = 'status_pending';
+  static const overdue_days = 'overdue_days';
+  static const today = 'today';
+  static const tomorrow = 'tomorrow';
+  static const in_days = 'in_days';
+  static const no_tasks_found = 'no_tasks_found';
+  static const no_tasks_assigned = 'no_tasks_assigned';
+  static const description = 'description';
+  static const due_date = 'due_date';
+  static const assigned_to = 'assigned_to';
+  static const start = 'start';
+  static const complete = 'complete';
+  static const priority_high = 'priority_high';
+  static const priority_medium = 'priority_medium';
+  static const priority_low = 'priority_low';
+  static const no_comments = 'no_comments';
+  static const now = 'now';
+  static const minutes_ago = 'minutes_ago';
+  static const hours_ago = 'hours_ago';
+  static const days_ago = 'days_ago';
 
 }

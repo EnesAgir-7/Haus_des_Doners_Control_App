@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
-import '../providers/report_photo_provider.dart';
 
+import '../providers/provider_report_photo.dart';
 class CameraWidget extends StatefulWidget {
   const CameraWidget({Key? key}) : super(key: key);
 
@@ -48,7 +48,7 @@ class _CameraWidgetState extends State<CameraWidget> {
       final XFile photo = await _controller!.takePicture();
       if (!mounted) return;
       
-      final provider = context.read<ReportPhotoProvider>();
+      final provider = context.read<ProviderReportPhoto>();
       provider.addPhoto(File(photo.path));
       Navigator.pop(context); // Close camera view
     } catch (e) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 
-class ReportPhotoProvider extends ChangeNotifier {
+class ProviderReportPhoto extends ChangeNotifier {
   List<File> _photos = [];
   List<File> get photos => _photos;
 

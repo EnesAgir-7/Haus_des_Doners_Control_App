@@ -5,9 +5,10 @@ import '../firebase_services/firebase_stats_service.dart';
 import '../firebase_services/firebase_user_service.dart';
 import '../models/user_model.dart';
 import '../models/inspector_stats_model.dart';
+
 /// Provider for Panel (Dashboard) screen
 /// Shows inspector's monthly stats and overview
-class PanelProvider extends ChangeNotifier {
+class ProviderPanel extends ChangeNotifier {
   final UserService _userService = UserService();
   final StatsService _statsService = StatsService();
 

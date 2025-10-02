@@ -38,16 +38,32 @@ class UserModel {
     );
   }
 
+  /// New factory to parse from JSON Map (for local storage)
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
+      id: map['id'] ?? '',
+      name: map['name'] ?? '',
+      email: map['email'] ?? '',
+      role: map['role'] ?? 'inspector',
+      active: map['active'] ?? true,
+      region: map['region'],
+      assignedVehicleId: map['assignedVehicleId'],
+      createdAt: DateTime.parse(map['createdAt']),
+      updatedAt: DateTime.parse(map['updatedAt']),
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
+      'id': id, // include id for local storage
       'name': name,
       'email': email,
       'role': role,
       'active': active,
       'region': region,
       'assignedVehicleId': assignedVehicleId,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 

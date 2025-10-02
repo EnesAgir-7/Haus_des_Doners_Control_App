@@ -30,8 +30,8 @@ class AppRouter {
     RouteNames.control: (context) => const ControlPage(),
     RouteNames.route: (context) => RoutePage(),
     RouteNames.fleet: (context) => const FleetPage(),
-    RouteNames.tasks: (context) => const TasksPage(),
-    RouteNames.auth: (context) =>  ScreenAuth(),
+    RouteNames.tasks: (context) => TasksPage(),
+    RouteNames.auth: (context) => ScreenAuth(),
     RouteNames.mainLayout: (context) => const MainLayout(),
   };
 }
