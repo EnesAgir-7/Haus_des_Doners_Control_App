@@ -90,7 +90,7 @@ class AuthWrapper extends StatelessWidget {
 
         final user = providerAuth.userModel;
         if (user != null) {
-          return user.isAdmin ? AdminDashboard() : const MainLayout();
+          return user.isAdmin ? AdminDashboard() : MainLayout();
         }
 
         providerAuth.fetchUserModel().then((fetchedUser) {
