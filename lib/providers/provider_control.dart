@@ -10,7 +10,7 @@ import '../models/user_model.dart';
 
 /// Provider for Control (Inspection Form) screen
 /// Handles creating and submitting inspections with photo uploads
-class ControlProvider extends ChangeNotifier {
+class ProviderControl extends ChangeNotifier {
   final InspectionService _inspectionService = InspectionService();
 
   // State

@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'admin/screen_admin_dashboard.dart';
 import 'core/theme/app_theme.dart';
 import 'layouts/main_layout.dart';
+import 'providers/provider_control.dart';
 import 'providers/provider_panel.dart';
 import 'providers/provider_report_photo.dart';
 import 'providers/provider_branches.dart';
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderFleet()),
         ChangeNotifierProvider(create: (_) => ProviderTasks()),
         ChangeNotifierProvider(create: (_) => ProviderRoute()),
+        ChangeNotifierProvider(create: (_) => ProviderControl()),
       ],
       child: MaterialApp(
         localizationsDelegates: context.localizationDelegates,
