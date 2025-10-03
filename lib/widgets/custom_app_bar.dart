@@ -58,45 +58,41 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ],
             ),
 
-            // Navigation row
             Container(
               color: AppColors.primaryDark,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    _buildNavLink(
-                      context,
-                      LocaleKeys.panel.tr(),
-                      RouteNames.panel,
-                    ),
-                    _buildNavLink(
-                      context,
-                      LocaleKeys.my_branches.tr(),
-                      RouteNames.subsidiaries,
-                    ),
-                    _buildNavLink(
-                      context,
-                      LocaleKeys.control.tr(),
-                      RouteNames.control,
-                    ),
-                    _buildNavLink(
-                      context,
-                      LocaleKeys.route.tr(),
-                      RouteNames.route,
-                    ),
-                    _buildNavLink(
-                      context,
-                      LocaleKeys.file.tr(),
-                      RouteNames.fleet,
-                    ),
-                    _buildNavLink(
-                      context,
-                      LocaleKeys.tasks.tr(),
-                      RouteNames.tasks,
-                    ),
-                  ],
+              child: Center(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildNavLink(
+                        context,
+                        LocaleKeys.panel.tr(),
+                        RouteNames.panel,
+                      ),
+                      _buildNavLink(
+                        context,
+                        LocaleKeys.my_branches.tr(),
+                        RouteNames.subsidiaries,
+                      ),
+                      _buildNavLink(
+                        context,
+                        LocaleKeys.route.tr(),
+                        RouteNames.route,
+                      ),
+                      _buildNavLink(
+                        context,
+                        LocaleKeys.file.tr(),
+                        RouteNames.fleet,
+                      ),
+                      _buildNavLink(
+                        context,
+                        LocaleKeys.tasks.tr(),
+                        RouteNames.tasks,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

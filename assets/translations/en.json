@@ -90,5 +90,20 @@
   "now": "Now",
   "minutes_ago": "{count} minutes ago",
   "hours_ago": "{count} hours ago",
-  "days_ago": "{count} days ago"
+  "days_ago": "{count} days ago", 
+  "search_branch_hint": "Search branch...",
+  "branch_count": "{count} Branch",
+  "sort_by_name": "By Name",
+  "sort_by_score": "By Score",
+  "sort_by_last_control": "By Last Inspection",
+  "error_occurred": "An error occurred",
+  "try_again": "Try Again",
+  "no_branches_assigned": "No branches assigned yet",
+  "branch_not_found": "Branch not found",
+  "clear_search": "Clear Search",
+  "total_inspections": "Total Inspections",
+  "inspection_history": "Inspection History",
+  "new_inspection": "New Inspection",
+  "submit_report": "Submit Report",
+  "no_inspections_yet": "No inspections yet"
 }

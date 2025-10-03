@@ -5,7 +5,10 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/provider_branches.dart';
 import '../../translations/locale_keys.g.dart';
+import '../../widgets/app_button.dart';
 import '../../widgets/branch_card.dart';
+import 'control_page.dart';
+import 'screen_map.dart';
 
 class SubsidiariesPage extends StatefulWidget {
   const SubsidiariesPage({super.key});
@@ -26,6 +29,14 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => BranchMapScreen()));
+        },
+        child: Icon(Icons.map, size: 36),
+      ),
       body: SafeArea(
         child: Consumer<ProviderBranches>(
           builder: (context, provider, child) {
@@ -59,7 +70,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          '${provider.branchCount} Şube',
+                          '${provider.branchCount} ${LocaleKeys.branch_count.tr()}',
                           style: TextStyle(
                             color: AppColors.primaryRed,
                             fontSize: 12,
@@ -76,7 +87,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
                     onChanged: (value) => provider.setSearchQuery(value),
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Şube ara...',
+                      hintText: LocaleKeys.search_branch_hint.tr(),
                       hintStyle: TextStyle(color: Colors.white54),
                       prefixIcon: Icon(Icons.search, color: Colors.white54),
                       suffixIcon: provider.searchQuery.isNotEmpty
@@ -112,7 +123,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
                       children: [
                         _buildSortChip(
                           context,
-                          label: 'İsme göre',
+                          label: LocaleKeys.sort_by_name.tr(),
                           value: 'name',
                           icon: Icons.sort_by_alpha,
                           provider: provider,
@@ -120,7 +131,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
                         SizedBox(width: 8),
                         _buildSortChip(
                           context,
-                          label: 'Puana göre',
+                          label: LocaleKeys.sort_by_score.tr(),
                           value: 'score',
                           icon: Icons.star,
                           provider: provider,
@@ -128,7 +139,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
                         SizedBox(width: 8),
                         _buildSortChip(
                           context,
-                          label: 'Son kontrole göre',
+                          label: LocaleKeys.sort_by_last_control.tr(),
                           value: 'lastInspection',
                           icon: Icons.access_time,
                           provider: provider,
@@ -209,7 +220,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
             Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
             SizedBox(height: 16),
             Text(
-              'Hata oluştu',
+              LocaleKeys.error_occurred.tr(),
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -231,7 +242,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryRed,
               ),
-              child: Text('Tekrar Dene'),
+              child: Text(LocaleKeys.try_again.tr()),
             ),
           ],
         ),
@@ -248,8 +259,8 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
               SizedBox(height: 16),
               Text(
                 provider.searchQuery.isEmpty
-                    ? 'Henüz şube atanmamış'
-                    : 'Şube bulunamadı',
+                    ? LocaleKeys.no_branches_assigned.tr()
+                    : LocaleKeys.branch_not_found.tr(),
                 style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
               if (provider.searchQuery.isNotEmpty) ...[
@@ -257,7 +268,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
                 TextButton(
                   onPressed: () => provider.setSearchQuery(''),
                   child: Text(
-                    'Aramayı temizle',
+                    LocaleKeys.clear_search.tr(),
                     style: TextStyle(color: AppColors.primaryRed),
                   ),
                 ),
@@ -276,8 +287,6 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
         itemCount: provider.branches.length,
         itemBuilder: (context, index) {
           final branchModel = provider.branches[index];
-
-          // Convert BranchModel to Branch for BranchCard widget
           final branch = Branch(
             name: branchModel.name,
             lastControl: branchModel.lastInspectionText,
@@ -298,7 +307,6 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
     dynamic branchModel,
     ProviderBranches provider,
   ) {
-    // Select branch and load its inspection history
     provider.selectBranch(branchModel);
 
     showModalBottomSheet(
@@ -334,7 +342,6 @@ class BranchDetailsSheet extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Handle bar
               Center(
                 child: Container(
                   width: 40,
@@ -346,8 +353,6 @@ class BranchDetailsSheet extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 20),
-
-              // Branch name
               Text(
                 branch.name,
                 style: TextStyle(
@@ -357,8 +362,6 @@ class BranchDetailsSheet extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 8),
-
-              // Address
               Row(
                 children: [
                   Icon(Icons.location_on, size: 16, color: Colors.white54),
@@ -372,8 +375,6 @@ class BranchDetailsSheet extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 12),
-
-              // Contact info
               Row(
                 children: [
                   Icon(Icons.person, size: 16, color: Colors.white54),
@@ -385,13 +386,11 @@ class BranchDetailsSheet extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 16),
-
-              // Stats
               Row(
                 children: [
                   Expanded(
                     child: _buildStatCard(
-                      label: 'Ortalama Puan',
+                      label: LocaleKeys.average_score.tr(),
                       value: branch.averageScore.toStringAsFixed(1),
                       icon: Icons.star,
                       color: Colors.amber,
@@ -400,7 +399,7 @@ class BranchDetailsSheet extends StatelessWidget {
                   SizedBox(width: 12),
                   Expanded(
                     child: _buildStatCard(
-                      label: 'Toplam Kontrol',
+                      label: LocaleKeys.total_inspections.tr(),
                       value: branch.totalInspections.toString(),
                       icon: Icons.fact_check,
                       color: Colors.blue,
@@ -409,13 +408,10 @@ class BranchDetailsSheet extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 16),
-
               Divider(color: Colors.white24),
               SizedBox(height: 12),
-
-              // Inspection history header
               Text(
-                'Kontrol Geçmişi',
+                LocaleKeys.inspection_history.tr(),
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
@@ -423,39 +419,53 @@ class BranchDetailsSheet extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 12),
-
-              // Inspection list
               Expanded(
                 child: Consumer<ProviderBranches>(
-                  builder: (context, co, _) {
-                    return _buildInspectionHistory(scrollController);
-                  },
+                  builder: (context, co, _) =>
+                      _buildInspectionHistory(scrollController),
                 ),
               ),
-
               SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    // Navigate to Control screen with this branch
-                    // You can implement this navigation
-                  },
-                  icon: Icon(Icons.add_task),
-                  label: Text(
-                    'Yeni Kontrol Yap',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryRed,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              Row(
+                children: [
+                  Expanded(
+                    child: AppButton(
+                      text: LocaleKeys.new_inspection.tr(),
+                      icon: Icons.add_task,
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      backgroundColor: AppColors.primaryRed,
+                      textStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      height: 48,
                     ),
                   ),
-                ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: AppButton(
+                      text: LocaleKeys.submit_report.tr(),
+                      icon: Icons.add_task,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ControlPage(selectedBranch: branch),
+                          ),
+                        );
+                      },
+                      backgroundColor: AppColors.primaryRed,
+                      textStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      height: 48,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -515,7 +525,7 @@ class BranchDetailsSheet extends StatelessWidget {
             Icon(Icons.history, size: 60, color: Colors.white24),
             SizedBox(height: 12),
             Text(
-              'Henüz kontrol yapılmamış',
+              LocaleKeys.no_inspections_yet.tr(),
               style: TextStyle(color: Colors.white54),
             ),
           ],
@@ -524,6 +534,7 @@ class BranchDetailsSheet extends StatelessWidget {
     }
 
     return ListView.builder(
+      shrinkWrap: true,
       controller: scrollController,
       itemCount: provider.branchInspections.length,
       itemBuilder: (context, index) {
@@ -554,9 +565,7 @@ class BranchDetailsSheet extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _getScoreColor(
-                        inspection.score,
-                      ).withValues(alpha: 0.2),
+                      color: _getScoreColor(inspection.score).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: _getScoreColor(inspection.score),
@@ -605,6 +614,639 @@ class BranchDetailsSheet extends StatelessWidget {
     return Colors.red;
   }
 }
+
+// import 'package:easy_localization/easy_localization.dart';
+// import 'package:flutter/material.dart';
+// import 'package:provider/provider.dart';
+
+// import '../../core/constants/app_colors.dart';
+// import '../../providers/provider_branches.dart';
+// import '../../translations/locale_keys.g.dart';
+// import '../../widgets/app_button.dart';
+// import '../../widgets/branch_card.dart';
+// import 'control_page.dart';
+
+// class SubsidiariesPage extends StatefulWidget {
+//   const SubsidiariesPage({super.key});
+
+//   @override
+//   State<SubsidiariesPage> createState() => _SubsidiariesPageState();
+// }
+
+// class _SubsidiariesPageState extends State<SubsidiariesPage> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       context.read<ProviderBranches>().initialize();
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: SafeArea(
+//         child: Consumer<ProviderBranches>(
+//           builder: (context, provider, child) {
+//             return Padding(
+//               padding: const EdgeInsets.all(16),
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   // Header with search and filter
+//                   Row(
+//                     children: [
+//                       Icon(Icons.apartment, color: Colors.lightBlueAccent),
+//                       SizedBox(width: 6),
+//                       Text(
+//                         LocaleKeys.my_branches.tr(),
+//                         style: TextStyle(
+//                           color: AppColors.primaryRed,
+//                           fontWeight: FontWeight.bold,
+//                           fontSize: 16,
+//                         ),
+//                       ),
+//                       Spacer(),
+//                       // Branch count badge
+//                       Container(
+//                         padding: EdgeInsets.symmetric(
+//                           horizontal: 10,
+//                           vertical: 6,
+//                         ),
+//                         decoration: BoxDecoration(
+//                           color: AppColors.lightRed,
+//                           borderRadius: BorderRadius.circular(12),
+//                         ),
+//                         child: Text(
+//                           '${provider.branchCount} Şube',
+//                           style: TextStyle(
+//                             color: AppColors.primaryRed,
+//                             fontSize: 12,
+//                             fontWeight: FontWeight.bold,
+//                           ),
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                   const SizedBox(height: 12),
+
+//                   // Search bar
+//                   TextField(
+//                     onChanged: (value) => provider.setSearchQuery(value),
+//                     style: TextStyle(color: Colors.white),
+//                     decoration: InputDecoration(
+//                       hintText: 'Şube ara...',
+//                       hintStyle: TextStyle(color: Colors.white54),
+//                       prefixIcon: Icon(Icons.search, color: Colors.white54),
+//                       suffixIcon: provider.searchQuery.isNotEmpty
+//                           ? IconButton(
+//                               icon: Icon(Icons.clear, color: Colors.white54),
+//                               onPressed: () => provider.setSearchQuery(''),
+//                             )
+//                           : null,
+//                       filled: true,
+//                       fillColor: AppColors.lightBlack,
+//                       border: OutlineInputBorder(
+//                         borderRadius: BorderRadius.circular(12),
+//                         borderSide: BorderSide(color: Colors.white24),
+//                       ),
+//                       enabledBorder: OutlineInputBorder(
+//                         borderRadius: BorderRadius.circular(12),
+//                         borderSide: BorderSide(color: Colors.white24),
+//                       ),
+//                       focusedBorder: OutlineInputBorder(
+//                         borderRadius: BorderRadius.circular(12),
+//                         borderSide: BorderSide(color: AppColors.primaryRed),
+//                       ),
+//                       contentPadding: EdgeInsets.symmetric(vertical: 12),
+//                     ),
+//                   ),
+
+//                   const SizedBox(height: 12),
+
+//                   // Sort options
+//                   SingleChildScrollView(
+//                     scrollDirection: Axis.horizontal,
+//                     child: Row(
+//                       children: [
+//                         _buildSortChip(
+//                           context,
+//                           label: 'İsme göre',
+//                           value: 'name',
+//                           icon: Icons.sort_by_alpha,
+//                           provider: provider,
+//                         ),
+//                         SizedBox(width: 8),
+//                         _buildSortChip(
+//                           context,
+//                           label: 'Puana göre',
+//                           value: 'score',
+//                           icon: Icons.star,
+//                           provider: provider,
+//                         ),
+//                         SizedBox(width: 8),
+//                         _buildSortChip(
+//                           context,
+//                           label: 'Son kontrole göre',
+//                           value: 'lastInspection',
+//                           icon: Icons.access_time,
+//                           provider: provider,
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+
+//                   const SizedBox(height: 12),
+//                   Container(height: 1, color: Colors.white24),
+//                   const SizedBox(height: 12),
+
+//                   // Branch list
+//                   Expanded(child: _buildBranchList(provider)),
+//                 ],
+//               ),
+//             );
+//           },
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildSortChip(
+//     BuildContext context, {
+//     required String label,
+//     required String value,
+//     required IconData icon,
+//     required ProviderBranches provider,
+//   }) {
+//     final isSelected = provider.sortBy == value;
+//     return GestureDetector(
+//       onTap: () => provider.setSortBy(value),
+//       child: Container(
+//         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+//         decoration: BoxDecoration(
+//           color: isSelected ? AppColors.primaryRed : AppColors.lightBlack,
+//           borderRadius: BorderRadius.circular(20),
+//           border: Border.all(
+//             color: isSelected ? AppColors.primaryRed : Colors.white24,
+//           ),
+//         ),
+//         child: Row(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Icon(
+//               icon,
+//               size: 14,
+//               color: isSelected ? Colors.white : Colors.white54,
+//             ),
+//             SizedBox(width: 6),
+//             Text(
+//               label,
+//               style: TextStyle(
+//                 color: isSelected ? Colors.white : Colors.white54,
+//                 fontSize: 12,
+//                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildBranchList(ProviderBranches provider) {
+//     if (provider.isLoading) {
+//       return Center(
+//         child: CircularProgressIndicator(color: AppColors.primaryRed),
+//       );
+//     }
+
+//     if (provider.errorMessage != null) {
+//       return Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+//             SizedBox(height: 16),
+//             Text(
+//               'Hata oluştu',
+//               style: TextStyle(
+//                 color: Colors.white,
+//                 fontSize: 18,
+//                 fontWeight: FontWeight.bold,
+//               ),
+//             ),
+//             SizedBox(height: 8),
+//             Padding(
+//               padding: EdgeInsets.symmetric(horizontal: 32),
+//               child: Text(
+//                 provider.errorMessage!,
+//                 style: TextStyle(color: Colors.white70),
+//                 textAlign: TextAlign.center,
+//               ),
+//             ),
+//             SizedBox(height: 16),
+//             ElevatedButton(
+//               onPressed: () => provider.refresh(),
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: AppColors.primaryRed,
+//               ),
+//               child: Text('Tekrar Dene'),
+//             ),
+//           ],
+//         ),
+//       );
+//     }
+
+//     if (provider.branches.isEmpty) {
+//       return Center(
+//         child: SingleChildScrollView(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: [
+//               Icon(Icons.apartment, size: 80, color: Colors.white24),
+//               SizedBox(height: 16),
+//               Text(
+//                 provider.searchQuery.isEmpty
+//                     ? 'Henüz şube atanmamış'
+//                     : 'Şube bulunamadı',
+//                 style: TextStyle(color: Colors.white70, fontSize: 16),
+//               ),
+//               if (provider.searchQuery.isNotEmpty) ...[
+//                 SizedBox(height: 8),
+//                 TextButton(
+//                   onPressed: () => provider.setSearchQuery(''),
+//                   child: Text(
+//                     'Aramayı temizle',
+//                     style: TextStyle(color: AppColors.primaryRed),
+//                   ),
+//                 ),
+//               ],
+//             ],
+//           ),
+//         ),
+//       );
+//     }
+
+//     return RefreshIndicator(
+//       onRefresh: provider.refresh,
+//       color: AppColors.primaryRed,
+//       backgroundColor: AppColors.lightBlack,
+//       child: ListView.builder(
+//         itemCount: provider.branches.length,
+//         itemBuilder: (context, index) {
+//           final branchModel = provider.branches[index];
+
+//           // Convert BranchModel to Branch for BranchCard widget
+//           final branch = Branch(
+//             name: branchModel.name,
+//             lastControl: branchModel.lastInspectionText,
+//             score: branchModel.lastInspectionScore ?? 0.0,
+//           );
+
+//           return GestureDetector(
+//             onTap: () => _showBranchDetails(context, branchModel, provider),
+//             child: BranchCard(branch: branch),
+//           );
+//         },
+//       ),
+//     );
+//   }
+
+//   void _showBranchDetails(
+//     BuildContext context,
+//     dynamic branchModel,
+//     ProviderBranches provider,
+//   ) {
+//     // Select branch and load its inspection history
+//     provider.selectBranch(branchModel);
+
+//     showModalBottomSheet(
+//       context: context,
+//       backgroundColor: AppColors.lightBlack,
+//       isScrollControlled: true,
+//       shape: RoundedRectangleBorder(
+//         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+//       ),
+//       builder: (context) =>
+//           BranchDetailsSheet(branch: branchModel, provider: provider),
+//     );
+//   }
+// }
+
+// // Branch Details Bottom Sheet
+// class BranchDetailsSheet extends StatelessWidget {
+//   final dynamic branch;
+//   final ProviderBranches provider;
+
+//   BranchDetailsSheet({required this.branch, required this.provider});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return DraggableScrollableSheet(
+//       initialChildSize: 0.9,
+//       minChildSize: 0.5,
+//       maxChildSize: 0.95,
+//       expand: false,
+//       builder: (context, scrollController) {
+//         return Padding(
+//           padding: EdgeInsets.all(20),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               // Handle bar
+//               Center(
+//                 child: Container(
+//                   width: 40,
+//                   height: 4,
+//                   decoration: BoxDecoration(
+//                     color: Colors.white24,
+//                     borderRadius: BorderRadius.circular(2),
+//                   ),
+//                 ),
+//               ),
+//               SizedBox(height: 20),
+
+//               // Branch name
+//               Text(
+//                 branch.name,
+//                 style: TextStyle(
+//                   color: Colors.white,
+//                   fontSize: 20,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//               SizedBox(height: 8),
+
+//               // Address
+//               Row(
+//                 children: [
+//                   Icon(Icons.location_on, size: 16, color: Colors.white54),
+//                   SizedBox(width: 6),
+//                   Expanded(
+//                     child: Text(
+//                       branch.address,
+//                       style: TextStyle(color: Colors.white70, fontSize: 14),
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               SizedBox(height: 12),
+
+//               // Contact info
+//               Row(
+//                 children: [
+//                   Icon(Icons.person, size: 16, color: Colors.white54),
+//                   SizedBox(width: 6),
+//                   Text(
+//                     '${branch.contactName} - ${branch.contactPhone}',
+//                     style: TextStyle(color: Colors.white70, fontSize: 14),
+//                   ),
+//                 ],
+//               ),
+//               SizedBox(height: 16),
+
+//               // Stats
+//               Row(
+//                 children: [
+//                   Expanded(
+//                     child: _buildStatCard(
+//                       label: 'Ortalama Puan',
+//                       value: branch.averageScore.toStringAsFixed(1),
+//                       icon: Icons.star,
+//                       color: Colors.amber,
+//                     ),
+//                   ),
+//                   SizedBox(width: 12),
+//                   Expanded(
+//                     child: _buildStatCard(
+//                       label: 'Toplam Kontrol',
+//                       value: branch.totalInspections.toString(),
+//                       icon: Icons.fact_check,
+//                       color: Colors.blue,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               SizedBox(height: 16),
+
+//               Divider(color: Colors.white24),
+//               SizedBox(height: 12),
+
+//               // Inspection history header
+//               Text(
+//                 'Kontrol Geçmişi',
+//                 style: TextStyle(
+//                   color: AppColors.primaryRed,
+//                   fontSize: 16,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//               SizedBox(height: 12),
+
+//               // Inspection list
+//               Expanded(
+//                 child: Consumer<ProviderBranches>(
+//                   builder: (context, co, _) {
+//                     return _buildInspectionHistory(scrollController);
+//                   },
+//                 ),
+//               ),
+
+//               SizedBox(height: 16),
+//               Row(
+//                 children: [
+//                   Expanded(
+//                     child: AppButton(
+//                       text: 'Yeni Kontrol Yap',
+//                       icon: Icons.add_task,
+//                       onPressed: () {
+//                         Navigator.pop(context);
+//                         // Navigate to Control screen with this branch
+//                         // You can implement this navigation
+//                       },
+//                       backgroundColor: AppColors.primaryRed,
+//                       textStyle: TextStyle(
+//                         fontSize: 16,
+//                         fontWeight: FontWeight.w600,
+//                       ),
+//                       height: 48,
+//                     ),
+//                   ),
+//                   SizedBox(width: 10),
+//                   Expanded(
+//                     child: AppButton(
+//                       text: 'Submit Report',
+//                       icon: Icons.add_task,
+//                       onPressed: () {
+//                         Navigator.push(
+//                           context,
+//                           MaterialPageRoute(
+//                             builder: (context) =>
+//                                 ControlPage(selectedBranch: branch),
+//                           ),
+//                         );
+//                         // Navigate to Control screen with this branch
+//                         // You can implement this navigation
+//                       },
+//                       backgroundColor: AppColors.primaryRed,
+//                       textStyle: TextStyle(
+//                         fontSize: 16,
+//                         fontWeight: FontWeight.w600,
+//                       ),
+//                       height: 48,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ],
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   Widget _buildStatCard({
+//     required String label,
+//     required String value,
+//     required IconData icon,
+//     required Color color,
+//   }) {
+//     return Container(
+//       padding: EdgeInsets.all(12),
+//       decoration: BoxDecoration(
+//         color: AppColors.lightRed,
+//         borderRadius: BorderRadius.circular(12),
+//         border: Border.all(color: Colors.white24),
+//       ),
+//       child: Column(
+//         children: [
+//           Icon(icon, color: color, size: 24),
+//           SizedBox(height: 8),
+//           Text(
+//             value,
+//             style: TextStyle(
+//               color: Colors.white,
+//               fontSize: 20,
+//               fontWeight: FontWeight.bold,
+//             ),
+//           ),
+//           SizedBox(height: 4),
+//           Text(
+//             label,
+//             style: TextStyle(color: Colors.white70, fontSize: 12),
+//             textAlign: TextAlign.center,
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Widget _buildInspectionHistory(ScrollController scrollController) {
+//     if (provider.isLoadingInspections) {
+//       return Center(
+//         child: CircularProgressIndicator(color: AppColors.primaryRed),
+//       );
+//     }
+
+//     if (provider.branchInspections.isEmpty) {
+//       return Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Icon(Icons.history, size: 60, color: Colors.white24),
+//             SizedBox(height: 12),
+//             Text(
+//               'Henüz kontrol yapılmamış',
+//               style: TextStyle(color: Colors.white54),
+//             ),
+//           ],
+//         ),
+//       );
+//     }
+
+//     return ListView.builder(
+//       shrinkWrap: true,
+//       controller: scrollController,
+//       itemCount: provider.branchInspections.length,
+//       itemBuilder: (context, index) {
+//         final inspection = provider.branchInspections[index];
+//         return Container(
+//           margin: EdgeInsets.only(bottom: 12),
+//           padding: EdgeInsets.all(12),
+//           decoration: BoxDecoration(
+//             color: AppColors.lightRed,
+//             borderRadius: BorderRadius.circular(12),
+//             border: Border.all(color: Colors.white24),
+//           ),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Text(
+//                     DateFormat(
+//                       'dd/MM/yyyy HH:mm',
+//                     ).format(inspection.scheduledTime),
+//                     style: TextStyle(
+//                       color: Colors.white,
+//                       fontWeight: FontWeight.w600,
+//                     ),
+//                   ),
+//                   Container(
+//                     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+//                     decoration: BoxDecoration(
+//                       color: _getScoreColor(
+//                         inspection.score,
+//                       ).withValues(alpha: 0.2),
+//                       borderRadius: BorderRadius.circular(8),
+//                       border: Border.all(
+//                         color: _getScoreColor(inspection.score),
+//                       ),
+//                     ),
+//                     child: Row(
+//                       children: [
+//                         Icon(
+//                           Icons.star,
+//                           size: 14,
+//                           color: _getScoreColor(inspection.score),
+//                         ),
+//                         SizedBox(width: 4),
+//                         Text(
+//                           inspection.score.toStringAsFixed(1),
+//                           style: TextStyle(
+//                             color: _getScoreColor(inspection.score),
+//                             fontWeight: FontWeight.bold,
+//                             fontSize: 13,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//               if (inspection.overallNotes.isNotEmpty) ...[
+//                 SizedBox(height: 8),
+//                 Text(
+//                   inspection.overallNotes,
+//                   style: TextStyle(color: Colors.white70, fontSize: 12),
+//                   maxLines: 2,
+//                   overflow: TextOverflow.ellipsis,
+//                 ),
+//               ],
+//             ],
+//           ),
+//         );
+//       },
+//     );
+//   }
+
+//   Color _getScoreColor(double score) {
+//     if (score >= 9.0) return Colors.green;
+//     if (score >= 7.0) return Colors.amber;
+//     return Colors.red;
+//   }
+// }
 
 // class SubsidiariesPage extends StatelessWidget {
 //   const SubsidiariesPage({super.key});

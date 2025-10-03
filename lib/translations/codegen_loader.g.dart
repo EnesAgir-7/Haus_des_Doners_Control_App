@@ -106,7 +106,22 @@ class CodegenLoader extends AssetLoader{
   "now": "Jetzt",
   "minutes_ago": "Vor {count} Minuten",
   "hours_ago": "Vor {count} Stunden",
-  "days_ago": "Vor {count} Tagen"
+  "days_ago": "Vor {count} Tagen",
+  "search_branch_hint": "Filiale suchen...",
+  "branch_count": "{count} Filiale",
+  "sort_by_name": "Nach Name",
+  "sort_by_score": "Nach Bewertung",
+  "sort_by_last_control": "Nach letzter Kontrolle",
+  "error_occurred": "Fehler aufgetreten",
+  "try_again": "Erneut versuchen",
+  "no_branches_assigned": "Noch keine Filiale zugewiesen",
+  "branch_not_found": "Filiale nicht gefunden",
+  "clear_search": "Suche löschen",
+  "total_inspections": "Gesamtinspektionen",
+  "inspection_history": "Inspektionsverlauf",
+  "new_inspection": "Neue Inspektion",
+  "submit_report": "Bericht einreichen",
+  "no_inspections_yet": "Noch keine Inspektionen"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Panel",
@@ -200,7 +215,22 @@ static const Map<String,dynamic> _en = {
   "now": "Now",
   "minutes_ago": "{count} minutes ago",
   "hours_ago": "{count} hours ago",
-  "days_ago": "{count} days ago"
+  "days_ago": "{count} days ago",
+  "search_branch_hint": "Search branch...",
+  "branch_count": "{count} Branch",
+  "sort_by_name": "By Name",
+  "sort_by_score": "By Score",
+  "sort_by_last_control": "By Last Inspection",
+  "error_occurred": "An error occurred",
+  "try_again": "Try Again",
+  "no_branches_assigned": "No branches assigned yet",
+  "branch_not_found": "Branch not found",
+  "clear_search": "Clear Search",
+  "total_inspections": "Total Inspections",
+  "inspection_history": "Inspection History",
+  "new_inspection": "New Inspection",
+  "submit_report": "Submit Report",
+  "no_inspections_yet": "No inspections yet"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -294,7 +324,22 @@ static const Map<String,dynamic> _tr = {
   "now": "Şimdi",
   "minutes_ago": "{count} dakika önce",
   "hours_ago": "{count} saat önce",
-  "days_ago": "{count} gün önce"
+  "days_ago": "{count} gün önce",
+  "search_branch_hint": "Şube ara...",
+  "branch_count": "{count} Şube",
+  "sort_by_name": "İsme göre",
+  "sort_by_score": "Puana göre",
+  "sort_by_last_control": "Son kontrole göre",
+  "error_occurred": "Hata oluştu",
+  "try_again": "Tekrar Dene",
+  "no_branches_assigned": "Henüz şube atanmamış",
+  "branch_not_found": "Şube bulunamadı",
+  "clear_search": "Aramayı temizle",
+  "total_inspections": "Toplam Kontrol",
+  "inspection_history": "Kontrol Geçmişi",
+  "new_inspection": "Yeni Kontrol Yap",
+  "submit_report": "Rapor Gönder",
+  "no_inspections_yet": "Henüz kontrol yapılmamış"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

@@ -35,12 +35,7 @@ class _ControlPageState extends State<ControlPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_selectedBranch != null) {
         final controlProvider = context.read<ProviderControl>();
-        final currentUser = context.read<ProviderBranches>().branches.isNotEmpty
-            ? null
-            : null;
-
-        // Initialize provider with selected branch
-        controlProvider.initialize(_selectedBranch!, currentUser!);
+        controlProvider.initialize(_selectedBranch!);
       }
     });
   }
@@ -59,22 +54,19 @@ class _ControlPageState extends State<ControlPage> {
         imageQuality: 85,
       );
 
-      if (photo != null && mounted) {
-        final provider = context.read<ProviderControl>();
-        switch (category) {
-          case 'cleanliness':
-            provider.addCleanlinessHygienePhoto(File(photo.path));
-            break;
-          case 'personnel':
-            provider.addProductQualityPhoto(File(photo.path));
-            break;
-          case 'product':
-            provider.addStaffServicePhoto(File(photo.path));
-            break;
-        }
+      if (photo == null || !mounted) return;
+
+      final file = File(photo.path);
+      final provider = context.read<ProviderControl>();
+
+      if (provider.getCategoryPhotos(category).length >= 4) {
+        if (mounted) showSnakBarr(context, 'Maximum 4 photos allowed');
+        return;
       }
-    } catch (e) {
-      debugPrint('Error taking photo: $e');
+
+      provider.addCategoryPhoto(category, file);
+    } catch (e, st) {
+      debugPrint('Error taking photo: $e\n$st');
       if (mounted) {
         showSnakBarr(context, "Error taking photo");
       }
@@ -97,6 +89,12 @@ class _ControlPageState extends State<ControlPage> {
           if (_selectedBranch == null) {
             return _buildBranchSelector(context);
           }
+          if (provider.isLoading) {
+            return Center(
+              child: CircularProgressIndicator(color: AppColors.primaryRed),
+            );
+          }
+          final template = provider.selectedTemplate;
 
           return Stack(
             children: [
@@ -108,56 +106,41 @@ class _ControlPageState extends State<ControlPage> {
                     // Branch Info Card
                     _buildBranchInfoCard(),
                     SizedBox(height: 16),
-
-                    // Cleanliness & Hygiene
-                    _buildQuestionCard(
-                      title: LocaleKeys.cleanliness_hygiene.tr(),
-                      category: 'cleanliness',
-                      score: provider.cleanlinessHygieneScore,
-                      photos: provider.cleanlinessHygienePhotos,
-                      notes: provider.cleanlinessHygieneNotes,
-                      onScoreChanged: provider.setCleanlinessHygieneScore,
-                      onNotesChanged: provider.setCleanlinessHygieneNotes,
-                      onPhotoRemoved: provider.removeCleanlinessHygienePhoto,
-                    ),
-
-                    // Product Quality
-                    _buildQuestionCard(
-                      title: LocaleKeys.product_quality.tr(),
-                      category: 'product',
-                      score: provider.productQualityScore,
-                      photos: provider.productQualityPhotos,
-                      notes: provider.productQualityNotes,
-                      onScoreChanged: provider.setProductQualityScore,
-                      onNotesChanged: provider.setProductQualityNotes,
-                      onPhotoRemoved: provider.removeProductQualityPhoto,
-                    ),
-
-                    // Product Quality
-                    _buildQuestionCard(
-                      title: LocaleKeys.product_quality.tr(),
-                      category: 'product',
-                      score: provider.productQualityScore,
-                      photos: provider.productQualityPhotos,
-                      notes: provider.productQualityNotes,
-                      onScoreChanged: provider.setProductQualityScore,
-                      onNotesChanged: provider.setProductQualityNotes,
-                      onPhotoRemoved: provider.removeProductQualityPhoto,
-                    ),
+                    if (template != null)
+                      ...template.categories.map((category) {
+                        return _buildQuestionCard(
+                          title: category.title,
+                          category: category.categoryId,
+                          score: provider.getCategoryScore(category.categoryId),
+                          photos: provider.getCategoryPhotos(
+                            category.categoryId,
+                          ),
+                          notes: provider.getCategoryNotes(category.categoryId),
+                          onScoreChanged: (val) => provider.setCategoryScore(
+                            category.categoryId,
+                            val,
+                          ),
+                          onNotesChanged: (val) => provider.setCategoryNotes(
+                            category.categoryId,
+                            val,
+                          ),
+                          onPhotoRemoved: (val) => provider.removeCategoryPhoto(
+                            category.categoryId,
+                            val,
+                          ),
+                        );
+                      }).toList()
+                    else
+                      const Text("No template linked to this branch"),
 
                     SizedBox(height: 16),
-
-                    // Overall Notes
                     _buildOverallNotesSection(provider),
 
                     SizedBox(height: 16),
 
-                    // Score Preview
                     if (provider.totalScore > 0) _buildScorePreview(provider),
 
                     SizedBox(height: 24),
-
-                    // Submit Button
                     AppButton(
                       text: 'Submit Inspection',
                       icon: Icons.check_circle,
@@ -276,7 +259,7 @@ class _ControlPageState extends State<ControlPage> {
     required String notes,
     required Function(int) onScoreChanged,
     required Function(String) onNotesChanged,
-    required Function(int) onPhotoRemoved,
+    required Function(File) onPhotoRemoved,
   }) {
     final List<String> emojis = ['😃', '🙂', '😐', '😞'];
 
@@ -452,7 +435,7 @@ class _ControlPageState extends State<ControlPage> {
                                 top: 4,
                                 right: 4,
                                 child: GestureDetector(
-                                  onTap: () => onPhotoRemoved(index),
+                                  onTap: () => onPhotoRemoved(photos[index]),
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(

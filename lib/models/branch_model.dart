@@ -4,6 +4,7 @@ class BranchModel {
   final String id;
   final String name;
   final String address;
+  final String templateId;
   final GeoPoint gps;
   final String contactName;
   final String contactPhone;
@@ -16,8 +17,9 @@ class BranchModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  BranchModel({
+  BranchModel( {
     required this.id,
+    required this.templateId, 
     required this.name,
     required this.address,
     required this.gps,
@@ -39,6 +41,7 @@ class BranchModel {
       id: doc.id,
       name: data['name'] ?? '',
       address: data['address'] ?? '',
+      templateId: data['templateId'] ?? '',
       gps: data['gps'] as GeoPoint,
       contactName: data['contactName'] ?? '',
       contactPhone: data['contactPhone'] ?? '',
@@ -52,6 +55,7 @@ class BranchModel {
       status: data['status'] ?? 'active',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      
     );
   }
 
@@ -62,6 +66,7 @@ class BranchModel {
       'gps': gps,
       'contactName': contactName,
       'contactPhone': contactPhone,
+      'templateId': templateId,
       'assignedInspectorId': assignedInspectorId,
       'lastInspectionDate': lastInspectionDate != null
           ? Timestamp.fromDate(lastInspectionDate!)
@@ -72,6 +77,7 @@ class BranchModel {
       'status': status,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
+      
     };
   }
 

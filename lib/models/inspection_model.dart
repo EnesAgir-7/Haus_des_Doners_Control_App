@@ -10,9 +10,7 @@ class InspectionModel {
   final DateTime? completedTime;
   final String status; // "scheduled" | "completed" | "pending" | "current"
   final double score;
-  final InspectionCategoryModel cleanlinessHygiene;
-  final InspectionCategoryModel staffService;
-  final InspectionCategoryModel productQuality;
+  final Map<String, InspectionCategoryModel> categories; // ✅ dynamic categories
   final String overallNotes;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -27,17 +25,23 @@ class InspectionModel {
     this.completedTime,
     required this.status,
     required this.score,
-    required this.cleanlinessHygiene,
-    required this.staffService,
-    required this.productQuality,
+    required this.categories,
     required this.overallNotes,
     required this.createdAt,
     required this.updatedAt,
   });
 
+  /// Factory to load from Firestore
   factory InspectionModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    final categories = data['categories'] as Map<String, dynamic>;
+
+    final rawCategories = data['categories'] as Map<String, dynamic>? ?? {};
+
+    // Convert categories map into Map<String, InspectionCategoryModel>
+    final parsedCategories = rawCategories.map(
+      (key, value) =>
+          MapEntry(key, InspectionCategoryModel.fromMap(value ?? {})),
+    );
 
     return InspectionModel(
       id: doc.id,
@@ -51,22 +55,14 @@ class InspectionModel {
           : null,
       status: data['status'] ?? 'pending',
       score: (data['score'] ?? 0.0).toDouble(),
-      cleanlinessHygiene: InspectionCategoryModel.fromMap(
-        categories['cleanlinessHygiene'] ?? {},
-      ),
-      staffService: InspectionCategoryModel.fromMap(
-        categories['staffService'] ?? {},
-      ),
-      productQuality: InspectionCategoryModel.fromMap(
-        categories['productQuality'] ?? {},
-      ),
-
+      categories: parsedCategories,
       overallNotes: data['overallNotes'] ?? '',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
   }
 
+  /// Convert to Firestore map
   Map<String, dynamic> toMap() {
     return {
       'branchId': branchId,
@@ -79,11 +75,9 @@ class InspectionModel {
           : null,
       'status': status,
       'score': score,
-      'categories': {
-        'cleanlinessHygiene': cleanlinessHygiene.toMap(),
-        'staffService': staffService.toMap(),
-        'productQuality': productQuality.toMap(),
-      },
+      'categories': categories.map(
+        (key, value) => MapEntry(key, value.toMap()),
+      ),
       'overallNotes': overallNotes,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
@@ -97,7 +91,7 @@ class InspectionModel {
 
 class InspectionCategoryModel {
   final int score; // 1-4 rating
-  final List<String> photos;
+  final List<String> photos; // URLs after upload
   final String notes;
 
   InspectionCategoryModel({

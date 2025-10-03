@@ -95,5 +95,20 @@ abstract class  LocaleKeys {
   static const minutes_ago = 'minutes_ago';
   static const hours_ago = 'hours_ago';
   static const days_ago = 'days_ago';
+  static const search_branch_hint = 'search_branch_hint';
+  static const branch_count = 'branch_count';
+  static const sort_by_name = 'sort_by_name';
+  static const sort_by_score = 'sort_by_score';
+  static const sort_by_last_control = 'sort_by_last_control';
+  static const error_occurred = 'error_occurred';
+  static const try_again = 'try_again';
+  static const no_branches_assigned = 'no_branches_assigned';
+  static const branch_not_found = 'branch_not_found';
+  static const clear_search = 'clear_search';
+  static const total_inspections = 'total_inspections';
+  static const inspection_history = 'inspection_history';
+  static const new_inspection = 'new_inspection';
+  static const submit_report = 'submit_report';
+  static const no_inspections_yet = 'no_inspections_yet';
 
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/inspection_model.dart';
+import '../models/inspection_template_model.dart';
 
 class InspectionService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -178,6 +179,24 @@ class InspectionService {
       await _db.collection(_collection).doc(inspectionId).delete();
     } catch (e) {
       print('Error deleting inspection: $e');
+      rethrow;
+    }
+  }
+
+    // Fetches the single template document by its ID
+  Future<InspectionTemplate?> getTemplateById(String templateId) async {
+    try {
+      final doc = await _db
+          .collection('inspectionTemplates')
+          .doc(templateId)
+          .get();
+      if (!doc.exists) {
+        print('Template with ID $templateId not found.');
+        return null;
+      }
+      return InspectionTemplate.fromFirestore(doc);
+    } catch (e) {
+      print('Error getting template: $e');
       rethrow;
     }
   }

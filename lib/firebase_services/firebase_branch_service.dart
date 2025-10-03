@@ -26,6 +26,8 @@ class BranchService {
     }
   }
 
+  
+
   // Stream branches by inspector (real-time)
   Stream<List<BranchModel>> streamBranchesByInspector(String inspectorId) {
     return _db
@@ -127,4 +129,6 @@ class BranchService {
       rethrow;
     }
   }
+
+
 }

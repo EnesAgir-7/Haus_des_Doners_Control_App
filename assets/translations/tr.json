@@ -90,5 +90,20 @@
   "now": "Şimdi",
   "minutes_ago": "{count} dakika önce",
   "hours_ago": "{count} saat önce",
-  "days_ago": "{count} gün önce"
+  "days_ago": "{count} gün önce",
+  "search_branch_hint": "Şube ara...",
+  "branch_count": "{count} Şube",
+  "sort_by_name": "İsme göre",
+  "sort_by_score": "Puana göre",
+  "sort_by_last_control": "Son kontrole göre",
+  "error_occurred": "Hata oluştu",
+  "try_again": "Tekrar Dene",
+  "no_branches_assigned": "Henüz şube atanmamış",
+  "branch_not_found": "Şube bulunamadı",
+  "clear_search": "Aramayı temizle",
+  "total_inspections": "Toplam Kontrol",
+  "inspection_history": "Kontrol Geçmişi",
+  "new_inspection": "Yeni Kontrol Yap",
+  "submit_report": "Rapor Gönder",
+  "no_inspections_yet": "Henüz kontrol yapılmamış"
 }
