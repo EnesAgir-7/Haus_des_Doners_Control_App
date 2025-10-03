@@ -10,7 +10,7 @@ import 'package:haus_des_control/providers/provider_tasks.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 
-import 'admin/screen_admin_dashboard.dart';
+import 'admin/screens/screen_admin_dashboard.dart';
 import 'core/theme/app_theme.dart';
 import 'layouts/main_layout.dart';
 import 'providers/provider_control.dart';
