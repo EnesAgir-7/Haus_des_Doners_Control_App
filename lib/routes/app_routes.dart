@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/layouts/main_layout.dart';
 import '../screens/screen_auth.dart';
 import '../screens/user/control_page.dart';
-import '../screens/user/subsidiaries_page.dart';
+import '../screens/user/my_branches_page.dart';
 import '../screens/user/panel_page.dart';
 import '../screens/user/route_page.dart';
 import '../screens/user/fleet_page.dart';

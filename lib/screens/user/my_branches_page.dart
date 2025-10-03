@@ -549,7 +549,9 @@ class BranchDetailsSheet extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _getScoreColor(inspection.score).withOpacity(0.2),
+                      color: _getScoreColor(
+                        inspection.score,
+                      ).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: _getScoreColor(inspection.score),

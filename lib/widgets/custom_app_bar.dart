@@ -73,7 +73,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     _buildNavLink(
                       context,
-                      LocaleKeys.subsidiaries.tr(),
+                      LocaleKeys.my_branches.tr(),
                       RouteNames.subsidiaries,
                     ),
                     _buildNavLink(
