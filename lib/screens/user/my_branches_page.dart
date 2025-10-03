@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../providers/provider_subsidiaries.dart';
+import '../../providers/provider_branches.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../widgets/branch_card.dart';
 
@@ -19,7 +19,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderSubsidiaries>().initialize();
+      context.read<ProviderBranches>().initialize();
     });
   }
 
@@ -27,7 +27,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Consumer<ProviderSubsidiaries>(
+        child: Consumer<ProviderBranches>(
           builder: (context, provider, child) {
             return Padding(
               padding: const EdgeInsets.all(16),
@@ -157,7 +157,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
     required String label,
     required String value,
     required IconData icon,
-    required ProviderSubsidiaries provider,
+    required ProviderBranches provider,
   }) {
     final isSelected = provider.sortBy == value;
     return GestureDetector(
@@ -194,7 +194,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
     );
   }
 
-  Widget _buildBranchList(ProviderSubsidiaries provider) {
+  Widget _buildBranchList(ProviderBranches provider) {
     if (provider.isLoading) {
       return Center(
         child: CircularProgressIndicator(color: AppColors.primaryRed),
@@ -296,7 +296,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
   void _showBranchDetails(
     BuildContext context,
     dynamic branchModel,
-    ProviderSubsidiaries provider,
+    ProviderBranches provider,
   ) {
     // Select branch and load its inspection history
     provider.selectBranch(branchModel);
@@ -317,7 +317,7 @@ class _SubsidiariesPageState extends State<SubsidiariesPage> {
 // Branch Details Bottom Sheet
 class BranchDetailsSheet extends StatelessWidget {
   final dynamic branch;
-  final ProviderSubsidiaries provider;
+  final ProviderBranches provider;
 
   BranchDetailsSheet({required this.branch, required this.provider});
 
@@ -425,9 +425,14 @@ class BranchDetailsSheet extends StatelessWidget {
               SizedBox(height: 12),
 
               // Inspection list
-              Expanded(child: _buildInspectionHistory(scrollController)),
+              Expanded(
+                child: Consumer<ProviderBranches>(
+                  builder: (context, co, _) {
+                    return _buildInspectionHistory(scrollController);
+                  },
+                ),
+              ),
 
-              // New inspection button
               SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,

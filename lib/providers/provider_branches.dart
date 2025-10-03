@@ -5,9 +5,10 @@ import '../firebase_services/firebase_branch_service.dart';
 import '../firebase_services/firebase_inspection_service.dart';
 import '../models/branch_model.dart';
 import '../models/inspection_model.dart';
+
 /// Provider for Subsidiaries (Branches) screen
 /// Shows list of branches assigned to inspector
-class ProviderSubsidiaries extends ChangeNotifier {
+class ProviderBranches extends ChangeNotifier {
   final BranchService _branchService = BranchService();
   final InspectionService _inspectionService = InspectionService();
 

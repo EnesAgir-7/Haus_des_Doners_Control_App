@@ -15,7 +15,7 @@ import 'core/theme/app_theme.dart';
 import 'layouts/main_layout.dart';
 import 'providers/provider_panel.dart';
 import 'providers/provider_report_photo.dart';
-import 'providers/provider_subsidiaries.dart';
+import 'providers/provider_branches.dart';
 import 'routes/app_routes.dart';
 import 'screens/screen_auth.dart';
 
@@ -51,7 +51,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ProviderAuth()),
         ChangeNotifierProvider(create: (_) => ProviderPanel()),
-        ChangeNotifierProvider(create: (_) => ProviderSubsidiaries()),
+        ChangeNotifierProvider(create: (_) => ProviderBranches()),
         ChangeNotifierProvider(create: (_) => ProviderReportPhoto()),
         ChangeNotifierProvider(create: (_) => ProviderFleet()),
         ChangeNotifierProvider(create: (_) => ProviderTasks()),
