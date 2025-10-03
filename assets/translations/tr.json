@@ -105,5 +105,20 @@
   "inspection_history": "Kontrol Geçmişi",
   "new_inspection": "Yeni Kontrol Yap",
   "submit_report": "Rapor Gönder",
-  "no_inspections_yet": "Henüz kontrol yapılmamış"
+  "no_inspections_yet": "Henüz kontrol yapılmamış",
+  "user_not_authenticated": "Kullanıcı kimlik doğrulaması yapılmadı",
+  "error_loading_vehicle": "Araç yüklenirken hata oluştu: {error}",
+  "error_loading_vehicles": "Araçlar yüklenirken hata oluştu: {error}",
+  "no_vehicle_assigned": "Atanmış araç yok",
+  "km_less_than_current": "Yeni kilometre mevcut kilometreden küçük olamaz",
+  "km_exceeds_limit": "Kilometre limiti aşıldı. Lütfen servis ile iletişime geçin",
+  "km_update_success": "Kilometre başarıyla güncellendi",
+  "km_update_error": "Kilometre güncellenirken hata oluştu: {error}",
+  "enter_km": "Lütfen kilometre giriniz",
+  "invalid_km_value": "Geçersiz kilometre değeri",
+  "vehicle_not_found": "Araç bulunamadı",
+  "vehicle_assigned_success": "Araç başarıyla atandı",
+  "vehicle_assign_error": "Araç atanırken hata oluştu: {error}",
+  "vehicle_unassign_success": "Araç ataması kaldırıldı",
+  "vehicle_unassign_error": "Araç ataması kaldırılırken hata oluştu: {error}"
 }

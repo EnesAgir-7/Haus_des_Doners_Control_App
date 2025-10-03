@@ -1,182 +1,164 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:haus_des_control/providers/provider_branches.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../data/dummy_branches.dart';
+import '../../models/branch_model.dart';
+import '../../providers/provider_map.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/custom_app_bar.dart';
 
-class BranchMapScreen extends StatefulWidget {
+class BranchMapScreen extends StatelessWidget {
   const BranchMapScreen({super.key});
 
   @override
-  State<BranchMapScreen> createState() => _BranchMapScreenState();
-}
-
-class _BranchMapScreenState extends State<BranchMapScreen> {
-  GoogleMapController? _mapController;
-  DymmyBranch? _selectedBranch;
-  final PageController _pageController = PageController(
-    viewportFraction: 0.75,
-  ); // slightly smaller cards
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController.addListener(_onScroll);
-  }
-
-  void _onScroll() {
-    // Only update map when user scrolls, not when tapping
-    if (_pageController.page != null &&
-        (_pageController.page! % 1).abs() < 0.01) {
-      final index = _pageController.page!.round();
-      final branch = dummyBranches[index];
-      _animateToBranch(branch, animateInfoWindow: false);
-    }
-  }
-
-  void _animateToBranch(DymmyBranch branch, {bool animateInfoWindow = true}) {
-    _mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(LatLng(branch.latitude, branch.longitude), 14),
-    );
-    if (animateInfoWindow) {
-      setState(() {
-        if (_selectedBranch == branch) {
-          _selectedBranch = null; // deselect if tapped again
-        } else {
-          _selectedBranch = branch;
-        }
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition: CameraPosition(
-              target: LatLng(
-                dummyBranches[0].latitude,
-                dummyBranches[0].longitude,
-              ),
-              zoom: 5,
-            ),
-            onMapCreated: (controller) => _mapController = controller,
-            markers: dummyBranches.map((branch) {
-              return Marker(
-                markerId: MarkerId(branch.id),
-                position: LatLng(branch.latitude, branch.longitude),
-                icon: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueRed,
-                ),
-                onTap: () => _animateToBranch(branch),
-              );
-            }).toSet(),
-            zoomControlsEnabled: true,
-            myLocationButtonEnabled: true,
-            compassEnabled: true,
-          ),
-
-          // Bottom scrollable list
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            height: 120, // smaller height for cards
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: dummyBranches.length,
-              physics: BouncingScrollPhysics(),
-              itemBuilder: (context, index) {
-                final branch = dummyBranches[index];
-                return _branchCard(branch, index);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _branchCard(DymmyBranch branch, int index) {
-    return GestureDetector(
-      onTap: () {
-        // Animate page to tapped card
-        _pageController.animateToPage(
-          index,
-          duration: Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-        _animateToBranch(branch);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppColors.lightBlack,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Row(
+    return Consumer<BranchMapController>(
+      builder: (context, controller, _) {
+        return Scaffold(
+          appBar: CustomAppBar(showLogout: false, showLang: false),
+          body: Stack(
             children: [
-              SizedBox(width: 10),
-              CachedNetworkImage(
-                imageUrl: branch.imageUrl ?? '',
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(color: AppColors.primaryRed),
+              GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(
+                    dummyBranches[0].gps.latitude,
+                    dummyBranches[0].gps.longitude,
+                  ),
+                  zoom: 14,
                 ),
-                errorWidget: (context, url, error) =>
-                    Icon(Icons.apartment, size: 50, color: Colors.white24),
+                onMapCreated: controller.setMapController,
+                markers: controller.markers.values.toSet(),
+                zoomControlsEnabled: false,
+                myLocationButtonEnabled: true,
+                compassEnabled: true,
               ),
-              SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      branch.name,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                      ),
-                    ),
-                    SizedBox(height: 2),
-                    Text(
-                      branch.address,
-                      style: TextStyle(color: Colors.white70, fontSize: 10),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4),
-                    RatingBarIndicator(
-                      rating: branch.averageScore ?? 0.0,
-                      itemBuilder: (context, index) =>
-                          Icon(Icons.star, color: Colors.amber),
-                      itemCount: 5,
-                      itemSize: 12,
-                      unratedColor: Colors.white24,
-                    ),
-                  ],
+              Positioned(
+                bottom: 20,
+                left: 0,
+                right: 0,
+                height: 160,
+                child: PageView.builder(
+                  controller: controller.pageController,
+                  itemCount: dummyBranches.length,
+                  physics: const BouncingScrollPhysics(),
+                  onPageChanged: controller.onPageChanged,
+                  itemBuilder: (context, index) {
+                    final branch = dummyBranches[index];
+                    return _branchCard(branch);
+                  },
                 ),
               ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _branchCard(BranchModel branch) {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: AppColors.lightBlack,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Row(
+                children: [
+                  // Image.network(
+                  //   branch.imageUrl ?? '',
+                  //   width: 60,
+                  //   height: 60,
+                  //   fit: BoxFit.cover,
+                  //   errorBuilder: (_, __, ___) =>
+                  //       Icon(Icons.apartment, size: 50, color: Colors.white24),
+                  // ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          branch.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          branch.address,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: SizedBox(
+                height: 40,
+                child: Row(
+                  spacing: 10,
+                  children: [
+                    Expanded(
+                      child: Consumer<ProviderBranches>(
+                        builder: (context, branchContr, child) {
+                          return AppButton(
+                            isLoading: branchContr.isLoading,
+                            text: "Assign to Me",
+                            onPressed: () {
+                              branchContr.assignBranchTome(
+                                branchId: branch.id,
+                                branchName: branch.name,
+                                timeSlot: "9 to 5",
+                                context: context,
+                              );
+                            },
+                            backgroundColor: AppColors.amber,
+                            textStyle: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.primaryDark,
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            borderRadius: 10,
+                          );
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: AppButton(
+                        text: "Submit Inspection",
+                        onPressed: () {},
+                        backgroundColor: AppColors.primaryRed,
+                        textStyle: const TextStyle(fontSize: 11),
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        borderRadius: 10,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

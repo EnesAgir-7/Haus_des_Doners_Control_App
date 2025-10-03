@@ -105,5 +105,20 @@
   "inspection_history": "Inspektionsverlauf",
   "new_inspection": "Neue Inspektion",
   "submit_report": "Bericht einreichen",
-  "no_inspections_yet": "Noch keine Inspektionen"
+  "no_inspections_yet": "Noch keine Inspektionen",
+  "user_not_authenticated": "Benutzer nicht authentifiziert",
+  "error_loading_vehicle": "Fehler beim Laden des Fahrzeugs: {error}",
+  "error_loading_vehicles": "Fehler beim Laden der Fahrzeuge: {error}",
+  "no_vehicle_assigned": "Kein Fahrzeug zugewiesen",
+  "km_less_than_current": "Neuer Kilometerstand kann nicht kleiner als der aktuelle sein",
+  "km_exceeds_limit": "Kilometerlimit überschritten. Bitte wenden Sie sich an den Service",
+  "km_update_success": "Kilometer erfolgreich aktualisiert",
+  "km_update_error": "Fehler beim Aktualisieren des Kilometers: {error}",
+  "enter_km": "Bitte Kilometer eingeben",
+  "invalid_km_value": "Ungültiger Kilometerwert",
+  "vehicle_not_found": "Fahrzeug nicht gefunden",
+  "vehicle_assigned_success": "Fahrzeug erfolgreich zugewiesen",
+  "vehicle_assign_error": "Fehler beim Zuweisen des Fahrzeugs: {error}",
+  "vehicle_unassign_success": "Fahrzeugzuweisung erfolgreich entfernt",
+  "vehicle_unassign_error": "Fehler beim Entfernen der Fahrzeugzuweisung: {error}"
 }

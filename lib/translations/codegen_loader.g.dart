@@ -121,7 +121,22 @@ class CodegenLoader extends AssetLoader{
   "inspection_history": "Inspektionsverlauf",
   "new_inspection": "Neue Inspektion",
   "submit_report": "Bericht einreichen",
-  "no_inspections_yet": "Noch keine Inspektionen"
+  "no_inspections_yet": "Noch keine Inspektionen",
+  "user_not_authenticated": "Benutzer nicht authentifiziert",
+  "error_loading_vehicle": "Fehler beim Laden des Fahrzeugs: {error}",
+  "error_loading_vehicles": "Fehler beim Laden der Fahrzeuge: {error}",
+  "no_vehicle_assigned": "Kein Fahrzeug zugewiesen",
+  "km_less_than_current": "Neuer Kilometerstand kann nicht kleiner als der aktuelle sein",
+  "km_exceeds_limit": "Kilometerlimit überschritten. Bitte wenden Sie sich an den Service",
+  "km_update_success": "Kilometer erfolgreich aktualisiert",
+  "km_update_error": "Fehler beim Aktualisieren des Kilometers: {error}",
+  "enter_km": "Bitte Kilometer eingeben",
+  "invalid_km_value": "Ungültiger Kilometerwert",
+  "vehicle_not_found": "Fahrzeug nicht gefunden",
+  "vehicle_assigned_success": "Fahrzeug erfolgreich zugewiesen",
+  "vehicle_assign_error": "Fehler beim Zuweisen des Fahrzeugs: {error}",
+  "vehicle_unassign_success": "Fahrzeugzuweisung erfolgreich entfernt",
+  "vehicle_unassign_error": "Fehler beim Entfernen der Fahrzeugzuweisung: {error}"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Panel",
@@ -230,7 +245,22 @@ static const Map<String,dynamic> _en = {
   "inspection_history": "Inspection History",
   "new_inspection": "New Inspection",
   "submit_report": "Submit Report",
-  "no_inspections_yet": "No inspections yet"
+  "no_inspections_yet": "No inspections yet",
+  "user_not_authenticated": "User not authenticated",
+  "error_loading_vehicle": "Error loading vehicle: {error}",
+  "error_loading_vehicles": "Error loading vehicles: {error}",
+  "no_vehicle_assigned": "No vehicle assigned",
+  "km_less_than_current": "New kilometer cannot be less than current kilometer",
+  "km_exceeds_limit": "Kilometer limit exceeded. Please contact service",
+  "km_update_success": "Kilometer updated successfully",
+  "km_update_error": "Error updating kilometer: {error}",
+  "enter_km": "Please enter kilometer",
+  "invalid_km_value": "Invalid kilometer value",
+  "vehicle_not_found": "Vehicle not found",
+  "vehicle_assigned_success": "Vehicle assigned successfully",
+  "vehicle_assign_error": "Error assigning vehicle: {error}",
+  "vehicle_unassign_success": "Vehicle unassignment successful",
+  "vehicle_unassign_error": "Error unassigning vehicle: {error}"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -339,7 +369,22 @@ static const Map<String,dynamic> _tr = {
   "inspection_history": "Kontrol Geçmişi",
   "new_inspection": "Yeni Kontrol Yap",
   "submit_report": "Rapor Gönder",
-  "no_inspections_yet": "Henüz kontrol yapılmamış"
+  "no_inspections_yet": "Henüz kontrol yapılmamış",
+  "user_not_authenticated": "Kullanıcı kimlik doğrulaması yapılmadı",
+  "error_loading_vehicle": "Araç yüklenirken hata oluştu: {error}",
+  "error_loading_vehicles": "Araçlar yüklenirken hata oluştu: {error}",
+  "no_vehicle_assigned": "Atanmış araç yok",
+  "km_less_than_current": "Yeni kilometre mevcut kilometreden küçük olamaz",
+  "km_exceeds_limit": "Kilometre limiti aşıldı. Lütfen servis ile iletişime geçin",
+  "km_update_success": "Kilometre başarıyla güncellendi",
+  "km_update_error": "Kilometre güncellenirken hata oluştu: {error}",
+  "enter_km": "Lütfen kilometre giriniz",
+  "invalid_km_value": "Geçersiz kilometre değeri",
+  "vehicle_not_found": "Araç bulunamadı",
+  "vehicle_assigned_success": "Araç başarıyla atandı",
+  "vehicle_assign_error": "Araç atanırken hata oluştu: {error}",
+  "vehicle_unassign_success": "Araç ataması kaldırıldı",
+  "vehicle_unassign_error": "Araç ataması kaldırılırken hata oluştu: {error}"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

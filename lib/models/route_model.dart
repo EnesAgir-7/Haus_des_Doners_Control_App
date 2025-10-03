@@ -60,7 +60,7 @@ class RouteStopModel {
   final String branchName;
   final String status; // "completed" | "pending" | "current"
   final String? inspectionId;
-  final int order;
+  int order;
 
   RouteStopModel({
     required this.timeSlot,

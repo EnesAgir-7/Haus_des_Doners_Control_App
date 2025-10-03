@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/screens/user/screen_map.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -29,6 +30,15 @@ class _PanelPageState extends State<PanelPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        heroTag: "mapFab",
+        onPressed: () {
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => BranchMapScreen()));
+        },
+        child: Icon(Icons.map, size: 36),
+      ),
       body: RefreshIndicator(
         onRefresh: () async {
           await context.read<ProviderPanel>().refresh();

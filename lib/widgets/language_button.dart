@@ -38,6 +38,7 @@ class LanguageButton extends StatelessWidget {
                   title: Text(entry.value['name']!),
                   onTap: () {
                     context.setLocale(Locale(entry.key));
+                    (context as Element).markNeedsBuild();
                     Navigator.of(context).pop();
                   },
                 );

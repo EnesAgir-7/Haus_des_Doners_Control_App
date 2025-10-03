@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../layouts/main_layout.dart';
+import '../layouts/bottom_nav_bar.dart';
 import '../screens/screen_auth.dart';
 import '../screens/user/control_page.dart';
 import '../screens/user/my_branches_page.dart';
@@ -39,13 +39,13 @@ class AppRouter {
   static Map<String, Widget Function(BuildContext)> routes = {
     // User routes
     RouteNames.panel: (context) => const PanelPage(),
-    RouteNames.subsidiaries: (context) => const SubsidiariesPage(),
+    RouteNames.subsidiaries: (context) => const BranchesPage(),
     RouteNames.control: (context) => const ControlPage(),
     RouteNames.route: (context) => RoutePage(),
     RouteNames.fleet: (context) => const FleetPage(),
     RouteNames.tasks: (context) => TasksPage(),
     RouteNames.auth: (context) => ScreenAuth(),
-    RouteNames.mainLayout: (context) => const MainLayout(),
+    RouteNames.mainLayout: (context) => const ScreenBottomNavBar(),
 
     // Admin routes
     RouteNames.admin: (context) => AdminDashboard(),

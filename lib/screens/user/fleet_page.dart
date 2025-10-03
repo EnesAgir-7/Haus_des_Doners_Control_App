@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/provider_fleet.dart';
 import '../../translations/locale_keys.g.dart';
-import '../../widgets/app_button.dart';
 
 class FleetPage extends StatefulWidget {
   const FleetPage({super.key});
@@ -103,20 +102,20 @@ class _FleetPageState extends State<FleetPage> {
                       _CurrentVehicleCard(provider: provider),
                       const SizedBox(height: 16),
                       _VehicleDetailsCard(provider: provider),
-                      const SizedBox(height: 16),
-                      _ActionButtons(provider: provider),
+                      // const SizedBox(height: 16),
+                      // _ActionButtons(provider: provider),
                       const SizedBox(height: 24),
                     ] else ...[
                       _NoVehicleCard(),
                       const SizedBox(height: 24),
                     ],
 
-                    _SectionTitle(
-                      icon: Icons.directions_car,
-                      title: LocaleKeys.other_controller_vehicles.tr(),
-                    ),
-                    const SizedBox(height: 12),
-                    _OtherVehiclesList(provider: provider),
+                    // _SectionTitle(
+                    //   icon: Icons.directions_car,
+                    //   title: LocaleKeys.other_controller_vehicles.tr(),
+                    // ),
+                    // const SizedBox(height: 12),
+                    // _OtherVehiclesList(provider: provider),
                   ],
                 ),
               ),
@@ -275,7 +274,7 @@ class _VehicleDetailsCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _RemainingKm(vehicle: vehicle),
+          _RemainingKm(vehicle: vehicle, provider: provider),
           const SizedBox(height: 16),
           _ReturnDate(vehicle: vehicle),
         ],
@@ -361,7 +360,8 @@ class _StatBox extends StatelessWidget {
 // -------------------- Remaining KM --------------------
 class _RemainingKm extends StatelessWidget {
   final dynamic vehicle;
-  const _RemainingKm({required this.vehicle});
+  final ProviderFleet provider;
+  const _RemainingKm({required this.vehicle, required this.provider});
 
   @override
   Widget build(BuildContext context) {
@@ -377,13 +377,23 @@ class _RemainingKm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            LocaleKeys.remaining_km.tr(),
-            style: const TextStyle(
-              color: AppColors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                LocaleKeys.remaining_km.tr(),
+                style: const TextStyle(
+                  color: AppColors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              IconButton(
+                tooltip: "Update KM",
+                onPressed: () => _showUpdateKmDialog(context, provider),
+                icon: Icon(Icons.edit, color: AppColors.white),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
@@ -491,201 +501,203 @@ class _ReturnDate extends StatelessWidget {
   }
 }
 
-// -------------------- Other Vehicles List --------------------
-class _OtherVehiclesList extends StatelessWidget {
-  final ProviderFleet provider;
-  const _OtherVehiclesList({required this.provider});
-
-  @override
-  Widget build(BuildContext context) {
-    // For inspectors, show all vehicles. For admins might show different view
-    final vehicles = provider.allVehicles
-        .where(
-          (v) =>
-              v.assignedInspectorId != null &&
-              v.assignedInspectorId != provider.currentUser?.id,
-        )
-        .toList();
-
-    if (vehicles.isEmpty) {
-      return Container(
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.lightBlack,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Center(
-          child: Text(
-            'No other vehicles',
-            style: TextStyle(color: Colors.white54),
-          ),
-        ),
-      );
-    }
-
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: vehicles.length,
-      itemBuilder: (context, index) {
-        final vehicle = vehicles[index];
-        return _OtherVehicleCard(vehicle: vehicle);
-      },
-    );
-  }
-}
-
-// -------------------- Action Buttons --------------------
-class _ActionButtons extends StatelessWidget {
-  final ProviderFleet provider;
-
-  const _ActionButtons({required this.provider});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: AppButton(
-            text: LocaleKeys.update_km.tr(),
-            isLoading: provider.isUpdating,
-            onPressed: () => _showUpdateKmDialog(context, provider),
-            backgroundColor: AppColors.lightRed,
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showUpdateKmDialog(BuildContext context, ProviderFleet provider) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.lightBlack,
-        title: Text('Update Kilometers', style: TextStyle(color: Colors.white)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Current: ${NumberFormat('#,###').format(provider.currentKm)} km',
-              style: TextStyle(color: Colors.white70),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              controller: provider.kmController,
-              keyboardType: TextInputType.number,
-              style: TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'New Kilometers',
-                labelStyle: TextStyle(color: Colors.white70),
-                hintText: 'Enter new KM',
-                hintStyle: TextStyle(color: Colors.white38),
-                filled: true,
-                fillColor: AppColors.lightRed,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            if (provider.errorMessage != null) ...[
-              SizedBox(height: 12),
-              Text(
-                provider.errorMessage!,
-                style: TextStyle(color: Colors.red, fontSize: 12),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.white70)),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final success = await provider.updateKmFromController();
-              if (success) {
-                Navigator.pop(context);
-                showSnakBarr(context, 'Kilometers updated successfully');
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryRed,
-            ),
-            child: Text('Update'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// -------------------- Other Vehicle Card --------------------
-class _OtherVehicleCard extends StatelessWidget {
-  final dynamic vehicle;
-
-  const _OtherVehicleCard({required this.vehicle});
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = vehicle.usagePercent / 100.0;
-    final progressColor = _getProgressColor(vehicle.usagePercent);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+void _showUpdateKmDialog(BuildContext context, ProviderFleet provider) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: AppColors.lightBlack,
+      title: Text('Update Kilometers', style: TextStyle(color: Colors.white)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            vehicle.assignedInspectorName ?? 'Unassigned',
-            style: const TextStyle(
-              color: AppColors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
+            'Current: ${NumberFormat('#,###').format(provider.currentKm)} km',
+            style: TextStyle(color: Colors.white70),
+          ),
+          SizedBox(height: 16),
+          TextField(
+            controller: provider.kmController,
+            keyboardType: TextInputType.number,
+            style: TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              labelText: 'New Kilometers',
+              labelStyle: TextStyle(color: Colors.white70),
+              hintText: 'Enter new KM',
+              hintStyle: TextStyle(color: Colors.white38),
+              filled: true,
+              fillColor: AppColors.lightRed,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            vehicle.plate,
-            style: const TextStyle(color: AppColors.lightGrey, fontSize: 13),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "KM: ${NumberFormat('#,###').format(vehicle.currentKm)} / ${NumberFormat('#,###').format(vehicle.maxKm)}",
-            style: const TextStyle(color: AppColors.white, fontSize: 13),
-          ),
-          const SizedBox(height: 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: LinearProgressIndicator(
-              value: progress,
-              minHeight: 6,
-              backgroundColor: AppColors.lightRed,
-              valueColor: AlwaysStoppedAnimation(progressColor),
+          if (provider.errorMessage != null) ...[
+            SizedBox(height: 12),
+            Text(
+              provider.errorMessage!,
+              style: TextStyle(color: Colors.red, fontSize: 12),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            "Service: ${DateFormat('dd MMM').format(vehicle.nextServiceDue)}",
-            style: const TextStyle(color: AppColors.lightGrey, fontSize: 13),
-          ),
+          ],
         ],
       ),
-    );
-  }
-
-  Color _getProgressColor(int percent) {
-    if (percent >= 95) return Colors.red;
-    if (percent >= 70) return Colors.amber;
-    return Colors.green;
-  }
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+        ),
+        ElevatedButton(
+          onPressed: () async {
+            final success = await provider.updateKmFromController();
+            if (success) {
+              Navigator.pop(context);
+              showSnakBarr(context, 'Kilometers updated successfully');
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryRed,
+          ),
+          child: Text('Update'),
+        ),
+      ],
+    ),
+  );
 }
+
+// -------------------- Other Vehicles List --------------------
+// class _OtherVehiclesList extends StatelessWidget {
+//   final ProviderFleet provider;
+//   const _OtherVehiclesList({required this.provider});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // For inspectors, show all vehicles. For admins might show different view
+//     final vehicles = provider.allVehicles
+//         .where(
+//           (v) =>
+//               v.assignedInspectorId != null &&
+//               v.assignedInspectorId != provider.currentUser?.id,
+//         )
+//         .toList();
+
+//     if (vehicles.isEmpty) {
+//       return Container(
+//         padding: EdgeInsets.all(20),
+//         decoration: BoxDecoration(
+//           color: AppColors.lightBlack,
+//           borderRadius: BorderRadius.circular(12),
+//         ),
+//         child: Center(
+//           child: Text(
+//             'No other vehicles',
+//             style: TextStyle(color: Colors.white54),
+//           ),
+//         ),
+//       );
+//     }
+
+//     return ListView.builder(
+//       shrinkWrap: true,
+//       physics: const NeverScrollableScrollPhysics(),
+//       itemCount: vehicles.length,
+//       itemBuilder: (context, index) {
+//         final vehicle = vehicles[index];
+//         return _OtherVehicleCard(vehicle: vehicle);
+//       },
+//     );
+//   }
+// }
+
+// -------------------- Action Buttons --------------------
+// class _ActionButtons extends StatelessWidget {
+//   final ProviderFleet provider;
+
+//   const _ActionButtons({required this.provider});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       children: [
+//         Expanded(
+//           child: AppButton(
+//             text: LocaleKeys.update_km.tr(),
+//             isLoading: provider.isUpdating,
+//             onPressed: () => _showUpdateKmDialog(context, provider),
+//             backgroundColor: AppColors.lightRed,
+//           ),
+//         ),
+//       ],
+//     );
+//   }
+
+// }
+
+
+// -------------------- Other Vehicle Card --------------------
+// class _OtherVehicleCard extends StatelessWidget {
+//   final dynamic vehicle;
+
+//   const _OtherVehicleCard({required this.vehicle});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final progress = vehicle.usagePercent / 100.0;
+//     final progressColor = _getProgressColor(vehicle.usagePercent);
+
+//     return Container(
+//       margin: const EdgeInsets.only(bottom: 12),
+//       padding: const EdgeInsets.all(14),
+//       decoration: BoxDecoration(
+//         color: AppColors.lightBlack,
+//         borderRadius: BorderRadius.circular(14),
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Text(
+//             vehicle.assignedInspectorName ?? 'Unassigned',
+//             style: const TextStyle(
+//               color: AppColors.white,
+//               fontWeight: FontWeight.bold,
+//               fontSize: 15,
+//             ),
+//           ),
+//           const SizedBox(height: 4),
+//           Text(
+//             vehicle.plate,
+//             style: const TextStyle(color: AppColors.lightGrey, fontSize: 13),
+//           ),
+//           const SizedBox(height: 8),
+//           Text(
+//             "KM: ${NumberFormat('#,###').format(vehicle.currentKm)} / ${NumberFormat('#,###').format(vehicle.maxKm)}",
+//             style: const TextStyle(color: AppColors.white, fontSize: 13),
+//           ),
+//           const SizedBox(height: 6),
+//           ClipRRect(
+//             borderRadius: BorderRadius.circular(6),
+//             child: LinearProgressIndicator(
+//               value: progress,
+//               minHeight: 6,
+//               backgroundColor: AppColors.lightRed,
+//               valueColor: AlwaysStoppedAnimation(progressColor),
+//             ),
+//           ),
+//           const SizedBox(height: 8),
+//           Text(
+//             "Service: ${DateFormat('dd MMM').format(vehicle.nextServiceDue)}",
+//             style: const TextStyle(color: AppColors.lightGrey, fontSize: 13),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   Color _getProgressColor(int percent) {
+//     if (percent >= 95) return Colors.red;
+//     if (percent >= 70) return Colors.amber;
+//     return Colors.green;
+//   }
+// }
 
 
 

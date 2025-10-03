@@ -9,40 +9,61 @@ class RouteService {
 
   // Get today's route for inspectorimport 'package:cloud_firestore/cloud_firestore.dart'; // Make sure you have this import
 
-  Future<RouteModel?> getTodaysRoute(String inspectorId) async {
+  Future<RouteModel?> getTodaysRoute(String userId) async {
     try {
-      // 1. Define the start and end of the day in UTC for consistent queries
-      final now = DateTime.now();
-      final startOfDay = DateTime.utc(
-        now.year,
-        now.month,
-        now.day,
-      ); // Midnight today, UTC
-      final endOfDay = DateTime.utc(
-        now.year,
-        now.month,
-        now.day + 1,
-      ); // Midnight tomorrow, UTC
-
       final snapshot = await _db
-          .collection(_collection)
-          .where('inspectorId', isEqualTo: inspectorId)
-          // 2. Query for a date within the range
-          .where('date', isGreaterThanOrEqualTo: startOfDay)
-          .where('date', isLessThan: endOfDay)
-          .limit(1)
+          .collection('routes')
+          .doc(userId)
+          .collection('routes') // subcollection inside the userId document
+          .limit(1) // only one route
           .get();
 
       if (snapshot.docs.isEmpty) {
-        print("No route found for today.");
+        print("No route found for user $userId.");
         return null;
       }
+
       return RouteModel.fromFirestore(snapshot.docs.first);
     } catch (e) {
-      console('Error getting today\'s route: $e'); 
+      print('Error fetching today\'s route for user $userId: $e');
       return null;
     }
   }
+
+  // Future<RouteModel?> getTodaysRoute(String inspectorId) async {
+  //   try {
+  //     // 1. Define the start and end of the day in UTC for consistent queries
+  //     final now = DateTime.now();
+  //     final startOfDay = DateTime.utc(
+  //       now.year,
+  //       now.month,
+  //       now.day,
+  //     ); // Midnight today, UTC
+  //     final endOfDay = DateTime.utc(
+  //       now.year,
+  //       now.month,
+  //       now.day + 1,
+  //     ); // Midnight tomorrow, UTC
+
+  //     final snapshot = await _db
+  //         .collection(_collection)
+  //         .where('inspectorId', isEqualTo: inspectorId)
+  //         // 2. Query for a date within the range
+  //         .where('date', isGreaterThanOrEqualTo: startOfDay)
+  //         .where('date', isLessThan: endOfDay)
+  //         .limit(1)
+  //         .get();
+
+  //     if (snapshot.docs.isEmpty) {
+  //       print("No route found for today.");
+  //       return null;
+  //     }
+  //     return RouteModel.fromFirestore(snapshot.docs.first);
+  //   } catch (e) {
+  //     console('Error getting today\'s route: $e');
+  //     return null;
+  //   }
+  // }
 
   // Stream today's route (real-time)
   Stream<RouteModel?> streamTodaysRoute(String inspectorId) {

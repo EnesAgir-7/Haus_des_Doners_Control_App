@@ -110,5 +110,20 @@ abstract class  LocaleKeys {
   static const new_inspection = 'new_inspection';
   static const submit_report = 'submit_report';
   static const no_inspections_yet = 'no_inspections_yet';
+  static const user_not_authenticated = 'user_not_authenticated';
+  static const error_loading_vehicle = 'error_loading_vehicle';
+  static const error_loading_vehicles = 'error_loading_vehicles';
+  static const no_vehicle_assigned = 'no_vehicle_assigned';
+  static const km_less_than_current = 'km_less_than_current';
+  static const km_exceeds_limit = 'km_exceeds_limit';
+  static const km_update_success = 'km_update_success';
+  static const km_update_error = 'km_update_error';
+  static const enter_km = 'enter_km';
+  static const invalid_km_value = 'invalid_km_value';
+  static const vehicle_not_found = 'vehicle_not_found';
+  static const vehicle_assigned_success = 'vehicle_assigned_success';
+  static const vehicle_assign_error = 'vehicle_assign_error';
+  static const vehicle_unassign_success = 'vehicle_unassign_success';
+  static const vehicle_unassign_error = 'vehicle_unassign_error';
 
 }

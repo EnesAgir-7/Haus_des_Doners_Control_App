@@ -2,10 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/core/console.dart';
 
 import '../models/branch_model.dart';
+import '../models/route_model.dart';
 
 class BranchService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collection = 'branches';
+  final String _collectionRoutes = 'routes';
 
   // Get branches assigned to inspector
   Future<List<BranchModel>> getBranchesByInspector(String inspectorId) async {
@@ -25,8 +27,6 @@ class BranchService {
       return [];
     }
   }
-
-  
 
   // Stream branches by inspector (real-time)
   Stream<List<BranchModel>> streamBranchesByInspector(String inspectorId) {
@@ -130,5 +130,66 @@ class BranchService {
     }
   }
 
+  /// Assign branch to inspector persistently (not date-specific)
+  Future<void> assignBranchToHimself({
+    required String inspectorId,
+    required String inspectorName,
+    required String branchId,
+    required String branchName,
+    required String timeSlot,
+  }) async {
+    try {
+      // Check if inspector already has a route
+      final query = await _db
+          .collection(_collection)
+          .where('inspectorId', isEqualTo: inspectorId)
+          .limit(1)
+          .get();
 
+      if (query.docs.isEmpty) {
+        // Create new route for inspector
+        final newRouteRef = _db.collection(_collectionRoutes).doc();
+        final route = RouteModel(
+          id: newRouteRef.id,
+          date: DateTime.now(), // can keep creation date
+          inspectorId: inspectorId,
+          inspectorName: inspectorName,
+          stops: [
+            RouteStopModel(
+              timeSlot: timeSlot,
+              branchId: branchId,
+              branchName: branchName,
+              status: 'current',
+              order: 1,
+            ),
+          ],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+        await newRouteRef.set(route.toMap());
+      } else {
+        // Append stop to existing route
+        final doc = query.docs.first;
+        final route = RouteModel.fromFirestore(doc);
+
+        final newStop = RouteStopModel(
+          timeSlot: timeSlot,
+          branchId: branchId,
+          branchName: branchName,
+          status: 'pending',
+          order: route.stops.length + 1,
+        );
+
+        final updatedStops = [...route.stops, newStop];
+
+        await doc.reference.update({
+          'stops': updatedStops.map((s) => s.toMap()).toList(),
+          'updatedAt': Timestamp.fromDate(DateTime.now()),
+        });
+      }
+    } catch (e) {
+      print("Error assigning branch: $e");
+      rethrow;
+    }
+  }
 }

@@ -12,11 +12,12 @@ import 'package:provider/provider.dart';
 
 import 'admin/screens/screen_admin_dashboard.dart';
 import 'core/theme/app_theme.dart';
-import 'layouts/main_layout.dart';
+import 'layouts/bottom_nav_bar.dart';
+import 'providers/provider_branches.dart';
 import 'providers/provider_control.dart';
+import 'providers/provider_map.dart';
 import 'providers/provider_panel.dart';
 import 'providers/provider_report_photo.dart';
-import 'providers/provider_branches.dart';
 import 'routes/app_routes.dart';
 import 'screens/screen_auth.dart';
 
@@ -58,6 +59,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderTasks()),
         ChangeNotifierProvider(create: (_) => ProviderRoute()),
         ChangeNotifierProvider(create: (_) => ProviderControl()),
+        ChangeNotifierProvider(create: (_) => BranchMapController()),
       ],
       child: MaterialApp(
         localizationsDelegates: context.localizationDelegates,
@@ -68,7 +70,7 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         themeMode: ThemeMode.dark,
-        home: const AuthWrapper(),
+        home: AuthWrapper(),
         routes: AppRouter.routes,
       ),
     );
@@ -90,7 +92,7 @@ class AuthWrapper extends StatelessWidget {
 
         final user = providerAuth.userModel;
         if (user != null) {
-          return user.isAdmin ? AdminDashboard() : MainLayout();
+          return user.isAdmin ? AdminDashboard() : ScreenBottomNavBar();
         }
 
         providerAuth.fetchUserModel().then((fetchedUser) {
