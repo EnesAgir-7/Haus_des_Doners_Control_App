@@ -1,10 +1,11 @@
 // lib/providers/fleet_provider.dart
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
 import '../firebase_services/firebase_user_service.dart';
 import '../firebase_services/firebase_vehicle_service.dart';
-import '../models/vehicle_model.dart';
 import '../models/user_model.dart';
+import '../models/vehicle_model.dart';
 
 /// Provider for Fleet (File) screen
 /// Shows assigned vehicle details and allows KM updates
@@ -48,6 +49,8 @@ class ProviderFleet extends ChangeNotifier {
   // Initialize for inspector
   Future<void> initialize() async {
     await fetchAssignedVehicle();
+    //call all verhilces only if needed.
+    await fetchAllVehicles();
   }
 
   // Initialize for admin
@@ -110,7 +113,6 @@ class ProviderFleet extends ChangeNotifier {
       notifyListeners();
 
       _allVehicles = await _vehicleService.getAllVehicles();
-
       _isLoading = false;
       notifyListeners();
     } catch (e) {

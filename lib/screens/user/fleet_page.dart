@@ -499,15 +499,13 @@ class _OtherVehiclesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // For inspectors, show all vehicles. For admins might show different view
-    final vehicles = provider.currentUser?.isAdmin ?? false
-        ? provider.allVehicles
-        : provider.allVehicles
-              .where(
-                (v) =>
-                    v.assignedInspectorId != null &&
-                    v.assignedInspectorId != provider.currentUser?.id,
-              )
-              .toList();
+    final vehicles = provider.allVehicles
+        .where(
+          (v) =>
+              v.assignedInspectorId != null &&
+              v.assignedInspectorId != provider.currentUser?.id,
+        )
+        .toList();
 
     if (vehicles.isEmpty) {
       return Container(
@@ -688,6 +686,31 @@ class _OtherVehicleCard extends StatelessWidget {
     return Colors.green;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////
+
+
+
+
+
 // class FleetPage extends StatelessWidget {
 //   const FleetPage({super.key});
 
