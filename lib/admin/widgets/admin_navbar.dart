@@ -1,87 +1,113 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../routes/admin_routes.dart';
+import '../../routes/app_routes.dart';
 
 class AdminNavBar extends StatelessWidget {
-  const AdminNavBar({super.key});
+  final String currentRoute;
+  final Function(String) onRouteSelected;
+
+  const AdminNavBar({
+    super.key,
+    required this.currentRoute,
+    required this.onRouteSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final currentRoute = ModalRoute.of(context)?.settings.name ?? '';
-
-    return NavigationDrawer(
-      backgroundColor: AppColors.primaryRed.withOpacity(0.1),
-      selectedIndex: _getSelectedIndex(currentRoute),
-      onDestinationSelected: (index) {
-        switch (index) {
-          case 0:
-            Navigator.pushNamed(context, AdminRouteNames.dashboard);
-            break;
-          case 1:
-            Navigator.pushNamed(context, AdminRouteNames.users);
-            break;
-          case 2:
-            Navigator.pushNamed(context, AdminRouteNames.branches);
-            break;
-          case 3:
-            Navigator.pushNamed(context, AdminRouteNames.fleet);
-            break;
-          case 4:
-            Navigator.pushNamed(context, AdminRouteNames.tasks);
-            break;
-        }
-      },
-      children: const [
-        Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            'Admin Panel',
-            style: TextStyle(
-              color: AppColors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 20,
+    return Container(
+      width: 250,
+      color: AppColors.primaryRed.withOpacity(0.1),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: AppColors.primaryRed.withOpacity(0.2),
+            child: const Row(
+              children: [
+                Icon(Icons.admin_panel_settings, color: AppColors.white),
+                SizedBox(width: 12),
+                Text(
+                  'Admin Panel',
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        NavigationDrawerDestination(
-          icon: Icon(Icons.dashboard),
-          label: Text('Dashboard'),
-        ),
-        NavigationDrawerDestination(
-          icon: Icon(Icons.people),
-          label: Text('Users'),
-        ),
-        NavigationDrawerDestination(
-          icon: Icon(Icons.store),
-          label: Text('Branches'),
-        ),
-        NavigationDrawerDestination(
-          icon: Icon(Icons.local_shipping),
-          label: Text('Fleet'),
-        ),
-        NavigationDrawerDestination(
-          icon: Icon(Icons.task),
-          label: Text('Tasks'),
-        ),
-      ],
+
+          // Navigation links
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                _buildNavLink(
+                  context,
+                  'Dashboard',
+                  RouteNames.admin,
+                  Icons.dashboard,
+                ),
+                _buildNavLink(
+                  context,
+                  'Users',
+                  RouteNames.adminUsers,
+                  Icons.people,
+                ),
+                _buildNavLink(
+                  context,
+                  'Branches',
+                  RouteNames.adminBranches,
+                  Icons.store,
+                ),
+                _buildNavLink(
+                  context,
+                  'Fleet',
+                  RouteNames.adminFleet,
+                  Icons.local_shipping,
+                ),
+                _buildNavLink(
+                  context,
+                  'Tasks',
+                  RouteNames.adminTasks,
+                  Icons.task,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  int _getSelectedIndex(String currentRoute) {
-    switch (currentRoute) {
-      case AdminRouteNames.dashboard:
-        return 0;
-      case AdminRouteNames.users:
-        return 1;
-      case AdminRouteNames.branches:
-        return 2;
-      case AdminRouteNames.fleet:
-        return 3;
-      case AdminRouteNames.tasks:
-        return 4;
-      default:
-        return 0;
-    }
+  Widget _buildNavLink(
+    BuildContext context,
+    String title,
+    String route,
+    IconData icon,
+  ) {
+    final bool isCurrentRoute = currentRoute == route;
+
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isCurrentRoute ? AppColors.primaryRed : AppColors.white,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: isCurrentRoute ? AppColors.primaryRed : AppColors.white,
+          fontWeight: isCurrentRoute ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      onTap: () => onRouteSelected(route),
+      tileColor: isCurrentRoute
+          ? Colors.white.withOpacity(0.1)
+          : Colors.transparent,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+    );
   }
 }

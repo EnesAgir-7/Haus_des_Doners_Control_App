@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/provider_auth.dart';
+import '../../routes/app_routes.dart';
 import '../../widgets/language_button.dart';
-import '../routes/admin_routes.dart';
 
 class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String currentRoute;
@@ -79,19 +79,15 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildNavLink(
-                        context,
-                        'Dashboard',
-                        AdminRouteNames.dashboard,
-                      ),
-                      _buildNavLink(context, 'Users', AdminRouteNames.users),
+                      _buildNavLink(context, 'Dashboard', RouteNames.admin),
+                      _buildNavLink(context, 'Users', RouteNames.adminUsers),
                       _buildNavLink(
                         context,
                         'Branches',
-                        AdminRouteNames.branches,
+                        RouteNames.adminBranches,
                       ),
-                      _buildNavLink(context, 'Fleet', AdminRouteNames.fleet),
-                      _buildNavLink(context, 'Tasks', AdminRouteNames.tasks),
+                      _buildNavLink(context, 'Fleet', RouteNames.adminFleet),
+                      _buildNavLink(context, 'Tasks', RouteNames.adminTasks),
                     ],
                   ),
                 ),

@@ -25,12 +25,26 @@ class AdminLayout extends StatelessWidget {
         },
       ),
       // Show side navigation for tablet
-      drawer: isTablet ? null : const AdminNavBar(),
+      drawer: isTablet
+          ? null
+          : AdminNavBar(
+              currentRoute: currentRoute,
+              onRouteSelected: (route) {
+                Navigator.pop(context); // Close drawer
+                Navigator.pushNamed(context, route);
+              },
+            ),
       body: SafeArea(
         child: Row(
           children: [
             // Show permanent side navigation for tablet
-            if (isTablet) const AdminNavBar(),
+            if (isTablet)
+              AdminNavBar(
+                currentRoute: currentRoute,
+                onRouteSelected: (route) {
+                  Navigator.pushNamed(context, route);
+                },
+              ),
 
             // Main content
             Expanded(
