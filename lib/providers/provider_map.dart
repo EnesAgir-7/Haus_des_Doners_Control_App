@@ -48,7 +48,11 @@ class BranchMapController extends ChangeNotifier {
         markerId: MarkerId(branch.id),
         position: LatLng(branch.gps.latitude, branch.gps.longitude),
         infoWindow: InfoWindow(title: branch.name, snippet: branch.address),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          branch.isAssigned
+              ? BitmapDescriptor.hueGreen
+              : BitmapDescriptor.hueRed,
+        ),
         onTap: () => selectBranch(branch, fromMarker: true),
       );
     }
