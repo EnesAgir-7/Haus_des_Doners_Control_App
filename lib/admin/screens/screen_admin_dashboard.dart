@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/widgets/statistic_card.dart';
 
-import '../layouts/admin_layout.dart';
-
 class AdminDashboard extends StatelessWidget {
   AdminDashboard({super.key});
 
@@ -43,35 +41,20 @@ class AdminDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AdminLayout(
-      title: 'Admin Dashboard',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.dashboard, color: Colors.lightBlueAccent),
-              const SizedBox(width: 6),
-              const Text(
-                "Admin Dashboard",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 12),
+        Expanded(
+          child: ListView.separated(
+            separatorBuilder: (context, index) => const SizedBox(height: 10),
+            itemCount: taskList.length,
+            itemBuilder: (context, index) {
+              return taskList[index];
+            },
           ),
-          const SizedBox(height: 12),
-          Container(height: 1, color: Colors.white24),
-          const SizedBox(height: 12),
-          Expanded(
-            child: ListView.separated(
-              separatorBuilder: (context, index) => const SizedBox(height: 10),
-              itemCount: taskList.length,
-              itemBuilder: (context, index) {
-                return taskList[index];
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -4,21 +4,13 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/provider_auth.dart';
-import '../../routes/app_routes.dart';
 import '../../widgets/language_button.dart';
 
 class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String currentRoute;
-  final Function(String) onRouteSelected;
-
-  const AdminAppBar({
-    super.key,
-    required this.currentRoute,
-    required this.onRouteSelected,
-  });
+  const AdminAppBar({super.key});
 
   @override
-  Size get preferredSize => const Size.fromHeight(120);
+  Size get preferredSize => const Size.fromHeight(70);
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +19,6 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: SafeArea(
         child: Column(
           children: [
-            // Top row with logo, language button, and logout button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -39,14 +30,6 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                       children: [
                         Image.asset(kAppLogo, height: 36),
                         const SizedBox(width: 12),
-                        const Text(
-                          'Admin Panel',
-                          style: TextStyle(
-                            color: AppColors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -66,54 +49,9 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ],
             ),
-
-            // Navigation row
-            Container(
-              width: MediaQuery.of(context).size.width,
-              color: AppColors.primaryDark,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildNavLink(context, 'Dashboard', RouteNames.admin),
-                      _buildNavLink(context, 'Users', RouteNames.adminUsers),
-                      _buildNavLink(
-                        context,
-                        'Branches',
-                        RouteNames.adminBranches,
-                      ),
-                      _buildNavLink(context, 'Fleet', RouteNames.adminFleet),
-                      _buildNavLink(context, 'Tasks', RouteNames.adminTasks),
-                    ],
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildNavLink(BuildContext context, String title, String route) {
-    final bool isCurrentRoute = currentRoute == route;
-
-    return TextButton(
-      onPressed: () => onRouteSelected(route),
-      style: TextButton.styleFrom(
-        backgroundColor: isCurrentRoute
-            ? AppColors.primaryRed
-            : Colors.transparent,
-        foregroundColor: AppColors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-        textStyle: const TextStyle(fontSize: 14),
-        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-      ),
-      child: Text(title),
     );
   }
 }
