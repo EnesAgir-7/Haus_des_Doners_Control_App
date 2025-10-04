@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../../data/dummy_branches.dart';
 import '../models/branch_model.dart';
 
 class BranchMapController extends ChangeNotifier {
@@ -11,10 +10,16 @@ class BranchMapController extends ChangeNotifier {
   BranchModel? _selectedBranch;
   BranchModel? get selectedBranch => _selectedBranch;
 
+  List<BranchModel> _branches = [];
+  List<BranchModel> get branches => _branches;
+
   final Map<String, Marker> markers = {};
 
-  BranchMapController() {
+  // Initialize with branches list
+  void initializeBranches(List<BranchModel> branches) {
+    _branches = branches;
     _initMarkers();
+    notifyListeners();
   }
 
   void setMapController(GoogleMapController controller) {
@@ -24,15 +29,21 @@ class BranchMapController extends ChangeNotifier {
 
   Future<void> _setMapStyle() async {
     if (mapController == null) return;
-    // you can load the map style here
-    final style = await rootBundle.loadString(
-      'assets/map_styles/dark_map.json',
-    );
-    mapController?.setMapStyle(style);
+    try {
+      // you can load the map style here
+      final style = await rootBundle.loadString(
+        'assets/map_styles/dark_map.json',
+      );
+      mapController?.setMapStyle(style);
+    } catch (e) {
+      // Handle error if map style file doesn't exist
+      debugPrint('Map style not found: $e');
+    }
   }
 
   void _initMarkers() {
-    for (var branch in dummyBranches) {
+    markers.clear();
+    for (var branch in _branches) {
       markers[branch.id] = Marker(
         markerId: MarkerId(branch.id),
         position: LatLng(branch.gps.latitude, branch.gps.longitude),
@@ -48,13 +59,16 @@ class BranchMapController extends ChangeNotifier {
     notifyListeners();
 
     mapController?.animateCamera(
-      CameraUpdate.newLatLngZoom(LatLng(branch.gps.latitude, branch.gps.longitude), 14),
+      CameraUpdate.newLatLngZoom(
+        LatLng(branch.gps.latitude, branch.gps.longitude),
+        14,
+      ),
     );
 
     mapController?.showMarkerInfoWindow(MarkerId(branch.id));
 
     if (fromMarker) {
-      final index = dummyBranches.indexOf(branch);
+      final index = _branches.indexWhere((b) => b.id == branch.id);
       if (index != -1) {
         pageController.animateToPage(
           index,
@@ -66,7 +80,16 @@ class BranchMapController extends ChangeNotifier {
   }
 
   void onPageChanged(int index) {
-    final branch = dummyBranches[index];
-    selectBranch(branch);
+    if (index < _branches.length) {
+      final branch = _branches[index];
+      selectBranch(branch);
+    }
+  }
+
+  @override
+  void dispose() {
+    mapController?.dispose();
+    pageController.dispose();
+    super.dispose();
   }
 }

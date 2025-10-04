@@ -9,6 +9,7 @@ class BranchModel {
   final String contactName;
   final String contactPhone;
   final String assignedInspectorId;
+  final bool isAssigned;
   final DateTime? lastInspectionDate;
   final double? lastInspectionScore;
   final int totalInspections;
@@ -17,15 +18,16 @@ class BranchModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  BranchModel( {
+  BranchModel({
     required this.id,
-    required this.templateId, 
+    required this.templateId,
     required this.name,
     required this.address,
     required this.gps,
     required this.contactName,
     required this.contactPhone,
     required this.assignedInspectorId,
+    required this.isAssigned,
     this.lastInspectionDate,
     this.lastInspectionScore,
     required this.totalInspections,
@@ -46,6 +48,7 @@ class BranchModel {
       contactName: data['contactName'] ?? '',
       contactPhone: data['contactPhone'] ?? '',
       assignedInspectorId: data['assignedInspectorId'] ?? '',
+      isAssigned: data['isAssigned'] ?? false,
       lastInspectionDate: data['lastInspectionDate'] != null
           ? (data['lastInspectionDate'] as Timestamp).toDate()
           : null,
@@ -55,7 +58,6 @@ class BranchModel {
       status: data['status'] ?? 'active',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-      
     );
   }
 
@@ -68,6 +70,7 @@ class BranchModel {
       'contactPhone': contactPhone,
       'templateId': templateId,
       'assignedInspectorId': assignedInspectorId,
+      'isAssigned': isAssigned,
       'lastInspectionDate': lastInspectionDate != null
           ? Timestamp.fromDate(lastInspectionDate!)
           : null,
@@ -77,7 +80,6 @@ class BranchModel {
       'status': status,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
-      
     };
   }
 

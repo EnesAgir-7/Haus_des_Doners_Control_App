@@ -19,6 +19,7 @@ final List<BranchModel> dummyBranches = [
     createdAt: DateTime.parse("2025-01-10T08:00:00Z"),
     updatedAt: DateTime.parse("2025-09-30T09:30:00Z"),
     templateId: 'standard_v1',
+    isAssigned: true,
   ),
   BranchModel(
     id: "branch_sisli",
@@ -36,6 +37,7 @@ final List<BranchModel> dummyBranches = [
     createdAt: DateTime.parse("2025-01-15T08:00:00Z"),
     updatedAt: DateTime.parse("2025-09-25T14:00:00Z"),
     templateId: 'standard_v1',
+    isAssigned: true,
   ),
   BranchModel(
     id: "branch_kadikoy",
@@ -53,6 +55,7 @@ final List<BranchModel> dummyBranches = [
     createdAt: DateTime.parse("2025-01-20T08:00:00Z"),
     updatedAt: DateTime.parse("2025-09-28T11:00:00Z"),
     templateId: 'standard_v1',
+    isAssigned: true,
   ),
   BranchModel(
     id: "branch_uskudar",
@@ -70,6 +73,7 @@ final List<BranchModel> dummyBranches = [
     createdAt: DateTime.parse("2025-02-01T08:00:00Z"),
     updatedAt: DateTime.parse("2025-09-27T10:00:00Z"),
     templateId: 'standard_v1',
+    isAssigned: true,
   ),
   BranchModel(
     id: "branch_bakirkoy",
@@ -87,6 +91,7 @@ final List<BranchModel> dummyBranches = [
     createdAt: DateTime.parse("2025-02-10T08:00:00Z"),
     updatedAt: DateTime.parse("2025-10-01T13:00:00Z"),
     templateId: 'standard_v1',
+    isAssigned: false,
   ),
   BranchModel(
     id: "branch_besiktas",
@@ -104,6 +109,7 @@ final List<BranchModel> dummyBranches = [
     createdAt: DateTime.parse("2025-02-15T08:00:00Z"),
     updatedAt: DateTime.parse("2025-09-26T15:00:00Z"),
     templateId: 'standard_v1',
+    isAssigned: false,
   ),
   BranchModel(
     id: "branch_taksim",
@@ -121,6 +127,7 @@ final List<BranchModel> dummyBranches = [
     createdAt: DateTime.parse("2025-03-01T08:00:00Z"),
     updatedAt: DateTime.parse("2025-09-24T12:00:00Z"),
     templateId: 'standard_v1',
+    isAssigned: false,
   ),
   BranchModel(
     id: "branch_galata",
@@ -138,5 +145,6 @@ final List<BranchModel> dummyBranches = [
     createdAt: DateTime.parse("2025-09-20T08:00:00Z"),
     updatedAt: DateTime.parse("2025-09-20T08:00:00Z"),
     templateId: 'standard_v1',
+    isAssigned: false,
   ),
 ];

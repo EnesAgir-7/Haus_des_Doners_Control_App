@@ -43,20 +43,6 @@ class BranchService {
         );
   }
 
-  // Get all branches (admin)
-  Future<List<BranchModel>> getAllBranches() async {
-    try {
-      final snapshot = await _db.collection(_collection).orderBy('name').get();
-
-      return snapshot.docs
-          .map((doc) => BranchModel.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      console('Error getting all branches: $e');
-      return [];
-    }
-  }
-
   // Stream all branches (admin, real-time)
   Stream<List<BranchModel>> streamAllBranches() {
     return _db
@@ -82,55 +68,6 @@ class BranchService {
     }
   }
 
-  // Create branch
-  Future<String> createBranch(BranchModel branch) async {
-    try {
-      final docRef = await _db.collection(_collection).add(branch.toMap());
-      return docRef.id;
-    } catch (e) {
-      console('Error creating branch: $e');
-      rethrow;
-    }
-  }
-
-  // Update branch
-  Future<void> updateBranch(String branchId, Map<String, dynamic> data) async {
-    try {
-      data['updatedAt'] = FieldValue.serverTimestamp();
-      await _db.collection(_collection).doc(branchId).update(data);
-    } catch (e) {
-      console('Error updating branch: $e');
-      rethrow;
-    }
-  }
-
-  // Delete branch
-  Future<void> deleteBranch(String branchId) async {
-    try {
-      await _db.collection(_collection).doc(branchId).delete();
-    } catch (e) {
-      console('Error deleting branch: $e');
-      rethrow;
-    }
-  }
-
-  // Assign branch to inspector
-  Future<void> assignBranchToInspector(
-    String branchId,
-    String inspectorId,
-  ) async {
-    try {
-      await _db.collection(_collection).doc(branchId).update({
-        'assignedInspectorId': inspectorId,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      console('Error assigning branch: $e');
-      rethrow;
-    }
-  }
-
-  /// Assign branch to inspector persistently (not date-specific)
   Future<void> assignBranchToHimself({
     required String inspectorId,
     required String inspectorName,
@@ -139,19 +76,17 @@ class BranchService {
     required String timeSlot,
   }) async {
     try {
-      // Check if inspector already has a route
-      final query = await _db
-          .collection(_collection)
-          .where('inspectorId', isEqualTo: inspectorId)
-          .limit(1)
-          .get();
+      final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
 
-      if (query.docs.isEmpty) {
-        // Create new route for inspector
-        final newRouteRef = _db.collection(_collectionRoutes).doc();
+      // 1. Check if a route document already exists for this inspector
+      final docSnap = await routeDocRef.get();
+
+      if (!docSnap.exists) {
+        console('No route found for inspector');
+        // 2. Create a new route document directly under inspectorId
         final route = RouteModel(
-          id: newRouteRef.id,
-          date: DateTime.now(), // can keep creation date
+          id: inspectorId,
+          date: DateTime.now(),
           inspectorId: inspectorId,
           inspectorName: inspectorName,
           stops: [
@@ -166,11 +101,12 @@ class BranchService {
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
         );
-        await newRouteRef.set(route.toMap());
+        await routeDocRef.set(route.toMap());
+        console('New route created for inspector');
       } else {
-        // Append stop to existing route
-        final doc = query.docs.first;
-        final route = RouteModel.fromFirestore(doc);
+        console('Route found for inspector');
+        // 3. Append stop to existing route
+        final route = RouteModel.fromFirestore(docSnap);
 
         final newStop = RouteStopModel(
           timeSlot: timeSlot,
@@ -182,13 +118,54 @@ class BranchService {
 
         final updatedStops = [...route.stops, newStop];
 
-        await doc.reference.update({
+        await routeDocRef.update({
           'stops': updatedStops.map((s) => s.toMap()).toList(),
           'updatedAt': Timestamp.fromDate(DateTime.now()),
         });
       }
+
+      // 4. Update branch to mark as assigned
+      await _db.collection('branches').doc(branchId).update({
+        'isAssigned': true,
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+
+      console('Branch assigned successfully');
     } catch (e) {
       print("Error assigning branch: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> removeBranchAssignment({
+    required String inspectorId,
+    required String branchId,
+  }) async {
+    try {
+      final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
+
+      final docSnap = await routeDocRef.get();
+      if (!docSnap.exists) return;
+
+      final route = RouteModel.fromFirestore(docSnap);
+      final updatedStops = route.stops
+          .where((s) => s.branchId != branchId)
+          .toList();
+
+      await routeDocRef.update({
+        'stops': updatedStops.map((s) => s.toMap()).toList(),
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+
+      // Mark branch as unassigned
+      await _db.collection('branches').doc(branchId).update({
+        'isAssigned': false,
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+
+      console('Branch unassigned successfully');
+    } catch (e) {
+      print("Error removing branch assignment: $e");
       rethrow;
     }
   }

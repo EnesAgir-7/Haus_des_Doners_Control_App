@@ -1,22 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:haus_des_control/providers/provider_branches.dart';
+import 'package:haus_des_control/widgets/custom_toast.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../data/dummy_branches.dart';
 import '../../models/branch_model.dart';
 import '../../providers/provider_map.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/custom_app_bar.dart';
 
-class BranchMapScreen extends StatelessWidget {
-  const BranchMapScreen({super.key});
+class BranchMapScreen extends StatefulWidget {
+  final List<BranchModel> branches;
+
+  const BranchMapScreen({super.key, required this.branches});
+
+  @override
+  State<BranchMapScreen> createState() => _BranchMapScreenState();
+}
+
+class _BranchMapScreenState extends State<BranchMapScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the controller with branches after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = context.read<BranchMapController>();
+      controller.initializeBranches(widget.branches);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<BranchMapController>(
       builder: (context, controller, _) {
+        // Show loading or empty state if no branches
+        if (controller.branches.isEmpty) {
+          return Scaffold(
+            appBar: CustomAppBar(showLogout: false, showLang: false),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
+
         return Scaffold(
           appBar: CustomAppBar(showLogout: false, showLang: false),
           body: Stack(
@@ -24,8 +49,8 @@ class BranchMapScreen extends StatelessWidget {
               GoogleMap(
                 initialCameraPosition: CameraPosition(
                   target: LatLng(
-                    dummyBranches[0].gps.latitude,
-                    dummyBranches[0].gps.longitude,
+                    controller.branches[0].gps.latitude,
+                    controller.branches[0].gps.longitude,
                   ),
                   zoom: 14,
                 ),
@@ -42,11 +67,11 @@ class BranchMapScreen extends StatelessWidget {
                 height: 160,
                 child: PageView.builder(
                   controller: controller.pageController,
-                  itemCount: dummyBranches.length,
+                  itemCount: controller.branches.length,
                   physics: const BouncingScrollPhysics(),
                   onPageChanged: controller.onPageChanged,
                   itemBuilder: (context, index) {
-                    final branch = dummyBranches[index];
+                    final branch = controller.branches[index];
                     return _branchCard(branch);
                   },
                 ),
@@ -73,14 +98,22 @@ class BranchMapScreen extends StatelessWidget {
             Expanded(
               child: Row(
                 children: [
-                  // Image.network(
-                  //   branch.imageUrl ?? '',
-                  //   width: 60,
-                  //   height: 60,
-                  //   fit: BoxFit.cover,
-                  //   errorBuilder: (_, __, ___) =>
-                  //       Icon(Icons.apartment, size: 50, color: Colors.white24),
-                  // ),
+                  // Uncomment to show branch image
+                  // if (branch.imageUrl != null && branch.imageUrl!.isNotEmpty)
+                  //   ClipRRect(
+                  //     borderRadius: BorderRadius.circular(8),
+                  //     child: Image.network(
+                  //       branch.imageUrl!,
+                  //       width: 60,
+                  //       height: 60,
+                  //       fit: BoxFit.cover,
+                  //       errorBuilder: (_, __, ___) => const Icon(
+                  //         Icons.apartment,
+                  //         size: 50,
+                  //         color: Colors.white24,
+                  //       ),
+                  //     ),
+                  //   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
@@ -117,26 +150,39 @@ class BranchMapScreen extends StatelessWidget {
               child: SizedBox(
                 height: 40,
                 child: Row(
-                  spacing: 10,
                   children: [
                     Expanded(
                       child: Consumer<ProviderBranches>(
                         builder: (context, branchContr, child) {
                           return AppButton(
                             isLoading: branchContr.isLoading,
-                            text: "Assign to Me",
+                            text: branch.isAssigned
+                                ? "Un Assign"
+                                : "Assign to Me",
                             onPressed: () {
-                              branchContr.assignBranchTome(
-                                branchId: branch.id,
-                                branchName: branch.name,
-                                timeSlot: "9 to 5",
-                                context: context,
-                              );
+                              if (branch.isAssigned) {
+                                branchContr.unAssignBranchToMe(
+                                  branchId: branch.id,
+                                  context: context,
+                                );
+                                showSnakBarr(context, "UnAssign the branch");
+                              } else {
+                                branchContr.assignBranchToMe(
+                                  branchId: branch.id,
+                                  branchName: branch.name,
+                                  timeSlot: "9 to 5",
+                                  context: context,
+                                );
+                              }
                             },
-                            backgroundColor: AppColors.amber,
-                            textStyle: const TextStyle(
+                            backgroundColor: branch.isAssigned
+                                ? AppColors.primaryRed
+                                : AppColors.amber,
+                            textStyle: TextStyle(
                               fontSize: 11,
-                              color: AppColors.primaryDark,
+                              color: branch.isAssigned
+                                  ? Colors.white
+                                  : AppColors.primaryDark,
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 8),
                             borderRadius: 10,
@@ -144,10 +190,13 @@ class BranchMapScreen extends StatelessWidget {
                         },
                       ),
                     ),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: AppButton(
                         text: "Submit Inspection",
-                        onPressed: () {},
+                        onPressed: () {
+                          // TODO: Implement inspection submission
+                        },
                         backgroundColor: AppColors.primaryRed,
                         textStyle: const TextStyle(fontSize: 11),
                         padding: const EdgeInsets.symmetric(vertical: 8),

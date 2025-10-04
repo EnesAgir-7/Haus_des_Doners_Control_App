@@ -1,7 +1,8 @@
 // lib/providers/subsidiaries_provider.dart
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:haus_des_control/widgets/custom_toast.dart';
+
 import '../firebase_services/firebase_branch_service.dart';
 import '../firebase_services/firebase_inspection_service.dart';
 import '../models/branch_model.dart';
@@ -159,7 +160,7 @@ class ProviderBranches extends ChangeNotifier {
     return filtered;
   }
 
-  Future<void> assignBranchTome({
+  Future<void> assignBranchToMe({
     required String branchId,
     required String branchName,
     required String timeSlot,
@@ -176,6 +177,31 @@ class ProviderBranches extends ChangeNotifier {
         branchId: branchId,
         branchName: branchName,
         timeSlot: timeSlot,
+      );
+
+      _isLoading = false;
+      notifyListeners();
+
+      showSnakBarr(context, "Branch assigned successfully");
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      showSnakBarr(context, "Failed to assign branch");
+    }
+  }
+
+  Future<void> unAssignBranchToMe({
+    required String branchId,
+    required BuildContext context, 
+  }) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+
+      await _branchService.removeBranchAssignment(
+        inspectorId: userId!,
+        branchId: branchId,
       );
 
       _isLoading = false;

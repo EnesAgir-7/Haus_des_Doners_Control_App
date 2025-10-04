@@ -32,9 +32,13 @@ class _BranchesPageState extends State<BranchesPage> {
       floatingActionButton: FloatingActionButton(
         heroTag: "branchesFab",
         onPressed: () {
-          Navigator.of(
-            context,
-          ).push(MaterialPageRoute(builder: (context) => BranchMapScreen()));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => BranchMapScreen(
+                branches: context.read<ProviderBranches>().branches,
+              ),
+            ),
+          );
         },
         child: Icon(Icons.map, size: 36),
       ),

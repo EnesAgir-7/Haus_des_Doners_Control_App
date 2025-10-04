@@ -8,24 +8,18 @@ class RouteService {
   final String _collection = 'routes';
 
   // Get today's route for inspectorimport 'package:cloud_firestore/cloud_firestore.dart'; // Make sure you have this import
-
   Future<RouteModel?> getTodaysRoute(String userId) async {
     try {
-      final snapshot = await _db
-          .collection('routes')
-          .doc(userId)
-          .collection('routes') // subcollection inside the userId document
-          .limit(1) // only one route
-          .get();
+      final docSnap = await _db.collection('routes').doc(userId).get();
 
-      if (snapshot.docs.isEmpty) {
+      if (!docSnap.exists) {
         print("No route found for user $userId.");
         return null;
       }
 
-      return RouteModel.fromFirestore(snapshot.docs.first);
+      return RouteModel.fromFirestore(docSnap);
     } catch (e) {
-      print('Error fetching today\'s route for user $userId: $e');
+      print("Error fetching today's route for user $userId: $e");
       return null;
     }
   }
