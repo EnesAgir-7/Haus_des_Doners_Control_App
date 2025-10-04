@@ -120,5 +120,13 @@
   "vehicle_assigned_success": "Vehicle assigned successfully",
   "vehicle_assign_error": "Error assigning vehicle: {error}",
   "vehicle_unassign_success": "Vehicle unassignment successful",
-  "vehicle_unassign_error": "Error unassigning vehicle: {error}"
+  "vehicle_unassign_error": "Error unassigning vehicle: {error}", 
+  "monthly_progress": "Monthly Progress",
+  "branches_checked": "branches checked",
+  "no_route_today": "No route planned for today",
+  "current_location": "Current Location",
+  "score": "Score",
+  "view_all_route": "View All Route",
+  "stops": "stops", 
+  "your_route_plan": "Your Route Plan"
 }

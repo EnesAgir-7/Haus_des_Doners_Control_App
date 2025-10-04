@@ -120,5 +120,13 @@
   "vehicle_assigned_success": "Fahrzeug erfolgreich zugewiesen",
   "vehicle_assign_error": "Fehler beim Zuweisen des Fahrzeugs: {error}",
   "vehicle_unassign_success": "Fahrzeugzuweisung erfolgreich entfernt",
-  "vehicle_unassign_error": "Fehler beim Entfernen der Fahrzeugzuweisung: {error}"
+  "vehicle_unassign_error": "Fehler beim Entfernen der Fahrzeugzuweisung: {error}",
+  "monthly_progress": "Monatlicher Fortschritt",
+  "branches_checked": "Filialen überprüft",
+  "no_route_today": "Heute ist keine Route geplant",
+  "current_location": "Aktueller Standort",
+  "score": "Bewertung",
+  "view_all_route": "Gesamte Route anzeigen",
+  "stops": "Stopps",
+  "your_route_plan": "Ihr Routenplaner"
 }

@@ -20,7 +20,6 @@ class _PanelPageState extends State<PanelPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Initialize both providers
       context.read<ProviderPanel>().initialize();
       context.read<ProviderRoute>().initialize();
     });
@@ -56,7 +55,7 @@ class _PanelPageState extends State<PanelPage> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      'Hata oluştu',
+                      LocaleKeys.error_occurred.tr(),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -78,7 +77,7 @@ class _PanelPageState extends State<PanelPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryRed,
                       ),
-                      child: Text('Tekrar Dene'),
+                      child: Text(LocaleKeys.try_again.tr()),
                     ),
                   ],
                 ),
@@ -89,12 +88,10 @@ class _PanelPageState extends State<PanelPage> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   DashboardCard(provider: panelProvider),
                   const SizedBox(height: 16),
-                  DailySummarySection(),
+                  const DailySummarySection(),
                 ],
               ),
             );
@@ -176,7 +173,6 @@ class DashboardCard extends StatelessWidget {
             ],
           ),
 
-          // Progress indicator
           if (stats != null) ...[
             const SizedBox(height: 16),
             Container(
@@ -192,7 +188,7 @@ class DashboardCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Aylık İlerleme',
+                        LocaleKeys.monthly_progress.tr(),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 13,
@@ -223,7 +219,7 @@ class DashboardCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${provider.completedInspections} / ${provider.totalBranches} şube kontrol edildi',
+                    '${provider.completedInspections} / ${provider.totalBranches} ${LocaleKeys.branches_checked.tr()}',
                     style: TextStyle(color: Colors.white70, fontSize: 11),
                   ),
                 ],
@@ -303,7 +299,7 @@ class DailySummarySection extends StatelessWidget {
                   const Icon(Icons.insert_chart),
                   const SizedBox(width: 6),
                   Text(
-                    LocaleKeys.daily_summary.tr(),
+                    LocaleKeys.your_route_plan.tr(),
                     style: const TextStyle(
                       color: AppColors.primaryRed,
                       fontWeight: FontWeight.bold,
@@ -330,7 +326,7 @@ class DailySummarySection extends StatelessWidget {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'Bugün için rota planlanmamış',
+                        LocaleKeys.no_route_today.tr(),
                         style: TextStyle(color: Colors.white70, fontSize: 14),
                       ),
                     ],
@@ -341,7 +337,6 @@ class DailySummarySection extends StatelessWidget {
           );
         }
 
-        // Show today's route stops
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -377,7 +372,6 @@ class DailySummarySection extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Show first 5 stops or all if less
             ...stops.take(5).map((stop) {
               Color statusColor;
               String statusText;
@@ -389,7 +383,7 @@ class DailySummarySection extends StatelessWidget {
                 statusIcon = Icons.check_box;
               } else if (stop.isCurrent) {
                 statusColor = Colors.blue;
-                statusText = 'Şu anki konum';
+                statusText = LocaleKeys.current_location.tr();
                 statusIcon = Icons.my_location;
               } else {
                 statusColor = Colors.amber;
@@ -405,7 +399,7 @@ class DailySummarySection extends StatelessWidget {
                   status: statusText,
                   statusColor: statusColor,
                   subtitle: stop.isCompleted
-                      ? "Puan: ${stop.inspectionId != null ? '9.0' : '-'}"
+                      ? "${LocaleKeys.score.tr()}: ${stop.inspectionId != null ? '9.0' : '-'}"
                       : "",
                   icon: statusIcon,
                 ),
@@ -416,17 +410,14 @@ class DailySummarySection extends StatelessWidget {
               const SizedBox(height: 8),
               Center(
                 child: TextButton.icon(
-                  onPressed: () {
-                    // Navigate to Route screen
-                    // You can implement this navigation
-                  },
+                  onPressed: () {},
                   icon: Icon(
                     Icons.route,
                     size: 16,
                     color: AppColors.primaryRed,
                   ),
                   label: Text(
-                    'Tüm rotayı gör (${stops.length} durak)',
+                    "${LocaleKeys.view_all_route.tr()} (${stops.length} ${LocaleKeys.stops.tr()})",
                     style: TextStyle(
                       color: AppColors.primaryRed,
                       fontSize: 13,
@@ -442,6 +433,7 @@ class DailySummarySection extends StatelessWidget {
     );
   }
 }
+
 // class PanelPage extends StatelessWidget {
 //   const PanelPage({super.key});
 

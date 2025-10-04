@@ -11,7 +11,6 @@ import 'package:haus_des_control/providers/provider_tasks.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 
-import 'admin/screens/screen_admin_dashboard.dart';
 import 'core/theme/app_theme.dart';
 import 'layouts/bottom_nav_bar.dart';
 import 'providers/provider_branches.dart';

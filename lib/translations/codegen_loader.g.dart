@@ -136,7 +136,15 @@ class CodegenLoader extends AssetLoader{
   "vehicle_assigned_success": "Fahrzeug erfolgreich zugewiesen",
   "vehicle_assign_error": "Fehler beim Zuweisen des Fahrzeugs: {error}",
   "vehicle_unassign_success": "Fahrzeugzuweisung erfolgreich entfernt",
-  "vehicle_unassign_error": "Fehler beim Entfernen der Fahrzeugzuweisung: {error}"
+  "vehicle_unassign_error": "Fehler beim Entfernen der Fahrzeugzuweisung: {error}",
+  "monthly_progress": "Monatlicher Fortschritt",
+  "branches_checked": "Filialen überprüft",
+  "no_route_today": "Heute ist keine Route geplant",
+  "current_location": "Aktueller Standort",
+  "score": "Bewertung",
+  "view_all_route": "Gesamte Route anzeigen",
+  "stops": "Stopps",
+  "your_route_plan": "Ihr Routenplaner"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Panel",
@@ -260,7 +268,15 @@ static const Map<String,dynamic> _en = {
   "vehicle_assigned_success": "Vehicle assigned successfully",
   "vehicle_assign_error": "Error assigning vehicle: {error}",
   "vehicle_unassign_success": "Vehicle unassignment successful",
-  "vehicle_unassign_error": "Error unassigning vehicle: {error}"
+  "vehicle_unassign_error": "Error unassigning vehicle: {error}",
+  "monthly_progress": "Monthly Progress",
+  "branches_checked": "branches checked",
+  "no_route_today": "No route planned for today",
+  "current_location": "Current Location",
+  "score": "Score",
+  "view_all_route": "View All Route",
+  "stops": "stops",
+  "your_route_plan": "Your Route Plan"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -384,7 +400,15 @@ static const Map<String,dynamic> _tr = {
   "vehicle_assigned_success": "Araç başarıyla atandı",
   "vehicle_assign_error": "Araç atanırken hata oluştu: {error}",
   "vehicle_unassign_success": "Araç ataması kaldırıldı",
-  "vehicle_unassign_error": "Araç ataması kaldırılırken hata oluştu: {error}"
+  "vehicle_unassign_error": "Araç ataması kaldırılırken hata oluştu: {error}",
+  "monthly_progress": "Aylık İlerleme",
+  "branches_checked": "şube kontrol edildi",
+  "no_route_today": "Bugün için rota planlanmamış",
+  "current_location": "Şu anki konum",
+  "score": "Puan",
+  "view_all_route": "Tüm rotayı gör",
+  "stops": "durak",
+  "your_route_plan": "Rota Planınız"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

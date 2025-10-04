@@ -125,5 +125,13 @@ abstract class  LocaleKeys {
   static const vehicle_assign_error = 'vehicle_assign_error';
   static const vehicle_unassign_success = 'vehicle_unassign_success';
   static const vehicle_unassign_error = 'vehicle_unassign_error';
+  static const monthly_progress = 'monthly_progress';
+  static const branches_checked = 'branches_checked';
+  static const no_route_today = 'no_route_today';
+  static const current_location = 'current_location';
+  static const score = 'score';
+  static const view_all_route = 'view_all_route';
+  static const stops = 'stops';
+  static const your_route_plan = 'your_route_plan';
 
 }

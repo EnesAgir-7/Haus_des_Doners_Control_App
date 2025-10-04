@@ -120,5 +120,13 @@
   "vehicle_assigned_success": "Araç başarıyla atandı",
   "vehicle_assign_error": "Araç atanırken hata oluştu: {error}",
   "vehicle_unassign_success": "Araç ataması kaldırıldı",
-  "vehicle_unassign_error": "Araç ataması kaldırılırken hata oluştu: {error}"
+  "vehicle_unassign_error": "Araç ataması kaldırılırken hata oluştu: {error}",
+  "monthly_progress": "Aylık İlerleme",
+  "branches_checked": "şube kontrol edildi",
+  "no_route_today": "Bugün için rota planlanmamış",
+  "current_location": "Şu anki konum",
+  "score": "Puan",
+  "view_all_route": "Tüm rotayı gör",
+  "stops": "durak",
+  "your_route_plan": "Rota Planınız"
 }
