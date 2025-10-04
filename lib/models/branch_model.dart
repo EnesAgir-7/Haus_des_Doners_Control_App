@@ -8,8 +8,8 @@ class BranchModel {
   final GeoPoint gps;
   final String contactName;
   final String contactPhone;
-  final String assignedInspectorId;
-  final bool isAssigned;
+  final AssignedInspector? assignedInspector;
+  final bool isRouteAssigned;
   final DateTime? lastInspectionDate;
   final double? lastInspectionScore;
   final int totalInspections;
@@ -26,8 +26,8 @@ class BranchModel {
     required this.gps,
     required this.contactName,
     required this.contactPhone,
-    required this.assignedInspectorId,
-    required this.isAssigned,
+    this.assignedInspector,
+    required this.isRouteAssigned,
     this.lastInspectionDate,
     this.lastInspectionScore,
     required this.totalInspections,
@@ -47,8 +47,13 @@ class BranchModel {
       gps: data['gps'] as GeoPoint,
       contactName: data['contactName'] ?? '',
       contactPhone: data['contactPhone'] ?? '',
-      assignedInspectorId: data['assignedInspectorId'] ?? '',
-      isAssigned: data['isAssigned'] ?? false,
+      assignedInspector: data['assignedInspector'] != null
+          ? AssignedInspector(
+              id: data['assignedInspector']['id'] ?? '',
+              name: data['assignedInspector']['name'] ?? '',
+            )
+          : null,
+      isRouteAssigned: data['isAssigned'] ?? false,
       lastInspectionDate: data['lastInspectionDate'] != null
           ? (data['lastInspectionDate'] as Timestamp).toDate()
           : null,
@@ -69,8 +74,11 @@ class BranchModel {
       'contactName': contactName,
       'contactPhone': contactPhone,
       'templateId': templateId,
-      'assignedInspectorId': assignedInspectorId,
-      'isAssigned': isAssigned,
+      'assignedInspector': {
+        'id': assignedInspector?.id,
+        'name': assignedInspector?.name,
+      },
+      'isAssigned': isRouteAssigned,
       'lastInspectionDate': lastInspectionDate != null
           ? Timestamp.fromDate(lastInspectionDate!)
           : null,
@@ -98,5 +106,16 @@ class BranchModel {
     if (days < 7) return '$days gün önce';
     if (days < 30) return '${(days / 7).floor()} hafta önce';
     return '${(days / 30).floor()} ay önce';
+  }
+}
+
+class AssignedInspector {
+  final String id;
+  final String name;
+
+  AssignedInspector({required this.id, required this.name});
+
+  factory AssignedInspector.fromMap(Map<String, dynamic> map) {
+    return AssignedInspector(id: map['id'] ?? '', name: map['name'] ?? '');
   }
 }

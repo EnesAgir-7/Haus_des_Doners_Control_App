@@ -156,11 +156,11 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                         builder: (context, branchContr, child) {
                           return AppButton(
                             isLoading: branchContr.isLoading,
-                            text: branch.isAssigned
+                            text: branch.isRouteAssigned
                                 ? "Un Assign"
                                 : "Assign to Me",
                             onPressed: () async {
-                              if (branch.isAssigned) {
+                              if (branch.isRouteAssigned) {
                                 branchContr.unAssignBranchToMe(
                                   branchId: branch.id,
                                   context: context,
@@ -195,12 +195,12 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                 }
                               }
                             },
-                            backgroundColor: branch.isAssigned
+                            backgroundColor: branch.isRouteAssigned
                                 ? AppColors.primaryRed
                                 : AppColors.amber,
                             textStyle: TextStyle(
                               fontSize: 11,
-                              color: branch.isAssigned
+                              color: branch.isRouteAssigned
                                   ? Colors.white
                                   : AppColors.primaryDark,
                             ),

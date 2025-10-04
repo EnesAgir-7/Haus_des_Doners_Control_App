@@ -1,3 +1,5 @@
+import '../../models/user_model.dart';
+
 class Collections {
   static const String branches = 'branches';
   static const String inspectionTemplates = 'inspectionTemplates';
@@ -16,3 +18,5 @@ class AppConstants {
   static const current = "current";
   static const inProgress = "in_progress";
 }
+
+ UserModel? loggedInUser;

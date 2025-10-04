@@ -80,7 +80,9 @@ class RouteStopModel {
       status: data['status'] ?? 'pending',
       inspectionId: data['inspectionId'],
       order: data['order'] ?? 0,
-      createdAt: data["createdAt"] ?? DateTime.now(),
+      createdAt: data["createdAt"] != null
+          ? DateTime.parse(data["createdAt"].toDate().toIso8601String())
+          : DateTime.now(),
     );
   }
 

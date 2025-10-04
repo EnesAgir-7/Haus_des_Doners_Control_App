@@ -49,7 +49,7 @@ class BranchMapController extends ChangeNotifier {
         position: LatLng(branch.gps.latitude, branch.gps.longitude),
         infoWindow: InfoWindow(title: branch.name, snippet: branch.address),
         icon: BitmapDescriptor.defaultMarkerWithHue(
-          branch.isAssigned
+          branch.isRouteAssigned
               ? BitmapDescriptor.hueGreen
               : BitmapDescriptor.hueRed,
         ),

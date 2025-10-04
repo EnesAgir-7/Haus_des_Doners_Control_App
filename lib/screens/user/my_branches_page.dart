@@ -258,6 +258,7 @@ class _BranchesPageState extends State<BranchesPage> {
     if (provider.branches.isEmpty) {
       return Center(
         child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -290,6 +291,7 @@ class _BranchesPageState extends State<BranchesPage> {
       color: AppColors.primaryRed,
       backgroundColor: AppColors.lightBlack,
       child: ListView.builder(
+        physics: AlwaysScrollableScrollPhysics(),
         itemCount: provider.branches.length,
         itemBuilder: (context, index) {
           final branchModel = provider.branches[index];

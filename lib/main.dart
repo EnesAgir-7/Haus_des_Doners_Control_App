@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:haus_des_control/admin/layouts/admin_bottom_nav_bar.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/firebase_options.dart';
 import 'package:haus_des_control/providers/provider_auth.dart';
 import 'package:haus_des_control/providers/provider_fleet.dart';
@@ -115,6 +116,7 @@ class AuthWrapper extends StatelessWidget {
         }
 
         final user = providerAuth.userModel;
+        loggedInUser = user;
         if (user != null) {
           return user.isAdmin ? AdminBottomNavBar() : ScreenBottomNavBar();
         }

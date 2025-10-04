@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -15,7 +16,6 @@ import '../firebase_services/firebase_inspection_service.dart';
 import '../models/branch_model.dart';
 import '../models/inspection_model.dart';
 import '../models/inspection_template_model.dart';
-import '../models/user_model.dart';
 import '../screens/user/pdf_preview.dart';
 import '../widgets/custom_toast.dart';
 
@@ -26,7 +26,6 @@ class ProviderControl extends ChangeNotifier {
 
   // State
   BranchModel? _selectedBranch;
-  UserModel? _currentUser;
   InspectionTemplate? selectedTemplate;
 
   Map<String, int> _scores = {};
@@ -49,7 +48,6 @@ class ProviderControl extends ChangeNotifier {
 
   // Getters
   BranchModel? get selectedBranch => _selectedBranch;
-  UserModel? get currentUser => _currentUser;
 
   String get overallNotes => _overallNotes;
 
@@ -263,7 +261,7 @@ class ProviderControl extends ChangeNotifier {
         branchId: _selectedBranch!.id,
         branchName: _selectedBranch!.name,
         inspectorId: userId,
-        inspectorName: _currentUser?.name ?? '',
+        inspectorName: loggedInUser!.name,
         scheduledTime: now,
         completedTime: now,
         status: 'completed',
@@ -545,7 +543,7 @@ class ProviderControl extends ChangeNotifier {
               ),
               pw.SizedBox(height: 4),
               pw.Text(
-                _currentUser?.name ?? 'N/A',
+                loggedInUser!.name,
                 style: pw.TextStyle(
                   fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
