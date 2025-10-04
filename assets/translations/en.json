@@ -143,5 +143,17 @@
   "submit_inspection_question": "Submit Inspection?",
   "submit_inspection_warning": "Are you sure you want to submit this inspection? This action cannot be undone.",
   "submit": "Submit",
-  "inspection_submitted": "Inspection submitted successfully!"
+  "inspection_submitted": "Inspection submitted successfully!",
+  "assign_to_me": "Assign to Me",
+  "unassign": "Unassign",
+  "assigned_at": "Assigned at", 
+  "signatures": "Signatures",
+  "inspector_signature": "Inspector Signature",
+  "your_signature": "Your signature",
+  "branch_representative": "Branch Representative",
+  "branch_manager_signature": "Branch manager signature",
+  "sign_here": "Sign here with your finger",
+  "save_signature": "Save Signature",
+  "please_sign_first": "Please sign first",
+  "clear": "Clear"
 }

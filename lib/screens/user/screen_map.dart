@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:haus_des_control/providers/provider_branches.dart';
@@ -158,19 +159,40 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                             text: branch.isAssigned
                                 ? "Un Assign"
                                 : "Assign to Me",
-                            onPressed: () {
+                            onPressed: () async {
                               if (branch.isAssigned) {
                                 branchContr.unAssignBranchToMe(
                                   branchId: branch.id,
                                   context: context,
                                 );
                               } else {
-                                branchContr.assignBranchToMe(
-                                  branchId: branch.id,
-                                  branchName: branch.name,
-                                  timeSlot: "9 to 5",
-                                  context: context,
-                                );
+                                // show date picker before assigning
+                                final DateTime? pickedDate =
+                                    await showDatePicker(
+                                      locale: context.locale,
+                                      context: context,
+                                      initialDate: DateTime.now(),
+                                      firstDate: DateTime.now(),
+                                      lastDate: DateTime.now().add(
+                                        const Duration(days: 365),
+                                      ),
+                                    );
+
+                                if (pickedDate != null) {
+                                  // format the slot however you want
+                                  final String timeSlot =
+                                      //  Timestamp.fromDate(
+                                      //   pickedDate,
+                                      // );
+                                      "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+
+                                  branchContr.assignBranchToMe(
+                                    branchId: branch.id,
+                                    branchName: branch.name,
+                                    timeSlot: timeSlot,
+                                    context: context,
+                                  );
+                                }
                               }
                             },
                             backgroundColor: branch.isAssigned
@@ -192,8 +214,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                     Expanded(
                       child: AppButton(
                         text: "Submit Inspection",
-                        onPressed: () {
-                        },
+                        onPressed: () {},
                         backgroundColor: AppColors.primaryRed,
                         textStyle: const TextStyle(fontSize: 11),
                         padding: const EdgeInsets.symmetric(vertical: 8),

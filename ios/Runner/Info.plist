@@ -54,6 +54,20 @@
 	<string>en</string>
 	<string>tr</string>
 	<string>de</string>
+
+
+	<key>NSPhotoLibraryUsageDescription</key>
+    <string>We need access to save inspection reports to your photo library</string>
+    
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>We need permission to save PDF reports to your photo library</string>
+    
+    <key>UIFileSharingEnabled</key>
+    <true/>
+    
+    <key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
+
 </array>
 </dict>
 </plist>

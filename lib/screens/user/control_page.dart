@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:haus_des_control/providers/provider_branches.dart';
 import 'package:haus_des_control/widgets/custom_toast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:signature/signature.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../models/branch_model.dart';
@@ -78,10 +80,15 @@ class _ControlPageState extends State<ControlPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        backgroundColor: AppColors.lightBlack,
-        title: Text(
-          _selectedBranch?.name ?? LocaleKeys.branch_inspection.tr(),
-          style: TextStyle(color: Colors.white, fontSize: 16),
+        title: ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(
+            _selectedBranch?.name ?? LocaleKeys.branch_inspection.tr(),
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          subtitle: Text(
+            _selectedBranch?.address ?? LocaleKeys.branch_inspection.tr(),
+          ),
         ),
       ),
       body: Consumer<ProviderControl>(
@@ -104,8 +111,8 @@ class _ControlPageState extends State<ControlPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Branch Info Card
-                    _buildBranchInfoCard(),
-                    SizedBox(height: 16),
+                    // _buildBranchInfoCard(),
+                    // SizedBox(height: 16),
                     if (template != null)
                       ...template.categories.map((category) {
                         return _buildQuestionCard(
@@ -133,24 +140,61 @@ class _ControlPageState extends State<ControlPage> {
                     else
                       Text(LocaleKeys.no_template.tr()),
 
-                    SizedBox(height: 16),
                     _buildOverallNotesSection(provider),
 
+                    // SizedBox(height: 16),
+
+                    // if (provider.totalScore > 0) _buildScorePreview(provider),
                     SizedBox(height: 16),
-
-                    if (provider.totalScore > 0) _buildScorePreview(provider),
-
+                    _buildSignatureSection(provider),
                     SizedBox(height: 24),
-                    AppButton(
-                      text: LocaleKeys.submit_inspection.tr(),
-                      icon: Icons.check_circle,
-                      onPressed: provider.isFormValid
-                          ? () => _submitInspection(provider)
-                          : null,
-                      backgroundColor: provider.isFormValid
-                          ? AppColors.primaryRed
-                          : Colors.grey,
-                      height: 52,
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: AppButton(
+                            text: "Preview PDF",
+                            icon: Icons.preview,
+                            onPressed:
+                                (provider.isFormValid &&
+                                    provider.hasAllSignatures)
+                                ? () => provider.previewPDF(context)
+                                : null,
+                            backgroundColor:
+                                (provider.isFormValid &&
+                                    provider.hasAllSignatures)
+                                ? AppColors.amber
+                                : Colors.grey,
+                            textStyle: TextStyle(
+                              fontSize: 16,
+                              color:
+                                  (provider.isFormValid &&
+                                      provider.hasAllSignatures)
+                                  ? AppColors.primaryDark
+                                  : AppColors.white,
+                            ),
+                            height: 52,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: AppButton(
+                            text: LocaleKeys.submit_inspection.tr(),
+                            icon: Icons.check_circle,
+                            onPressed:
+                                (provider.isFormValid &&
+                                    provider.hasAllSignatures)
+                                ? () => _submitInspection(provider)
+                                : null,
+                            backgroundColor:
+                                (provider.isFormValid &&
+                                    provider.hasAllSignatures)
+                                ? AppColors.primaryRed
+                                : Colors.grey,
+                            height: 52,
+                          ),
+                        ),
+                      ],
                     ),
 
                     SizedBox(height: 32),
@@ -214,42 +258,42 @@ class _ControlPageState extends State<ControlPage> {
     );
   }
 
-  Widget _buildBranchInfoCard() {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryRed),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.location_on, color: AppColors.primaryRed, size: 20),
-              SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  _selectedBranch!.name,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Text(
-            _selectedBranch!.address,
-            style: TextStyle(color: Colors.white70, fontSize: 13),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildBranchInfoCard() {
+  //   return Container(
+  //     padding: EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: AppColors.lightBlack,
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(color: AppColors.primaryRed),
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           children: [
+  //             Icon(Icons.location_on, color: AppColors.primaryRed, size: 20),
+  //             SizedBox(width: 8),
+  //             Expanded(
+  //               child: Text(
+  //                 _selectedBranch!.name,
+  //                 style: TextStyle(
+  //                   color: Colors.white,
+  //                   fontSize: 16,
+  //                   fontWeight: FontWeight.bold,
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         SizedBox(height: 8),
+  //         Text(
+  //           _selectedBranch!.address,
+  //           style: TextStyle(color: Colors.white70, fontSize: 13),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildQuestionCard({
     required String title,
@@ -266,7 +310,7 @@ class _ControlPageState extends State<ControlPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: AppColors.whiteWithOpacity(0.1),
+        color: AppColors.white.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: score > 0
@@ -401,6 +445,7 @@ class _ControlPageState extends State<ControlPage> {
               children: [
                 AppButton(
                   text: '${LocaleKeys.take_photo.tr()} (${photos.length}/4)',
+                  textStyle: TextStyle(fontSize: 14),
                   icon: Icons.camera_alt,
                   onPressed: photos.length < 4
                       ? () => _takePhoto(category)
@@ -507,40 +552,40 @@ class _ControlPageState extends State<ControlPage> {
     );
   }
 
-  Widget _buildScorePreview(ProviderControl provider) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryRed.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryRed),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                LocaleKeys.total_score.tr(),
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-              SizedBox(height: 4),
-              Text(
-                provider.totalScore.toStringAsFixed(1),
-                style: TextStyle(
-                  color: AppColors.primaryRed,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          Icon(Icons.star, size: 48, color: AppColors.primaryRed),
-        ],
-      ),
-    );
-  }
+  // Widget _buildScorePreview(ProviderControl provider) {
+  //   return Container(
+  //     padding: EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: AppColors.primaryRed.withValues(alpha: 0.15),
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(color: AppColors.primaryRed),
+  //     ),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             Text(
+  //               LocaleKeys.total_score.tr(),
+  //               style: TextStyle(color: Colors.white70, fontSize: 14),
+  //             ),
+  //             SizedBox(height: 4),
+  //             Text(
+  //               provider.totalScore.toStringAsFixed(1),
+  //               style: TextStyle(
+  //                 color: AppColors.primaryRed,
+  //                 fontSize: 32,
+  //                 fontWeight: FontWeight.bold,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         Icon(Icons.star, size: 48, color: AppColors.primaryRed),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildUploadOverlay(ProviderControl provider) {
     return Container(
@@ -618,24 +663,374 @@ class _ControlPageState extends State<ControlPage> {
     final success = await provider.submitInspection();
 
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(LocaleKeys.inspection_submitted.tr()),
-          backgroundColor: Colors.green,
-        ),
-      );
+      showSnakBarr(context, LocaleKeys.inspection_submitted.tr());
 
       await Future.delayed(Duration(seconds: 2));
       if (mounted) {
         Navigator.pop(context);
       }
     } else if (mounted && provider.errorMessage != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(provider.errorMessage!),
-          backgroundColor: Colors.red,
-        ),
-      );
+      showSnakBarr(context, provider.errorMessage.toString());
     }
+  }
+
+  Widget _buildSignatureSection(ProviderControl provider) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.lightBlack,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: provider.hasAllSignatures
+              ? AppColors.primaryRed.withValues(alpha: 0.5)
+              : Colors.white24,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.edit_document, color: AppColors.primaryRed, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                LocaleKeys.signatures.tr(), // Add to translations
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const Spacer(),
+              if (provider.hasAllSignatures)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryRed.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.primaryRed.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: AppColors.primaryRed,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        LocaleKeys.complete.tr(),
+                        style: TextStyle(
+                          color: AppColors.primaryRed,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // Inspector Signature
+          _buildSignatureCard(
+            title: LocaleKeys.inspector_signature.tr(),
+            subtitle: LocaleKeys.your_signature.tr(),
+            signature: provider.inspectorSignature,
+            icon: Icons.person,
+            onTap: () => _showSignatureDialog(
+              context,
+              title: LocaleKeys.inspector_signature.tr(),
+              onSave: (signature) {
+                provider.setInspectorSignature(signature);
+              },
+            ),
+            onClear: () => provider.setInspectorSignature(null),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Branch Representative Signature
+          _buildSignatureCard(
+            title: LocaleKeys.branch_representative.tr(),
+            subtitle: LocaleKeys.branch_manager_signature.tr(),
+            signature: provider.branchSignature,
+            icon: Icons.business,
+            onTap: () => _showSignatureDialog(
+              context,
+              title: LocaleKeys.branch_representative.tr(),
+              onSave: (signature) {
+                provider.setBranchSignature(signature);
+              },
+            ),
+            onClear: () => provider.setBranchSignature(null),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSignatureCard({
+    required String title,
+    required String subtitle,
+    required Uint8List? signature,
+    required IconData icon,
+    required VoidCallback onTap,
+    required VoidCallback onClear,
+  }) {
+    final bool hasSigned = signature != null;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: hasSigned
+                ? AppColors.primaryRed.withValues(alpha: 0.3)
+                : Colors.white24,
+            width: hasSigned ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            // Icon
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: hasSigned
+                    ? AppColors.primaryRed.withValues(alpha: 0.1)
+                    : Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                size: 24,
+                color: hasSigned ? AppColors.primaryRed : Colors.white54,
+              ),
+            ),
+            const SizedBox(width: 12),
+
+            // Text & Signature Preview
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  if (hasSigned)
+                    Container(
+                      height: 40,
+                      margin: const EdgeInsets.only(top: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.memory(signature, fit: BoxFit.contain),
+                      ),
+                    )
+                  else
+                    Text(
+                      subtitle,
+                      style: TextStyle(color: Colors.white54, fontSize: 12),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+
+            // Action Button
+            if (hasSigned)
+              IconButton(
+                onPressed: onClear,
+                icon: Icon(Icons.close, color: AppColors.primaryRed, size: 20),
+                tooltip: "Clear",
+              )
+            else
+              Icon(Icons.edit, color: Colors.white38, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showSignatureDialog(
+    BuildContext context, {
+    required String title,
+    required Function(Uint8List) onSave,
+  }) {
+    final SignatureController controller = SignatureController(
+      penStrokeWidth: 3,
+      penColor: Colors.black,
+      exportBackgroundColor: Colors.white,
+    );
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.lightBlack,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryRed.withValues(alpha: 0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                  border: Border(
+                    bottom: BorderSide(
+                      color: AppColors.primaryRed.withValues(alpha: 0.3),
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.draw, color: AppColors.primaryRed, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close, color: Colors.white54),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Signature Pad
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.grey.shade300,
+                          width: 2,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Signature(
+                          controller: controller,
+                          backgroundColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      LocaleKeys.sign_here.tr(),
+                      style: TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Actions
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => controller.clear(),
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: Text(LocaleKeys.clear.tr()),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white70,
+                          side: const BorderSide(color: Colors.white24),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton.icon(
+                        onPressed: () async {
+                          if (controller.isEmpty) {
+                            showSnakBarr(
+                              context,
+                              LocaleKeys.please_sign_first.tr(),
+                            );
+                            return;
+                          }
+
+                          final signature = await controller.toPngBytes();
+                          if (signature != null) {
+                            onSave(signature);
+                            if (context.mounted) {
+                              Navigator.pop(context);
+                            }
+                          }
+                        },
+                        icon: const Icon(Icons.check, size: 18),
+                        label: Text(LocaleKeys.save_signature.tr()),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryRed,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

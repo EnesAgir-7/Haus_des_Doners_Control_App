@@ -159,7 +159,19 @@ class CodegenLoader extends AssetLoader{
   "submit_inspection_question": "Prüfung absenden?",
   "submit_inspection_warning": "Sind Sie sicher, dass Sie diese Prüfung absenden möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
   "submit": "Absenden",
-  "inspection_submitted": "Prüfung erfolgreich abgesendet!"
+  "inspection_submitted": "Prüfung erfolgreich abgesendet!",
+  "assigned_at": "Zugewiesen am",
+  "assign_to_me": "Mir zuweisen",
+  "unassign": "Zuweisung aufheben",
+  "signatures": "Unterschriften",
+  "inspector_signature": "Inspektoren-Unterschrift",
+  "your_signature": "Ihre Unterschrift",
+  "branch_representative": "Filialvertreter",
+  "branch_manager_signature": "Unterschrift des Filialleiters",
+  "sign_here": "Hier mit dem Finger unterschreiben",
+  "save_signature": "Unterschrift speichern",
+  "please_sign_first": "Bitte zuerst unterschreiben",
+  "clear": "Löschen"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Panel",
@@ -306,7 +318,19 @@ static const Map<String,dynamic> _en = {
   "submit_inspection_question": "Submit Inspection?",
   "submit_inspection_warning": "Are you sure you want to submit this inspection? This action cannot be undone.",
   "submit": "Submit",
-  "inspection_submitted": "Inspection submitted successfully!"
+  "inspection_submitted": "Inspection submitted successfully!",
+  "assign_to_me": "Assign to Me",
+  "unassign": "Unassign",
+  "assigned_at": "Assigned at",
+  "signatures": "Signatures",
+  "inspector_signature": "Inspector Signature",
+  "your_signature": "Your signature",
+  "branch_representative": "Branch Representative",
+  "branch_manager_signature": "Branch manager signature",
+  "sign_here": "Sign here with your finger",
+  "save_signature": "Save Signature",
+  "please_sign_first": "Please sign first",
+  "clear": "Clear"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -453,7 +477,19 @@ static const Map<String,dynamic> _tr = {
   "submit_inspection_question": "Denetimi göndermek istiyor musunuz?",
   "submit_inspection_warning": "Bu denetimi göndermek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
   "submit": "Gönder",
-  "inspection_submitted": "Denetim başarıyla gönderildi!"
+  "inspection_submitted": "Denetim başarıyla gönderildi!",
+  "assigned_at": "Atama tarihi",
+  "assign_to_me": "Bana Ata",
+  "unassign": "Atamayı Kaldır",
+  "signatures": "İmzalar",
+  "inspector_signature": "Denetçi İmzası",
+  "your_signature": "İmzanız",
+  "branch_representative": "Şube Temsilcisi",
+  "branch_manager_signature": "Şube müdürü imzası",
+  "sign_here": "Parmağınızla buraya imzalayın",
+  "save_signature": "İmzayı Kaydet",
+  "please_sign_first": "Lütfen önce imzalayın",
+  "clear": "Temizle"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

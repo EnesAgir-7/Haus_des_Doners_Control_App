@@ -88,7 +88,7 @@ class AppTheme {
 
       // AppBar teması
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.primaryDark,
+        backgroundColor: AppColors.primaryRed,
         foregroundColor: AppColors.white,
         elevation: 0,
       ),

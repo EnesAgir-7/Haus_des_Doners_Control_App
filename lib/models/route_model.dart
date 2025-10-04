@@ -53,13 +53,13 @@ class RouteModel {
       totalStops > 0 ? (completedStopsCount / totalStops) * 100 : 0;
 }
 
-
 class RouteStopModel {
   final String timeSlot;
   final String branchId;
   final String branchName;
   final String status; // "completed" | "pending" | "current"
   final String? inspectionId;
+  final DateTime? createdAt;
   int order;
 
   RouteStopModel({
@@ -69,6 +69,7 @@ class RouteStopModel {
     required this.status,
     this.inspectionId,
     required this.order,
+    this.createdAt,
   });
 
   factory RouteStopModel.fromMap(Map<String, dynamic> data) {
@@ -79,6 +80,7 @@ class RouteStopModel {
       status: data['status'] ?? 'pending',
       inspectionId: data['inspectionId'],
       order: data['order'] ?? 0,
+      createdAt: data["createdAt"] ?? DateTime.now(),
     );
   }
 
@@ -90,6 +92,7 @@ class RouteStopModel {
       'status': status,
       'inspectionId': inspectionId,
       'order': order,
+      'createdAt': DateTime.now(),
     };
   }
 

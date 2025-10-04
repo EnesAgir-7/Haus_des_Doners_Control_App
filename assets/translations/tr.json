@@ -143,5 +143,17 @@
   "submit_inspection_question": "Denetimi göndermek istiyor musunuz?",
   "submit_inspection_warning": "Bu denetimi göndermek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
   "submit": "Gönder",
-  "inspection_submitted": "Denetim başarıyla gönderildi!"
+  "inspection_submitted": "Denetim başarıyla gönderildi!",
+  "assigned_at": "Atama tarihi",
+  "assign_to_me": "Bana Ata",
+  "unassign": "Atamayı Kaldır",
+  "signatures": "İmzalar",
+  "inspector_signature": "Denetçi İmzası",
+  "your_signature": "İmzanız",
+  "branch_representative": "Şube Temsilcisi",
+  "branch_manager_signature": "Şube müdürü imzası",
+  "sign_here": "Parmağınızla buraya imzalayın",
+  "save_signature": "İmzayı Kaydet",
+  "please_sign_first": "Lütfen önce imzalayın",
+  "clear": "Temizle"
 }

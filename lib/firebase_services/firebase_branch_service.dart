@@ -92,11 +92,13 @@ class BranchService {
           inspectorName: inspectorName,
           stops: [
             RouteStopModel(
+              
               timeSlot: timeSlot,
               branchId: branchId,
               branchName: branchName,
-              status: AppConstants.current,
+              status: AppConstants.pending,
               order: 1,
+
             ),
           ],
           createdAt: DateTime.now(),

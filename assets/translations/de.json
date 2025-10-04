@@ -143,5 +143,17 @@
   "submit_inspection_question": "Prüfung absenden?",
   "submit_inspection_warning": "Sind Sie sicher, dass Sie diese Prüfung absenden möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
   "submit": "Absenden",
-  "inspection_submitted": "Prüfung erfolgreich abgesendet!"
+  "inspection_submitted": "Prüfung erfolgreich abgesendet!",
+  "assigned_at": "Zugewiesen am",
+  "assign_to_me": "Mir zuweisen",
+  "unassign": "Zuweisung aufheben", 
+  "signatures": "Unterschriften",
+  "inspector_signature": "Inspektoren-Unterschrift",
+  "your_signature": "Ihre Unterschrift",
+  "branch_representative": "Filialvertreter",
+  "branch_manager_signature": "Unterschrift des Filialleiters",
+  "sign_here": "Hier mit dem Finger unterschreiben",
+  "save_signature": "Unterschrift speichern",
+  "please_sign_first": "Bitte zuerst unterschreiben",
+  "clear": "Löschen"
 }

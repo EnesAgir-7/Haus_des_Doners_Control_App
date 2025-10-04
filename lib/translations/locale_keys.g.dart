@@ -148,5 +148,17 @@ abstract class  LocaleKeys {
   static const submit_inspection_warning = 'submit_inspection_warning';
   static const submit = 'submit';
   static const inspection_submitted = 'inspection_submitted';
+  static const assigned_at = 'assigned_at';
+  static const assign_to_me = 'assign_to_me';
+  static const unassign = 'unassign';
+  static const signatures = 'signatures';
+  static const inspector_signature = 'inspector_signature';
+  static const your_signature = 'your_signature';
+  static const branch_representative = 'branch_representative';
+  static const branch_manager_signature = 'branch_manager_signature';
+  static const sign_here = 'sign_here';
+  static const save_signature = 'save_signature';
+  static const please_sign_first = 'please_sign_first';
+  static const clear = 'clear';
 
 }

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/models/branch_model.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -329,7 +330,7 @@ class _BranchesPageState extends State<BranchesPage> {
 
 // Branch Details Bottom Sheet
 class BranchDetailsSheet extends StatelessWidget {
-  final dynamic branch;
+  final BranchModel branch;
   final ProviderBranches provider;
 
   BranchDetailsSheet({required this.branch, required this.provider});
@@ -403,11 +404,17 @@ class BranchDetailsSheet extends StatelessWidget {
                   ),
                   SizedBox(width: 12),
                   Expanded(
-                    child: _buildStatCard(
-                      label: LocaleKeys.total_inspections.tr(),
-                      value: branch.totalInspections.toString(),
-                      icon: Icons.fact_check,
-                      color: Colors.blue,
+                    child: Consumer<ProviderBranches>(
+                      builder: (context, pro, child) {
+                        return _buildStatCard(
+                          label: LocaleKeys.total_inspections.tr(),
+                          value: provider.isLoadingInspections
+                              ? "Loading"
+                              : provider.branchInspections.length.toString(),
+                          icon: Icons.fact_check,
+                          color: Colors.blue,
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -616,9 +623,9 @@ class BranchDetailsSheet extends StatelessWidget {
   }
 
   Color _getScoreColor(double score) {
-    if (score >= 9.0) return Colors.green;
-    if (score >= 7.0) return Colors.amber;
-    return Colors.red;
+    if (score <= 3.0) return Colors.green; // very good
+    if (score <= 7.0) return Colors.amber; // average
+    return Colors.red; // very bad
   }
 }
 

@@ -1,14 +1,23 @@
 // lib/providers/control_provider.dart
-import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+
 import '../core/console.dart';
 import '../firebase_services/firebase_inspection_service.dart';
-import '../models/inspection_model.dart';
 import '../models/branch_model.dart';
+import '../models/inspection_model.dart';
 import '../models/inspection_template_model.dart';
 import '../models/user_model.dart';
+import '../screens/user/pdf_preview.dart';
+import '../widgets/custom_toast.dart';
 
 /// Provider for Control (Inspection Form) screen
 /// Handles creating and submitting inspections with photo uploads
@@ -23,6 +32,9 @@ class ProviderControl extends ChangeNotifier {
   Map<String, int> _scores = {};
   Map<String, String> _notes = {};
   Map<String, List<File>> _photos = {};
+
+  Uint8List? inspectorSignature;
+  Uint8List? branchSignature;
 
   // Overall notes
   String _overallNotes = '';
@@ -69,7 +81,6 @@ class ProviderControl extends ChangeNotifier {
 
   void setCategoryNotes(String categoryId, String value) {
     _notes[categoryId] = value;
-    console(_notes);
   }
 
   void addCategoryPhoto(String categoryId, File file) {
@@ -103,6 +114,19 @@ class ProviderControl extends ChangeNotifier {
     return selectedTemplate!.categories.every(
       (cat) => _scores[cat.categoryId] != null,
     );
+  }
+
+  bool get hasAllSignatures =>
+      inspectorSignature != null && branchSignature != null;
+
+  void setInspectorSignature(Uint8List? signature) {
+    inspectorSignature = signature;
+    notifyListeners();
+  }
+
+  void setBranchSignature(Uint8List? signature) {
+    branchSignature = signature;
+    notifyListeners();
   }
 
   // Computed: Overall score (average of categories)
@@ -288,7 +312,6 @@ class ProviderControl extends ChangeNotifier {
   // Reset form
   void resetForm() {
     _overallNotes = '';
-
     _photos = {};
     _scores = {};
     _notes = {};
@@ -298,7 +321,566 @@ class ProviderControl extends ChangeNotifier {
     _successMessage = null;
     _isSubmitting = false;
     _isUploading = false;
-
+    inspectorSignature = null;
+    branchSignature = null;
     notifyListeners();
+  }
+
+  Future<void> previewPDF(BuildContext context) async {
+    try {
+      final pdf = await _generateInspectionPDF();
+
+      if (context.mounted) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                PDFPreviewScreen(pdf: pdf, branchName: _selectedBranch!.name),
+          ),
+        );
+      }
+    } catch (e) {
+      console('Error generating PDF: $e');
+      if (context.mounted) {
+        showSnakBarr(context, 'Error generating PDF preview');
+      }
+    }
+  }
+
+  Future<pw.Document> _generateInspectionPDF() async {
+    final pdf = pw.Document();
+
+    // Load logo (optional - replace with your logo path)
+    final logoImage = await imageFromAssetBundle('assets/logo.png');
+
+    // Format date
+    final dateFormat = DateFormat('dd MMMM yyyy, HH:mm');
+    final now = DateTime.now();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(32),
+        build: (context) => [
+          // Header
+          _buildPDFHeader(logoImage, now, dateFormat),
+          pw.SizedBox(height: 20),
+
+          // Branch Info
+          _buildBranchInfo(),
+          pw.SizedBox(height: 20),
+
+          // Inspector Info
+          _buildInspectorInfo(dateFormat, now),
+          pw.SizedBox(height: 20),
+
+          // Divider
+          pw.Divider(thickness: 2, color: PdfColors.red700),
+          pw.SizedBox(height: 20),
+
+          // Categories with Scores
+          _buildCategoriesSection(),
+          pw.SizedBox(height: 20),
+
+          // Overall Score
+          _buildOverallScore(),
+          pw.SizedBox(height: 20),
+
+          // Overall Notes
+          if (_overallNotes.isNotEmpty) _buildOverallNotes(),
+
+          pw.SizedBox(height: 30),
+
+          // Signatures
+          _buildSignaturesSection(),
+        ],
+        footer: (context) => _buildFooter(context),
+      ),
+    );
+
+    // Add photos page
+    if (_hasPhotos()) {
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4,
+          margin: const pw.EdgeInsets.all(32),
+          build: (context) => [
+            pw.Header(
+              level: 0,
+              child: pw.Text(
+                'Inspection Photos',
+                style: pw.TextStyle(
+                  fontSize: 24,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.red700,
+                ),
+              ),
+            ),
+            pw.SizedBox(height: 20),
+            ..._buildPhotosSection(),
+          ],
+        ),
+      );
+    }
+
+    return pdf;
+  }
+
+  pw.Widget _buildPDFHeader(
+    pw.ImageProvider logoImage,
+    DateTime now,
+    DateFormat dateFormat,
+  ) {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Image(logoImage, width: 80, height: 80),
+            pw.SizedBox(height: 8),
+            pw.Text(
+              'INSPECTION REPORT',
+              style: pw.TextStyle(
+                fontSize: 24,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.red700,
+              ),
+            ),
+          ],
+        ),
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.Text(
+              'Report ID',
+              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+            ),
+            pw.Text(
+              '#${now.millisecondsSinceEpoch.toString().substring(7)}',
+              style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 8),
+            pw.Text(
+              dateFormat.format(now),
+              style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey700),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _buildBranchInfo() {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.grey200,
+        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: PdfColors.red700, width: 2),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Row(
+            children: [
+              pw.Container(
+                padding: const pw.EdgeInsets.all(8),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.red700,
+                  borderRadius: pw.BorderRadius.circular(4),
+                ),
+                child: pw.Icon(
+                  const pw.IconData(0xe0c8), // location_on icon
+                  color: PdfColors.white,
+                  size: 20,
+                ),
+              ),
+              pw.SizedBox(width: 12),
+              pw.Text(
+                'BRANCH INFORMATION',
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.red700,
+                ),
+              ),
+            ],
+          ),
+          pw.SizedBox(height: 12),
+          pw.Text(
+            _selectedBranch!.name,
+            style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 4),
+          pw.Text(
+            _selectedBranch!.address,
+            style: const pw.TextStyle(fontSize: 12, color: PdfColors.grey800),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildInspectorInfo(DateFormat dateFormat, DateTime now) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(16),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.grey100,
+        borderRadius: pw.BorderRadius.circular(8),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'Inspector',
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                  color: PdfColors.grey700,
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                _currentUser?.name ?? 'N/A',
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.end,
+            children: [
+              pw.Text(
+                'Template',
+                style: const pw.TextStyle(
+                  fontSize: 10,
+                  color: PdfColors.grey700,
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                selectedTemplate?.name ?? 'N/A',
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildCategoriesSection() {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          'INSPECTION DETAILS',
+          style: pw.TextStyle(
+            fontSize: 18,
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColors.red700,
+          ),
+        ),
+        pw.SizedBox(height: 16),
+        ...selectedTemplate!.categories.map((category) {
+          final score = _scores[category.categoryId] ?? 0;
+          final notes = _notes[category.categoryId] ?? '';
+          final photos = _photos[category.categoryId] ?? [];
+
+          return pw.Container(
+            margin: const pw.EdgeInsets.only(bottom: 12),
+            padding: const pw.EdgeInsets.all(12),
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(color: PdfColors.grey400),
+              borderRadius: pw.BorderRadius.circular(8),
+            ),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Row(
+                  mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                  children: [
+                    pw.Expanded(
+                      child: pw.Text(
+                        category.title,
+                        style: pw.TextStyle(
+                          fontSize: 14,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: pw.BoxDecoration(
+                        color: _getScoreColor(score),
+                        borderRadius: pw.BorderRadius.circular(4),
+                      ),
+                      child: pw.Text(
+                        '$score/4',
+                        style: pw.TextStyle(
+                          fontSize: 12,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (notes.isNotEmpty) ...[
+                  pw.SizedBox(height: 8),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.all(8),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.grey200,
+                      borderRadius: pw.BorderRadius.circular(4),
+                    ),
+                    child: pw.Text(
+                      notes,
+                      style: const pw.TextStyle(
+                        fontSize: 10,
+                        color: PdfColors.grey800,
+                      ),
+                    ),
+                  ),
+                ],
+                if (photos.isNotEmpty) ...[
+                  pw.SizedBox(height: 8),
+                  pw.Text(
+                    '${photos.length} photo(s) attached',
+                    style: const pw.TextStyle(
+                      fontSize: 10,
+                      color: PdfColors.grey700,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+  pw.Widget _buildOverallScore() {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(20),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.red50,
+        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: PdfColors.red700, width: 2),
+      ),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Text(
+                'TOTAL SCORE',
+                style: pw.TextStyle(
+                  fontSize: 14,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.red700,
+                ),
+              ),
+              pw.SizedBox(height: 4),
+              pw.Text(
+                totalScore.toStringAsFixed(1),
+                style: pw.TextStyle(
+                  fontSize: 36,
+                  fontWeight: pw.FontWeight.bold,
+                  color: PdfColors.red700,
+                ),
+              ),
+            ],
+          ),
+          pw.Container(
+            width: 80,
+            height: 80,
+            decoration: pw.BoxDecoration(
+              shape: pw.BoxShape.circle,
+              color: PdfColors.red700,
+            ),
+            child: pw.Center(
+              child: pw.Icon(
+                const pw.IconData(0xe838), // star icon
+                color: PdfColors.white,
+                size: 40,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildOverallNotes() {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          'OVERALL NOTES',
+          style: pw.TextStyle(
+            fontSize: 14,
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColors.red700,
+          ),
+        ),
+        pw.SizedBox(height: 8),
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.all(12),
+          decoration: pw.BoxDecoration(
+            color: PdfColors.grey100,
+            borderRadius: pw.BorderRadius.circular(8),
+          ),
+          child: pw.Text(
+            _overallNotes,
+            style: const pw.TextStyle(fontSize: 12),
+          ),
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _buildSignaturesSection() {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+      children: [
+        _buildSignatureBox('Inspector Signature', inspectorSignature),
+        pw.SizedBox(width: 20),
+        _buildSignatureBox('Branch Representative', branchSignature),
+      ],
+    );
+  }
+
+  pw.Widget _buildSignatureBox(String title, Uint8List? signature) {
+    return pw.Expanded(
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            title,
+            style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Container(
+            height: 80,
+
+            child: signature != null
+                ? pw.ClipRRect(
+                    verticalRadius: 8,
+                    horizontalRadius: 8,
+                    child: pw.Image(
+                      pw.MemoryImage(signature),
+                      fit: pw.BoxFit.contain,
+                    ),
+                  )
+                : pw.Center(
+                    child: pw.Text(
+                      'No Signature',
+                      style: const pw.TextStyle(
+                        fontSize: 10,
+                        color: PdfColors.grey600,
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildFooter(pw.Context context) {
+    return pw.Container(
+      alignment: pw.Alignment.centerRight,
+      margin: const pw.EdgeInsets.only(top: 16),
+      child: pw.Text(
+        'Page ${context.pageNumber} of ${context.pagesCount}',
+        style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
+      ),
+    );
+  }
+
+  List<pw.Widget> _buildPhotosSection() {
+    final List<pw.Widget> widgets = [];
+
+    for (final category in selectedTemplate!.categories) {
+      final photos = _photos[category.categoryId];
+      if (photos == null || photos.isEmpty) continue;
+
+      widgets.add(
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Text(
+              category.title,
+              style: pw.TextStyle(
+                fontSize: 16,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.red700,
+              ),
+            ),
+            pw.SizedBox(height: 12),
+            pw.GridView(
+              childAspectRatio: 1.0, // Add this line
+              crossAxisCount: 3,
+              mainAxisSpacing: 12,
+              crossAxisSpacing: 12,
+              children: photos.map((photo) {
+                return pw.Container(
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(color: PdfColors.grey400),
+                    borderRadius: pw.BorderRadius.circular(8),
+                  ),
+                  child: pw.ClipRRect(
+                    horizontalRadius: 8,
+                    verticalRadius: 8,
+                    child: pw.Image(
+                      pw.MemoryImage(photo.readAsBytesSync()),
+                      fit: pw.BoxFit.cover,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+            pw.SizedBox(height: 20),
+          ],
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
+  bool _hasPhotos() {
+    return _photos.values.any((photos) => photos.isNotEmpty);
+  }
+
+  PdfColor _getScoreColor(int score) {
+    switch (score) {
+      case 1: // very good
+        return PdfColors.green700;
+      case 2: // good
+        return PdfColors.blue700;
+      case 3: // bad
+        return PdfColors.orange700;
+      case 4: // very bad
+        return PdfColors.red700;
+      default:
+        return PdfColors.grey600;
+    }
   }
 }
