@@ -72,6 +72,28 @@ class MyApp extends StatelessWidget {
         themeMode: ThemeMode.dark,
         home: AuthWrapper(),
         routes: AppRouter.routes,
+        localeListResolutionCallback: (deviceLocales, supportedLocales) {
+          if (deviceLocales != null) {
+            for (var deviceLocale in deviceLocales) {
+              for (var locale in supportedLocales) {
+                if (locale.languageCode == deviceLocale.languageCode) {
+                  return locale;
+                }
+              }
+            }
+          }
+          return context.fallbackLocale;
+        },
+        localeResolutionCallback: (deviceLocale, supportedLocales) {
+          if (deviceLocale != null) {
+            for (var locale in supportedLocales) {
+              if (locale.languageCode == deviceLocale.languageCode) {
+                return locale;
+              }
+            }
+          }
+          return context.fallbackLocale;
+        },
       ),
     );
   }

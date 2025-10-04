@@ -35,10 +35,7 @@ class ProviderAuth extends ChangeNotifier {
 
   /// Fetches the user model from Firestore
   Future<UserModel?> fetchUserModel() async {
-    const cacheKey = 'cached_user';
-
-    // Try loading cached user first
-    final cachedMap = await LocalStorageHelper.instance.getData(cacheKey);
+    final cachedMap = await LocalStorageHelper.instance.getData(cacheUserKey);
     if (cachedMap != null) {
       try {
         userModel = UserModel.fromMap(cachedMap);
@@ -64,7 +61,10 @@ class ProviderAuth extends ChangeNotifier {
 
     if (fetchedUser != null) {
       userModel = fetchedUser;
-      await LocalStorageHelper.instance.saveData(cacheKey, fetchedUser.toMap());
+      await LocalStorageHelper.instance.saveData(
+        cacheUserKey,
+        fetchedUser.toMap(),
+      );
     }
 
     return userModel;
@@ -94,7 +94,7 @@ class ProviderAuth extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await LocalStorageHelper.instance.removeData('cached_user');
+    await LocalStorageHelper.instance.removeData(cacheUserKey);
     await _authHelper.signOut();
     userModel = null;
     notifyListeners();

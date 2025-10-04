@@ -85,6 +85,8 @@ class _PanelPageState extends State<PanelPage> {
             }
 
             return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +344,7 @@ class DailySummarySection extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.insert_chart, color: Colors.purpleAccent),
+                const Icon(Icons.route_outlined, color: Colors.lightBlueAccent),
                 const SizedBox(width: 6),
                 Text(
                   LocaleKeys.daily_summary.tr(),
@@ -373,36 +375,9 @@ class DailySummarySection extends StatelessWidget {
             const SizedBox(height: 12),
 
             ...stops.take(5).map((stop) {
-              Color statusColor;
-              String statusText;
-              IconData statusIcon;
-
-              if (stop.isCompleted) {
-                statusColor = Colors.green;
-                statusText = LocaleKeys.completed.tr();
-                statusIcon = Icons.check_box;
-              } else if (stop.isCurrent) {
-                statusColor = Colors.blue;
-                statusText = LocaleKeys.current_location.tr();
-                statusIcon = Icons.my_location;
-              } else {
-                statusColor = Colors.amber;
-                statusText = LocaleKeys.waiting.tr();
-                statusIcon = Icons.hourglass_bottom;
-              }
-
               return Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: StatisticCard(
-                  time: stop.timeSlot.split(' - ')[0],
-                  title: stop.branchName,
-                  status: statusText,
-                  statusColor: statusColor,
-                  subtitle: stop.isCompleted
-                      ? "${LocaleKeys.score.tr()}: ${stop.inspectionId != null ? '9.0' : '-'}"
-                      : "",
-                  icon: statusIcon,
-                ),
+                child: StatisticCard(stop: stop),
               );
             }).toList(),
 

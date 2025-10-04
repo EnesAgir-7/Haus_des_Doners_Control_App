@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/core/console.dart';
+import '../core/constants/firebase_constants.dart';
 import '../models/task_model.dart';
 
 class TaskService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final String _collection = 'tasks';
+  final String _collection = Collections.tasks;
 
   // Get tasks by inspector
   Future<List<TaskModel>> getTasksByInspector(String inspectorId) async {

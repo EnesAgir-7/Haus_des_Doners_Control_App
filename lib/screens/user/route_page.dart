@@ -18,36 +18,9 @@ class _RoutePageState extends State<RoutePage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<ProviderRoute>(context, listen: false).fetchTodaysRoute();
-    });
-  }
-
-  // Helper function to get card details based on stop status
-  ({String statusText, Color statusColor, IconData icon}) _getStopDetails(
-    String status,
-  ) {
-    switch (status) {
-      case 'completed':
-        return (
-          statusText: 'Tamamlandı', // Completed
-          statusColor: Colors.green,
-          icon: Icons.check_box,
-        );
-      case 'current':
-        return (
-          statusText: 'Şu anki Durak', // Current Stop
-          statusColor: Colors.pink,
-          icon: Icons.location_on,
-        );
-      case 'pending':
-      default:
-        return (
-          statusText: 'Bekliyor', // Pending
-          statusColor: Colors.grey,
-          icon: Icons.hourglass_empty,
-        );
-    }
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Provider.of<ProviderRoute>(context, listen: false).fetchTodaysRoute();
+    // });
   }
 
   @override
@@ -70,7 +43,7 @@ class _RoutePageState extends State<RoutePage> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    LocaleKeys.today_route_plan.tr(),
+                    LocaleKeys.your_route_plan.tr(),
                     style: const TextStyle(
                       color: AppColors.primaryRed,
                       fontWeight: FontWeight.bold,
@@ -114,23 +87,21 @@ class _RoutePageState extends State<RoutePage> {
       );
     }
 
-    // If we have data, build the list
-    return ListView.separated(
-      separatorBuilder: (context, index) => const SizedBox(height: 10),
-      itemCount: provider.stops.length,
-      itemBuilder: (context, index) {
-        final stop = provider.stops[index];
-        final details = _getStopDetails(stop.status);
-
-        return StatisticCard(
-          time: stop.timeSlot,
-          title: stop.branchName,
-          status: details.statusText,
-          subtitle: "", // You can add more info here if needed
-          statusColor: details.statusColor,
-          icon: details.icon,
-        );
+    return RefreshIndicator(
+      color: AppColors.primaryRed,
+      onRefresh: () async {
+        await provider.fetchTodaysRoute();
       },
+      child: ListView.separated(
+        physics: AlwaysScrollableScrollPhysics(),
+        separatorBuilder: (context, index) => const SizedBox(height: 10),
+        itemCount: provider.stops.length,
+        itemBuilder: (context, index) {
+          final stop = provider.stops[index];
+
+          return StatisticCard(stop: stop);
+        },
+      ),
     );
   }
 }

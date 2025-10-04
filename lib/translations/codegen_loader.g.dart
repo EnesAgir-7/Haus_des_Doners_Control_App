@@ -144,7 +144,22 @@ class CodegenLoader extends AssetLoader{
   "score": "Bewertung",
   "view_all_route": "Gesamte Route anzeigen",
   "stops": "Stopps",
-  "your_route_plan": "Ihr Routenplaner"
+  "your_route_plan": "Ihr Routenplaner",
+  "branch_inspection": "Filialprüfung",
+  "maximum_photos": "Maximal 4 Fotos erlaubt",
+  "error_taking_photo": "Fehler beim Aufnehmen des Fotos",
+  "no_template": "Keine Vorlage für diese Filiale verknüpft",
+  "submit_inspection": "Prüfung absenden",
+  "no_branches": "Keine Filialen verfügbar",
+  "add_notes_optional": "Notizen hinzufügen (optional)",
+  "overall_notes": "Gesamtnotizen",
+  "general_comments": "Fügen Sie allgemeine Kommentare zu dieser Prüfung hinzu...",
+  "total_score": "Gesamtpunktzahl",
+  "uploading_photos": "Fotos werden hochgeladen...",
+  "submit_inspection_question": "Prüfung absenden?",
+  "submit_inspection_warning": "Sind Sie sicher, dass Sie diese Prüfung absenden möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "submit": "Absenden",
+  "inspection_submitted": "Prüfung erfolgreich abgesendet!"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Panel",
@@ -276,7 +291,22 @@ static const Map<String,dynamic> _en = {
   "score": "Score",
   "view_all_route": "View All Route",
   "stops": "stops",
-  "your_route_plan": "Your Route Plan"
+  "your_route_plan": "Your Route Plan",
+  "branch_inspection": "Branch Inspection",
+  "maximum_photos": "Maximum 4 photos allowed",
+  "error_taking_photo": "Error taking photo",
+  "no_template": "No template linked to this branch",
+  "submit_inspection": "Submit Inspection",
+  "no_branches": "No branches available",
+  "add_notes_optional": "Add notes (optional)",
+  "overall_notes": "Overall Notes",
+  "general_comments": "Add general comments about this inspection...",
+  "total_score": "Total Score",
+  "uploading_photos": "Uploading photos...",
+  "submit_inspection_question": "Submit Inspection?",
+  "submit_inspection_warning": "Are you sure you want to submit this inspection? This action cannot be undone.",
+  "submit": "Submit",
+  "inspection_submitted": "Inspection submitted successfully!"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -408,7 +438,22 @@ static const Map<String,dynamic> _tr = {
   "score": "Puan",
   "view_all_route": "Tüm rotayı gör",
   "stops": "durak",
-  "your_route_plan": "Rota Planınız"
+  "your_route_plan": "Rota Planınız",
+  "branch_inspection": "Şube Denetimi",
+  "maximum_photos": "Maksimum 4 fotoğraf izin verilir",
+  "error_taking_photo": "Fotoğraf çekme hatası",
+  "no_template": "Bu şubeye bağlı şablon yok",
+  "submit_inspection": "Denetimi Gönder",
+  "no_branches": "Mevcut şube yok",
+  "add_notes_optional": "Not ekle (isteğe bağlı)",
+  "overall_notes": "Genel Notlar",
+  "general_comments": "Bu denetim hakkında genel yorum ekleyin...",
+  "total_score": "Toplam Puan",
+  "uploading_photos": "Fotoğraflar yükleniyor...",
+  "submit_inspection_question": "Denetimi göndermek istiyor musunuz?",
+  "submit_inspection_warning": "Bu denetimi göndermek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+  "submit": "Gönder",
+  "inspection_submitted": "Denetim başarıyla gönderildi!"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

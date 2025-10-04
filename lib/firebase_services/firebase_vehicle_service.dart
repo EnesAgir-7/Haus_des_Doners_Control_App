@@ -1,16 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../core/constants/firebase_constants.dart';
 import '../models/vehicle_model.dart';
 
 class VehicleService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final String _collection = 'vehicles';
+  final String _collectionVehicles = Collections.vehicles;
 
   // Get vehicle assigned to inspector
   Future<VehicleModel?> getVehicleByInspector(String inspectorId) async {
     try {
       final snapshot = await _db
-          .collection(_collection)
+          .collection(_collectionVehicles)
           .where('assignedInspectorId', isEqualTo: inspectorId)
           .limit(1)
           .get();
@@ -26,7 +27,7 @@ class VehicleService {
   // Stream vehicle by inspector (real-time)
   Stream<VehicleModel?> streamVehicleByInspector(String inspectorId) {
     return _db
-        .collection(_collection)
+        .collection(_collectionVehicles)
         .where('assignedInspectorId', isEqualTo: inspectorId)
         .limit(1)
         .snapshots()
@@ -39,7 +40,10 @@ class VehicleService {
   // Get all vehicles (admin)
   Future<List<VehicleModel>> getAllVehicles() async {
     try {
-      final snapshot = await _db.collection(_collection).orderBy('plate').get();
+      final snapshot = await _db
+          .collection(_collectionVehicles)
+          .orderBy('plate')
+          .get();
 
       return snapshot.docs
           .map((doc) => VehicleModel.fromFirestore(doc))
@@ -54,7 +58,7 @@ class VehicleService {
   Future<List<VehicleModel>> getVehiclesByStatus(String status) async {
     try {
       final snapshot = await _db
-          .collection(_collection)
+          .collection(_collectionVehicles)
           .where('status', isEqualTo: status)
           .get();
 
@@ -70,7 +74,10 @@ class VehicleService {
   // Update vehicle kilometers
   Future<void> updateVehicleKm(String vehicleId, int newKm) async {
     try {
-      final vehicle = await _db.collection(_collection).doc(vehicleId).get();
+      final vehicle = await _db
+          .collection(_collectionVehicles)
+          .doc(vehicleId)
+          .get();
       if (!vehicle.exists) throw Exception('Vehicle not found');
 
       final data = vehicle.data() as Map<String, dynamic>;
@@ -78,7 +85,7 @@ class VehicleService {
       final remainingKm = maxKm - newKm;
       final usagePercent = ((newKm / maxKm) * 100).round();
 
-      await _db.collection(_collection).doc(vehicleId).update({
+      await _db.collection(_collectionVehicles).doc(vehicleId).update({
         'currentKm': newKm,
         'remainingKm': remainingKm,
         'usagePercent': usagePercent,
@@ -97,7 +104,7 @@ class VehicleService {
     String inspectorName,
   ) async {
     try {
-      await _db.collection(_collection).doc(vehicleId).update({
+      await _db.collection(_collectionVehicles).doc(vehicleId).update({
         'assignedInspectorId': inspectorId,
         'assignedInspectorName': inspectorName,
         'status': 'assigned',
@@ -112,7 +119,7 @@ class VehicleService {
   // Unassign vehicle
   Future<void> unassignVehicle(String vehicleId) async {
     try {
-      await _db.collection(_collection).doc(vehicleId).update({
+      await _db.collection(_collectionVehicles).doc(vehicleId).update({
         'assignedInspectorId': null,
         'assignedInspectorName': null,
         'status': 'available',

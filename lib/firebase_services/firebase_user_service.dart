@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../models/user_model.dart';
 
 class UserService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final String _collection = 'users';
+  final String _collection = Collections.users;
 
   // Get user by ID
   Future<UserModel?> getUserById(String userId) async {
@@ -31,7 +32,7 @@ class UserService {
     try {
       final snapshot = await _db
           .collection(_collection)
-          .where('role', isEqualTo: 'inspector')
+          .where('role', isEqualTo: AppConstants.inspector)
           .where('active', isEqualTo: true)
           .get();
 

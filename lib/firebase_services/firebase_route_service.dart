@@ -1,16 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../core/console.dart';
+import '../core/constants/firebase_constants.dart';
 import '../models/route_model.dart';
 
 class RouteService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final String _collection = 'routes';
+  final String _collection = Collections.routes;
 
-  // Get today's route for inspectorimport 'package:cloud_firestore/cloud_firestore.dart'; // Make sure you have this import
   Future<RouteModel?> getTodaysRoute(String userId) async {
     try {
-      final docSnap = await _db.collection('routes').doc(userId).get();
+      final docSnap = await _db.collection(_collection).doc(userId).get();
 
       if (!docSnap.exists) {
         print("No route found for user $userId.");

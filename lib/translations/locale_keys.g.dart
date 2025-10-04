@@ -133,5 +133,20 @@ abstract class  LocaleKeys {
   static const view_all_route = 'view_all_route';
   static const stops = 'stops';
   static const your_route_plan = 'your_route_plan';
+  static const branch_inspection = 'branch_inspection';
+  static const maximum_photos = 'maximum_photos';
+  static const error_taking_photo = 'error_taking_photo';
+  static const no_template = 'no_template';
+  static const submit_inspection = 'submit_inspection';
+  static const no_branches = 'no_branches';
+  static const add_notes_optional = 'add_notes_optional';
+  static const overall_notes = 'overall_notes';
+  static const general_comments = 'general_comments';
+  static const total_score = 'total_score';
+  static const uploading_photos = 'uploading_photos';
+  static const submit_inspection_question = 'submit_inspection_question';
+  static const submit_inspection_warning = 'submit_inspection_warning';
+  static const submit = 'submit';
+  static const inspection_submitted = 'inspection_submitted';
 
 }

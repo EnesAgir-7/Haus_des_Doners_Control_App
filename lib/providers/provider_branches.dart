@@ -5,8 +5,10 @@ import 'package:haus_des_control/widgets/custom_toast.dart';
 
 import '../firebase_services/firebase_branch_service.dart';
 import '../firebase_services/firebase_inspection_service.dart';
+import '../helpers/local_storage_helper.dart';
 import '../models/branch_model.dart';
 import '../models/inspection_model.dart';
+import '../models/user_model.dart';
 
 /// Provider for Subsidiaries (Branches) screen
 /// Shows list of branches assigned to inspector
@@ -169,11 +171,17 @@ class ProviderBranches extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      final userId = FirebaseAuth.instance.currentUser?.uid;
+      final UserModel? userModel;
+      final cachedMap = await LocalStorageHelper.instance.getData(cacheUserKey);
+      if (cachedMap != null) {
+        userModel = UserModel.fromMap(cachedMap);
+      } else {
+        userModel = null;
+      }
 
       await _branchService.assignBranchToHimself(
-        inspectorId: userId!,
-        inspectorName: 'You',
+        inspectorId: userModel!.id,
+        inspectorName: userModel.name,
         branchId: branchId,
         branchName: branchName,
         timeSlot: timeSlot,
@@ -192,7 +200,7 @@ class ProviderBranches extends ChangeNotifier {
 
   Future<void> unAssignBranchToMe({
     required String branchId,
-    required BuildContext context, 
+    required BuildContext context,
   }) async {
     try {
       _isLoading = true;

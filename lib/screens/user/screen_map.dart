@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:haus_des_control/providers/provider_branches.dart';
-import 'package:haus_des_control/widgets/custom_toast.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -165,7 +164,6 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                   branchId: branch.id,
                                   context: context,
                                 );
-                                showSnakBarr(context, "UnAssign the branch");
                               } else {
                                 branchContr.assignBranchToMe(
                                   branchId: branch.id,
@@ -195,7 +193,6 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                       child: AppButton(
                         text: "Submit Inspection",
                         onPressed: () {
-                          // TODO: Implement inspection submission
                         },
                         backgroundColor: AppColors.primaryRed,
                         textStyle: const TextStyle(fontSize: 11),

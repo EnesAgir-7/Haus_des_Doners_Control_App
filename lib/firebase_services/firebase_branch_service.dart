@@ -1,19 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/core/console.dart';
 
+import '../core/constants/firebase_constants.dart';
 import '../models/branch_model.dart';
 import '../models/route_model.dart';
 
 class BranchService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final String _collection = 'branches';
-  final String _collectionRoutes = 'routes';
+  final String _collectionBranches = Collections.branches;
+  final String _collectionRoutes = Collections.routes;
 
   // Get branches assigned to inspector
   Future<List<BranchModel>> getBranchesByInspector(String inspectorId) async {
     try {
       final snapshot = await _db
-          .collection(_collection)
+          .collection(_collectionBranches)
           .where('assignedInspectorId', isEqualTo: inspectorId)
           .where('status', isEqualTo: 'active')
           .orderBy('name')
@@ -31,7 +32,7 @@ class BranchService {
   // Stream branches by inspector (real-time)
   Stream<List<BranchModel>> streamBranchesByInspector(String inspectorId) {
     return _db
-        .collection(_collection)
+        .collection(_collectionBranches)
         .where('assignedInspectorId', isEqualTo: inspectorId)
         .where('status', isEqualTo: 'active')
         .orderBy('name')
@@ -46,7 +47,7 @@ class BranchService {
   // Stream all branches (admin, real-time)
   Stream<List<BranchModel>> streamAllBranches() {
     return _db
-        .collection(_collection)
+        .collection(_collectionBranches)
         .orderBy('name')
         .snapshots()
         .map(
@@ -59,7 +60,7 @@ class BranchService {
   // Get single branch by ID
   Future<BranchModel?> getBranchById(String branchId) async {
     try {
-      final doc = await _db.collection(_collection).doc(branchId).get();
+      final doc = await _db.collection(_collectionBranches).doc(branchId).get();
       if (!doc.exists) return null;
       return BranchModel.fromFirestore(doc);
     } catch (e) {
@@ -94,7 +95,7 @@ class BranchService {
               timeSlot: timeSlot,
               branchId: branchId,
               branchName: branchName,
-              status: 'current',
+              status: AppConstants.current,
               order: 1,
             ),
           ],
@@ -107,12 +108,11 @@ class BranchService {
         console('Route found for inspector');
         // 3. Append stop to existing route
         final route = RouteModel.fromFirestore(docSnap);
-
         final newStop = RouteStopModel(
           timeSlot: timeSlot,
           branchId: branchId,
           branchName: branchName,
-          status: 'pending',
+          status: AppConstants.pending,
           order: route.stops.length + 1,
         );
 
@@ -125,7 +125,7 @@ class BranchService {
       }
 
       // 4. Update branch to mark as assigned
-      await _db.collection('branches').doc(branchId).update({
+      await _db.collection(_collectionBranches).doc(branchId).update({
         'isAssigned': true,
         'updatedAt': Timestamp.fromDate(DateTime.now()),
       });
@@ -158,7 +158,7 @@ class BranchService {
       });
 
       // Mark branch as unassigned
-      await _db.collection('branches').doc(branchId).update({
+      await _db.collection(_collectionBranches).doc(branchId).update({
         'isAssigned': false,
         'updatedAt': Timestamp.fromDate(DateTime.now()),
       });

@@ -128,5 +128,20 @@
   "score": "Puan",
   "view_all_route": "Tüm rotayı gör",
   "stops": "durak",
-  "your_route_plan": "Rota Planınız"
+  "your_route_plan": "Rota Planınız",
+  "branch_inspection": "Şube Denetimi",
+  "maximum_photos": "Maksimum 4 fotoğraf izin verilir",
+  "error_taking_photo": "Fotoğraf çekme hatası",
+  "no_template": "Bu şubeye bağlı şablon yok",
+  "submit_inspection": "Denetimi Gönder",
+  "no_branches": "Mevcut şube yok",
+  "add_notes_optional": "Not ekle (isteğe bağlı)",
+  "overall_notes": "Genel Notlar",
+  "general_comments": "Bu denetim hakkında genel yorum ekleyin...",
+  "total_score": "Toplam Puan",
+  "uploading_photos": "Fotoğraflar yükleniyor...",
+  "submit_inspection_question": "Denetimi göndermek istiyor musunuz?",
+  "submit_inspection_warning": "Bu denetimi göndermek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+  "submit": "Gönder",
+  "inspection_submitted": "Denetim başarıyla gönderildi!"
 }

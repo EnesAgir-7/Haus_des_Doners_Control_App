@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../core/constants/firebase_constants.dart';
 import '../models/inspector_stats_model.dart';
 
 class StatsService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final String _collection = 'inspectorStats';
+  final String _collection = Collections.inspectorStats;
 
   // Get current month stats for inspector
   Future<InspectorStatsModel?> getCurrentMonthStats(String inspectorId) async {

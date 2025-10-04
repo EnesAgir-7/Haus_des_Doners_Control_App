@@ -60,7 +60,7 @@ class _ControlPageState extends State<ControlPage> {
       final provider = context.read<ProviderControl>();
 
       if (provider.getCategoryPhotos(category).length >= 4) {
-        if (mounted) showSnakBarr(context, 'Maximum 4 photos allowed');
+        if (mounted) showSnakBarr(context, LocaleKeys.maximum_photos.tr());
         return;
       }
 
@@ -68,7 +68,7 @@ class _ControlPageState extends State<ControlPage> {
     } catch (e, st) {
       debugPrint('Error taking photo: $e\n$st');
       if (mounted) {
-        showSnakBarr(context, "Error taking photo");
+        showSnakBarr(context, LocaleKeys.error_taking_photo.tr());
       }
     }
   }
@@ -80,7 +80,7 @@ class _ControlPageState extends State<ControlPage> {
         automaticallyImplyLeading: true,
         backgroundColor: AppColors.lightBlack,
         title: Text(
-          _selectedBranch?.name ?? 'Branch Inspection',
+          _selectedBranch?.name ?? LocaleKeys.branch_inspection.tr(),
           style: TextStyle(color: Colors.white, fontSize: 16),
         ),
       ),
@@ -131,7 +131,7 @@ class _ControlPageState extends State<ControlPage> {
                         );
                       }).toList()
                     else
-                      const Text("No template linked to this branch"),
+                      Text(LocaleKeys.no_template.tr()),
 
                     SizedBox(height: 16),
                     _buildOverallNotesSection(provider),
@@ -142,7 +142,7 @@ class _ControlPageState extends State<ControlPage> {
 
                     SizedBox(height: 24),
                     AppButton(
-                      text: 'Submit Inspection',
+                      text: LocaleKeys.submit_inspection.tr(),
                       icon: Icons.check_circle,
                       onPressed: provider.isFormValid
                           ? () => _submitInspection(provider)
@@ -178,7 +178,7 @@ class _ControlPageState extends State<ControlPage> {
                 Icon(Icons.apartment, size: 80, color: Colors.white38),
                 SizedBox(height: 16),
                 Text(
-                  'No branches available',
+                  LocaleKeys.no_branches.tr(),
                   style: TextStyle(color: Colors.white70, fontSize: 16),
                 ),
               ],
@@ -372,7 +372,7 @@ class _ControlPageState extends State<ControlPage> {
               maxLines: 2,
               style: TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Add notes (optional)',
+                hintText: LocaleKeys.add_notes_optional.tr(),
                 hintStyle: TextStyle(color: Colors.white38),
                 filled: true,
                 fillColor: AppColors.lightBlack,
@@ -477,7 +477,7 @@ class _ControlPageState extends State<ControlPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Overall Notes',
+            LocaleKeys.overall_notes.tr(),
             style: TextStyle(
               color: AppColors.primaryRed,
               fontSize: 16,
@@ -491,7 +491,7 @@ class _ControlPageState extends State<ControlPage> {
             maxLines: 4,
             style: TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              hintText: 'Add general comments about this inspection...',
+              hintText: LocaleKeys.general_comments.tr(),
               hintStyle: TextStyle(color: Colors.white38),
               filled: true,
               fillColor: AppColors.lightRed,
@@ -522,7 +522,7 @@ class _ControlPageState extends State<ControlPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Total Score',
+                LocaleKeys.total_score.tr(),
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
               SizedBox(height: 4),
@@ -564,7 +564,7 @@ class _ControlPageState extends State<ControlPage> {
               ),
               SizedBox(height: 24),
               Text(
-                'Uploading photos...',
+                LocaleKeys.uploading_photos.tr(),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -588,30 +588,26 @@ class _ControlPageState extends State<ControlPage> {
   }
 
   Future<void> _submitInspection(ProviderControl provider) async {
-    // Show confirmation dialog
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.lightBlack,
-        title: Text(
-          'Submit Inspection?',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Text(
-          'Are you sure you want to submit this inspection? This action cannot be undone.',
-          style: TextStyle(color: Colors.white70),
-        ),
+        title: Text(LocaleKeys.submit_inspection_question.tr()),
+        content: Text(LocaleKeys.submit_inspection_warning.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+            child: Text(
+              LocaleKeys.cancel.tr(),
+              style: TextStyle(color: Colors.white70),
+            ),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryRed,
             ),
-            child: Text('Submit'),
+            child: Text(LocaleKeys.submit.tr()),
           ),
         ],
       ),
@@ -619,18 +615,16 @@ class _ControlPageState extends State<ControlPage> {
 
     if (confirm != true) return;
 
-    // Submit inspection
     final success = await provider.submitInspection();
 
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Inspection submitted successfully!'),
+          content: Text(LocaleKeys.inspection_submitted.tr()),
           backgroundColor: Colors.green,
         ),
       );
 
-      // Navigate back after delay
       await Future.delayed(Duration(seconds: 2));
       if (mounted) {
         Navigator.pop(context);
@@ -645,252 +639,3 @@ class _ControlPageState extends State<ControlPage> {
     }
   }
 }
-
-// class ControlPage extends StatefulWidget {
-//   const ControlPage({super.key});
-
-//   @override
-//   State<ControlPage> createState() => _ControlPageState();
-// }
-
-// class _ControlPageState extends State<ControlPage> {
-//   final List<Map<String, dynamic>> questions = [
-//     {
-//       'question': LocaleKeys.cleanliness_hygiene.tr(),
-//       'rating': null,
-//       'photos': <File>[],
-//     },
-//     {
-//       'question': LocaleKeys.personnel_service.tr(),
-//       'rating': null,
-//       'photos': <File>[],
-//     },
-//     {
-//       'question': LocaleKeys.product_quality.tr(),
-//       'rating': null,
-//       'photos': <File>[],
-//     },
-//     {
-//       'question': LocaleKeys.store_organization.tr(),
-//       'rating': null,
-//       'photos': <File>[],
-//     },
-//   ];
-
-//   final ImagePicker _picker = ImagePicker();
-
-//   Future<void> _takePhoto(Map<String, dynamic> question) async {
-//     try {
-//       final XFile? photo = await _picker.pickImage(
-//         source: ImageSource.camera,
-//         preferredCameraDevice: CameraDevice.rear,
-//       );
-
-//       if (photo != null) {
-//         setState(() {
-//           List<File> photos = question['photos'] as List<File>;
-//           photos.add(File(photo.path));
-//         });
-//       }
-//     } catch (e) {
-//       debugPrint('Error taking photo: $e');
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: SingleChildScrollView(
-//         padding: const EdgeInsets.all(16),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.stretch,
-//           children: [
-//             ...questions.map((question) => _buildQuestionCard(question)),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildQuestionCard(Map<String, dynamic> question) {
-//     List<File> photos = question['photos'] as List<File>;
-//     final List<String> emojis = ['😃', '🙂', '😐', '😞'];
-
-//     return Container(
-//       margin: const EdgeInsets.only(bottom: 16),
-//       decoration: BoxDecoration(
-//         color: AppColors.whiteWithOpacity(0.1),
-//         borderRadius: BorderRadius.circular(12),
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.black.withValues(alpha: 0.1),
-//             blurRadius: 8,
-//             offset: const Offset(0, 2),
-//           ),
-//         ],
-//       ),
-//       child: Column(
-//         children: [
-//           Container(
-//             padding: const EdgeInsets.all(16),
-//             decoration: BoxDecoration(
-//               borderRadius: const BorderRadius.vertical(
-//                 top: Radius.circular(12),
-//               ),
-//             ),
-//             child: Row(
-//               children: [
-//                 Text(
-//                   question['question'],
-//                   style: const TextStyle(
-//                     fontSize: 18,
-//                     fontWeight: FontWeight.bold,
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//           Container(
-//             padding: const EdgeInsets.all(16),
-//             child: Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//               children: List.generate(4, (index) {
-//                 final rating = index + 1;
-//                 final bool isSelected = question['rating'] == rating;
-
-//                 return GestureDetector(
-//                   onTap: () {
-//                     setState(() {
-//                       question['rating'] = rating;
-//                     });
-//                   },
-//                   child: AnimatedContainer(
-//                     duration: const Duration(milliseconds: 300),
-//                     width: isSelected ? 80 : 70,
-//                     height: isSelected ? 80 : 70,
-//                     decoration: BoxDecoration(
-//                       color: isSelected
-//                           ? AppColors.primaryRed
-//                           : Colors.grey[300],
-//                       borderRadius: BorderRadius.circular(12),
-//                       boxShadow: [
-//                         BoxShadow(
-//                           color: Colors.black.withValues(alpha: 0.1),
-//                           blurRadius: 4,
-//                           offset: const Offset(0, 2),
-//                         ),
-//                       ],
-//                     ),
-//                     child: Column(
-//                       mainAxisAlignment: MainAxisAlignment.center,
-//                       children: [
-//                         Text(
-//                           rating.toString(),
-//                           style: TextStyle(
-//                             fontSize: 24,
-//                             fontWeight: FontWeight.bold,
-//                             color: isSelected
-//                                 ? AppColors.whiteWithOpacity(0.9)
-//                                 : Colors.black,
-//                           ),
-//                         ),
-//                         if (isSelected)
-//                           AnimatedScale(
-//                             scale: isSelected ? 1.3 : 1.0,
-//                             duration: const Duration(milliseconds: 300),
-//                             curve: Curves.elasticOut,
-//                             child: Text(
-//                               emojis[index],
-//                               style: const TextStyle(fontSize: 24),
-//                             ),
-//                           ),
-//                       ],
-//                     ),
-//                   ),
-//                 );
-//               }),
-//             ),
-//           ),
-//           Container(
-//             padding: const EdgeInsets.all(16),
-//             decoration: BoxDecoration(
-//               borderRadius: const BorderRadius.vertical(
-//                 bottom: Radius.circular(12),
-//               ),
-//             ),
-//             child: Column(
-//               crossAxisAlignment: CrossAxisAlignment.stretch,
-//               children: [
-//                 AppButton(
-//                   text: LocaleKeys.take_photo.tr(),
-//                   icon: Icons.camera_alt,
-//                   onPressed: () => _takePhoto(question),
-//                   backgroundColor: AppColors.primaryRed,
-//                   textStyle: TextStyle(color: AppColors.whiteWithOpacity(0.9)),
-//                   height: 48,
-//                 ),
-//                 if (photos.isNotEmpty) ...[
-//                   const SizedBox(height: 12),
-//                   Container(
-//                     height: 120,
-//                     decoration: BoxDecoration(
-//                       borderRadius: BorderRadius.circular(8),
-//                     ),
-//                     child: GridView.builder(
-//                       scrollDirection: Axis.horizontal,
-//                       gridDelegate:
-//                           const SliverGridDelegateWithFixedCrossAxisCount(
-//                             crossAxisCount: 1,
-//                             mainAxisSpacing: 8,
-//                             childAspectRatio: 1,
-//                           ),
-//                       itemCount: photos.length,
-//                       itemBuilder: (context, index) {
-//                         return Stack(
-//                           children: [
-//                             Container(
-//                               decoration: BoxDecoration(
-//                                 borderRadius: BorderRadius.circular(8),
-//                                 image: DecorationImage(
-//                                   image: FileImage(photos[index]),
-//                                   fit: BoxFit.cover,
-//                                 ),
-//                               ),
-//                             ),
-//                             Positioned(
-//                               top: 4,
-//                               right: 4,
-//                               child: InkWell(
-//                                 onTap: () {
-//                                   setState(() {
-//                                     photos.removeAt(index);
-//                                   });
-//                                 },
-//                                 child: Container(
-//                                   padding: const EdgeInsets.all(2),
-//                                   decoration: BoxDecoration(
-//                                     color: AppColors.whiteWithOpacity(0.9),
-//                                     shape: BoxShape.circle,
-//                                   ),
-//                                   child: const Icon(
-//                                     Icons.close,
-//                                     size: 16,
-//                                     color: AppColors.primaryRed,
-//                                   ),
-//                                 ),
-//                               ),
-//                             ),
-//                           ],
-//                         );
-//                       },
-//                     ),
-//                   ),
-//                 ],
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }

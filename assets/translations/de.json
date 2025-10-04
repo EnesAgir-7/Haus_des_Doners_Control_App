@@ -128,5 +128,20 @@
   "score": "Bewertung",
   "view_all_route": "Gesamte Route anzeigen",
   "stops": "Stopps",
-  "your_route_plan": "Ihr Routenplaner"
+  "your_route_plan": "Ihr Routenplaner",
+  "branch_inspection": "Filialprüfung",
+  "maximum_photos": "Maximal 4 Fotos erlaubt",
+  "error_taking_photo": "Fehler beim Aufnehmen des Fotos",
+  "no_template": "Keine Vorlage für diese Filiale verknüpft",
+  "submit_inspection": "Prüfung absenden",
+  "no_branches": "Keine Filialen verfügbar",
+  "add_notes_optional": "Notizen hinzufügen (optional)",
+  "overall_notes": "Gesamtnotizen",
+  "general_comments": "Fügen Sie allgemeine Kommentare zu dieser Prüfung hinzu...",
+  "total_score": "Gesamtpunktzahl",
+  "uploading_photos": "Fotos werden hochgeladen...",
+  "submit_inspection_question": "Prüfung absenden?",
+  "submit_inspection_warning": "Sind Sie sicher, dass Sie diese Prüfung absenden möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+  "submit": "Absenden",
+  "inspection_submitted": "Prüfung erfolgreich abgesendet!"
 }

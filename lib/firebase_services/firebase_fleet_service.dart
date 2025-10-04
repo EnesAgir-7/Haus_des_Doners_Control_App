@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../core/constants/firebase_constants.dart';
 import '../models/vehicle_model.dart'; // Make sure you have this model
 
 class VehicleService {
   final CollectionReference _vehiclesCollection = FirebaseFirestore.instance
-      .collection('vehicles');
+      .collection(Collections.vehicles);
 
   /// Fetches a single vehicle assigned to a specific inspector.
   Future<VehicleModel?> getVehicleByInspector(String inspectorId) async {
