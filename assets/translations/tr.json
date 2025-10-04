@@ -155,5 +155,10 @@
   "sign_here": "Parmağınızla buraya imzalayın",
   "save_signature": "İmzayı Kaydet",
   "please_sign_first": "Lütfen önce imzalayın",
-  "clear": "Temizle"
+  "clear": "Temizle",
+  "search_branches": "Şubeleri ara...",
+  "retry": "Tekrar Dene",
+  "no_branches_found": "Aramanızla eşleşen şube bulunamadı",
+  "no_branches_available": "Mevcut şube yok",
+  "unassigned": "Atanmamış"
 }

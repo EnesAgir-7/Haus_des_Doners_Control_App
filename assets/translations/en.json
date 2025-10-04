@@ -155,5 +155,10 @@
   "sign_here": "Sign here with your finger",
   "save_signature": "Save Signature",
   "please_sign_first": "Please sign first",
-  "clear": "Clear"
+  "clear": "Clear",
+  "search_branches": "Search branches...",
+  "retry": "Retry",
+  "no_branches_found": "No branches found matching your search",
+  "no_branches_available": "No branches available",
+  "unassigned": "Unassigned"
 }

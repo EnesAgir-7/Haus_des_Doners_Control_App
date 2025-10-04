@@ -155,5 +155,10 @@
   "sign_here": "Hier mit dem Finger unterschreiben",
   "save_signature": "Unterschrift speichern",
   "please_sign_first": "Bitte zuerst unterschreiben",
-  "clear": "Löschen"
+  "clear": "Löschen",
+  "search_branches": "Filialen suchen...",
+  "retry": "Wiederholen",
+  "no_branches_found": "Keine Filialen für Ihre Suche gefunden",
+  "no_branches_available": "Keine Filialen verfügbar",
+  "unassigned": "Nicht zugewiesen"
 }

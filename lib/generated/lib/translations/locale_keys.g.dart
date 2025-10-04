@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class LocaleKeys {
+abstract class  LocaleKeys {
   static const panel = 'panel';
   static const subsidiaries = 'subsidiaries';
   static const fleet = 'fleet';
@@ -30,7 +30,6 @@ abstract class LocaleKeys {
   static const password_min_length = 'password_min_length';
   static const forgot_password = 'forgot_password';
   static const login = 'login';
-  static const controller_name = 'controller_name';
   static const region = 'region';
   static const total_branch = 'total_branch';
   static const this_week_check = 'this_week_check';
@@ -48,6 +47,7 @@ abstract class LocaleKeys {
   static const fleet_management = 'fleet_management';
   static const other_controller_vehicles = 'other_controller_vehicles';
   static const current_rented_vehicle = 'current_rented_vehicle';
+  static const controller_name = 'controller_name';
   static const current_km = 'current_km';
   static const max_km = 'max_km';
   static const remaining_km = 'remaining_km';
@@ -165,4 +165,5 @@ abstract class LocaleKeys {
   static const no_branches_found = 'no_branches_found';
   static const no_branches_available = 'no_branches_available';
   static const unassigned = 'unassigned';
+
 }
