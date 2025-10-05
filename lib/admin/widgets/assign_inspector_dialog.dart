@@ -19,7 +19,7 @@ class _AssignInspectorDialogState extends State<AssignInspectorDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedInspectorId = widget.branch.assignedInspectorId;
+    _selectedInspectorId = widget.branch.assignedInspector?.id;
   }
 
   @override
@@ -68,7 +68,7 @@ class _AssignInspectorDialogState extends State<AssignInspectorDialog> {
         ),
         ElevatedButton(
           onPressed: () async {
-            if (_selectedInspectorId != widget.branch.assignedInspectorId) {
+            if (_selectedInspectorId != widget.branch.assignedInspector?.id) {
               await provider.assignInspectorToBranch(
                 widget.branch.id,
                 _selectedInspectorId ?? '',

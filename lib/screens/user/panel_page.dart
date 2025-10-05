@@ -1,8 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:haus_des_control/providers/provider_branches.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/enums.dart';
 import '../../providers/provider_panel.dart';
 import '../../providers/provider_route.dart';
 import '../../translations/locale_keys.g.dart';
@@ -111,9 +114,6 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = provider.currentUser;
-    final stats = provider.currentMonthStats;
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -124,13 +124,14 @@ class DashboardCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header with user info
           Row(
             children: [
               const Icon(Icons.search, color: Colors.lightBlueAccent, size: 20),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  user?.name ?? LocaleKeys.controller_name.tr(),
+                  loggedInUser?.name ?? LocaleKeys.controller_name.tr(),
                   style: const TextStyle(
                     color: AppColors.primaryRed,
                     fontWeight: FontWeight.bold,
@@ -143,127 +144,393 @@ class DashboardCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          Text(
-            user?.region ?? LocaleKeys.region.tr(),
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
-          ),
-          const SizedBox(height: 16),
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 2.2,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              StatBox(
-                number: provider.totalBranches.toString(),
-                label: LocaleKeys.total_branch.tr(),
+              Text(
+                loggedInUser?.region ?? LocaleKeys.region.tr(),
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
               ),
-              StatBox(
-                number: provider.completedInspections.toString(),
-                label: LocaleKeys.this_week_check.tr(),
-              ),
-              StatBox(
-                number: provider.pendingInspections.toString(),
-                label: LocaleKeys.pending_task.tr(),
-              ),
-              StatBox(
-                number: provider.averageScore.toStringAsFixed(1),
-                label: LocaleKeys.average_score.tr(),
+              // Time Range Dropdown
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.lightRed,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.primaryRed.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: DropdownButton<TimeRange>(
+                  value: provider.selectedRange,
+                  isDense: true,
+                  underline: const SizedBox(),
+                  dropdownColor: AppColors.lightBlack,
+                  icon: const Icon(
+                    Icons.keyboard_arrow_down,
+                    color: AppColors.primaryRed,
+                    size: 18,
+                  ),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  items: [TimeRange.daily, TimeRange.weekly, TimeRange.monthly]
+                      .map((time) {
+                        return DropdownMenuItem(
+                          value: time,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.today,
+                                size: 14,
+                                color: Colors.white70,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(time.name),
+                            ],
+                          ),
+                        );
+                      })
+                      .toList(),
+                  onChanged: (range) {
+                    if (range != null) {
+                      provider.changeTimeRange(range);
+                    }
+                  },
+                ),
               ),
             ],
           ),
+          const SizedBox(height: 16),
 
-          if (stats != null) ...[
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.lightRed,
-                borderRadius: BorderRadius.circular(12),
+          if (provider.isLoading)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32),
+                child: CircularProgressIndicator(color: AppColors.primaryRed),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        LocaleKeys.monthly_progress.tr(),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        '${provider.progressPercent.toStringAsFixed(0)}%',
-                        style: TextStyle(
-                          color: AppColors.primaryRed,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: provider.progressPercent / 100,
-                      backgroundColor: Colors.white24,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        AppColors.primaryRed,
-                      ),
-                      minHeight: 6,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${provider.completedInspections} / ${provider.totalBranches} ${LocaleKeys.branches_checked.tr()}',
-                    style: TextStyle(color: Colors.white70, fontSize: 11),
-                  ),
-                ],
-              ),
+            )
+          else
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 2.2,
+              children: [
+                Consumer<ProviderBranches>(
+                  builder: (context, brachCont, child) {
+                    return StatBox(
+                      isLoading: brachCont.isLoading,
+                      number: brachCont.branchCount.toString(),
+                      label: "Assigned Branches",
+                      icon: Icons.apartment,
+                      color: Colors.blue,
+                    );
+                  },
+                ),
+                StatBox(
+                  number: provider.completedInspections.toString(),
+                  label: _getRangeLabel(provider.selectedRange, context),
+                  icon: Icons.check_circle,
+                  color: Colors.green,
+                ),
+                StatBox(
+                  number: provider.pendingTasks.toString(),
+                  label: LocaleKeys.pending_task.tr(),
+                  icon: Icons.pending_actions,
+                  color: Colors.orange,
+                ),
+                StatBox(
+                  number: provider.averageScore.toStringAsFixed(1),
+                  label: LocaleKeys.average_score.tr(),
+                  icon: Icons.star,
+                  color: AppColors.amber,
+                ),
+              ],
             ),
-          ],
+
+          const SizedBox(height: 16),
+          Consumer<ProviderRoute>(
+            builder: (context, ro, child) {
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.lightRed,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _getProgressLabel(provider.selectedRange, context),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          '${(provider.calculateCompletionPercentage(ro.completedStops, ro.totalStops) * 100).toStringAsFixed(0)}%',
+                          style: const TextStyle(
+                            color: AppColors.primaryRed,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: provider.calculateCompletionPercentage(
+                          ro.completedStops,
+                          ro.totalStops,
+                        ),
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.primaryRed,
+                        ),
+                        minHeight: 6,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${ro.completedStops} / ${ro.totalStops} ${LocaleKeys.branches_checked.tr()}',
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
   }
+
+  String _getRangeLabel(TimeRange range, BuildContext context) {
+    switch (range) {
+      case TimeRange.daily:
+        return "Today Checks";
+      case TimeRange.weekly:
+        return LocaleKeys.this_week_check.tr();
+      case TimeRange.monthly:
+        return "This month";
+    }
+  }
+
+  String _getProgressLabel(TimeRange range, BuildContext context) {
+    switch (range) {
+      case TimeRange.daily:
+        return "Daily Progress";
+      case TimeRange.weekly:
+        return "Weekly Progress";
+      case TimeRange.monthly:
+        return LocaleKeys.monthly_progress.tr();
+    }
+  }
 }
+
+// class DashboardCard extends StatelessWidget {
+//   final ProviderPanel provider;
+
+//   const DashboardCard({super.key, required this.provider});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final stats = provider.currentMonthStats;
+
+//     return Container(
+//       padding: const EdgeInsets.all(16),
+//       decoration: BoxDecoration(
+//         color: AppColors.lightBlack,
+//         borderRadius: BorderRadius.circular(16),
+//         border: Border.all(color: AppColors.primaryRed),
+//       ),
+//       child: Column(
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           Row(
+//             children: [
+//               const Icon(Icons.search, color: Colors.lightBlueAccent, size: 20),
+//               const SizedBox(width: 6),
+//               Expanded(
+//                 child: Text(
+//                   loggedInUser?.name ?? LocaleKeys.controller_name.tr(),
+//                   style: const TextStyle(
+//                     color: AppColors.primaryRed,
+//                     fontWeight: FontWeight.bold,
+//                     fontSize: 16,
+//                   ),
+//                   maxLines: 1,
+//                   overflow: TextOverflow.ellipsis,
+//                 ),
+//               ),
+//             ],
+//           ),
+//           const SizedBox(height: 6),
+//           Text(
+//             loggedInUser?.region ?? LocaleKeys.region.tr(),
+//             style: const TextStyle(color: Colors.white70, fontSize: 14),
+//           ),
+//           const SizedBox(height: 16),
+//           GridView.count(
+//             shrinkWrap: true,
+//             physics: const NeverScrollableScrollPhysics(),
+//             crossAxisCount: 2,
+//             crossAxisSpacing: 12,
+//             mainAxisSpacing: 12,
+//             childAspectRatio: 2.2,
+//             children: [
+//               StatBox(
+//                 number: provider.totalBranches.toString(),
+//                 label: LocaleKeys.total_branch.tr(),
+//               ),
+//               StatBox(
+//                 number: provider.completedInspections.toString(),
+//                 label: LocaleKeys.this_week_check.tr(),
+//               ),
+//               StatBox(
+//                 number: provider.pendingInspections.toString(),
+//                 label: LocaleKeys.pending_task.tr(),
+//               ),
+//               StatBox(
+//                 number: provider.averageScore.toStringAsFixed(1),
+//                 label: LocaleKeys.average_score.tr(),
+//               ),
+//             ],
+//           ),
+
+//           if (stats != null) ...[
+//             const SizedBox(height: 16),
+//             Container(
+//               padding: const EdgeInsets.all(12),
+//               decoration: BoxDecoration(
+//                 color: AppColors.lightRed,
+//                 borderRadius: BorderRadius.circular(12),
+//               ),
+//               child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: [
+//                   Row(
+//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                     children: [
+//                       Text(
+//                         LocaleKeys.monthly_progress.tr(),
+//                         style: TextStyle(
+//                           color: Colors.white,
+//                           fontSize: 13,
+//                           fontWeight: FontWeight.w600,
+//                         ),
+//                       ),
+//                       Text(
+//                         '${provider.progressPercent.toStringAsFixed(0)}%',
+//                         style: TextStyle(
+//                           color: AppColors.primaryRed,
+//                           fontSize: 14,
+//                           fontWeight: FontWeight.bold,
+//                         ),
+//                       ),
+//                     ],
+//                   ),
+//                   const SizedBox(height: 8),
+//                   ClipRRect(
+//                     borderRadius: BorderRadius.circular(4),
+//                     child: LinearProgressIndicator(
+//                       value: provider.progressPercent / 100,
+//                       backgroundColor: Colors.white24,
+//                       valueColor: AlwaysStoppedAnimation<Color>(
+//                         AppColors.primaryRed,
+//                       ),
+//                       minHeight: 6,
+//                     ),
+//                   ),
+//                   const SizedBox(height: 8),
+//                   Text(
+//                     '${provider.completedInspections} / ${provider.totalBranches} ${LocaleKeys.branches_checked.tr()}',
+//                     style: TextStyle(color: Colors.white70, fontSize: 11),
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ],
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class StatBox extends StatelessWidget {
   final String number;
   final String label;
+  final IconData? icon;
+  final Color? color;
+  final bool isLoading;
 
-  const StatBox({super.key, required this.number, required this.label});
+  const StatBox({
+    super.key,
+    required this.number,
+    required this.label,
+    this.isLoading = false,
+    this.icon,
+    this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.lightRed,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: (color ?? AppColors.primaryRed).withValues(alpha: 0.3),
+        ),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            number,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryRed,
-            ),
+          Row(
+            children: [
+              if (icon != null) ...[
+                Icon(icon, size: 16, color: color ?? AppColors.primaryRed),
+                const SizedBox(width: 6),
+              ],
+              Expanded(
+                child: isLoading
+                    ? CircularProgressIndicator(
+                        color: color ?? AppColors.primaryRed,
+                      )
+                    : Text(
+                        number,
+                        style: TextStyle(
+                          color: color ?? AppColors.primaryRed,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           Text(
             label,
-            style: const TextStyle(fontSize: 13, color: Colors.white70),
-            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white70, fontSize: 11),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -373,13 +640,12 @@ class DailySummarySection extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-
-            ...stops.take(5).map((stop) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: StatisticCard(stop: stop),
-              );
-            }).toList(),
+            Column(
+              spacing: 16,
+              children: stops.take(5).map((stop) {
+                return StatisticCard(stop: stop);
+              }).toList(),
+            ),
 
             if (stops.length > 5) ...[
               const SizedBox(height: 8),

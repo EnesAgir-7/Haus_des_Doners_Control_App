@@ -665,7 +665,6 @@ class _ControlPageState extends State<ControlPage> {
     if (success && mounted) {
       showSnakBarr(context, LocaleKeys.inspection_submitted.tr());
 
-      await Future.delayed(Duration(seconds: 2));
       if (mounted) {
         Navigator.pop(context);
       }

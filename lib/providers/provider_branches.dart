@@ -1,14 +1,12 @@
 // lib/providers/subsidiaries_provider.dart
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/widgets/custom_toast.dart';
 
 import '../firebase_services/firebase_branch_service.dart';
 import '../firebase_services/firebase_inspection_service.dart';
-import '../helpers/local_storage_helper.dart';
 import '../models/branch_model.dart';
 import '../models/inspection_model.dart';
-import '../models/user_model.dart';
 
 /// Provider for Subsidiaries (Branches) screen
 /// Shows list of branches assigned to inspector
@@ -49,12 +47,7 @@ class ProviderBranches extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      _branches = await _branchService.getBranchesByInspector(userId);
+      _branches = await _branchService.getBranchesByInspector(loggedInUser!.id);
 
       _isLoading = false;
       notifyListeners();
@@ -68,10 +61,9 @@ class ProviderBranches extends ChangeNotifier {
 
   // Stream-based initialization (real-time updates)
   void initializeWithStreams() {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return;
-
-    _branchService.streamBranchesByInspector(userId).listen((branches) {
+    _branchService.streamBranchesByInspector(loggedInUser!.id).listen((
+      branches,
+    ) {
       _branches = branches;
       notifyListeners();
     });
@@ -81,18 +73,17 @@ class ProviderBranches extends ChangeNotifier {
   Future<void> selectBranch(BranchModel branch) async {
     _selectedBranch = branch;
     notifyListeners();
-    await fetchBranchInspections(branch.id);
+    await fetchLastTenBranchInspections(branch.id);
   }
 
   // Fetch inspections for selected branch
-  Future<void> fetchBranchInspections(String branchId) async {
+  Future<void> fetchLastTenBranchInspections(String branchId) async {
     try {
       _isLoadingInspections = true;
       notifyListeners();
 
-      _branchInspections = await _inspectionService.getInspectionsByBranch(
-        branchId,
-      );
+      _branchInspections = await _inspectionService
+          .getLastTenInspectionsByBranch(branchId);
 
       _isLoadingInspections = false;
       notifyListeners();
@@ -162,7 +153,7 @@ class ProviderBranches extends ChangeNotifier {
     return filtered;
   }
 
-  Future<void> assignBranchToMe({
+  Future<bool> assignBranchToMe({
     required String branchId,
     required String branchName,
     required String timeSlot,
@@ -171,55 +162,49 @@ class ProviderBranches extends ChangeNotifier {
     try {
       _isLoading = true;
       notifyListeners();
-      final UserModel? userModel;
-      final cachedMap = await LocalStorageHelper.instance.getData(cacheUserKey);
-      if (cachedMap != null) {
-        userModel = UserModel.fromMap(cachedMap);
-      } else {
-        userModel = null;
-      }
 
       await _branchService.assignBranchToHimself(
-        inspectorId: userModel!.id,
-        inspectorName: userModel.name,
+        inspectorId: loggedInUser!.id,
+        inspectorName: loggedInUser!.name,
+        timeSlot: timeSlot,
         branchId: branchId,
         branchName: branchName,
-        timeSlot: timeSlot,
       );
 
       _isLoading = false;
       notifyListeners();
-
       showSnakBarr(context, "Branch assigned successfully");
+      return true;
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      showSnakBarr(context, "Failed to assign branch");
+      showSnakBarr(context, "Failed to assign branch: $e");
+      return false;
     }
   }
 
-  Future<void> unAssignBranchToMe({
+  Future<bool> unAssignBranchToMe({
     required String branchId,
     required BuildContext context,
   }) async {
     try {
       _isLoading = true;
       notifyListeners();
-      final userId = FirebaseAuth.instance.currentUser?.uid;
 
       await _branchService.removeBranchAssignment(
-        inspectorId: userId!,
+        inspectorId: loggedInUser!.id,
         branchId: branchId,
       );
 
       _isLoading = false;
       notifyListeners();
-
-      showSnakBarr(context, "Branch assigned successfully");
+      showSnakBarr(context, "Branch unassigned successfully");
+      return true;
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      showSnakBarr(context, "Failed to assign branch");
+      showSnakBarr(context, "Failed to unassign branch: $e");
+      return false;
     }
   }
 
@@ -227,7 +212,7 @@ class ProviderBranches extends ChangeNotifier {
   Future<void> refresh() async {
     await fetchBranches();
     if (_selectedBranch != null) {
-      await fetchBranchInspections(_selectedBranch!.id);
+      await fetchLastTenBranchInspections(_selectedBranch!.id);
     }
   }
 

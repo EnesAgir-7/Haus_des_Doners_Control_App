@@ -94,7 +94,7 @@ class _RoutePageState extends State<RoutePage> {
       },
       child: ListView.separated(
         physics: AlwaysScrollableScrollPhysics(),
-        separatorBuilder: (context, index) => const SizedBox(height: 10),
+        separatorBuilder: (context, index) => const SizedBox(height: 16),
         itemCount: provider.stops.length,
         itemBuilder: (context, index) {
           final stop = provider.stops[index];

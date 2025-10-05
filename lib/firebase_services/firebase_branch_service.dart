@@ -83,7 +83,6 @@ class BranchService {
       final docSnap = await routeDocRef.get();
 
       if (!docSnap.exists) {
-        console('No route found for inspector');
         // 2. Create a new route document directly under inspectorId
         final route = RouteModel(
           id: inspectorId,
@@ -92,7 +91,6 @@ class BranchService {
           inspectorName: inspectorName,
           stops: [
             RouteStopModel(
-              
               timeSlot: timeSlot,
               branchId: branchId,
               branchName: branchName,
@@ -105,9 +103,7 @@ class BranchService {
           updatedAt: DateTime.now(),
         );
         await routeDocRef.set(route.toMap());
-        console('New route created for inspector');
       } else {
-        console('Route found for inspector');
         // 3. Append stop to existing route
         final route = RouteModel.fromFirestore(docSnap);
         final newStop = RouteStopModel(

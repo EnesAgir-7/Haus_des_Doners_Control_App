@@ -5,7 +5,7 @@ class InspectionModel {
   final String branchId;
   final String branchName;
   final String inspectorId;
-  final String inspectorName;
+  final String? inspectorName;
   final DateTime scheduledTime;
   final DateTime? completedTime;
   final String status; // "scheduled" | "completed" | "pending" | "current"
@@ -48,7 +48,7 @@ class InspectionModel {
       branchId: data['branchId'] ?? '',
       branchName: data['branchName'] ?? '',
       inspectorId: data['inspectorId'] ?? '',
-      inspectorName: data['inspectorName'] ?? '',
+      inspectorName: data['inspectorName'],
       scheduledTime: (data['scheduledTime'] as Timestamp).toDate(),
       completedTime: data['completedTime'] != null
           ? (data['completedTime'] as Timestamp).toDate()

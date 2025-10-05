@@ -83,6 +83,36 @@ class BranchMapController extends ChangeNotifier {
     }
   }
 
+    // Update a specific branch's marker after assignment change
+  void updateBranchMarker(String branchId, bool isAssigned) {
+    final branchIndex = _branches.indexWhere((b) => b.id == branchId);
+    if (branchIndex != -1) {
+      // Update the branch in the list
+      _branches[branchIndex] = _branches[branchIndex].copyWith(
+        isRouteAssigned: isAssigned,
+      );
+
+      // Recreate the marker with new color
+      markers[branchId] = Marker(
+        markerId: MarkerId(branchId),
+        position: LatLng(
+          _branches[branchIndex].gps.latitude,
+          _branches[branchIndex].gps.longitude,
+        ),
+        infoWindow: InfoWindow(
+          title: _branches[branchIndex].name,
+          snippet: _branches[branchIndex].address,
+        ),
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          isAssigned ? BitmapDescriptor.hueGreen : BitmapDescriptor.hueRed,
+        ),
+        onTap: () => selectBranch(_branches[branchIndex], fromMarker: true),
+      );
+
+      notifyListeners();
+    }
+  }
+
   void onPageChanged(int index) {
     if (index < _branches.length) {
       final branch = _branches[index];

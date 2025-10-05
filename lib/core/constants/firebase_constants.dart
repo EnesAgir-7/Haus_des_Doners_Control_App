@@ -17,6 +17,7 @@ class AppConstants {
   static const completed = "completed";
   static const current = "current";
   static const inProgress = "in_progress";
+  static const count = "{count}";
 }
 
- UserModel? loggedInUser;
+UserModel? loggedInUser;

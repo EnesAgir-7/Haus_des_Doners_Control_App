@@ -65,6 +65,70 @@ class BranchModel {
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
   }
+  factory BranchModel.fromMap(Map<String, dynamic> data) {
+    return BranchModel(
+      id: '', // ID is empty since it's not provided here
+      name: data['name'] ?? '',
+      address: data['address'] ?? '',
+      templateId: data['templateId'] ?? '',
+      gps: data['gps'] ?? const GeoPoint(0, 0),
+      contactName: data['contactName'] ?? '',
+      contactPhone: data['contactPhone'] ?? '',
+      assignedInspector: data['assignedInspector'] != null
+          ? AssignedInspector.fromMap(data['assignedInspector'])
+          : null,
+      isRouteAssigned: data['isAssigned'] ?? false,
+      lastInspectionDate: data['lastInspectionDate'] != null
+          ? (data['lastInspectionDate'] as Timestamp).toDate()
+          : null,
+      lastInspectionScore: data['lastInspectionScore']?.toDouble(),
+      totalInspections: data['totalInspections'] ?? 0,
+      averageScore: (data['averageScore'] ?? 0.0).toDouble(),
+      status: data['status'] ?? 'active',
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+    );
+  }
+
+  BranchModel copyWith({
+    String? id,
+    String? name,
+    String? address,
+    String? templateId,
+    GeoPoint? gps,
+    String? contactName,
+    String? contactPhone,
+    AssignedInspector? assignedInspector,
+    bool? isRouteAssigned,
+    DateTime? lastInspectionDate,
+    double? lastInspectionScore,
+    int? totalInspections,
+    double? averageScore,
+    String? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return BranchModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      address: address ?? this.address,
+      templateId: templateId ?? this.templateId,
+      gps: gps ?? this.gps,
+      contactName: contactName ?? this.contactName,
+      contactPhone: contactPhone ?? this.contactPhone,
+      assignedInspector: assignedInspector ?? this.assignedInspector,
+      isRouteAssigned: isRouteAssigned ?? this.isRouteAssigned,
+      lastInspectionDate: lastInspectionDate ?? this.lastInspectionDate,
+      lastInspectionScore: lastInspectionScore ?? this.lastInspectionScore,
+      totalInspections: totalInspections ?? this.totalInspections,
+      averageScore: averageScore ?? this.averageScore,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+
 
   Map<String, dynamic> toMap() {
     return {

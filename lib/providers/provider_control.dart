@@ -143,7 +143,6 @@ class ProviderControl extends ChangeNotifier {
   }
 
   Future<void> fetchTemplateByID(String id) async {
-    console("Fetching Template");
     _isLoading = true;
     notifyListeners();
 

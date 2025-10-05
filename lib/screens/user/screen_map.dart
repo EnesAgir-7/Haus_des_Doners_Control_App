@@ -151,22 +151,97 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                 height: 40,
                 child: Row(
                   children: [
+                    // Expanded(
+                    //   child: Consumer<ProviderBranches>(
+                    //     builder: (context, branchContr, child) {
+                    //       return AppButton(
+                    //         isLoading: branchContr.isLoading,
+                    //         text: branch.isRouteAssigned
+                    //             ? "Un Assign"
+                    //             : "Assign to Me",
+                    //         onPressed: () async {
+                    //           if (branch.isRouteAssigned) {
+                    //             branchContr.unAssignBranchToMe(
+                    //               branchId: branch.id,
+                    //               context: context,
+                    //             );
+                    //           } else {
+                    //             // show date picker before assigning
+                    //             final DateTime? pickedDate =
+                    //                 await showDatePicker(
+                    //                   locale: context.locale,
+                    //                   context: context,
+                    //                   initialDate: DateTime.now(),
+                    //                   firstDate: DateTime.now(),
+                    //                   lastDate: DateTime.now().add(
+                    //                     const Duration(days: 365),
+                    //                   ),
+                    //                 );
+
+                    //             if (pickedDate != null) {
+                    //               // format the slot however you want
+                    //               final String timeSlot =
+                    //                   //  Timestamp.fromDate(
+                    //                   //   pickedDate,
+                    //                   // );
+                    //                   "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+
+                    //               branchContr.assignBranchToMe(
+                    //                 branch: branch,
+                    //                 timeSlot: timeSlot,
+                    //                 context: context,
+                    //               );
+                    //             }
+                    //           }
+                    //         },
+                    //         backgroundColor: branch.isRouteAssigned
+                    //             ? AppColors.primaryRed
+                    //             : AppColors.amber,
+                    //         textStyle: TextStyle(
+                    //           fontSize: 11,
+                    //           color: branch.isRouteAssigned
+                    //               ? Colors.white
+                    //               : AppColors.primaryDark,
+                    //         ),
+                    //         padding: const EdgeInsets.symmetric(vertical: 8),
+                    //         borderRadius: 10,
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
                     Expanded(
-                      child: Consumer<ProviderBranches>(
-                        builder: (context, branchContr, child) {
+                      // Listen to both providers to get real-time updates
+                      child: Consumer2<ProviderBranches, BranchMapController>(
+                        builder: (context, branchContr, mapContr, child) {
+                          // Get the updated branch from map controller
+                          final updatedBranch = mapContr.branches.firstWhere(
+                            (b) => b.id == branch.id,
+                            orElse: () => branch,
+                          );
+
                           return AppButton(
                             isLoading: branchContr.isLoading,
-                            text: branch.isRouteAssigned
+                            text: updatedBranch.isRouteAssigned
                                 ? "Un Assign"
                                 : "Assign to Me",
                             onPressed: () async {
-                              if (branch.isRouteAssigned) {
-                                branchContr.unAssignBranchToMe(
-                                  branchId: branch.id,
-                                  context: context,
-                                );
+                              if (updatedBranch.isRouteAssigned) {
+                                // Unassign
+                                final success = await branchContr
+                                    .unAssignBranchToMe(
+                                      branchId: updatedBranch.id,
+                                      context: context,
+                                    );
+
+                                if (success) {
+                                  // Update marker to red
+                                  mapContr.updateBranchMarker(
+                                    updatedBranch.id,
+                                    false,
+                                  );
+                                }
                               } else {
-                                // show date picker before assigning
+                                // Show date picker before assigning
                                 final DateTime? pickedDate =
                                     await showDatePicker(
                                       locale: context.locale,
@@ -179,28 +254,33 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                     );
 
                                 if (pickedDate != null) {
-                                  // format the slot however you want
                                   final String timeSlot =
-                                      //  Timestamp.fromDate(
-                                      //   pickedDate,
-                                      // );
                                       "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
 
-                                  branchContr.assignBranchToMe(
-                                    branchId: branch.id,
-                                    branchName: branch.name,
-                                    timeSlot: timeSlot,
-                                    context: context,
-                                  );
+                                  final success = await branchContr
+                                      .assignBranchToMe(
+                                        branchId: branch.id,
+                                        branchName: branch.name,
+                                        timeSlot: timeSlot,
+                                        context: context,
+                                      );
+
+                                  if (success) {
+                                    // Update marker to green
+                                    mapContr.updateBranchMarker(
+                                      updatedBranch.id,
+                                      true,
+                                    );
+                                  }
                                 }
                               }
                             },
-                            backgroundColor: branch.isRouteAssigned
+                            backgroundColor: updatedBranch.isRouteAssigned
                                 ? AppColors.primaryRed
                                 : AppColors.amber,
                             textStyle: TextStyle(
                               fontSize: 11,
-                              color: branch.isRouteAssigned
+                              color: updatedBranch.isRouteAssigned
                                   ? Colors.white
                                   : AppColors.primaryDark,
                             ),

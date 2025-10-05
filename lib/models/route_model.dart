@@ -98,6 +98,26 @@ class RouteStopModel {
     };
   }
 
+  RouteStopModel copyWith({
+    String? timeSlot,
+    String? branchId,
+    String? branchName,
+    String? status,
+    String? inspectionId,
+    int? order,
+    DateTime? createdAt,
+  }) {
+    return RouteStopModel(
+      timeSlot: timeSlot ?? this.timeSlot,
+      branchId: branchId ?? this.branchId,
+      branchName: branchName ?? this.branchName,
+      status: status ?? this.status,
+      inspectionId: inspectionId ?? this.inspectionId,
+      order: order ?? this.order,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
   bool get isCompleted => status == 'completed';
   bool get isPending => status == 'pending';
   bool get isCurrent => status == 'current';

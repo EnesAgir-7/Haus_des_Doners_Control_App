@@ -15,7 +15,7 @@ class BranchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<ProviderAdminBranches>();
     final assignedInspector = provider.inspectors.firstWhere(
-      (inspector) => inspector.id == branch.assignedInspectorId,
+      (inspector) => inspector.id == branch.assignedInspector?.id,
       orElse: () => UserModel(
         id: '',
         name: LocaleKeys.unassigned.tr(),
@@ -30,37 +30,36 @@ class BranchCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      branch.name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    branch.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  _buildStatusChip(branch.status),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(branch.address, style: const TextStyle(color: Colors.grey)),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildInspectorInfo(assignedInspector),
-                  _buildLastInspectionInfo(),
-                ],
-              ),
-            ],
-          ),
+                ),
+                _buildStatusChip(branch.status),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(branch.address, style: const TextStyle(color: Colors.grey)),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildInspectorInfo(assignedInspector),
+                _buildLastInspectionInfo(),
+              ],
+            ),
+          ],
         ),
       ),
     );

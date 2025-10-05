@@ -1,11 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../models/inspection_model.dart';
 import '../models/inspection_template_model.dart';
+import '../models/route_model.dart';
 
 class InspectionService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final String _collection = 'inspections';
+  final String _collection = Collections.inspections;
+  final String _collectionBranches = Collections.branches;
+  final String _collectionRoutes = Collections.routes;
 
   // Get inspections by branch
   Future<List<InspectionModel>> getInspectionsByBranch(String branchId) async {
@@ -14,6 +18,26 @@ class InspectionService {
           .collection(_collection)
           .where('branchId', isEqualTo: branchId)
           .orderBy('scheduledTime', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => InspectionModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error getting inspections by branch: $e');
+      return [];
+    }
+  }
+
+  Future<List<InspectionModel>> getLastTenInspectionsByBranch(
+    String branchId,
+  ) async {
+    try {
+      final snapshot = await _db
+          .collection(_collection)
+          .where('branchId', isEqualTo: branchId)
+          .orderBy('scheduledTime', descending: true)
+          .limit(10) // ✅ Get only last 10 inspections
           .get();
 
       return snapshot.docs
@@ -130,9 +154,61 @@ class InspectionService {
   Future<String> createInspection(InspectionModel inspection) async {
     try {
       final docRef = await _db.collection(_collection).add(inspection.toMap());
+      // Update branch statistics
+      await updateBranchStatistics(
+        branchId: inspection.branchId,
+        inspectionScore: inspection.score,
+      );
+
+      // 2. Update the route stop to mark as completed
+      await updateRouteStopStatus(
+        inspectorId: inspection.inspectorId,
+        branchId: inspection.branchId,
+        inspectionId: docRef.id,
+        status: 'completed',
+      );
+      
       return docRef.id;
     } catch (e) {
       print('Error creating inspection: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateBranchStatistics({
+    required String branchId,
+    required double inspectionScore,
+  }) async {
+    try {
+      final branchRef = _db.collection(_collectionBranches).doc(branchId);
+
+      // Get current branch data
+      final branchDoc = await branchRef.get();
+
+      if (!branchDoc.exists) {
+        throw Exception('Branch not found');
+      }
+
+      final currentData = branchDoc.data()!;
+      final currentTotal = currentData['totalInspections'] ?? 0;
+      final currentAverage = (currentData['averageRating'] ?? 0.0).toDouble();
+
+      // Calculate new average
+      final newTotal = currentTotal + 1;
+      final newAverage =
+          ((currentAverage * currentTotal) + inspectionScore) / newTotal;
+
+      // Update branch document
+      await branchRef.update({
+        'totalInspections': newTotal,
+        'lastInspectionDate': FieldValue.serverTimestamp(),
+        'averageRating': newAverage,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      print('Branch statistics updated: Total=$newTotal, Avg=$newAverage');
+    } catch (e) {
+      print('Error updating branch statistics: $e');
       rethrow;
     }
   }
@@ -183,7 +259,7 @@ class InspectionService {
     }
   }
 
-    // Fetches the single template document by its ID
+  // Fetches the single template document by its ID
   Future<InspectionTemplate?> getTemplateById(String templateId) async {
     try {
       final doc = await _db
@@ -200,4 +276,46 @@ class InspectionService {
       rethrow;
     }
   }
+
+
+  Future<void> updateRouteStopStatus({
+    required String inspectorId,
+    required String branchId,
+    required String inspectionId,
+    String status = 'completed',
+  }) async {
+    try {
+      final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
+      final docSnap = await routeDocRef.get();
+
+      if (!docSnap.exists) {
+        print("No route found for inspector $inspectorId");
+        return;
+      }
+
+      final route = RouteModel.fromFirestore(docSnap);
+
+      // Find the stop that matches the branch
+      final updatedStops = route.stops.map((stop) {
+        if (stop.branchId == branchId) {
+          return stop.copyWith(
+            status: status,
+            inspectionId: inspectionId,
+            createdAt: DateTime.now(),
+          );
+        }
+        return stop;
+      }).toList();
+
+      await routeDocRef.update({
+        'stops': updatedStops.map((s) => s.toMap()).toList(),
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+
+      print('Route stop updated successfully for branch $branchId');
+    } catch (e) {
+      print('Error updating route stop status: $e');
+    }
+  }
+
 }

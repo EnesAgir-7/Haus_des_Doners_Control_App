@@ -58,7 +58,6 @@ class StatisticCard extends StatelessWidget {
           ),
         ],
       ),
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

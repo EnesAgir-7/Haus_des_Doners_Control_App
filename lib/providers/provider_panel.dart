@@ -1,67 +1,62 @@
 // lib/providers/panel_provider.dart
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
+import '../core/constants/firebase_constants.dart';
+import '../core/enums.dart';
 import '../firebase_services/firebase_stats_service.dart';
-import '../firebase_services/firebase_user_service.dart';
-import '../models/user_model.dart';
-import '../models/inspector_stats_model.dart';
+import '../models/dashboard_statistics.dart';
 
 /// Provider for Panel (Dashboard) screen
 /// Shows inspector's monthly stats and overview
 class ProviderPanel extends ChangeNotifier {
-  final UserService _userService = UserService();
   final StatsService _statsService = StatsService();
 
-  // State
-  UserModel? _currentUser;
-  InspectorStatsModel? _currentMonthStats;
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Getters
-  UserModel? get currentUser => _currentUser;
-  InspectorStatsModel? get currentMonthStats => _currentMonthStats;
+  // int _totalBranches = 0;
+  int _completedInspections = 0;
+  int _pendingTasks = 0;
+  double _averageScore = 0.0;
+
+  // int get totalBranches => _totalBranches;
+  int get completedInspections => _completedInspections;
+  int get pendingTasks => _pendingTasks;
+  double get averageScore => _averageScore;
+
+  DashboardStats? _stats;
+  TimeRange _selectedRange = TimeRange.weekly;
+  TimeRange get selectedRange => _selectedRange;
+
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-
-  // Computed values for dashboard
-  int get totalBranches => _currentMonthStats?.totalBranches ?? 0;
-  int get completedInspections => _currentMonthStats?.completedInspections ?? 0;
-  int get pendingInspections => _currentMonthStats?.pendingInspections ?? 0;
-  double get averageScore => _currentMonthStats?.averageScore ?? 0.0;
-  double get progressPercent => _currentMonthStats?.progressPercent ?? 0.0;
-  int get remainingInspections => _currentMonthStats?.remainingInspections ?? 0;
+  DashboardStats? get stats => _stats;
 
   // Initialize - call this when screen loads
   Future<void> initialize() async {
-    await fetchDashboardData();
+    // await fetchDashboardData();
+    await loadDashboardStats();
   }
 
-  // Fetch all dashboard data
-  Future<void> fetchDashboardData() async {
+  Future<void> loadDashboardStats() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
     try {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
+      final stats = await _statsService.getDashboardStats(
+        loggedInUser!.id,
+        range: _selectedRange,
+      );
 
-      // Get current user ID from Firebase Auth
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      // Fetch user data
-      _currentUser = await _userService.getUserById(userId);
-      if (_currentUser == null) {
-        throw Exception('User data not found');
-      }
-
-      // Fetch current month stats
-      _currentMonthStats = await _statsService.getCurrentMonthStats(userId);
-
+      // _totalBranches = stats.assignedBranches;
+      _completedInspections = stats.inspectionsCount;
+      _pendingTasks = stats.pendingTasks;
+      _averageScore = stats.averageScore;
       _isLoading = false;
       notifyListeners();
     } catch (e) {
+      debugPrint('Error loading dashboard stats: $e');
       _errorMessage = 'Error loading dashboard: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
@@ -69,27 +64,21 @@ class ProviderPanel extends ChangeNotifier {
     }
   }
 
-  // Stream-based initialization (real-time updates)
-  void initializeWithStreams() {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return;
+  Future<void> changeTimeRange(TimeRange range) async {
+    _selectedRange = range;
+    notifyListeners();
+    await loadDashboardStats();
+  }
 
-    // Listen to user changes
-    _userService.streamUserById(userId).listen((user) {
-      _currentUser = user;
-      notifyListeners();
-    });
-
-    // Listen to stats changes
-    _statsService.streamCurrentMonthStats(userId).listen((stats) {
-      _currentMonthStats = stats;
-      notifyListeners();
-    });
+  double calculateCompletionPercentage(int completed, int total) {
+    if (total == 0) return 0.0;
+    return completed / total;
   }
 
   // Refresh data
   Future<void> refresh() async {
-    await fetchDashboardData();
+    // await fetchDashboardData();
+    await loadDashboardStats();
   }
 
   // Clear error

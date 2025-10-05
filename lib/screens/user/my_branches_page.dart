@@ -1,9 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/models/branch_model.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../helpers/app_helpers.dart';
 import '../../providers/provider_branches.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
@@ -76,7 +78,7 @@ class _BranchesPageState extends State<BranchesPage> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          '${provider.branchCount} ${LocaleKeys.branch_count.tr()}',
+                          '${LocaleKeys.branch_count.tr().replaceAll(AppConstants.count, provider.branchCount.toString())}',
                           style: TextStyle(
                             color: AppColors.primaryRed,
                             fontSize: 12,
@@ -295,15 +297,9 @@ class _BranchesPageState extends State<BranchesPage> {
         itemCount: provider.branches.length,
         itemBuilder: (context, index) {
           final branchModel = provider.branches[index];
-          final branch = Branch(
-            name: branchModel.name,
-            lastControl: branchModel.lastInspectionText,
-            score: branchModel.lastInspectionScore ?? 0.0,
-          );
-
           return GestureDetector(
             onTap: () => _showBranchDetails(context, branchModel, provider),
-            child: BranchCard(branch: branch),
+            child: InspectorBranchCard(branch: branchModel),
           );
         },
       ),
@@ -410,9 +406,7 @@ class BranchDetailsSheet extends StatelessWidget {
                       builder: (context, pro, child) {
                         return _buildStatCard(
                           label: LocaleKeys.total_inspections.tr(),
-                          value: provider.isLoadingInspections
-                              ? "Loading"
-                              : provider.branchInspections.length.toString(),
+                          value: branch.totalInspections.toString(),
                           icon: Icons.fact_check,
                           color: Colors.blue,
                         );
@@ -425,7 +419,7 @@ class BranchDetailsSheet extends StatelessWidget {
               Divider(color: Colors.white24),
               SizedBox(height: 12),
               Text(
-                LocaleKeys.inspection_history.tr(),
+                "Last 10 Inspections",
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
@@ -444,8 +438,7 @@ class BranchDetailsSheet extends StatelessWidget {
                 children: [
                   Expanded(
                     child: AppButton(
-                      text: LocaleKeys.new_inspection.tr(),
-                      icon: Icons.add_task,
+                      text: "Back",
                       onPressed: () {
                         Navigator.pop(context);
                       },
@@ -567,14 +560,27 @@ class BranchDetailsSheet extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    DateFormat(
-                      'dd/MM/yyyy HH:mm',
-                    ).format(inspection.scheduledTime),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Inspected by: ${inspection.inspectorName}",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        // DateFormat(
+                        //   'dd/MM/yyyy HH:mm',
+                        // ).format(inspection.updatedAt),
+                        formatDate(inspection.updatedAt),
+                        style: TextStyle(
+                          color: AppColors.whiteWithOpacity(.7),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
