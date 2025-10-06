@@ -31,6 +31,7 @@ android {
         targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders = [ MAPS_API_KEY: project.properties['MAPS_API_KEY'] ?: "" ]
     }
 
     buildTypes {
