@@ -18,6 +18,9 @@ class AppConstants {
   static const current = "current";
   static const inProgress = "in_progress";
   static const count = "{count}";
+  static const high = "high";
+  static const medium = "medium";
+  static const low = "low";
 }
 
 UserModel? loggedInUser;

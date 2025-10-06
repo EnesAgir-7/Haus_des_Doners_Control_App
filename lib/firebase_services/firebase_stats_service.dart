@@ -11,22 +11,22 @@ class StatsService {
 
   Future<DashboardStats> getDashboardStats(
     String userId, {
-    TimeRange range = TimeRange.weekly, 
+    TimeRange range = TimeRange.weekly,
   }) async {
     final now = DateTime.now();
     final startDate = _getStartDate(now, range);
 
     final results = await Future.wait([
       // _getAssignedBranchesCount(userId),
-      _getPendingTasksCount(userId),
+      // _getPendingTasksCount(userId),
       _getInspectionsInRange(userId, startDate),
     ]);
 
-    final inspections = results[1] as List<double>;
+    final inspections = results[0];
 
     return DashboardStats(
       // assignedBranches: results[0] as int,
-      pendingTasks: results[0] as int,
+      // pendingTasks: results[0] as int,
       inspectionsCount: inspections.length,
       averageScore: _calculateAverage(inspections),
       timeRange: range,
@@ -44,18 +44,18 @@ class StatsService {
     }
   }
 
-  Future<int> _getPendingTasksCount(String userId) async {
-    final snapshot = await _db
-        .collection(Collections.tasks)
-        .where('assignedInspectorId', isEqualTo: userId)
-        .where(
-          'status',
-          whereIn: [AppConstants.pending, AppConstants.inProgress],
-        )
-        .count()
-        .get();
-    return snapshot.count ?? 0;
-  }
+  // Future<int> _getPendingTasksCount(String userId) async {
+  //   final snapshot = await _db
+  //       .collection(Collections.tasks)
+  //       .where('assignedInspectorId', isEqualTo: userId)
+  //       .where(
+  //         'status',
+  //         whereIn: [AppConstants.pending, AppConstants.inProgress],
+  //       )
+  //       .count()
+  //       .get();
+  //   return snapshot.count ?? 0;
+  // }
 
   Future<List<double>> _getInspectionsInRange(
     String userId,

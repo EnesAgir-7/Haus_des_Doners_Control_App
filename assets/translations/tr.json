@@ -160,5 +160,9 @@
   "retry": "Tekrar Dene",
   "no_branches_found": "Aramanızla eşleşen şube bulunamadı",
   "no_branches_available": "Mevcut şube yok",
-  "unassigned": "Atanmamış"
+  "unassigned": "Atanmamış", 
+  "days_late": "gün gecikmiş",
+  "no_assigned_tasks": "Henüz size atanmış görev yok",
+  "no_comments_yet": "Henüz yorum yok",
+  "just_now": "Şimdi"
 }

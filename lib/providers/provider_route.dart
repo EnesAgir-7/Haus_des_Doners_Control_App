@@ -10,40 +10,57 @@ class ProviderRoute extends ChangeNotifier {
   final RouteService _routeService = RouteService();
 
   // State
-  RouteModel? _todaysRoute;
+  RouteModel? _allRoute;
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
   String? _errorMessage;
 
   // Getters
-  RouteModel? get todaysRoute => _todaysRoute;
+  RouteModel? get allRoute => _allRoute;
   DateTime get selectedDate => _selectedDate;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
   // Computed values
-  List<RouteStopModel> get stops => _todaysRoute?.stops ?? [];
-  int get totalStops => _todaysRoute?.totalStops ?? 0;
-  int get completedStops => _todaysRoute?.completedStopsCount ?? 0;
-  double get completionPercent => _todaysRoute?.completionPercent ?? 0.0;
+  List<RouteStopModel> get stops => _allRoute?.stops ?? [];
+  int get totalStops => _allRoute?.totalStops ?? 0;
+  int get completedStops => _allRoute?.completedStopsCount ?? 0;
+  double get completionPercent => _allRoute?.completionPercent ?? 0.0;
 
   RouteStopModel? get currentStop {
-    if (_todaysRoute == null) return null;
+    if (_allRoute == null) return null;
     try {
-      return _todaysRoute!.stops.firstWhere((stop) => stop.isCurrent);
+      return _allRoute!.stops.firstWhere((stop) => stop.isCurrent);
     } catch (e) {
       return null;
     }
   }
 
   RouteStopModel? get nextStop {
-    if (_todaysRoute == null) return null;
+    if (_allRoute == null) return null;
     try {
-      return _todaysRoute!.stops.firstWhere((stop) => stop.isPending);
+      return _allRoute!.stops.firstWhere((stop) => stop.isPending);
     } catch (e) {
       return null;
     }
   }
+  List<RouteStopModel> get todaysStops {
+    if (_allRoute == null) return [];
+
+    final today = DateTime.now();
+    final todayKey = "${today.year}-${today.month}-${today.day}";
+
+    try {
+      return _allRoute!.stops.where((stop) {
+        // stop.timeSlot example: "2025-10-5"
+        return stop.timeSlot == todayKey;
+      }).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+
 
   List<RouteStopModel> get completedStopsList =>
       stops.where((stop) => stop.isCompleted).toList();
@@ -53,11 +70,11 @@ class ProviderRoute extends ChangeNotifier {
 
   // Initialize
   Future<void> initialize() async {
-    await fetchTodaysRoute();
+    await fetchAllRoutes();
   }
 
   // Fetch today's route
-  Future<void> fetchTodaysRoute() async {
+  Future<void> fetchAllRoutes() async {
     try {
       _isLoading = true;
       _errorMessage = null;
@@ -68,7 +85,7 @@ class ProviderRoute extends ChangeNotifier {
         throw Exception('User not authenticated');
       }
 
-      _todaysRoute = await _routeService.getTodaysRoute(userId);
+      _allRoute = await _routeService.getAllRoutes(userId);
 
       _isLoading = false;
       notifyListeners();
@@ -86,7 +103,7 @@ class ProviderRoute extends ChangeNotifier {
     if (userId == null) return;
 
     _routeService.streamTodaysRoute(userId).listen((route) {
-      _todaysRoute = route;
+      _allRoute = route;
       notifyListeners();
     });
   }
@@ -104,7 +121,7 @@ class ProviderRoute extends ChangeNotifier {
         throw Exception('User not authenticated');
       }
 
-      _todaysRoute = await _routeService.getRouteByDate(userId, date);
+      _allRoute = await _routeService.getRouteByDate(userId, date);
 
       _isLoading = false;
       notifyListeners();
@@ -118,17 +135,17 @@ class ProviderRoute extends ChangeNotifier {
 
   // Update stop status
   Future<void> updateStopStatus(int stopIndex, String newStatus) async {
-    if (_todaysRoute == null) return;
+    if (_allRoute == null) return;
 
     try {
       await _routeService.updateStopStatus(
-        _todaysRoute!.id,
+        _allRoute!.id,
         stopIndex,
         newStatus,
       );
 
       // Update local state immediately for better UX
-      final updatedStops = List<RouteStopModel>.from(_todaysRoute!.stops);
+      final updatedStops = List<RouteStopModel>.from(_allRoute!.stops);
       updatedStops[stopIndex] = RouteStopModel(
         timeSlot: updatedStops[stopIndex].timeSlot,
         branchId: updatedStops[stopIndex].branchId,
@@ -138,13 +155,13 @@ class ProviderRoute extends ChangeNotifier {
         order: updatedStops[stopIndex].order,
       );
 
-      _todaysRoute = RouteModel(
-        id: _todaysRoute!.id,
-        date: _todaysRoute!.date,
-        inspectorId: _todaysRoute!.inspectorId,
-        inspectorName: _todaysRoute!.inspectorName,
+      _allRoute = RouteModel(
+        id: _allRoute!.id,
+        date: _allRoute!.date,
+        inspectorId: _allRoute!.inspectorId,
+        inspectorName: _allRoute!.inspectorName,
         stops: updatedStops,
-        createdAt: _todaysRoute!.createdAt,
+        createdAt: _allRoute!.createdAt,
         updatedAt: DateTime.now(),
       );
 
@@ -173,24 +190,24 @@ class ProviderRoute extends ChangeNotifier {
 
   // Get stop by index
   RouteStopModel? getStopByIndex(int index) {
-    if (_todaysRoute == null || index >= _todaysRoute!.stops.length) {
+    if (_allRoute == null || index >= _allRoute!.stops.length) {
       return null;
     }
-    return _todaysRoute!.stops[index];
+    return _allRoute!.stops[index];
   }
 
   // Get stop index by branch ID
   int? getStopIndexByBranchId(String branchId) {
-    if (_todaysRoute == null) return null;
-    return _todaysRoute!.stops.indexWhere((stop) => stop.branchId == branchId);
+    if (_allRoute == null) return null;
+    return _allRoute!.stops.indexWhere((stop) => stop.branchId == branchId);
   }
 
   // Check if there's a route for today
-  bool get hasRouteForToday => _todaysRoute != null;
+  bool get hasRouteForToday => _allRoute != null;
 
   // Refresh
   Future<void> refresh() async {
-    await fetchTodaysRoute();
+    await fetchAllRoutes();
   }
 
   // Clear error

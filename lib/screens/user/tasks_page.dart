@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:provider/provider.dart';
 
@@ -69,28 +70,28 @@ class _TasksPageState extends State<TasksPage> {
             child: Row(
               children: [
                 _buildFilterChip(
-                  label: 'Tümü',
+                  label: LocaleKeys.all.tr(),
                   count: provider.totalTasks,
                   isSelected: provider.statusFilter == 'all',
                   onTap: () => provider.setStatusFilter('all'),
                 ),
                 SizedBox(width: 8),
                 _buildFilterChip(
-                  label: 'Bekleyen',
+                  label: LocaleKeys.pending.tr(),
                   count: provider.pendingTasksCount,
                   isSelected: provider.statusFilter == 'pending',
                   onTap: () => provider.setStatusFilter('pending'),
                 ),
                 SizedBox(width: 8),
                 _buildFilterChip(
-                  label: 'Devam Eden',
+                  label: LocaleKeys.in_progress.tr(),
                   count: provider.inProgressTasksCount,
                   isSelected: provider.statusFilter == 'in_progress',
                   onTap: () => provider.setStatusFilter('in_progress'),
                 ),
                 SizedBox(width: 8),
                 _buildFilterChip(
-                  label: 'Tamamlanan',
+                  label: LocaleKeys.completed.tr(),
                   count: provider.completedTasksCount,
                   isSelected: provider.statusFilter == 'completed',
                   onTap: () => provider.setStatusFilter('completed'),
@@ -354,20 +355,20 @@ class _TasksPageState extends State<TasksPage> {
     IconData icon;
 
     switch (status) {
-      case 'completed':
+      case AppConstants.completed:
         color = Color(0xFF4CAF50);
-        text = 'Tamamlandı';
+        text = LocaleKeys.completed.tr();
         icon = Icons.check_circle;
         break;
-      case 'in_progress':
+      case AppConstants.inProgress:
         color = Color(0xFFFFA726);
-        text = 'Devam Ediyor';
+        text = LocaleKeys.in_progress.tr();
         icon = Icons.pending;
         break;
-      case 'pending':
+      case AppConstants.pending:
       default:
         color = Color(0xFF808080);
-        text = 'Bekliyor';
+        text = LocaleKeys.pending.tr();
         icon = Icons.hourglass_empty;
         break;
     }
@@ -414,13 +415,13 @@ class _TasksPageState extends State<TasksPage> {
     final difference = dueDate.difference(now).inDays;
 
     if (difference < 0) {
-      return '${difference.abs()} gün gecikmiş';
+      return '${difference.abs()} ${LocaleKeys.days_ago.tr()}';
     } else if (difference == 0) {
-      return 'Bugün';
+      return LocaleKeys.today.tr();
     } else if (difference == 1) {
-      return 'Yarın';
+      return LocaleKeys.tomorrow.tr();
     } else if (difference <= 7) {
-      return '$difference gün sonra';
+      return '$difference ${LocaleKeys.days_left.tr()}';
     } else {
       return '${dueDate.day}/${dueDate.month}/${dueDate.year}';
     }
@@ -434,7 +435,7 @@ class _TasksPageState extends State<TasksPage> {
           Icon(Icons.task_alt, size: 80, color: Color(0xFF3A3A3A)),
           SizedBox(height: 16),
           Text(
-            'Görev bulunamadı',
+            LocaleKeys.no_tasks_found.tr(),
             style: TextStyle(
               color: Color(0xFF808080),
               fontSize: 18,
@@ -443,7 +444,7 @@ class _TasksPageState extends State<TasksPage> {
           ),
           SizedBox(height: 8),
           Text(
-            'Henüz size atanmış görev yok',
+            LocaleKeys.no_tasks_found.tr(),
             style: TextStyle(color: Color(0xFF606060), fontSize: 14),
           ),
         ],
@@ -532,7 +533,7 @@ class TaskDetailsSheet extends StatelessWidget {
 
               // Description
               Text(
-                'Açıklama',
+                LocaleKeys.description.tr(),
                 style: TextStyle(
                   color: Color(0xFFB0B0B0),
                   fontSize: 14,
@@ -554,7 +555,7 @@ class TaskDetailsSheet extends StatelessWidget {
               if (task.dueDate != null) ...[
                 _buildInfoRow(
                   icon: Icons.calendar_today,
-                  label: 'Bitiş Tarihi',
+                  label: LocaleKeys.due_date.tr(),
                   value:
                       '${task.dueDate!.day}/${task.dueDate!.month}/${task.dueDate!.year}',
                 ),
@@ -563,7 +564,7 @@ class TaskDetailsSheet extends StatelessWidget {
 
               _buildInfoRow(
                 icon: Icons.person,
-                label: 'Atanan',
+                label: "Assigned Inspector",
                 value: task.assignedInspectorName,
               ),
 
@@ -582,7 +583,7 @@ class TaskDetailsSheet extends StatelessWidget {
                     if (task.isPending)
                       Expanded(
                         child: _buildActionButton(
-                          label: 'Başlat',
+                          label: LocaleKeys.start.tr(),
                           icon: Icons.play_arrow,
                           color: Color(0xFFFFA726),
                           onPressed: () {
@@ -594,7 +595,7 @@ class TaskDetailsSheet extends StatelessWidget {
                     if (task.isInProgress) ...[
                       Expanded(
                         child: _buildActionButton(
-                          label: 'Tamamla',
+                          label: LocaleKeys.complete.tr(),
                           icon: Icons.check_circle,
                           color: Color(0xFF4CAF50),
                           onPressed: () {
@@ -673,7 +674,7 @@ class TaskDetailsSheet extends StatelessWidget {
     if (task.comments.isEmpty) {
       return Center(
         child: Text(
-          'Henüz yorum yok',
+          LocaleKeys.no_comments.tr(),
           style: TextStyle(color: Color(0xFF606060), fontSize: 14),
         ),
       );
@@ -771,11 +772,11 @@ class TaskDetailsSheet extends StatelessWidget {
 
   Color _getPriorityColor(String priority) {
     switch (priority) {
-      case 'high':
+      case AppConstants.high:
         return Color(0xFFE53935);
-      case 'medium':
+      case AppConstants.medium:
         return Color(0xFFFFA726);
-      case 'low':
+      case AppConstants.low:
       default:
         return Color(0xFF4CAF50);
     }
@@ -784,22 +785,22 @@ class TaskDetailsSheet extends StatelessWidget {
   String _getPriorityText(String priority) {
     switch (priority) {
       case 'high':
-        return 'Yüksek';
+        return "High";
       case 'medium':
-        return 'Orta';
+        return 'Medium';
       case 'low':
       default:
-        return 'Düşük';
+        return 'Low';
     }
   }
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'completed':
+      case AppConstants.completed:
         return Color(0xFF4CAF50);
-      case 'in_progress':
+      case AppConstants.inProgress:
         return Color(0xFFFFA726);
-      case 'pending':
+      case AppConstants.pending:
       default:
         return Color(0xFF808080);
     }
@@ -807,13 +808,13 @@ class TaskDetailsSheet extends StatelessWidget {
 
   String _getStatusText(String status) {
     switch (status) {
-      case 'completed':
-        return 'Tamamlandı';
-      case 'in_progress':
-        return 'Devam Ediyor';
-      case 'pending':
+      case AppConstants.completed:
+        return "Completed";
+      case AppConstants.inProgress:
+        return 'In Progress';
+      case AppConstants.pending:
       default:
-        return 'Bekliyor';
+        return 'Pending';
     }
   }
 
@@ -822,13 +823,13 @@ class TaskDetailsSheet extends StatelessWidget {
     final difference = now.difference(timestamp);
 
     if (difference.inMinutes < 1) {
-      return 'Şimdi';
+      return LocaleKeys.just_now.tr();
     } else if (difference.inHours < 1) {
-      return '${difference.inMinutes} dakika önce';
+      return '"${LocaleKeys.minutes_ago.tr().replaceAll(AppConstants.count, difference.inMinutes.toString())}"';
     } else if (difference.inDays < 1) {
-      return '${difference.inHours} saat önce';
+      return '"${LocaleKeys.hours_ago.tr().replaceAll(AppConstants.count, difference.inHours.toString())}"';
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} gün önce';
+      return '${LocaleKeys.days_ago.tr().replaceAll(AppConstants.count, difference.inDays.toString())}"';
     } else {
       return '${timestamp.day}/${timestamp.month}/${timestamp.year}';
     }

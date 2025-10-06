@@ -8,7 +8,7 @@ class RouteService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collection = Collections.routes;
 
-  Future<RouteModel?> getTodaysRoute(String userId) async {
+  Future<RouteModel?> getAllRoutes(String userId) async {
     try {
       final docSnap = await _db.collection(_collection).doc(userId).get();
 

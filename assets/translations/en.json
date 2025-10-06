@@ -160,5 +160,8 @@
   "retry": "Retry",
   "no_branches_found": "No branches found matching your search",
   "no_branches_available": "No branches available",
-  "unassigned": "Unassigned"
+  "unassigned": "Unassigned",
+  "no_assigned_tasks": "No tasks have been assigned to you yet",
+  "no_comments_yet": "No comments yet",
+  "just_now": "Just now"
 }

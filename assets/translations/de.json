@@ -160,5 +160,10 @@
   "retry": "Wiederholen",
   "no_branches_found": "Keine Filialen für Ihre Suche gefunden",
   "no_branches_available": "Keine Filialen verfügbar",
-  "unassigned": "Nicht zugewiesen"
+  "unassigned": "Nicht zugewiesen", 
+  "days_late": "Tage verspätet",
+  "no_assigned_tasks": "Ihnen wurden noch keine Aufgaben zugewiesen",
+  "no_comments_yet": "Noch keine Kommentare",
+  "just_now": "Gerade eben"
+
 }

@@ -16,12 +16,12 @@ class ProviderPanel extends ChangeNotifier {
 
   // int _totalBranches = 0;
   int _completedInspections = 0;
-  int _pendingTasks = 0;
+  // int _pendingTasks = 0;
   double _averageScore = 0.0;
 
   // int get totalBranches => _totalBranches;
   int get completedInspections => _completedInspections;
-  int get pendingTasks => _pendingTasks;
+  // int get pendingTasks => _pendingTasks;
   double get averageScore => _averageScore;
 
   DashboardStats? _stats;
@@ -51,7 +51,7 @@ class ProviderPanel extends ChangeNotifier {
 
       // _totalBranches = stats.assignedBranches;
       _completedInspections = stats.inspectionsCount;
-      _pendingTasks = stats.pendingTasks;
+      // _pendingTasks = stats.pendingTasks;
       _averageScore = stats.averageScore;
       _isLoading = false;
       notifyListeners();

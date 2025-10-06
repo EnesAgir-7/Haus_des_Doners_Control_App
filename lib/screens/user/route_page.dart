@@ -1,11 +1,9 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/widgets/statistic_card.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../providers/provider_route.dart';
-import '../../translations/locale_keys.g.dart';
 
 class RoutePage extends StatefulWidget {
   const RoutePage({super.key});
@@ -43,7 +41,7 @@ class _RoutePageState extends State<RoutePage> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    LocaleKeys.your_route_plan.tr(),
+                    "Upcoming Routes",
                     style: const TextStyle(
                       color: AppColors.primaryRed,
                       fontWeight: FontWeight.bold,
@@ -78,7 +76,7 @@ class _RoutePageState extends State<RoutePage> {
       );
     }
 
-    if (provider.todaysRoute == null || provider.stops.isEmpty) {
+    if (provider.allRoute == null || provider.stops.isEmpty) {
       return const Center(
         child: Text(
           'Bugün için planlanmış bir rota bulunamadı.',
@@ -90,7 +88,7 @@ class _RoutePageState extends State<RoutePage> {
     return RefreshIndicator(
       color: AppColors.primaryRed,
       onRefresh: () async {
-        await provider.fetchTodaysRoute();
+        await provider.fetchAllRoutes();
       },
       child: ListView.separated(
         physics: AlwaysScrollableScrollPhysics(),

@@ -171,7 +171,16 @@ class CodegenLoader extends AssetLoader{
   "sign_here": "Hier mit dem Finger unterschreiben",
   "save_signature": "Unterschrift speichern",
   "please_sign_first": "Bitte zuerst unterschreiben",
-  "clear": "Löschen"
+  "clear": "Löschen",
+  "search_branches": "Filialen suchen...",
+  "retry": "Wiederholen",
+  "no_branches_found": "Keine Filialen für Ihre Suche gefunden",
+  "no_branches_available": "Keine Filialen verfügbar",
+  "unassigned": "Nicht zugewiesen",
+  "days_late": "Tage verspätet",
+  "no_assigned_tasks": "Ihnen wurden noch keine Aufgaben zugewiesen",
+  "no_comments_yet": "Noch keine Kommentare",
+  "just_now": "Gerade eben"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Panel",
@@ -330,7 +339,15 @@ static const Map<String,dynamic> _en = {
   "sign_here": "Sign here with your finger",
   "save_signature": "Save Signature",
   "please_sign_first": "Please sign first",
-  "clear": "Clear"
+  "clear": "Clear",
+  "search_branches": "Search branches...",
+  "retry": "Retry",
+  "no_branches_found": "No branches found matching your search",
+  "no_branches_available": "No branches available",
+  "unassigned": "Unassigned",
+  "no_assigned_tasks": "No tasks have been assigned to you yet",
+  "no_comments_yet": "No comments yet",
+  "just_now": "Just now"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -489,7 +506,16 @@ static const Map<String,dynamic> _tr = {
   "sign_here": "Parmağınızla buraya imzalayın",
   "save_signature": "İmzayı Kaydet",
   "please_sign_first": "Lütfen önce imzalayın",
-  "clear": "Temizle"
+  "clear": "Temizle",
+  "search_branches": "Şubeleri ara...",
+  "retry": "Tekrar Dene",
+  "no_branches_found": "Aramanızla eşleşen şube bulunamadı",
+  "no_branches_available": "Mevcut şube yok",
+  "unassigned": "Atanmamış",
+  "days_late": "gün gecikmiş",
+  "no_assigned_tasks": "Henüz size atanmış görev yok",
+  "no_comments_yet": "Henüz yorum yok",
+  "just_now": "Şimdi"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

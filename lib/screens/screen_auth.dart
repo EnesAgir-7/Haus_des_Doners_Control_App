@@ -43,7 +43,10 @@ class _ScreenAuthState extends State<ScreenAuth> {
       builder: (context, provider, _) {
         return Scaffold(
           backgroundColor: AppColors.primaryDark,
-          appBar: AppBar(actions: const [LanguageButton()]),
+          appBar: AppBar(
+            actions: const [LanguageButton()],
+            backgroundColor: AppColors.primaryDark,
+          ),
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(24.0),

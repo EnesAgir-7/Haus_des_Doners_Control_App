@@ -8,6 +8,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/enums.dart';
 import '../../providers/provider_panel.dart';
 import '../../providers/provider_route.dart';
+import '../../providers/provider_tasks.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../widgets/statistic_card.dart';
 
@@ -239,11 +240,16 @@ class DashboardCard extends StatelessWidget {
                   icon: Icons.check_circle,
                   color: Colors.green,
                 ),
-                StatBox(
-                  number: provider.pendingTasks.toString(),
-                  label: LocaleKeys.pending_task.tr(),
-                  icon: Icons.pending_actions,
-                  color: Colors.orange,
+                Consumer<ProviderTasks>(
+                  builder: (context, taskPro, child) {
+                    return StatBox(
+                      isLoading: taskPro.isLoading,
+                      number: taskPro.tasks.length.toString(),
+                      label: LocaleKeys.pending_task.tr(),
+                      icon: Icons.pending_actions,
+                      color: Colors.orange,
+                    );
+                  },
                 ),
                 StatBox(
                   number: provider.averageScore.toStringAsFixed(1),
@@ -343,135 +349,6 @@ class DashboardCard extends StatelessWidget {
   }
 }
 
-// class DashboardCard extends StatelessWidget {
-//   final ProviderPanel provider;
-
-//   const DashboardCard({super.key, required this.provider});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final stats = provider.currentMonthStats;
-
-//     return Container(
-//       padding: const EdgeInsets.all(16),
-//       decoration: BoxDecoration(
-//         color: AppColors.lightBlack,
-//         borderRadius: BorderRadius.circular(16),
-//         border: Border.all(color: AppColors.primaryRed),
-//       ),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Row(
-//             children: [
-//               const Icon(Icons.search, color: Colors.lightBlueAccent, size: 20),
-//               const SizedBox(width: 6),
-//               Expanded(
-//                 child: Text(
-//                   loggedInUser?.name ?? LocaleKeys.controller_name.tr(),
-//                   style: const TextStyle(
-//                     color: AppColors.primaryRed,
-//                     fontWeight: FontWeight.bold,
-//                     fontSize: 16,
-//                   ),
-//                   maxLines: 1,
-//                   overflow: TextOverflow.ellipsis,
-//                 ),
-//               ),
-//             ],
-//           ),
-//           const SizedBox(height: 6),
-//           Text(
-//             loggedInUser?.region ?? LocaleKeys.region.tr(),
-//             style: const TextStyle(color: Colors.white70, fontSize: 14),
-//           ),
-//           const SizedBox(height: 16),
-//           GridView.count(
-//             shrinkWrap: true,
-//             physics: const NeverScrollableScrollPhysics(),
-//             crossAxisCount: 2,
-//             crossAxisSpacing: 12,
-//             mainAxisSpacing: 12,
-//             childAspectRatio: 2.2,
-//             children: [
-//               StatBox(
-//                 number: provider.totalBranches.toString(),
-//                 label: LocaleKeys.total_branch.tr(),
-//               ),
-//               StatBox(
-//                 number: provider.completedInspections.toString(),
-//                 label: LocaleKeys.this_week_check.tr(),
-//               ),
-//               StatBox(
-//                 number: provider.pendingInspections.toString(),
-//                 label: LocaleKeys.pending_task.tr(),
-//               ),
-//               StatBox(
-//                 number: provider.averageScore.toStringAsFixed(1),
-//                 label: LocaleKeys.average_score.tr(),
-//               ),
-//             ],
-//           ),
-
-//           if (stats != null) ...[
-//             const SizedBox(height: 16),
-//             Container(
-//               padding: const EdgeInsets.all(12),
-//               decoration: BoxDecoration(
-//                 color: AppColors.lightRed,
-//                 borderRadius: BorderRadius.circular(12),
-//               ),
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   Row(
-//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                     children: [
-//                       Text(
-//                         LocaleKeys.monthly_progress.tr(),
-//                         style: TextStyle(
-//                           color: Colors.white,
-//                           fontSize: 13,
-//                           fontWeight: FontWeight.w600,
-//                         ),
-//                       ),
-//                       Text(
-//                         '${provider.progressPercent.toStringAsFixed(0)}%',
-//                         style: TextStyle(
-//                           color: AppColors.primaryRed,
-//                           fontSize: 14,
-//                           fontWeight: FontWeight.bold,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                   const SizedBox(height: 8),
-//                   ClipRRect(
-//                     borderRadius: BorderRadius.circular(4),
-//                     child: LinearProgressIndicator(
-//                       value: provider.progressPercent / 100,
-//                       backgroundColor: Colors.white24,
-//                       valueColor: AlwaysStoppedAnimation<Color>(
-//                         AppColors.primaryRed,
-//                       ),
-//                       minHeight: 6,
-//                     ),
-//                   ),
-//                   const SizedBox(height: 8),
-//                   Text(
-//                     '${provider.completedInspections} / ${provider.totalBranches} ${LocaleKeys.branches_checked.tr()}',
-//                     style: TextStyle(color: Colors.white70, fontSize: 11),
-//                   ),
-//                 ],
-//               ),
-//             ),
-//           ],
-//         ],
-//       ),
-//     );
-//   }
-// }
-
 class StatBox extends StatelessWidget {
   final String number;
   final String label;
@@ -556,10 +433,10 @@ class DailySummarySection extends StatelessWidget {
           );
         }
 
-        final todaysRoute = routeProvider.todaysRoute;
-        final stops = routeProvider.stops;
+        final stops = routeProvider.todaysStops;
+        // final stops = routeProvider.stops;
 
-        if (todaysRoute == null || stops.isEmpty) {
+        if (stops.isEmpty) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
