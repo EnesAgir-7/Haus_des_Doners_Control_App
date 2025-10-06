@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class  LocaleKeys {
+abstract class LocaleKeys {
   static const panel = 'panel';
   static const subsidiaries = 'subsidiaries';
   static const fleet = 'fleet';
@@ -165,5 +165,4 @@ abstract class  LocaleKeys {
   static const no_branches_found = 'no_branches_found';
   static const no_branches_available = 'no_branches_available';
   static const unassigned = 'unassigned';
-
 }

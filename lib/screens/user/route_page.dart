@@ -1,9 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/widgets/statistic_card.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../providers/provider_route.dart';
+import '../../translations/locale_keys.g.dart';
 
 class RoutePage extends StatefulWidget {
   const RoutePage({super.key});
@@ -41,7 +43,7 @@ class _RoutePageState extends State<RoutePage> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    "Upcoming Routes",
+                    LocaleKeys.upcoming_routes.tr(),
                     style: const TextStyle(
                       color: AppColors.primaryRed,
                       fontWeight: FontWeight.bold,
@@ -70,16 +72,16 @@ class _RoutePageState extends State<RoutePage> {
     if (provider.errorMessage != null) {
       return Center(
         child: Text(
-          'Hata: ${provider.errorMessage}',
+          '${provider.errorMessage}',
           style: const TextStyle(color: Colors.red),
         ),
       );
     }
 
     if (provider.allRoute == null || provider.stops.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'Bugün için planlanmış bir rota bulunamadı.',
+          LocaleKeys.no_route_today.tr(),
           style: TextStyle(fontSize: 16),
         ),
       );

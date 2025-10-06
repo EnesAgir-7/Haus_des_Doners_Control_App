@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/helpers/app_helpers.dart';
 
 import '../core/constants/app_colors.dart';
 import '../models/branch_model.dart';
+import '../translations/locale_keys.g.dart';
 
 class InspectorBranchCard extends StatelessWidget {
   final BranchModel branch;
@@ -20,10 +22,7 @@ class InspectorBranchCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF212121),
           borderRadius: BorderRadius.circular(16.0),
-          // border: Border.all(
-          //   color: Colors.white10, // Subtle border
-          //   width: 1,
-          // ),
+
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,
@@ -99,7 +98,7 @@ class InspectorBranchCard extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            'In Queue',
+            LocaleKeys.in_queue.tr(),
             style: TextStyle(
               color: Colors.grey.shade300,
               fontSize: 11,
@@ -127,7 +126,7 @@ class InspectorBranchCard extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Text(
-            'Last Inspected:',
+            LocaleKeys.last_inspected.tr(),
             style: TextStyle(
               color: Colors.grey.shade500,
               fontSize: 13,
@@ -138,7 +137,7 @@ class InspectorBranchCard extends StatelessWidget {
           Text(
             branch.lastInspectionDate != null
                 ? formatDate(branch.lastInspectionDate!)
-                : 'Pending First',
+                : LocaleKeys.pending_first.tr(),
             style: const TextStyle(
               color: Colors.white70,
               fontSize: 13,
@@ -157,7 +156,7 @@ class InspectorBranchCard extends StatelessWidget {
         Icon(Icons.fact_check_outlined, size: 14, color: Colors.grey.shade600),
         const SizedBox(width: 6),
         Text(
-          '${branch.totalInspections} Total Inspections',
+          '${branch.totalInspections} ${LocaleKeys.total_inspections.tr()}',
           style: TextStyle(
             color: Colors.grey.shade600,
             fontSize: 12,

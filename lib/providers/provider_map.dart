@@ -34,6 +34,7 @@ class BranchMapController extends ChangeNotifier {
       final style = await rootBundle.loadString(
         'assets/map_styles/dark_map.json',
       );
+      // ignore: deprecated_member_use
       mapController?.setMapStyle(style);
     } catch (e) {
       // Handle error if map style file doesn't exist

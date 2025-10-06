@@ -1,6 +1,8 @@
 // lib/providers/subsidiaries_provider.dart
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:haus_des_control/widgets/custom_toast.dart';
 
 import '../firebase_services/firebase_branch_service.dart';
@@ -22,7 +24,7 @@ class ProviderBranches extends ChangeNotifier {
   bool _isLoadingInspections = false;
   String? _errorMessage;
   String _searchQuery = '';
-  String _sortBy = 'name'; // name, score, lastInspection
+  String _sortBy = AppConstants.name; // name, score, lastInspection
 
   // Getters
   List<BranchModel> get branches => _filteredAndSortedBranches();
@@ -135,13 +137,13 @@ class ProviderBranches extends ChangeNotifier {
 
     // Sort
     switch (_sortBy) {
-      case 'name':
+      case AppConstants.name:
         filtered.sort((a, b) => a.name.compareTo(b.name));
         break;
-      case 'score':
+      case AppConstants.score:
         filtered.sort((a, b) => b.averageScore.compareTo(a.averageScore));
         break;
-      case 'lastInspection':
+      case AppConstants.lastInspection:
         filtered.sort((a, b) {
           if (a.lastInspectionDate == null) return 1;
           if (b.lastInspectionDate == null) return -1;
@@ -173,7 +175,7 @@ class ProviderBranches extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
-      showSnakBarr(context, "Branch assigned successfully");
+      showSnakBarr(context, LocaleKeys.branch_assigned_successfully.tr());
       return true;
     } catch (e) {
       _isLoading = false;
@@ -198,7 +200,7 @@ class ProviderBranches extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
-      showSnakBarr(context, "Branch unassigned successfully");
+      showSnakBarr(context, LocaleKeys.branch_unassigned_successfully.tr());
       return true;
     } catch (e) {
       _isLoading = false;

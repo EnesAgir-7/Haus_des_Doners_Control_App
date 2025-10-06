@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../admin/screens/screen_admin_branches.dart';
+import '../admin/screens/screen_admin_dashboard.dart';
+import '../admin/screens/screen_admin_fleet.dart';
+import '../admin/screens/screen_admin_tasks.dart';
+import '../admin/screens/screen_admin_users.dart';
 import '../layouts/bottom_nav_bar.dart';
 import '../screens/screen_auth.dart';
 import '../screens/user/control_page.dart';
+import '../screens/user/fleet_page.dart';
 import '../screens/user/my_branches_page.dart';
 import '../screens/user/panel_page.dart';
 import '../screens/user/route_page.dart';
-import '../screens/user/fleet_page.dart';
 import '../screens/user/tasks_page.dart';
-import '../admin/screens/screen_admin_dashboard.dart';
-import '../admin/screens/screen_admin_users.dart';
-import '../admin/screens/screen_admin_branches.dart';
-import '../admin/screens/screen_admin_fleet.dart';
-import '../admin/screens/screen_admin_tasks.dart';
 
 /// Contains all route names as constants
 class RouteNames {

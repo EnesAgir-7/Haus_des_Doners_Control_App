@@ -2,11 +2,12 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
-import 'package:intl/intl.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -263,7 +264,7 @@ class ProviderControl extends ChangeNotifier {
         inspectorName: loggedInUser!.name,
         scheduledTime: now,
         completedTime: now,
-        status: 'completed',
+        status: AppConstants.completed,
         score: totalScore,
         categories: Map.fromEntries(
           selectedTemplate!.categories.map((cat) {
@@ -451,7 +452,7 @@ class ProviderControl extends ChangeNotifier {
           crossAxisAlignment: pw.CrossAxisAlignment.end,
           children: [
             pw.Text(
-              'Report ID',
+              LocaleKeys.report_id.tr(),
               style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
             ),
             pw.Text(
@@ -496,7 +497,7 @@ class ProviderControl extends ChangeNotifier {
               ),
               pw.SizedBox(width: 12),
               pw.Text(
-                'BRANCH INFORMATION',
+                LocaleKeys.branch_information.tr(), 
                 style: pw.TextStyle(
                   fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
@@ -580,7 +581,7 @@ class ProviderControl extends ChangeNotifier {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          'INSPECTION DETAILS',
+          LocaleKeys.inspection_details.tr(), 
           style: pw.TextStyle(
             fontSize: 18,
             fontWeight: pw.FontWeight.bold,
@@ -685,7 +686,7 @@ class ProviderControl extends ChangeNotifier {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'TOTAL SCORE',
+                LocaleKeys.total_score.tr(), 
                 style: pw.TextStyle(
                   fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
@@ -728,7 +729,7 @@ class ProviderControl extends ChangeNotifier {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          'OVERALL NOTES',
+          LocaleKeys.overall_notes.tr(), 
           style: pw.TextStyle(
             fontSize: 14,
             fontWeight: pw.FontWeight.bold,
@@ -756,9 +757,9 @@ class ProviderControl extends ChangeNotifier {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        _buildSignatureBox('Inspector Signature', inspectorSignature),
+        _buildSignatureBox(LocaleKeys.inspector_signature.tr(), inspectorSignature),
         pw.SizedBox(width: 20),
-        _buildSignatureBox('Branch Representative', branchSignature),
+        _buildSignatureBox(LocaleKeys.branch_representative.tr(), branchSignature),
       ],
     );
   }
@@ -787,7 +788,7 @@ class ProviderControl extends ChangeNotifier {
                   )
                 : pw.Center(
                     child: pw.Text(
-                      'No Signature',
+                      LocaleKeys.no_signature.tr(),
                       style: const pw.TextStyle(
                         fontSize: 10,
                         color: PdfColors.grey600,

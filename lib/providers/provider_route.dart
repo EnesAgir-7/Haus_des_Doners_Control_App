@@ -5,8 +5,6 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import '../firebase_services/firebase_route_service.dart';
 import '../models/route_model.dart';
 
-/// Provider for Route screen
-/// Shows today's route schedule with all planned branch visits
 class ProviderRoute extends ChangeNotifier {
   final RouteService _routeService = RouteService();
 
@@ -104,7 +102,6 @@ class ProviderRoute extends ChangeNotifier {
 
   // Stream-based initialization (real-time updates)
   void initializeWithStreams() {
-
     _routeService.streamTodaysRoute(loggedInUser!.id).listen((route) {
       _allRoute = route;
       notifyListeners();
@@ -169,17 +166,17 @@ class ProviderRoute extends ChangeNotifier {
 
   // Mark stop as completed
   Future<void> markStopCompleted(int stopIndex) async {
-    await updateStopStatus(stopIndex, 'completed');
+    await updateStopStatus(stopIndex, AppConstants.completed);
   }
 
   // Mark stop as current
   Future<void> markStopCurrent(int stopIndex) async {
-    await updateStopStatus(stopIndex, 'current');
+    await updateStopStatus(stopIndex, AppConstants.current);
   }
 
   // Mark stop as pending
   Future<void> markStopPending(int stopIndex) async {
-    await updateStopStatus(stopIndex, 'pending');
+    await updateStopStatus(stopIndex, AppConstants.pending);
   }
 
   // Get stop by index

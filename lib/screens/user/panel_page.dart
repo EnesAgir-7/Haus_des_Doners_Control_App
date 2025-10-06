@@ -238,7 +238,7 @@ class DashboardCard extends StatelessWidget {
                     return StatBox(
                       isLoading: brachCont.isLoading,
                       number: brachCont.branchCount.toString(),
-                      label: "Assigned Branches",
+                      label: LocaleKeys.assigned_branches.tr(),
                       icon: Icons.apartment,
                       color: Colors.blue,
                     );
@@ -286,7 +286,7 @@ class DashboardCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Today's Progress",
+                          LocaleKeys.todays_progress.tr(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,
@@ -336,11 +336,11 @@ class DashboardCard extends StatelessWidget {
   String _getRangeLabel(TimeRange range, BuildContext context) {
     switch (range) {
       case TimeRange.daily:
-        return "Today Checks";
+        return LocaleKeys.today_checks.tr();
       case TimeRange.weekly:
         return LocaleKeys.this_week_check.tr();
       case TimeRange.monthly:
-        return "This month";
+        return LocaleKeys.this_month.tr();
     }
   }
 }
@@ -368,9 +368,6 @@ class StatBox extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.lightRed,
         borderRadius: BorderRadius.circular(12),
-        // border: Border.all(
-        //   color: (color ?? AppColors.primaryRed).withValues(alpha: 0.3),
-        // ),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -501,7 +498,7 @@ class DailySummarySection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${routeProvider.todaysCompletedCount}/${routeProvider.todaysStopsList.length}',
+                    '${routeProvider.completedStops}/${routeProvider.totalStops}',
                     style: TextStyle(
                       color: AppColors.primaryRed,
                       fontSize: 12,
@@ -514,32 +511,10 @@ class DailySummarySection extends StatelessWidget {
             const SizedBox(height: 12),
             Column(
               spacing: 16,
-              children: stops.take(5).map((stop) {
+              children: stops.map((stop) {
                 return StatisticCard(stop: stop);
               }).toList(),
             ),
-
-            if (stops.length > 5) ...[
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton.icon(
-                  onPressed: () {},
-                  icon: Icon(
-                    Icons.route,
-                    size: 16,
-                    color: AppColors.primaryRed,
-                  ),
-                  label: Text(
-                    "${LocaleKeys.view_all_route.tr()} (${stops.length} ${LocaleKeys.stops.tr()})",
-                    style: TextStyle(
-                      color: AppColors.primaryRed,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ],
         );
       },

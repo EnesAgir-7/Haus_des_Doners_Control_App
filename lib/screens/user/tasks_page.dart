@@ -87,7 +87,8 @@ class _TasksPageState extends State<TasksPage> {
                   label: LocaleKeys.in_progress.tr(),
                   count: provider.inProgressTasksCount,
                   isSelected: provider.statusFilter == AppConstants.inProgress,
-                  onTap: () => provider.setStatusFilter(AppConstants.inProgress),
+                  onTap: () =>
+                      provider.setStatusFilter(AppConstants.inProgress),
                 ),
                 SizedBox(width: 8),
                 _buildFilterChip(
@@ -119,7 +120,7 @@ class _TasksPageState extends State<TasksPage> {
                   ),
                   SizedBox(width: 8),
                   Text(
-                    '${provider.overdueTasksCount} görev süresi geçti',
+                    '${provider.overdueTasksCount} ${LocaleKeys.tasks_overdue.tr()}',
                     style: TextStyle(
                       color: Color(0xFFE53935),
                       fontSize: 13,
@@ -313,7 +314,7 @@ class _TasksPageState extends State<TasksPage> {
                       SizedBox(width: 6),
                       Expanded(
                         child: Text(
-                          'Şube ile ilgili',
+                          LocaleKeys.about_the_branch.tr(),
                           style: TextStyle(
                             color: Color(0xFF808080),
                             fontSize: 12,
@@ -415,7 +416,7 @@ class _TasksPageState extends State<TasksPage> {
     final difference = dueDate.difference(now).inDays;
 
     if (difference < 0) {
-      return '${difference.abs()} ${LocaleKeys.days_ago.tr()}';
+      return '${LocaleKeys.days_ago.tr().replaceAll(AppConstants.count, difference.abs().toString())}';
     } else if (difference == 0) {
       return LocaleKeys.today.tr();
     } else if (difference == 1) {
@@ -564,6 +565,7 @@ class TaskDetailsSheet extends StatelessWidget {
 
               _buildInfoRow(
                 icon: Icons.person,
+                //TODO: locale
                 label: "Assigned Inspector",
                 value: task.assignedInspectorName,
               ),
@@ -785,12 +787,12 @@ class TaskDetailsSheet extends StatelessWidget {
   String _getPriorityText(String priority) {
     switch (priority) {
       case AppConstants.high:
-        return "High";
+        return LocaleKeys.high.tr();
       case AppConstants.medium:
-        return 'Medium';
+        return LocaleKeys.medium.tr();
       case AppConstants.low:
       default:
-        return 'Low';
+        return LocaleKeys.low.tr();
     }
   }
 
@@ -809,12 +811,12 @@ class TaskDetailsSheet extends StatelessWidget {
   String _getStatusText(String status) {
     switch (status) {
       case AppConstants.completed:
-        return "Completed";
+        return LocaleKeys.completed.tr();
       case AppConstants.inProgress:
-        return 'In Progress';
+        return LocaleKeys.in_progress.tr();
       case AppConstants.pending:
       default:
-        return 'Pending';
+        return LocaleKeys.pending.tr();
     }
   }
 

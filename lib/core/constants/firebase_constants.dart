@@ -22,6 +22,12 @@ class AppConstants {
   static const medium = "medium";
   static const low = "low";
   static const all = "all";
+  static const name = "name";
+  static const score = "score";
+  static const lastInspection = "lastInspection";
+  static const dueDate = "dueDate";
+  static const priority = "priority";
+  static const createdAt = "createdAt";
 }
 
 UserModel? loggedInUser;

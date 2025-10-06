@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'dart:io';
 import '../firebase_services/firebase_tasks_service.dart';
 import '../models/task_model.dart';
@@ -51,8 +52,9 @@ class ProviderTasks extends ChangeNotifier {
 
   List<TaskModel> get overdueTasks => _tasks.where((t) => t.isOverdue).toList();
 
-  List<TaskModel> get highPriorityTasks =>
-      _tasks.where((t) => t.priority == 'high' && !t.isCompleted).toList();
+  List<TaskModel> get highPriorityTasks => _tasks
+      .where((t) => t.priority == AppConstants.high && !t.isCompleted)
+      .toList();
 
   // Initialize
   Future<void> initialize() async {
@@ -65,13 +67,7 @@ class ProviderTasks extends ChangeNotifier {
       _isLoading = true;
       _errorMessage = null;
       notifyListeners();
-
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      _tasks = await _taskService.getTasksByInspector(userId);
+      _tasks = await _taskService.getTasksByInspector(loggedInUser!.id);
 
       _isLoading = false;
       notifyListeners();
@@ -85,10 +81,8 @@ class ProviderTasks extends ChangeNotifier {
 
   // Stream-based initialization (real-time updates)
   void initializeWithStreams() {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return;
 
-    _taskService.streamTasksByInspector(userId).listen((tasks) {
+    _taskService.streamTasksByInspector(loggedInUser!.id).listen((tasks) {
       _tasks = tasks;
       notifyListeners();
     });
@@ -128,14 +122,14 @@ class ProviderTasks extends ChangeNotifier {
     var filtered = _tasks;
 
     // Filter by status
-    if (_statusFilter != 'all') {
+    if (_statusFilter != AppConstants.all) {
       filtered = filtered
           .where((task) => task.status == _statusFilter)
           .toList();
     }
 
     // Filter by priority
-    if (_priorityFilter != 'all') {
+    if (_priorityFilter != AppConstants.all) {
       filtered = filtered
           .where((task) => task.priority == _priorityFilter)
           .toList();
@@ -143,21 +137,25 @@ class ProviderTasks extends ChangeNotifier {
 
     // Sort
     switch (_sortBy) {
-      case 'dueDate':
+      case AppConstants.dueDate:
         filtered.sort((a, b) {
           if (a.dueDate == null) return 1;
           if (b.dueDate == null) return -1;
           return a.dueDate!.compareTo(b.dueDate!);
         });
         break;
-      case 'priority':
-        final priorityOrder = {'high': 0, 'medium': 1, 'low': 2};
+      case AppConstants.priority:
+        final priorityOrder = {
+          AppConstants.high: 0,
+          AppConstants.medium: 1,
+          AppConstants.low: 2,
+        };
         filtered.sort(
           (a, b) =>
               priorityOrder[a.priority]!.compareTo(priorityOrder[b.priority]!),
         );
         break;
-      case 'createdAt':
+      case AppConstants.createdAt:
         filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
         break;
     }
@@ -174,7 +172,7 @@ class ProviderTasks extends ChangeNotifier {
 
       await _taskService.updateTaskStatus(taskId, newStatus);
 
-      _successMessage = 'Görev durumu güncellendi';
+      _successMessage = 'Task status updated successfully';
       _isUpdating = false;
       notifyListeners();
 
@@ -257,9 +255,6 @@ class ProviderTasks extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) throw Exception('User not authenticated');
-
       // Upload photos
       final photoUrls = <String>[];
       for (final photo in _commentPhotos) {
@@ -269,7 +264,7 @@ class ProviderTasks extends ChangeNotifier {
 
       // Create comment
       final comment = TaskCommentModel(
-        userId: userId,
+        userId: loggedInUser!.id,
         userName: FirebaseAuth.instance.currentUser?.displayName ?? 'Inspector',
         text: commentText,
         timestamp: DateTime.now(),

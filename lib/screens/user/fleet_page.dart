@@ -51,7 +51,7 @@ class _FleetPageState extends State<FleetPage> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Error loading fleet',
+                    LocaleKeys.error_loading_fleet.tr(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -73,7 +73,7 @@ class _FleetPageState extends State<FleetPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryRed,
                     ),
-                    child: Text('Retry'),
+                    child: Text(LocaleKeys.retry.tr()),
                   ),
                 ],
               ),
@@ -172,7 +172,7 @@ class _NoVehicleCard extends StatelessWidget {
             ),
             SizedBox(height: 12),
             Text(
-              'No vehicle assigned',
+              LocaleKeys.no_vehicle_assigned.tr(),
               style: TextStyle(
                 color: Colors.white70,
                 fontSize: 16,
@@ -181,7 +181,7 @@ class _NoVehicleCard extends StatelessWidget {
             ),
             SizedBox(height: 6),
             Text(
-              'Please contact admin for vehicle assignment',
+              LocaleKeys.please_contact_admin_for_vehicle_assignment.tr(),
               style: TextStyle(color: Colors.white54, fontSize: 13),
               textAlign: TextAlign.center,
             ),
@@ -225,6 +225,7 @@ class _CurrentVehicleCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
+            //TODO: locale
             provider.currentUser?.name ?? 'Inspector',
             style: const TextStyle(color: AppColors.white, fontSize: 13),
           ),
@@ -249,17 +250,6 @@ class _VehicleDetailsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.lightBlack,
         borderRadius: BorderRadius.circular(16),
-        // border: Border.all(
-        //   color: AppColors.primaryRed.withValues(alpha: 0.3),
-        //   width: 1,
-        // ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,7 +310,7 @@ class _VehicleInfo extends StatelessWidget {
                 ),
               ),
               Text(
-                "Plate: $plate",
+                "${LocaleKeys.plate.tr()}: $plate",
                 style: TextStyle(color: AppColors.lightGrey, fontSize: 13),
               ),
             ],
@@ -400,7 +390,7 @@ class _RemainingKm extends StatelessWidget {
                 ),
               ),
               IconButton(
-                tooltip: "Update KM",
+                tooltip: LocaleKeys.update_km.tr(),
                 onPressed: () => _showUpdateKmDialog(context, provider),
                 icon: Icon(Icons.edit, color: AppColors.white),
               ),
@@ -408,7 +398,7 @@ class _RemainingKm extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            "${NumberFormat('#,###').format(vehicle.remainingKm)} km",
+            "${NumberFormat('#,###').format(vehicle.remainingKm)} ${LocaleKeys.km.tr()}",
             style: const TextStyle(
               color: AppColors.primaryRed,
               fontWeight: FontWeight.bold,
@@ -427,7 +417,7 @@ class _RemainingKm extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            "${vehicle.usagePercent}% used",
+            "${vehicle.usagePercent}% ${LocaleKeys.used.tr()}",
             style: const TextStyle(color: AppColors.lightGrey, fontSize: 12),
           ),
         ],
@@ -460,7 +450,7 @@ class _ReturnDate extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Service Due",
+                LocaleKeys.service_due.tr(),
                 style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontWeight: FontWeight.bold,
@@ -488,8 +478,8 @@ class _ReturnDate extends StatelessWidget {
                     const SizedBox(width: 4),
                     Text(
                       daysUntil > 0
-                          ? "$daysUntil days left"
-                          : "${daysUntil.abs()} days overdue",
+                          ? "$daysUntil ${LocaleKeys.days_left.tr()}"
+                          : "${daysUntil.abs()} ${LocaleKeys.days_overdue.tr()}",
                       style: const TextStyle(
                         color: AppColors.primaryRed,
                         fontSize: 13,
@@ -500,7 +490,7 @@ class _ReturnDate extends StatelessWidget {
                 )
               else
                 Text(
-                  "$daysUntil days until service",
+                  "$daysUntil ${LocaleKeys.days_until_service.tr()}",
                   style: const TextStyle(color: Colors.green, fontSize: 13),
                 ),
             ],
@@ -517,12 +507,15 @@ void _showUpdateKmDialog(BuildContext context, ProviderFleet provider) {
     context: context,
     builder: (context) => AlertDialog(
       backgroundColor: AppColors.lightBlack,
-      title: Text('Update Kilometers', style: TextStyle(color: Colors.white)),
+      title: Text(
+        LocaleKeys.update_kilometers.tr(),
+        style: TextStyle(color: Colors.white),
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            'Current: ${NumberFormat('#,###').format(provider.currentKm)} km',
+            '${LocaleKeys.current.tr()}: ${NumberFormat('#,###').format(provider.currentKm)} ${LocaleKeys.km.tr()}',
             style: TextStyle(color: Colors.white70),
           ),
           SizedBox(height: 16),
@@ -531,9 +524,9 @@ void _showUpdateKmDialog(BuildContext context, ProviderFleet provider) {
             keyboardType: TextInputType.number,
             style: TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              labelText: 'New Kilometers',
+              labelText: LocaleKeys.new_kilometers.tr(),
               labelStyle: TextStyle(color: Colors.white70),
-              hintText: 'Enter new KM',
+              hintText: LocaleKeys.enter_new_km.tr(),
               hintStyle: TextStyle(color: Colors.white38),
               filled: true,
               fillColor: AppColors.lightRed,
@@ -555,20 +548,26 @@ void _showUpdateKmDialog(BuildContext context, ProviderFleet provider) {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+          child: Text(
+            LocaleKeys.cancel.tr(),
+            style: TextStyle(color: Colors.white70),
+          ),
         ),
         ElevatedButton(
           onPressed: () async {
             final success = await provider.updateKmFromController();
             if (success) {
               Navigator.pop(context);
-              showSnakBarr(context, 'Kilometers updated successfully');
+              showSnakBarr(
+                context,
+                LocaleKeys.kilometers_updated_successfully.tr(),
+              );
             }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryRed,
           ),
-          child: Text('Update'),
+          child: Text(LocaleKeys.update_km.tr()),
         ),
       ],
     ),
