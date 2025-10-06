@@ -70,10 +70,6 @@ class ProviderPanel extends ChangeNotifier {
     await loadDashboardStats();
   }
 
-  double calculateCompletionPercentage(int completed, int total) {
-    if (total == 0) return 0.0;
-    return completed / total;
-  }
 
   // Refresh data
   Future<void> refresh() async {

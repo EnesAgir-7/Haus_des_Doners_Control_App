@@ -1,6 +1,7 @@
 // lib/providers/route_provider.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import '../firebase_services/firebase_route_service.dart';
 import '../models/route_model.dart';
 
@@ -14,6 +15,10 @@ class ProviderRoute extends ChangeNotifier {
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
   String? _errorMessage;
+
+  List<RouteStopModel> todaysStopsList = [];
+  double todaysProgressValue = 0.0;
+  int todaysCompletedCount = 0;
 
   // Getters
   RouteModel? get allRoute => _allRoute;
@@ -44,29 +49,33 @@ class ProviderRoute extends ChangeNotifier {
       return null;
     }
   }
-  List<RouteStopModel> get todaysStops {
-    if (_allRoute == null) return [];
+
+  void calculateTodaysData() {
+    if (_allRoute == null) {
+      todaysStopsList = [];
+      todaysProgressValue = 0.0;
+      todaysCompletedCount = 0;
+      return;
+    }
 
     final today = DateTime.now();
     final todayKey = "${today.year}-${today.month}-${today.day}";
 
-    try {
-      return _allRoute!.stops.where((stop) {
-        // stop.timeSlot example: "2025-10-5"
-        return stop.timeSlot == todayKey;
-      }).toList();
-    } catch (e) {
-      return [];
-    }
+    // Filter stops for today
+    todaysStopsList = _allRoute!.stops
+        .where((stop) => stop.timeSlot == todayKey)
+        .toList();
+
+    // Completed stops count
+    todaysCompletedCount = todaysStopsList
+        .where((stop) => stop.status == AppConstants.completed)
+        .length;
+
+    // Progress
+    todaysProgressValue = todaysStopsList.isEmpty
+        ? 0.0
+        : todaysCompletedCount / todaysStopsList.length;
   }
-
-
-
-  List<RouteStopModel> get completedStopsList =>
-      stops.where((stop) => stop.isCompleted).toList();
-
-  List<RouteStopModel> get pendingStopsList =>
-      stops.where((stop) => stop.isPending).toList();
 
   // Initialize
   Future<void> initialize() async {
@@ -86,6 +95,7 @@ class ProviderRoute extends ChangeNotifier {
       }
 
       _allRoute = await _routeService.getAllRoutes(userId);
+      calculateTodaysData();
 
       _isLoading = false;
       notifyListeners();
@@ -138,11 +148,7 @@ class ProviderRoute extends ChangeNotifier {
     if (_allRoute == null) return;
 
     try {
-      await _routeService.updateStopStatus(
-        _allRoute!.id,
-        stopIndex,
-        newStatus,
-      );
+      await _routeService.updateStopStatus(_allRoute!.id, stopIndex, newStatus);
 
       // Update local state immediately for better UX
       final updatedStops = List<RouteStopModel>.from(_allRoute!.stops);

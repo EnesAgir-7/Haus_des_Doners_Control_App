@@ -244,7 +244,7 @@ class DashboardCard extends StatelessWidget {
                   builder: (context, taskPro, child) {
                     return StatBox(
                       isLoading: taskPro.isLoading,
-                      number: taskPro.tasks.length.toString(),
+                      number: taskPro.pendingTasksCount.toString(),
                       label: LocaleKeys.pending_task.tr(),
                       icon: Icons.pending_actions,
                       color: Colors.orange,
@@ -276,7 +276,7 @@ class DashboardCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          _getProgressLabel(provider.selectedRange, context),
+                          "Today's Progress",
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 13,
@@ -284,7 +284,7 @@ class DashboardCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          '${(provider.calculateCompletionPercentage(ro.completedStops, ro.totalStops) * 100).toStringAsFixed(0)}%',
+                          '${(ro.todaysProgressValue * 100).toStringAsFixed(0)}%',
                           style: const TextStyle(
                             color: AppColors.primaryRed,
                             fontSize: 14,
@@ -297,10 +297,7 @@ class DashboardCard extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
-                        value: provider.calculateCompletionPercentage(
-                          ro.completedStops,
-                          ro.totalStops,
-                        ),
+                        value: ro.todaysProgressValue,
                         backgroundColor: Colors.white24,
                         valueColor: const AlwaysStoppedAnimation<Color>(
                           AppColors.primaryRed,
@@ -310,7 +307,7 @@ class DashboardCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${ro.completedStops} / ${ro.totalStops} ${LocaleKeys.branches_checked.tr()}',
+                      '${ro.todaysCompletedCount} / ${ro.todaysStopsList.length} ${LocaleKeys.branches_checked.tr()}',
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 11,
@@ -334,17 +331,6 @@ class DashboardCard extends StatelessWidget {
         return LocaleKeys.this_week_check.tr();
       case TimeRange.monthly:
         return "This month";
-    }
-  }
-
-  String _getProgressLabel(TimeRange range, BuildContext context) {
-    switch (range) {
-      case TimeRange.daily:
-        return "Daily Progress";
-      case TimeRange.weekly:
-        return "Weekly Progress";
-      case TimeRange.monthly:
-        return LocaleKeys.monthly_progress.tr();
     }
   }
 }
@@ -433,8 +419,7 @@ class DailySummarySection extends StatelessWidget {
           );
         }
 
-        final stops = routeProvider.todaysStops;
-        // final stops = routeProvider.stops;
+        final stops = routeProvider.todaysStopsList;
 
         if (stops.isEmpty) {
           return Column(
