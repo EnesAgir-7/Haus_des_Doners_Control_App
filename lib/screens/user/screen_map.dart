@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:haus_des_control/providers/provider_branches.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
@@ -222,8 +223,8 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                           return AppButton(
                             isLoading: branchContr.isLoading,
                             text: updatedBranch.isRouteAssigned
-                                ? "Un Assign"
-                                : "Assign to Me",
+                                ? LocaleKeys.unassign.tr()
+                                : LocaleKeys.assign_to_me.tr(),
                             onPressed: () async {
                               if (updatedBranch.isRouteAssigned) {
                                 // Unassign
@@ -263,6 +264,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                         branchName: branch.name,
                                         timeSlot: timeSlot,
                                         context: context,
+                                        
                                       );
 
                                   if (success) {
@@ -293,7 +295,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: AppButton(
-                        text: "Submit Inspection",
+                        text: LocaleKeys.submit_inspection.tr(),
                         onPressed: () {},
                         backgroundColor: AppColors.primaryRed,
                         textStyle: const TextStyle(fontSize: 11),

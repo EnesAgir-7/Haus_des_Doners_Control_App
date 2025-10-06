@@ -1,7 +1,7 @@
 // lib/providers/route_provider.dart
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+
 import '../firebase_services/firebase_route_service.dart';
 import '../models/route_model.dart';
 
@@ -89,12 +89,7 @@ class ProviderRoute extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      _allRoute = await _routeService.getAllRoutes(userId);
+      _allRoute = await _routeService.getAllRoutes(loggedInUser!.id);
       calculateTodaysData();
 
       _isLoading = false;
@@ -109,10 +104,8 @@ class ProviderRoute extends ChangeNotifier {
 
   // Stream-based initialization (real-time updates)
   void initializeWithStreams() {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return;
 
-    _routeService.streamTodaysRoute(userId).listen((route) {
+    _routeService.streamTodaysRoute(loggedInUser!.id).listen((route) {
       _allRoute = route;
       notifyListeners();
     });
@@ -126,12 +119,7 @@ class ProviderRoute extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('User not authenticated');
-      }
-
-      _allRoute = await _routeService.getRouteByDate(userId, date);
+      _allRoute = await _routeService.getRouteByDate(loggedInUser!.id, date);
 
       _isLoading = false;
       notifyListeners();

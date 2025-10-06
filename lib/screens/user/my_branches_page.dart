@@ -9,7 +9,7 @@ import '../../helpers/app_helpers.dart';
 import '../../providers/provider_branches.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
-import '../../widgets/branch_card.dart';
+import '../../widgets/inspector_branch_card.dart';
 import 'control_page.dart';
 import 'screen_map.dart';
 

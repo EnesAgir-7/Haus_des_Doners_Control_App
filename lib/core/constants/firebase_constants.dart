@@ -21,6 +21,7 @@ class AppConstants {
   static const high = "high";
   static const medium = "medium";
   static const low = "low";
+  static const all = "all";
 }
 
 UserModel? loggedInUser;

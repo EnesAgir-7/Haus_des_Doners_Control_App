@@ -20,10 +20,10 @@ class InspectorBranchCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF212121),
           borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(
-            color: Colors.white10, // Subtle border
-            width: 1,
-          ),
+          // border: Border.all(
+          //   color: Colors.white10, // Subtle border
+          //   width: 1,
+          // ),
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,

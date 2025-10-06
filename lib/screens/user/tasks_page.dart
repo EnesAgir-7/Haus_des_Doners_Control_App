@@ -72,29 +72,29 @@ class _TasksPageState extends State<TasksPage> {
                 _buildFilterChip(
                   label: LocaleKeys.all.tr(),
                   count: provider.totalTasks,
-                  isSelected: provider.statusFilter == 'all',
-                  onTap: () => provider.setStatusFilter('all'),
+                  isSelected: provider.statusFilter == AppConstants.all,
+                  onTap: () => provider.setStatusFilter(AppConstants.all),
                 ),
                 SizedBox(width: 8),
                 _buildFilterChip(
                   label: LocaleKeys.pending.tr(),
                   count: provider.pendingTasksCount,
-                  isSelected: provider.statusFilter == 'pending',
-                  onTap: () => provider.setStatusFilter('pending'),
+                  isSelected: provider.statusFilter == AppConstants.pending,
+                  onTap: () => provider.setStatusFilter(AppConstants.pending),
                 ),
                 SizedBox(width: 8),
                 _buildFilterChip(
                   label: LocaleKeys.in_progress.tr(),
                   count: provider.inProgressTasksCount,
-                  isSelected: provider.statusFilter == 'in_progress',
-                  onTap: () => provider.setStatusFilter('in_progress'),
+                  isSelected: provider.statusFilter == AppConstants.inProgress,
+                  onTap: () => provider.setStatusFilter(AppConstants.inProgress),
                 ),
                 SizedBox(width: 8),
                 _buildFilterChip(
                   label: LocaleKeys.completed.tr(),
                   count: provider.completedTasksCount,
-                  isSelected: provider.statusFilter == 'completed',
-                  onTap: () => provider.setStatusFilter('completed'),
+                  isSelected: provider.statusFilter == AppConstants.completed,
+                  onTap: () => provider.setStatusFilter(AppConstants.completed),
                 ),
               ],
             ),
@@ -400,11 +400,11 @@ class _TasksPageState extends State<TasksPage> {
 
   Color _getPriorityColor(String priority) {
     switch (priority) {
-      case 'high':
+      case AppConstants.high:
         return Color(0xFFE53935);
-      case 'medium':
+      case AppConstants.medium:
         return Color(0xFFFFA726);
-      case 'low':
+      case AppConstants.low:
       default:
         return Color(0xFF4CAF50);
     }
@@ -784,11 +784,11 @@ class TaskDetailsSheet extends StatelessWidget {
 
   String _getPriorityText(String priority) {
     switch (priority) {
-      case 'high':
+      case AppConstants.high:
         return "High";
-      case 'medium':
+      case AppConstants.medium:
         return 'Medium';
-      case 'low':
+      case AppConstants.low:
       default:
         return 'Low';
     }

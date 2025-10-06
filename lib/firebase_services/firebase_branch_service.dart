@@ -96,6 +96,8 @@ class BranchService {
               branchName: branchName,
               status: AppConstants.pending,
               order: 1,
+              inspectionId: inspectorId, 
+              createdAt: DateTime.now(),
 
             ),
           ],
