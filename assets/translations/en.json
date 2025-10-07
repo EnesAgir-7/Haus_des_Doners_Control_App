@@ -220,7 +220,6 @@
   "no_users_found": "No users found matching your search",
   "no_users_available": "No users available",
   "role": "Role",
-  "region": "Region",
   "branch_details": "Branch Details",
   "name": "Name",
   "address": "Address",
@@ -263,5 +262,6 @@
   "user_details": "User Details",
   "inactive": "Inactive",
   "user_updated_successfully": "User updated successfully",
-  "assign_branch": "Assign Branch"
+  "assign_branch": "Assign Branch", 
+  "search_branches": "Search Branches"
 }

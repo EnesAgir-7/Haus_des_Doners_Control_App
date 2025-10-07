@@ -223,5 +223,7 @@
   "user_details": "Kullanıcı Detayları",
   "inactive": "Pasif",
   "user_updated_successfully": "Kullanıcı başarıyla güncellendi",
-  "assign_branch": "Şube Ata"
+  "assign_branch": "Şube Ata",
+  "status": "Status",
+  "name": "Name"
 }

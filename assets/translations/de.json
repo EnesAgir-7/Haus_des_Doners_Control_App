@@ -220,7 +220,6 @@
   "no_users_found": "Keine Benutzer für Ihre Suche gefunden",
   "no_users_available": "Keine Benutzer verfügbar",
   "role": "Rolle",
-  "region": "Region",
   "search": "Suchen",
   "search_vehicles": "Suchen",
   "no_vehicles_found": "Keine Fahrzeuge gefunden",
@@ -242,5 +241,8 @@
   "user_details": "Benutzerdetails",
   "inactive": "Inaktiv",
   "user_updated_successfully": "Benutzer erfolgreich aktualisiert",
-  "assign_branch": "Filiale zuweisen"
+  "assign_branch": "Filiale zuweisen", 
+  "search_branches": "Filialen suchen", 
+  "status": "Status", 
+  "name": "Name"
 }
