@@ -209,5 +209,12 @@
   "lutfen_yorum_veya_fotograf_ekleyin": "Lütfen yorum veya fotoğraf ekleyin",
   "yorum_eklendi": "Yorum eklendi",
   "branch_assigned_successfully": "Branch assigned successfully",
-  "branch_unassigned_successfully": "Branch unassigned successfully"
+  "branch_unassigned_successfully": "Branch unassigned successfully",
+  "filtered": "Filtrelenmiş",
+  "done": "Tamamlandı",
+  "left": "Kalan",
+  "select_date": "Tarih Seç",
+  "show_all_routes": "Tüm Rotaları Göster",
+  "no_stops_for_date": "Bu tarih için hiçbir durak planlanmadı",
+  "start_inspection": "Denetime Başla"
 }

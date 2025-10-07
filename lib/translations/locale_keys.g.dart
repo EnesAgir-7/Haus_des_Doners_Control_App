@@ -214,5 +214,12 @@ abstract class  LocaleKeys {
   static const yorum_eklendi = 'yorum_eklendi';
   static const branch_assigned_successfully = 'branch_assigned_successfully';
   static const branch_unassigned_successfully = 'branch_unassigned_successfully';
+  static const filtered = 'filtered';
+  static const done = 'done';
+  static const left = 'left';
+  static const select_date = 'select_date';
+  static const show_all_routes = 'show_all_routes';
+  static const no_stops_for_date = 'no_stops_for_date';
+  static const start_inspection = 'start_inspection';
 
 }

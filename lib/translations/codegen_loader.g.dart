@@ -225,7 +225,14 @@ class CodegenLoader extends AssetLoader{
   "lutfen_yorum_veya_fotograf_ekleyin": "Lütfen yorum veya fotoğraf ekleyin",
   "yorum_eklendi": "Yorum eklendi",
   "branch_assigned_successfully": "Branch assigned successfully",
-  "branch_unassigned_successfully": "Branch unassigned successfully"
+  "branch_unassigned_successfully": "Branch unassigned successfully",
+  "filtered": "Gefiltert",
+  "done": "Erledigt",
+  "left": "Übrig",
+  "select_date": "Datum Auswählen",
+  "show_all_routes": "Alle Routen Anzeigen",
+  "no_stops_for_date": "Keine Haltestellen für dieses Datum geplant",
+  "start_inspection": "Inspektion Starten"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Panel",
@@ -437,7 +444,14 @@ static const Map<String,dynamic> _en = {
   "lutfen_yorum_veya_fotograf_ekleyin": "Lütfen yorum veya fotoğraf ekleyin",
   "yorum_eklendi": "Yorum eklendi",
   "branch_assigned_successfully": "Branch assigned successfully",
-  "branch_unassigned_successfully": "Branch unassigned successfully"
+  "branch_unassigned_successfully": "Branch unassigned successfully",
+  "filtered": "Filtered",
+  "done": "Done",
+  "left": "Left",
+  "select_date": "Select Date",
+  "show_all_routes": "Show All Routes",
+  "no_stops_for_date": "No stops scheduled for this date",
+  "start_inspection": "Start Inspection"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -650,7 +664,14 @@ static const Map<String,dynamic> _tr = {
   "lutfen_yorum_veya_fotograf_ekleyin": "Lütfen yorum veya fotoğraf ekleyin",
   "yorum_eklendi": "Yorum eklendi",
   "branch_assigned_successfully": "Branch assigned successfully",
-  "branch_unassigned_successfully": "Branch unassigned successfully"
+  "branch_unassigned_successfully": "Branch unassigned successfully",
+  "filtered": "Filtrelenmiş",
+  "done": "Tamamlandı",
+  "left": "Kalan",
+  "select_date": "Tarih Seç",
+  "show_all_routes": "Tüm Rotaları Göster",
+  "no_stops_for_date": "Bu tarih için hiçbir durak planlanmadı",
+  "start_inspection": "Denetime Başla"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

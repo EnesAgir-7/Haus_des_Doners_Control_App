@@ -13,6 +13,7 @@ class ProviderRoute extends ChangeNotifier {
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
   String? _errorMessage;
+  DateTime? _filterDate;
 
   List<RouteStopModel> todaysStopsList = [];
   double todaysProgressValue = 0.0;
@@ -23,12 +24,37 @@ class ProviderRoute extends ChangeNotifier {
   DateTime get selectedDate => _selectedDate;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  DateTime? get filterDate => _filterDate;
 
   // Computed values
   List<RouteStopModel> get stops => _allRoute?.stops ?? [];
   int get totalStops => _allRoute?.totalStops ?? 0;
   int get completedStops => _allRoute?.completedStopsCount ?? 0;
   double get completionPercent => _allRoute?.completionPercent ?? 0.0;
+
+  // Filtered stops based on selected date
+  List<RouteStopModel> get filteredStops {
+    if (_filterDate == null) {
+      return stops;
+    }
+
+    final filterKey =
+        "${_filterDate!.year}-${_filterDate!.month}-${_filterDate!.day}";
+    return stops.where((stop) => stop.timeSlot == filterKey).toList();
+  }
+
+  // Filtered completed count
+  int get filteredCompletedCount {
+    return filteredStops
+        .where((stop) => stop.status == AppConstants.completed)
+        .length;
+  }
+
+  // Filtered progress value
+  double get filteredProgressValue {
+    if (filteredStops.isEmpty) return 0.0;
+    return filteredCompletedCount / filteredStops.length;
+  }
 
   RouteStopModel? get currentStop {
     if (_allRoute == null) return null;
@@ -46,6 +72,18 @@ class ProviderRoute extends ChangeNotifier {
     } catch (e) {
       return null;
     }
+  }
+
+  // Set date filter
+  void setDateFilter(DateTime date) {
+    _filterDate = DateTime(date.year, date.month, date.day);
+    notifyListeners();
+  }
+
+  // Clear date filter
+  void clearDateFilter() {
+    _filterDate = null;
+    notifyListeners();
   }
 
   void calculateTodaysData() {
@@ -104,6 +142,7 @@ class ProviderRoute extends ChangeNotifier {
   void initializeWithStreams() {
     _routeService.streamTodaysRoute(loggedInUser!.id).listen((route) {
       _allRoute = route;
+      calculateTodaysData();
       notifyListeners();
     });
   }
@@ -117,6 +156,7 @@ class ProviderRoute extends ChangeNotifier {
       notifyListeners();
 
       _allRoute = await _routeService.getRouteByDate(loggedInUser!.id, date);
+      calculateTodaysData();
 
       _isLoading = false;
       notifyListeners();
@@ -156,6 +196,7 @@ class ProviderRoute extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
 
+      calculateTodaysData();
       notifyListeners();
     } catch (e) {
       _errorMessage = 'Error updating stop status: ${e.toString()}';
