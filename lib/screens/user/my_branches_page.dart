@@ -42,7 +42,7 @@ class _BranchesPageState extends State<BranchesPage> {
             ),
           );
         },
-        child: Icon(Icons.map, size: 36),
+        child: Icon(Icons.location_on, size: 36),
       ),
       body: SafeArea(
         child: Consumer<ProviderBranches>(

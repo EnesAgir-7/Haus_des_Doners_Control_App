@@ -64,8 +64,12 @@ class BranchModel {
       totalInspections: data['totalInspections'] ?? 0,
       averageScore: (data['averageScore'] ?? 0.0).toDouble(),
       status: data['status'] ?? 'active',
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: data["createdAt"] != null
+          ? (data['createdAt'] as Timestamp).toDate()
+          : DateTime.now(),
+      updatedAt: data["updatedAt"] != null
+          ? (data['updatedAt'] as Timestamp).toDate()
+          : DateTime.now(),
     );
   }
 

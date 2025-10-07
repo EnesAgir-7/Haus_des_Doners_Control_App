@@ -161,6 +161,7 @@ class _ControlPageState extends State<ControlPage> {
                       children: [
                         Expanded(
                           child: AppButton(
+                            isLoading: provider.isSubmittingOrUploading,
                             text: "Preview PDF",
                             icon: Icons.preview,
                             onPressed:
@@ -187,6 +188,7 @@ class _ControlPageState extends State<ControlPage> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: AppButton(
+                            isLoading: provider.isSubmittingOrUploading,
                             text: LocaleKeys.submit_inspection.tr(),
                             icon: Icons.check_circle,
                             onPressed:

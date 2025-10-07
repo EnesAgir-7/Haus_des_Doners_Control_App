@@ -240,6 +240,8 @@ class ProviderControl extends ChangeNotifier {
     return urls;
   }
 
+  bool get isSubmittingOrUploading => _isSubmitting || _isUploading;
+
   // Submit inspection
   Future<bool> submitInspection() async {
     if (selectedTemplate == null) {

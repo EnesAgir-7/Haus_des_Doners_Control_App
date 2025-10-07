@@ -15,7 +15,7 @@ class LanguageButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.language, color: Colors.white),
+      icon: const Icon(Icons.language_outlined, color: Colors.white),
       tooltip: LocaleKeys.change_language.tr(),
       onPressed: () => _showLanguageDialog(context),
     );

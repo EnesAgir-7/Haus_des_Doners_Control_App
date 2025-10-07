@@ -165,7 +165,7 @@ class InspectionService {
         inspectorId: inspection.inspectorId,
         branchId: inspection.branchId,
         inspectionId: docRef.id,
-        status: 'completed',
+        status: AppConstants.completed,
       );
       
       return docRef.id;
