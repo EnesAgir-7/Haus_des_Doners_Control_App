@@ -235,7 +235,11 @@ class CodegenLoader extends AssetLoader{
   "no_users_found": "Aramanızla eşleşen kullanıcı bulunamadı",
   "no_users_available": "Mevcut kullanıcı yok",
   "role": "Rol",
-  "region": "Bölge"
+  "region": "Bölge",
+  "user_details": "Kullanıcı Detayları",
+  "inactive": "Pasif",
+  "user_updated_successfully": "Kullanıcı başarıyla güncellendi",
+  "assign_branch": "Şube Ata"
 };
 static const Map<String,dynamic> _de = {
   "panel": "Panel",
@@ -476,7 +480,11 @@ static const Map<String,dynamic> _de = {
   "next_service": "Nächster Service",
   "assignment_info": "Zuweisungsinformationen",
   "assign_inspector": "Inspektor zuweisen",
-  "unassign_inspector": "Inspektor entfernen"
+  "unassign_inspector": "Inspektor entfernen",
+  "user_details": "Benutzerdetails",
+  "inactive": "Inaktiv",
+  "user_updated_successfully": "Benutzer erfolgreich aktualisiert",
+  "assign_branch": "Filiale zuweisen"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Panel",
@@ -738,7 +746,11 @@ static const Map<String,dynamic> _en = {
   "next_service": "Next Service",
   "assignment_info": "Assignment Information",
   "assign_inspector": "Assign Inspector",
-  "unassign_inspector": "Unassign Inspector"
+  "unassign_inspector": "Unassign Inspector",
+  "user_details": "User Details",
+  "inactive": "Inactive",
+  "user_updated_successfully": "User updated successfully",
+  "assign_branch": "Assign Branch"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"tr": _tr, "de": _de, "en": _en};
 }
