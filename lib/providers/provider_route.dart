@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../firebase_services/firebase_route_service.dart';
@@ -21,7 +22,9 @@ class ProviderRoute extends ChangeNotifier {
   int todaysCompletedCount = 0;
 
   // Stream subscription
+  // Stream subscription
   StreamSubscription<RouteModel?>? _routeSubscription;
+  String? _currentInspectorId;
 
   // Getters
   RouteModel? get allRoute => _allRoute;
@@ -115,32 +118,19 @@ class ProviderRoute extends ChangeNotifier {
 
   // 🔹 Normal (non-stream) initialization
   Future<void> initialize() async {
-    // await fetchAllRoutes();
     initializeWithStreams();
   }
 
-  // 🔹 Fetch today's route (one-time)
-  // Future<void> fetchAllRoutes() async {
-  //   try {
-  //     _isLoading = true;
-  //     _errorMessage = null;
-  //     notifyListeners();
-
-  //     _allRoute = await _routeService.getAllRoutes(loggedInUser!.id);
-  //     calculateTodaysData();
-
-  //     _isLoading = false;
-  //     notifyListeners();
-  //   } catch (e) {
-  //     _errorMessage = 'Error loading route: ${e.toString()}';
-  //     _isLoading = false;
-  //     notifyListeners();
-  //     print(_errorMessage);
-  //   }
-  // }
-
   // 🔥 Real-time route stream initialization
   initializeWithStreams() {
+    final inspectorId = loggedInUser!.id;
+
+    if (_routeSubscription != null && _currentInspectorId == inspectorId) {
+      console("Same user and stream is On");
+      return;
+    }
+
+    _currentInspectorId = inspectorId;
     _routeSubscription?.cancel();
 
     _isLoading = true;
@@ -161,10 +151,6 @@ class ProviderRoute extends ChangeNotifier {
             notifyListeners();
             print(_errorMessage);
           },
-          onDone: () {
-            _isLoading = false;
-            notifyListeners();
-          },
         );
   }
 
@@ -177,6 +163,7 @@ class ProviderRoute extends ChangeNotifier {
 
       final updatedStops = List<RouteStopModel>.from(_allRoute!.stops);
       updatedStops[stopIndex] = RouteStopModel(
+        branchTemplateId: updatedStops[stopIndex].branchTemplateId,
         timeSlot: updatedStops[stopIndex].timeSlot,
         branchId: updatedStops[stopIndex].branchId,
         branchName: updatedStops[stopIndex].branchName,
@@ -229,7 +216,6 @@ class ProviderRoute extends ChangeNotifier {
 
   // 🔹 Refresh manually
   Future<void> refresh() async {
-    // await fetchAllRoutes();
     initializeWithStreams();
   }
 
@@ -255,6 +241,26 @@ class ProviderRoute extends ChangeNotifier {
   //     notifyListeners();
 
   //     _allRoute = await _routeService.getRouteByDate(loggedInUser!.id, date);
+  //     calculateTodaysData();
+
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   } catch (e) {
+  //     _errorMessage = 'Error loading route: ${e.toString()}';
+  //     _isLoading = false;
+  //     notifyListeners();
+  //     print(_errorMessage);
+  //   }
+  // }
+
+  // 🔹 Fetch today's route (one-time)
+  // Future<void> fetchAllRoutes() async {
+  //   try {
+  //     _isLoading = true;
+  //     _errorMessage = null;
+  //     notifyListeners();
+
+  //     _allRoute = await _routeService.getAllRoutes(loggedInUser!.id);
   //     calculateTodaysData();
 
   //     _isLoading = false;

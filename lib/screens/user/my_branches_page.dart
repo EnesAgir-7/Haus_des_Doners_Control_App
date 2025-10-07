@@ -10,7 +10,6 @@ import '../../providers/provider_branches.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/inspector_branch_card.dart';
-import 'control_page.dart';
 import 'screen_map.dart';
 
 class BranchesPage extends StatefulWidget {
@@ -451,24 +450,66 @@ class BranchDetailsSheet extends StatelessWidget {
                   ),
                   SizedBox(width: 10),
                   Expanded(
-                    child: AppButton(
-                      text: LocaleKeys.submit_report.tr(),
-                      icon: Icons.add_task,
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ControlPage(selectedBranch: branch),
+                    child: Consumer<ProviderBranches>(
+                      builder: (context, prod, child) {
+                        return AppButton(
+                          isLoading: prod.isLoading,
+                          text: branch.isRouteAssigned
+                              ? "Remove from Route"
+                              : "Add to Route",
+                          onPressed: () async {
+                            if (branch.isRouteAssigned) {
+                              // Unassign
+                              final success = await prod.unAssignBranchToMe(
+                                branchId: branch.id,
+                                context: context,
+                              );
+
+                              if (success) {
+                                Navigator.pop(context);
+                              }
+                            } else {
+                              // Show date picker before assigning
+                              final DateTime? pickedDate = await showDatePicker(
+                                locale: context.locale,
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime.now().add(
+                                  const Duration(days: 7),
+                                ),
+                              );
+
+                              if (pickedDate != null) {
+                                final String timeSlot =
+                                    "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+
+                                final success = await prod.assignBranchToMe(
+                                  branchId: branch.id,
+                                  branchName: branch.name,
+                                  timeSlot: timeSlot,
+                                  context: context,
+                                  branchTemplateId: branch.templateId,
+                                );
+
+                                if (success) {
+                                  Navigator.pop(context);
+                                }
+                              }
+                            }
+                          },
+                          backgroundColor: branch.isRouteAssigned
+                              ? AppColors.primaryRed
+                              : AppColors.amber,
+                          textStyle: TextStyle(
+                            color: branch.isRouteAssigned
+                                ? Colors.white
+                                : AppColors.primaryDark,
                           ),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          borderRadius: 10,
                         );
                       },
-                      backgroundColor: AppColors.primaryRed,
-                      textStyle: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      height: 48,
                     ),
                   ),
                 ],

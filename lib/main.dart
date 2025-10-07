@@ -115,22 +115,21 @@ class AuthWrapper extends StatelessWidget {
       builder: (context, providerAuth, _) {
         final currentUser = providerAuth.currentUser;
 
-        if (currentUser == null) {
-          return const ScreenAuth();
+        // Not logged in → show login screen
+        if (currentUser == null) return const ScreenAuth();
+
+        // Logged in but user model is still loading
+        if (providerAuth.userModel == null) {
+          return const Center(child: CircularProgressIndicator());
         }
 
-        final user = providerAuth.userModel;
-        loggedInUser = user;
-        if (user != null) {
-          return user.isAdmin ? AdminBottomNavBar() : ScreenBottomNavBar();
-        }
+        // User model ready → show relevant dashboard
+        final user = providerAuth.userModel!;
+        loggedInUser = user; // keep global in sync
 
-        providerAuth.fetchUserModel().then((fetchedUser) {
-          providerAuth.userModel = fetchedUser;
-          (context as Element).markNeedsBuild();
-        });
-
-        return const Center(child: CircularProgressIndicator());
+        return user.isAdmin
+            ? const AdminBottomNavBar()
+            : const ScreenBottomNavBar();
       },
     );
   }

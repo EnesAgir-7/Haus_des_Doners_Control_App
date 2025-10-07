@@ -68,31 +68,6 @@ class BranchModel {
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
   }
-  factory BranchModel.fromMap(Map<String, dynamic> data) {
-    return BranchModel(
-      id: '', // ID is empty since it's not provided here
-      name: data['name'] ?? '',
-      address: data['address'] ?? '',
-      templateId: data['templateId'] ?? '',
-      region: data['region'],
-      gps: data['gps'] ?? const GeoPoint(0, 0),
-      contactName: data['contactName'] ?? '',
-      contactPhone: data['contactPhone'] ?? '',
-      assignedInspector: data['assignedInspector'] != null
-          ? AssignedInspector.fromMap(data['assignedInspector'])
-          : null,
-      isRouteAssigned: data['isAssigned'] ?? false,
-      lastInspectionDate: data['lastInspectionDate'] != null
-          ? (data['lastInspectionDate'] as Timestamp).toDate()
-          : null,
-      lastInspectionScore: data['lastInspectionScore']?.toDouble(),
-      totalInspections: data['totalInspections'] ?? 0,
-      averageScore: (data['averageScore'] ?? 0.0).toDouble(),
-      status: data['status'] ?? 'active',
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
-    );
-  }
 
   BranchModel copyWith({
     String? id,

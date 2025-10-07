@@ -7,6 +7,7 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:haus_des_control/widgets/custom_toast.dart';
 
+import '../core/console.dart';
 import '../firebase_services/firebase_branch_service.dart';
 import '../firebase_services/firebase_inspection_service.dart';
 import '../models/branch_model.dart';
@@ -42,6 +43,7 @@ class ProviderBranches extends ChangeNotifier {
   String get searchQuery => _searchQuery;
   String get sortBy => _sortBy;
   int get branchCount => _branches.length;
+  String? _currentInspectorId;
 
   // Initialize
   Future<void> initialize() async {
@@ -52,7 +54,13 @@ class ProviderBranches extends ChangeNotifier {
   // Stream-based initialization (real-time updates)
   // 🔥 Real-time stream initialization (for branches)
   initializeWithStreams() {
+    if (_branchesSubscription != null &&
+        _currentInspectorId == loggedInUser!.id) {
+      console("Same user and stream is On");
+      return;
+    }
     _branchesSubscription?.cancel();
+    _currentInspectorId = loggedInUser!.id;
 
     _branchesSubscription = _branchService
         .streamBranchesByInspector(loggedInUser!.id)
@@ -70,6 +78,10 @@ class ProviderBranches extends ChangeNotifier {
 
   // Select a branch and stream its inspections in real-time
   Future<void> selectBranch(BranchModel branch) async {
+    if (_selectedBranch?.id == branch.id && _inspectionsSubscription != null) {
+      console("Same user and stream is On");
+      return;
+    }
     _selectedBranch = branch;
     notifyListeners();
 
@@ -88,52 +100,11 @@ class ProviderBranches extends ChangeNotifier {
             _isLoadingInspections = false;
             notifyListeners();
           },
-          onDone: () {
-            _isLoadingInspections = false;
-            notifyListeners();
-          },
         );
 
     _isLoadingInspections = true;
     notifyListeners();
   }
-
-  // Fetch inspections for selected branch
-  // Future<void> fetchLastTenBranchInspections(String branchId) async {
-  //   try {
-  //     _isLoadingInspections = true;
-  //     notifyListeners();
-
-  //     _branchInspections = await _inspectionService
-  //         .getLastTenInspectionsByBranch(branchId);
-
-  //     _isLoadingInspections = false;
-  //     notifyListeners();
-  //   } catch (e) {
-  //     print('Error loading branch inspections: ${e.toString()}');
-  //     _isLoadingInspections = false;
-  //     notifyListeners();
-  //   }
-  // }
-
-  // Fetch branches assigned to inspector
-  // Future<void> fetchBranches() async {
-  //   try {
-  //     _isLoading = true;
-  //     _errorMessage = null;
-  //     notifyListeners();
-
-  //     _branches = await _branchService.getBranchesByInspector(loggedInUser!.id);
-
-  //     _isLoading = false;
-  //     notifyListeners();
-  //   } catch (e) {
-  //     _errorMessage = 'Error loading branches: ${e.toString()}';
-  //     _isLoading = false;
-  //     notifyListeners();
-  //     print(_errorMessage);
-  //   }
-  // }
 
   // Clear selected branch
   void clearSelection() {
@@ -188,6 +159,7 @@ class ProviderBranches extends ChangeNotifier {
     required String branchId,
     required String branchName,
     required String timeSlot,
+    required String branchTemplateId,
     required BuildContext context,
   }) async {
     try {
@@ -200,6 +172,7 @@ class ProviderBranches extends ChangeNotifier {
         timeSlot: timeSlot,
         branchId: branchId,
         branchName: branchName,
+        branchTemplateId: branchTemplateId,
       );
 
       _isLoading = false;

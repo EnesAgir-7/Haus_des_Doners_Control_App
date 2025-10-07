@@ -96,6 +96,7 @@ class ProviderAdminBranches with ChangeNotifier {
         final branch = _branches.firstWhere((b) => b.id == branchId);
         final inspector = _inspectors.firstWhere((i) => i.id == inspectorId);
         await _branchService.assignBranchToHimself(
+          branchTemplateId: branch.templateId,
           inspectorId: inspectorId,
           inspectorName: inspector.name,
           branchId: branchId,

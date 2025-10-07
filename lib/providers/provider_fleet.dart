@@ -1,21 +1,16 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
-import '../firebase_services/firebase_user_service.dart';
 import '../firebase_services/firebase_vehicle_service.dart';
-import '../models/user_model.dart';
 import '../models/vehicle_model.dart';
 import '../translations/locale_keys.g.dart';
 
 class ProviderFleet extends ChangeNotifier {
   final VehicleService _vehicleService = VehicleService();
-  final UserService _userService = UserService();
 
   VehicleModel? _assignedVehicle;
   List<VehicleModel> _allVehicles = [];
-  UserModel? _currentUser;
   bool _isLoading = false;
   bool _isUpdating = false;
   String? _errorMessage;
@@ -25,7 +20,6 @@ class ProviderFleet extends ChangeNotifier {
 
   VehicleModel? get assignedVehicle => _assignedVehicle;
   List<VehicleModel> get allVehicles => _allVehicles;
-  UserModel? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   bool get isUpdating => _isUpdating;
   String? get errorMessage => _errorMessage;
@@ -52,13 +46,7 @@ class ProviderFleet extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) {
-        throw Exception(LocaleKeys.user_not_authenticated.tr());
-      }
-
-      _currentUser = await _userService.getUserById(userId);
-      _assignedVehicle = await _vehicleService.getVehicleByInspector(userId);
+      _assignedVehicle = await _vehicleService.getVehicleByInspector(loggedInUser!.id);
 
       if (_assignedVehicle != null) {
         kmController.text = _assignedVehicle!.currentKm.toString();

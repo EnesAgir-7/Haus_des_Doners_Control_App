@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:haus_des_control/firebase_services/firebase_branch_service.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -24,6 +25,7 @@ import '../widgets/custom_toast.dart';
 /// Handles creating and submitting inspections with photo uploads
 class ProviderControl extends ChangeNotifier {
   final InspectionService _inspectionService = InspectionService();
+  final BranchService _branchService = BranchService();
 
   // State
   BranchModel? _selectedBranch;
@@ -62,6 +64,10 @@ class ProviderControl extends ChangeNotifier {
   void setTemplate(InspectionTemplate newTemplate) {
     selectedTemplate = newTemplate;
     notifyListeners();
+  }
+
+  void setBranch(BranchModel branch) {
+    _selectedBranch = branch;
   }
 
   // Getters
@@ -132,10 +138,21 @@ class ProviderControl extends ChangeNotifier {
   double get totalScore => _scores.values.fold(0, (a, b) => a + b);
 
   // Initialize with branch and user
-  void initialize(BranchModel branch) {
+  void initialize(
+    BranchModel? branch,
+    String branchId,
+    String templateId,
+  ) async {
     resetForm();
-    _selectedBranch = branch;
-    fetchTemplateByID(branch.templateId);
+    if (branch != null) {
+      _selectedBranch = branch;
+      await fetchTemplateByID(branch.templateId);
+    } else {
+      await Future.wait([
+        getBranchById(branchId),
+        fetchTemplateByID(templateId),
+      ]);
+    }
   }
 
   void setOverallNotes(String notes) {
@@ -154,6 +171,27 @@ class ProviderControl extends ChangeNotifier {
         _errorMessage = 'Template with ID $id not found.';
       } else {
         setTemplate(template);
+      }
+    } catch (e) {
+      _errorMessage = 'Error loading branches: ${e.toString()}';
+      console(_errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> getBranchById(String branchId) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final branch = await _branchService.getBranchById(branchId);
+
+      if (branch == null) {
+        _errorMessage = 'Branch not found';
+      } else {
+        setBranch(branch);
       }
     } catch (e) {
       _errorMessage = 'Error loading branches: ${e.toString()}';
@@ -321,7 +359,7 @@ class ProviderControl extends ChangeNotifier {
     _isUploading = false;
     inspectorSignature = null;
     branchSignature = null;
-    notifyListeners();
+    // notifyListeners();
   }
 
   Future<void> previewPDF(BuildContext context) async {
@@ -497,7 +535,7 @@ class ProviderControl extends ChangeNotifier {
               ),
               pw.SizedBox(width: 12),
               pw.Text(
-                LocaleKeys.branch_information.tr(), 
+                LocaleKeys.branch_information.tr(),
                 style: pw.TextStyle(
                   fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
@@ -581,7 +619,7 @@ class ProviderControl extends ChangeNotifier {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          LocaleKeys.inspection_details.tr(), 
+          LocaleKeys.inspection_details.tr(),
           style: pw.TextStyle(
             fontSize: 18,
             fontWeight: pw.FontWeight.bold,
@@ -686,7 +724,7 @@ class ProviderControl extends ChangeNotifier {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                LocaleKeys.total_score.tr(), 
+                LocaleKeys.total_score.tr(),
                 style: pw.TextStyle(
                   fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
@@ -729,7 +767,7 @@ class ProviderControl extends ChangeNotifier {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          LocaleKeys.overall_notes.tr(), 
+          LocaleKeys.overall_notes.tr(),
           style: pw.TextStyle(
             fontSize: 14,
             fontWeight: pw.FontWeight.bold,
@@ -757,9 +795,15 @@ class ProviderControl extends ChangeNotifier {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        _buildSignatureBox(LocaleKeys.inspector_signature.tr(), inspectorSignature),
+        _buildSignatureBox(
+          LocaleKeys.inspector_signature.tr(),
+          inspectorSignature,
+        ),
         pw.SizedBox(width: 20),
-        _buildSignatureBox(LocaleKeys.branch_representative.tr(), branchSignature),
+        _buildSignatureBox(
+          LocaleKeys.branch_representative.tr(),
+          branchSignature,
+        ),
       ],
     );
   }

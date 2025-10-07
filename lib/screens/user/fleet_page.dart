@@ -1,8 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/widgets/custom_toast.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/provider_fleet.dart';
 import '../../translations/locale_keys.g.dart';
@@ -197,11 +199,7 @@ class _CurrentVehicleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primaryRed),
-      ),
+      decoration: shadowDeco,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -221,8 +219,7 @@ class _CurrentVehicleCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            //TODO: locale
-            provider.currentUser?.name ?? 'Inspector',
+            loggedInUser!.name,
             style: const TextStyle(color: AppColors.white, fontSize: 13),
           ),
         ],
@@ -243,10 +240,7 @@ class _VehicleDetailsCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(16),
-      ),
+      decoration: shadowDeco,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

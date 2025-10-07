@@ -38,6 +38,7 @@ class RouteModel {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id, 
       'date': Timestamp.fromDate(date),
       'inspectorId': inspectorId,
       'inspectorName': inspectorName,
@@ -57,6 +58,7 @@ class RouteStopModel {
   final String timeSlot;
   final String branchId;
   final String branchName;
+  final String branchTemplateId;
   final String status; // "completed" | "pending" | "current"
   final String? inspectionId;
   final DateTime? createdAt;
@@ -66,6 +68,7 @@ class RouteStopModel {
     required this.timeSlot,
     required this.branchId,
     required this.branchName,
+    required this.branchTemplateId, 
     required this.status,
     this.inspectionId,
     required this.order,
@@ -77,6 +80,7 @@ class RouteStopModel {
       timeSlot: data['timeSlot'] ?? '',
       branchId: data['branchId'] ?? '',
       branchName: data['branchName'] ?? '',
+      branchTemplateId: data["branchTemplateId"],
       status: data['status'] ?? 'pending',
       inspectionId: data['inspectionId'],
       order: data['order'] ?? 0,
@@ -95,6 +99,7 @@ class RouteStopModel {
       'inspectionId': inspectionId,
       'order': order,
       'createdAt': DateTime.now(),
+      'branchTemplateId': branchTemplateId, 
     };
   }
 
@@ -104,10 +109,12 @@ class RouteStopModel {
     String? branchName,
     String? status,
     String? inspectionId,
+    String? branchTemplateId,
     int? order,
     DateTime? createdAt,
   }) {
     return RouteStopModel(
+      branchTemplateId: branchTemplateId ?? this.branchTemplateId,
       timeSlot: timeSlot ?? this.timeSlot,
       branchId: branchId ?? this.branchId,
       branchName: branchName ?? this.branchName,

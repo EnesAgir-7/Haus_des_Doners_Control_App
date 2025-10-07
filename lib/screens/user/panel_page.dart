@@ -4,6 +4,7 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/providers/provider_branches.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/enums.dart';
 import '../../providers/provider_panel.dart';
@@ -11,6 +12,7 @@ import '../../providers/provider_route.dart';
 import '../../providers/provider_tasks.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../widgets/statistic_card.dart';
+import 'control_page.dart';
 
 class PanelPage extends StatefulWidget {
   const PanelPage({super.key});
@@ -117,21 +119,7 @@ class DashboardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(16),
-        // border: Border.all(
-        //   color: AppColors.primaryRed.withValues(alpha: 0.3),
-        //   width: 1,
-        // ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+      decoration: shadowDeco,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -380,20 +368,16 @@ class StatBox extends StatelessWidget {
                 const SizedBox(width: 6),
               ],
               Expanded(
-                child: isLoading
-                    ? CircularProgressIndicator(
-                        color: color ?? AppColors.primaryRed,
-                      )
-                    : Text(
-                        number,
-                        style: TextStyle(
-                          color: color ?? AppColors.primaryRed,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                child: Text(
+                  isLoading ? "Loading" : number,
+                  style: TextStyle(
+                    color: color ?? AppColors.primaryRed,
+                    fontSize: isLoading ? 14 : 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),
@@ -449,11 +433,7 @@ class DailySummarySection extends StatelessWidget {
               const SizedBox(height: 12),
               Container(
                 padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.lightBlack,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white24),
-                ),
+                decoration: shadowDeco,
                 child: Center(
                   child: Column(
                     children: [
@@ -498,7 +478,7 @@ class DailySummarySection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    '${routeProvider.completedStops}/${routeProvider.totalStops}',
+                    '${routeProvider.completedStops}/${stops.length}',
                     style: TextStyle(
                       color: AppColors.primaryRed,
                       fontSize: 12,
@@ -512,7 +492,20 @@ class DailySummarySection extends StatelessWidget {
             Column(
               spacing: 16,
               children: stops.map((stop) {
-                return StatisticCard(stop: stop);
+                return StatisticCard(
+                  stop: stop,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ControlPage(
+                          branchId: stop.branchId,
+                          branchTemplateId: stop.branchTemplateId,
+                        ),
+                      ),
+                    );
+                  },
+                );
               }).toList(),
             ),
           ],

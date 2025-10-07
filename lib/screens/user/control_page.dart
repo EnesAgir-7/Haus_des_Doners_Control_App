@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/providers/provider_branches.dart';
 import 'package:haus_des_control/widgets/custom_toast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -17,8 +16,15 @@ import '../../widgets/app_button.dart';
 
 class ControlPage extends StatefulWidget {
   final BranchModel? selectedBranch;
+  final String? branchId;
+  final String? branchTemplateId;
 
-  const ControlPage({super.key, this.selectedBranch});
+  const ControlPage({
+    super.key,
+    this.selectedBranch,
+    this.branchId,
+    this.branchTemplateId,
+  });
 
   @override
   State<ControlPage> createState() => _ControlPageState();
@@ -27,18 +33,18 @@ class ControlPage extends StatefulWidget {
 class _ControlPageState extends State<ControlPage> {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _overallNotesController = TextEditingController();
-  BranchModel? _selectedBranch;
 
   @override
   void initState() {
     super.initState();
-    _selectedBranch = widget.selectedBranch;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_selectedBranch != null) {
-        final controlProvider = context.read<ProviderControl>();
-        controlProvider.initialize(_selectedBranch!);
-      }
+      final controlProvider = context.read<ProviderControl>();
+      controlProvider.initialize(
+        widget.selectedBranch,
+        widget.branchId!,
+        widget.branchTemplateId!,
+      );
     });
   }
 
@@ -80,22 +86,24 @@ class _ControlPageState extends State<ControlPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        title: ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(
-            _selectedBranch?.name ?? LocaleKeys.branch_inspection.tr(),
-            style: TextStyle(color: Colors.white, fontSize: 16),
-          ),
-          subtitle: Text(
-            _selectedBranch?.address ?? LocaleKeys.branch_inspection.tr(),
-          ),
+        title: Consumer<ProviderControl>(
+          builder: (context, cont, child) {
+            return ListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                cont.selectedBranch?.name ?? LocaleKeys.branch_inspection.tr(),
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              subtitle: Text(
+                cont.selectedBranch?.address ??
+                    LocaleKeys.branch_inspection.tr(),
+              ),
+            );
+          },
         ),
       ),
       body: Consumer<ProviderControl>(
         builder: (context, provider, child) {
-          if (_selectedBranch == null) {
-            return _buildBranchSelector(context);
-          }
           if (provider.isLoading) {
             return Center(
               child: CircularProgressIndicator(color: AppColors.primaryRed),
@@ -208,53 +216,6 @@ class _ControlPageState extends State<ControlPage> {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildBranchSelector(BuildContext context) {
-    return Consumer<ProviderBranches>(
-      builder: (context, branchProvider, child) {
-        if (branchProvider.branches.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.apartment, size: 80, color: Colors.white38),
-                SizedBox(height: 16),
-                Text(
-                  LocaleKeys.no_branches.tr(),
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return ListView.builder(
-          padding: EdgeInsets.all(16),
-          itemCount: branchProvider.branches.length,
-          itemBuilder: (context, index) {
-            final branch = branchProvider.branches[index];
-            return Card(
-              color: AppColors.lightBlack,
-              child: ListTile(
-                leading: Icon(Icons.apartment, color: AppColors.primaryRed),
-                title: Text(branch.name, style: TextStyle(color: Colors.white)),
-                subtitle: Text(
-                  branch.address,
-                  style: TextStyle(color: Colors.white54),
-                ),
-                trailing: Icon(Icons.arrow_forward_ios, color: Colors.white54),
-                onTap: () {
-                  setState(() {
-                    _selectedBranch = branch;
-                  });
-                },
-              ),
-            );
-          },
-        );
-      },
     );
   }
 

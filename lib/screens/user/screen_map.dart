@@ -264,6 +264,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                         branchName: branch.name,
                                         timeSlot: timeSlot,
                                         context: context,
+                                        branchTemplateId: branch.templateId,
                                       );
 
                                   if (success) {

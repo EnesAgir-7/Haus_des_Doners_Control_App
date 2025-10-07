@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
+import '../../models/route_model.dart';
 import '../../providers/provider_route.dart';
 import '../../translations/locale_keys.g.dart';
+import 'control_page.dart';
 
 class RoutePage extends StatefulWidget {
   const RoutePage({super.key});
@@ -51,13 +54,7 @@ class _RoutePageState extends State<RoutePage> {
   Widget _buildHeader(ProviderRoute provider) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        // gradient: LinearGradient(
-        //   colors: [AppColors.primaryRed, AppColors.primaryRed.withValues(alpha: 0.8)],
-        //   begin: Alignment.topLeft,
-        //   end: Alignment.bottomRight,
-        // ),
-      ),
+      decoration: shadowDeco,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -364,7 +361,7 @@ class _RoutePageState extends State<RoutePage> {
   }
 
   Widget _buildRouteStopItem({
-    required stop,
+    required RouteStopModel stop,
     required int index,
     required bool isFirst,
     required bool isLast,
@@ -605,7 +602,15 @@ class _RoutePageState extends State<RoutePage> {
                             width: double.infinity,
                             child: ElevatedButton.icon(
                               onPressed: () {
-                                // Navigate to inspection
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ControlPage(
+                                      branchId: stop.branchId,
+                                      branchTemplateId: stop.branchTemplateId,
+                                    ),
+                                  ),
+                                );
                               },
                               icon: const Icon(Icons.arrow_forward),
                               label: Text(LocaleKeys.start_inspection.tr()),

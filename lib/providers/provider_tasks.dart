@@ -1,9 +1,12 @@
 // lib/providers/tasks_provider.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'dart:io';
+import '../core/console.dart';
 import '../firebase_services/firebase_tasks_service.dart';
 import '../models/task_model.dart';
 
@@ -22,10 +25,9 @@ class ProviderTasks extends ChangeNotifier {
   String? _successMessage;
 
   // Filters
-  String _statusFilter =
-      AppConstants.all; 
-  String _priorityFilter = AppConstants.all; 
-  String _sortBy = AppConstants.dueDate; 
+  String _statusFilter = AppConstants.all;
+  String _priorityFilter = AppConstants.all;
+  String _sortBy = AppConstants.dueDate;
 
   // Comment input
   final TextEditingController commentController = TextEditingController();
@@ -56,7 +58,8 @@ class ProviderTasks extends ChangeNotifier {
       .where((t) => t.priority == AppConstants.high && !t.isCompleted)
       .toList();
 
-  Stream<List<TaskModel>>? _tasksStream;
+  StreamSubscription<List<TaskModel>>? _tasksSubscription;
+  String? _currentInspectorId;
 
   /// Initialize provider with Firestore stream
   Future<void> initialize() async {
@@ -64,19 +67,34 @@ class ProviderTasks extends ChangeNotifier {
   }
 
   initializeTasksStream() {
+    final inspectorId = loggedInUser!.id;
+
+    if (_tasksSubscription != null && _currentInspectorId == inspectorId) {
+      console("Same user and stream is On");
+      return;
+    }
+
+    _currentInspectorId = inspectorId;
+    _tasksSubscription?.cancel();
+
     _isLoading = true;
     notifyListeners();
 
     try {
-      final inspectorId = loggedInUser!.id;
-
-      // Attach stream listener
-      _tasksStream = _taskService.streamTasksByInspector(inspectorId);
-      _tasksStream!.listen((tasks) {
-        _tasks = tasks;
-        _isLoading = false;
-        notifyListeners();
-      });
+      _tasksSubscription = _taskService
+          .streamTasksByInspector(inspectorId)
+          .listen(
+            (tasks) {
+              _tasks = tasks;
+              _isLoading = false;
+              notifyListeners();
+            },
+            onError: (error) {
+              _errorMessage = 'Error in tasks stream: $error';
+              _isLoading = false;
+              notifyListeners();
+            },
+          );
     } catch (e) {
       _errorMessage = 'Error initializing tasks stream: $e';
       _isLoading = false;
@@ -325,6 +343,7 @@ class ProviderTasks extends ChangeNotifier {
 
   @override
   void dispose() {
+    _tasksSubscription?.cancel();
     commentController.dispose();
     super.dispose();
   }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../firebase_services/firebase_auth_service.dart';
 import '../firebase_services/firebase_error_helper.dart';
@@ -17,14 +18,11 @@ class ProviderAuth extends ChangeNotifier {
   String? _error;
 
   UserModel? userModel;
+  bool _isFetchingUserModel = false;
 
   ProviderAuth() {
     FirebaseAuth.instance.authStateChanges().listen((user) {
-      _user = user;
-      if (user == null) {
-        userModel = null;
-      }
-      notifyListeners();
+      _handleAuthStateChange(user);
     });
   }
 
@@ -33,8 +31,45 @@ class ProviderAuth extends ChangeNotifier {
   bool get obscurePassword => _obscurePassword;
   String? get error => _error;
 
-  /// Fetches the user model from Firestore
+  void togglePasswordVisibility() {
+    _obscurePassword = !_obscurePassword;
+    notifyListeners();
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
+  Future<void> _handleAuthStateChange(User? user) async {
+    _user = user;
+
+    if (user == null) {
+      // Logout
+      userModel = null;
+      loggedInUser = null;
+      await LocalStorageHelper.instance.removeData(cacheUserKey);
+    } else {
+      // Login or already logged in
+      if (!_isFetchingUserModel) {
+        _isFetchingUserModel = true;
+        final fetchedUser = await fetchUserModel();
+        userModel = fetchedUser;
+        loggedInUser = fetchedUser;
+        _isFetchingUserModel = false;
+      }
+    }
+
+    notifyListeners();
+  }
+
   Future<UserModel?> fetchUserModel() async {
+    // Avoid fetching if cached and same UID
+    if (userModel != null && _user != null && userModel!.id == _user!.uid) {
+      return userModel;
+    }
+
+    // Try cached data first
     final cachedMap = await LocalStorageHelper.instance.getData(cacheUserKey);
     if (cachedMap != null) {
       try {
@@ -45,17 +80,13 @@ class ProviderAuth extends ChangeNotifier {
       }
     }
 
+    // Fetch from Firestore safely
     final fetchedUser = await FirebaseSafeRunner.run<UserModel?>(() async {
-      if (_user == null) {
-        debugPrint("⚠️ No authenticated user found.");
-        return null;
-      }
+      if (_user == null) return null;
 
       final doc = await _firestore.collection('users').doc(_user!.uid).get();
-      if (!doc.exists) {
-        debugPrint("⚠️ User document not found for UID: ${_user!.uid}");
-        return null;
-      }
+      if (!doc.exists) return null;
+
       return UserModel.fromFirestore(doc);
     });
 
@@ -70,11 +101,6 @@ class ProviderAuth extends ChangeNotifier {
     return userModel;
   }
 
-  void togglePasswordVisibility() {
-    _obscurePassword = !_obscurePassword;
-    notifyListeners();
-  }
-
   Future<bool> login({required String email, required String password}) async {
     _isLoading = true;
     _error = null;
@@ -82,26 +108,26 @@ class ProviderAuth extends ChangeNotifier {
 
     try {
       final user = await _authHelper.signIn(email: email, password: password);
-      _isLoading = false;
-      notifyListeners();
+      if (user != null) {
+        await fetchUserModel(); // fetch immediately after login
+        loggedInUser = userModel;
+      }
       return user != null;
     } catch (e) {
-      _isLoading = false;
       _error = e.toString();
-      notifyListeners();
       return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
   Future<void> logout() async {
+    _user = null;
+    userModel = null;
+    loggedInUser = null;
     await LocalStorageHelper.instance.removeData(cacheUserKey);
     await _authHelper.signOut();
-    userModel = null;
-    notifyListeners();
-  }
-
-  void clearError() {
-    _error = null;
     notifyListeners();
   }
 }

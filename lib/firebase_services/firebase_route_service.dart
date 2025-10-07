@@ -119,6 +119,7 @@ class RouteService {
       }
 
       route.stops[stopIndex] = RouteStopModel(
+        branchTemplateId: route.stops[stopIndex].branchTemplateId,
         timeSlot: route.stops[stopIndex].timeSlot,
         branchId: route.stops[stopIndex].branchId,
         branchName: route.stops[stopIndex].branchName,

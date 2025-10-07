@@ -40,6 +40,26 @@ class BranchService {
     }
   }
 
+  // Fetch branch by ID (one-time)
+  Future<BranchModel?> getBranchById(String branchId) async {
+    try {
+      final docSnap = await _db
+          .collection(_collectionBranches)
+          .doc(branchId)
+          .get();
+
+      if (!docSnap.exists) {
+        print('No branch found with id: $branchId');
+        return null;
+      }
+
+      return BranchModel.fromFirestore(docSnap);
+    } catch (e) {
+      print('Error fetching branch: $e');
+      return null;
+    }
+  }
+
   // Get active branches assigned to inspector
   Future<List<BranchModel>> getBranchesByInspector(String inspectorId) async {
     try {
@@ -87,24 +107,13 @@ class BranchService {
         );
   }
 
-  // Get single branch by ID
-  Future<BranchModel?> getBranchById(String branchId) async {
-    try {
-      final doc = await _db.collection(_collectionBranches).doc(branchId).get();
-      if (!doc.exists) return null;
-      return BranchModel.fromFirestore(doc);
-    } catch (e) {
-      console('Error getting branch: $e');
-      return null;
-    }
-  }
-
   Future<void> assignBranchToHimself({
     required String inspectorId,
     required String inspectorName,
     required String branchId,
     required String branchName,
     required String timeSlot,
+    required String branchTemplateId,
   }) async {
     try {
       final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
@@ -121,6 +130,7 @@ class BranchService {
           inspectorName: inspectorName,
           stops: [
             RouteStopModel(
+              branchTemplateId: branchTemplateId,
               timeSlot: timeSlot,
               branchId: branchId,
               branchName: branchName,
@@ -139,6 +149,7 @@ class BranchService {
         final route = RouteModel.fromFirestore(docSnap);
         final newStop = RouteStopModel(
           timeSlot: timeSlot,
+          branchTemplateId: branchTemplateId,
           branchId: branchId,
           branchName: branchName,
           status: AppConstants.pending,
