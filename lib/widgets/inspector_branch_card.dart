@@ -98,7 +98,7 @@ class InspectorBranchCard extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            LocaleKeys.in_queue.tr(),
+            "In your route",
             style: TextStyle(
               color: Colors.grey.shade300,
               fontSize: 11,

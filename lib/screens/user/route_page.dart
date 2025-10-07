@@ -231,8 +231,8 @@ class _RoutePageState extends State<RoutePage> {
               borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
                 value: provider.filteredProgressValue,
-                backgroundColor: Colors.white.withValues(alpha: 0.3),
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                backgroundColor: AppColors.white,
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
                 minHeight: 8,
               ),
             ),
