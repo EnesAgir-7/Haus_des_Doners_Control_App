@@ -10,6 +10,7 @@ import 'package:haus_des_control/providers/provider_fleet.dart';
 import 'package:haus_des_control/providers/provider_route.dart';
 import 'package:haus_des_control/providers/provider_tasks.dart';
 import 'package:haus_des_control/providers/provider_admin_branches.dart';
+import 'package:haus_des_control/providers/provider_admin_users.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderControl()),
         ChangeNotifierProvider(create: (_) => BranchMapController()),
         ChangeNotifierProvider(create: (_) => ProviderAdminBranches()),
+        ChangeNotifierProvider(create: (_) => ProviderAdminUsers()),
       ],
       child: MaterialApp(
         localizationsDelegates: context.localizationDelegates,

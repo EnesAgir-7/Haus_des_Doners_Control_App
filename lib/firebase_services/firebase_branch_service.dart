@@ -96,9 +96,8 @@ class BranchService {
               branchName: branchName,
               status: AppConstants.pending,
               order: 1,
-              inspectionId: inspectorId, 
+              inspectionId: inspectorId,
               createdAt: DateTime.now(),
-
             ),
           ],
           createdAt: DateTime.now(),
@@ -133,6 +132,22 @@ class BranchService {
       console('Branch assigned successfully');
     } catch (e) {
       print("Error assigning branch: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> updateBranch(BranchModel branch) async {
+    try {
+      await _db.collection(_collectionBranches).doc(branch.id).update({
+        'name': branch.name,
+        'address': branch.address,
+        'contactName': branch.contactName,
+        'contactPhone': branch.contactPhone,
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+      console('Branch updated successfully');
+    } catch (e) {
+      print("Error updating branch: $e");
       rethrow;
     }
   }

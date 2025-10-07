@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/branch_model.dart';
-import '../../models/user_model.dart';
-import '../../providers/provider_admin_branches.dart';
 import '../../translations/locale_keys.g.dart';
+import '../screens/screen_admin_branch_details.dart';
 
 class BranchCard extends StatelessWidget {
   final BranchModel branch;
@@ -13,53 +11,49 @@ class BranchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<ProviderAdminBranches>();
-    final assignedInspector = provider.inspectors.firstWhere(
-      (inspector) => inspector.id == branch.assignedInspector?.id,
-      orElse: () => UserModel(
-        id: '',
-        name: LocaleKeys.unassigned.tr(),
-        email: '',
-        role: 'inspector',
-        active: true,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-    );
-
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    branch.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AdminBranchDetailsScreen(branch: branch),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      branch.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                _buildStatusChip(branch.status),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(branch.address, style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildInspectorInfo(assignedInspector),
-                _buildLastInspectionInfo(),
-              ],
-            ),
-          ],
+                  _buildStatusChip(branch.status),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(branch.address, style: const TextStyle(color: Colors.grey)),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildInspectorInfo(branch.assignedInspector),
+                  _buildLastInspectionInfo(),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -105,13 +99,13 @@ class BranchCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInspectorInfo(UserModel? inspector) {
+  Widget _buildInspectorInfo(AssignedInspector? inspector) {
     return Row(
       children: [
         const Icon(Icons.person, size: 16, color: AppColors.primaryRed),
         const SizedBox(width: 4),
         Text(
-          inspector?.name ?? 'Unassigned',
+          inspector?.name ?? LocaleKeys.unassigned.tr(),
           style: const TextStyle(fontSize: 14, color: AppColors.primaryRed),
         ),
       ],

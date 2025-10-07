@@ -30,7 +30,6 @@ abstract class  LocaleKeys {
   static const password_min_length = 'password_min_length';
   static const forgot_password = 'forgot_password';
   static const login = 'login';
-  static const controller_name = 'controller_name';
   static const region = 'region';
   static const total_branch = 'total_branch';
   static const this_week_check = 'this_week_check';
@@ -48,6 +47,7 @@ abstract class  LocaleKeys {
   static const fleet_management = 'fleet_management';
   static const other_controller_vehicles = 'other_controller_vehicles';
   static const current_rented_vehicle = 'current_rented_vehicle';
+  static const controller_name = 'controller_name';
   static const current_km = 'current_km';
   static const max_km = 'max_km';
   static const remaining_km = 'remaining_km';
@@ -221,5 +221,9 @@ abstract class  LocaleKeys {
   static const show_all_routes = 'show_all_routes';
   static const no_stops_for_date = 'no_stops_for_date';
   static const start_inspection = 'start_inspection';
+  static const search_users = 'search_users';
+  static const no_users_found = 'no_users_found';
+  static const no_users_available = 'no_users_available';
+  static const role = 'role';
 
 }

@@ -47,6 +47,7 @@ class UserService {
   Future<List<UserModel>> getAllUsers() async {
     try {
       final snapshot = await _db.collection(_collection).get();
+      print('Firebase response: ${snapshot.docs.length} documents');
       return snapshot.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
     } catch (e) {
       print('Error getting all users: $e');

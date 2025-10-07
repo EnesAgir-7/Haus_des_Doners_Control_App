@@ -216,5 +216,10 @@
   "select_date": "Datum Auswählen",
   "show_all_routes": "Alle Routen Anzeigen",
   "no_stops_for_date": "Keine Haltestellen für dieses Datum geplant",
-  "start_inspection": "Inspektion Starten"
+  "start_inspection": "Inspektion Starten",
+  "search_users": "Benutzer suchen...",
+  "no_users_found": "Keine Benutzer für Ihre Suche gefunden",
+  "no_users_available": "Keine Benutzer verfügbar",
+  "role": "Rolle",
+  "region": "Region"
 }

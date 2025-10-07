@@ -216,5 +216,10 @@
   "select_date": "Tarih Seç",
   "show_all_routes": "Tüm Rotaları Göster",
   "no_stops_for_date": "Bu tarih için hiçbir durak planlanmadı",
-  "start_inspection": "Denetime Başla"
+  "start_inspection": "Denetime Başla",
+  "search_users": "Kullanıcı ara...",
+  "no_users_found": "Aramanızla eşleşen kullanıcı bulunamadı",
+  "no_users_available": "Mevcut kullanıcı yok",
+  "role": "Rol",
+  "region": "Bölge"
 }

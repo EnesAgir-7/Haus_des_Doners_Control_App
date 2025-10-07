@@ -65,6 +65,20 @@ class ProviderAdminBranches with ChangeNotifier {
   }
 
   // Assign inspector to branch
+  Future<void> updateBranch(BranchModel branch) async {
+    _setLoading(true);
+    _error = null;
+
+    try {
+      await _branchService.updateBranch(branch);
+      await loadData(); // Reload data to get updated branch
+    } catch (e) {
+      _error = 'Error updating branch: $e';
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<void> assignInspectorToBranch(
     String branchId,
     String inspectorId,
