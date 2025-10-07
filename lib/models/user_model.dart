@@ -33,8 +33,8 @@ class UserModel {
       active: data['active'] ?? true,
       region: data['region'],
       assignedVehicleId: data['assignedVehicleId'],
-      createdAt: data['createdAt'],
-      updatedAt: data['updatedAt'],
+      createdAt: data['createdAt'].toString(),
+      updatedAt: data['updatedAt'].toString(),
     );
   }
 

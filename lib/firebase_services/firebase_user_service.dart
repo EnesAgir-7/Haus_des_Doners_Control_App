@@ -45,14 +45,14 @@ class UserService {
 
   // Get all users (admin only)
   Future<List<UserModel>> getAllUsers() async {
-    // try {
+    try {
     final snapshot = await _db.collection(_collection).get();
     print('Firebase response: ${snapshot.docs.length} documents');
     return snapshot.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
-    // } catch (e) {
-    // print('Error getting all users: $e');
-    // return [];
-    // }
+    } catch (e) {
+    print('Error getting all users: $e');
+    return [];
+    }
   }
 
   // Update user
