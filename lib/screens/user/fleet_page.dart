@@ -19,12 +19,7 @@ class _FleetPageState extends State<FleetPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<ProviderFleet>();
-      if (provider.currentUser?.isAdmin ?? false) {
-        provider.initializeAdmin();
-      } else {
-        provider.initialize();
-      }
+      context.read<ProviderFleet>().initialize();
     });
   }
 
@@ -88,6 +83,7 @@ class _FleetPageState extends State<FleetPage> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

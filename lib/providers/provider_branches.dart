@@ -1,4 +1,6 @@
 // lib/providers/subsidiaries_provider.dart
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
@@ -15,6 +17,10 @@ import '../models/inspection_model.dart';
 class ProviderBranches extends ChangeNotifier {
   final BranchService _branchService = BranchService();
   final InspectionService _inspectionService = InspectionService();
+
+  // Stream Subscriptions
+  StreamSubscription<List<BranchModel>>? _branchesSubscription;
+  StreamSubscription<List<InspectionModel>>? _inspectionsSubscription;
 
   // State
   List<BranchModel> _branches = [];
@@ -39,72 +45,95 @@ class ProviderBranches extends ChangeNotifier {
 
   // Initialize
   Future<void> initialize() async {
-    await fetchBranches();
-  }
-
-  // Fetch branches assigned to inspector
-  Future<void> fetchBranches() async {
-    try {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
-
-      _branches = await _branchService.getBranchesByInspector(loggedInUser!.id);
-
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _errorMessage = 'Error loading branches: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
-      print(_errorMessage);
-    }
+    // await fetchBranches();
+    await initializeWithStreams();
   }
 
   // Stream-based initialization (real-time updates)
-  void initializeWithStreams() {
-    _branchService.streamBranchesByInspector(loggedInUser!.id).listen((
-      branches,
-    ) {
-      _branches = branches;
-      notifyListeners();
-    });
+  // 🔥 Real-time stream initialization (for branches)
+  initializeWithStreams() {
+    _branchesSubscription?.cancel();
+
+    _branchesSubscription = _branchService
+        .streamBranchesByInspector(loggedInUser!.id)
+        .listen(
+          (branches) {
+            _branches = branches;
+            notifyListeners();
+          },
+          onError: (error) {
+            _errorMessage = 'Stream error: $error';
+            notifyListeners();
+          },
+        );
   }
 
-  // Select a branch and load its inspection history
+  // Select a branch and stream its inspections in real-time
   Future<void> selectBranch(BranchModel branch) async {
     _selectedBranch = branch;
     notifyListeners();
-    await fetchLastTenBranchInspections(branch.id);
+
+    _inspectionsSubscription?.cancel();
+
+    _inspectionsSubscription = _inspectionService
+        .streamInspectionsByBranch(branch.id)
+        .listen(
+          (inspections) {
+            _branchInspections = inspections;
+            _isLoadingInspections = false;
+            notifyListeners();
+          },
+          onError: (error) {
+            print('Inspection stream error: $error');
+            _isLoadingInspections = false;
+            notifyListeners();
+          },
+          onDone: () {
+            _isLoadingInspections = false;
+            notifyListeners();
+          },
+        );
+
+    _isLoadingInspections = true;
+    notifyListeners();
   }
 
   // Fetch inspections for selected branch
-  Future<void> fetchLastTenBranchInspections(String branchId) async {
-    try {
-      _isLoadingInspections = true;
-      notifyListeners();
+  // Future<void> fetchLastTenBranchInspections(String branchId) async {
+  //   try {
+  //     _isLoadingInspections = true;
+  //     notifyListeners();
 
-      _branchInspections = await _inspectionService
-          .getLastTenInspectionsByBranch(branchId);
+  //     _branchInspections = await _inspectionService
+  //         .getLastTenInspectionsByBranch(branchId);
 
-      _isLoadingInspections = false;
-      notifyListeners();
-    } catch (e) {
-      print('Error loading branch inspections: ${e.toString()}');
-      _isLoadingInspections = false;
-      notifyListeners();
-    }
-  }
+  //     _isLoadingInspections = false;
+  //     notifyListeners();
+  //   } catch (e) {
+  //     print('Error loading branch inspections: ${e.toString()}');
+  //     _isLoadingInspections = false;
+  //     notifyListeners();
+  //   }
+  // }
 
-  // Stream inspections for selected branch (real-time)
-  void streamBranchInspections(String branchId) {
-    _inspectionService.streamInspectionsByBranch(branchId).listen((
-      inspections,
-    ) {
-      _branchInspections = inspections;
-      notifyListeners();
-    });
-  }
+  // Fetch branches assigned to inspector
+  // Future<void> fetchBranches() async {
+  //   try {
+  //     _isLoading = true;
+  //     _errorMessage = null;
+  //     notifyListeners();
+
+  //     _branches = await _branchService.getBranchesByInspector(loggedInUser!.id);
+
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   } catch (e) {
+  //     _errorMessage = 'Error loading branches: ${e.toString()}';
+  //     _isLoading = false;
+  //     notifyListeners();
+  //     print(_errorMessage);
+  //   }
+  // }
 
   // Clear selected branch
   void clearSelection() {
@@ -212,10 +241,11 @@ class ProviderBranches extends ChangeNotifier {
 
   // Refresh
   Future<void> refresh() async {
-    await fetchBranches();
-    if (_selectedBranch != null) {
-      await fetchLastTenBranchInspections(_selectedBranch!.id);
-    }
+    initializeWithStreams();
+    // await fetchBranches();
+    // if (_selectedBranch != null) {
+    //   await fetchLastTenBranchInspections(_selectedBranch!.id);
+    // }
   }
 
   // Clear error
@@ -226,6 +256,8 @@ class ProviderBranches extends ChangeNotifier {
 
   @override
   void dispose() {
+    _branchesSubscription?.cancel();
+    _inspectionsSubscription?.cancel();
     super.dispose();
   }
 }

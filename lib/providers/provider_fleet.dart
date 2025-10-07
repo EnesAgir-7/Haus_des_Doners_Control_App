@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../firebase_services/firebase_user_service.dart';
 import '../firebase_services/firebase_vehicle_service.dart';
@@ -45,10 +46,6 @@ class ProviderFleet extends ChangeNotifier {
     await fetchAssignedVehicle();
   }
 
-  Future<void> initializeAdmin() async {
-    await fetchAllVehicles();
-  }
-
   Future<void> fetchAssignedVehicle() async {
     try {
       _isLoading = true;
@@ -79,34 +76,14 @@ class ProviderFleet extends ChangeNotifier {
   }
 
   void initializeWithStreams() {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null) return;
 
-    _vehicleService.streamVehicleByInspector(userId).listen((vehicle) {
+    _vehicleService.streamVehicleByInspector(loggedInUser!.id).listen((vehicle) {
       _assignedVehicle = vehicle;
       if (vehicle != null) {
         kmController.text = vehicle.currentKm.toString();
       }
       notifyListeners();
     });
-  }
-
-  Future<void> fetchAllVehicles() async {
-    try {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
-
-      _allVehicles = await _vehicleService.getAllVehicles();
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _errorMessage =
-          '${LocaleKeys.error_loading_vehicles.tr(args: [e.toString()])}';
-      _isLoading = false;
-      notifyListeners();
-      print(_errorMessage);
-    }
   }
 
   Future<bool> updateVehicleKm(int newKm) async {
@@ -195,66 +172,8 @@ class ProviderFleet extends ChangeNotifier {
     return _allVehicles.where((v) => v.status == status).toList();
   }
 
-  Future<bool> assignVehicle(
-    String vehicleId,
-    String inspectorId,
-    String inspectorName,
-  ) async {
-    try {
-      _isUpdating = true;
-      _errorMessage = null;
-      notifyListeners();
-
-      await _vehicleService.assignVehicleToInspector(
-        vehicleId,
-        inspectorId,
-        inspectorName,
-      );
-
-      _successMessage = LocaleKeys.vehicle_assigned_success.tr();
-      _isUpdating = false;
-      notifyListeners();
-
-      await fetchAllVehicles();
-      return true;
-    } catch (e) {
-      _errorMessage =
-          '${LocaleKeys.vehicle_assign_error.tr(args: [e.toString()])}';
-      _isUpdating = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  Future<bool> unassignVehicle(String vehicleId) async {
-    try {
-      _isUpdating = true;
-      _errorMessage = null;
-      notifyListeners();
-
-      await _vehicleService.unassignVehicle(vehicleId);
-
-      _successMessage = LocaleKeys.vehicle_unassign_success.tr();
-      _isUpdating = false;
-      notifyListeners();
-
-      await fetchAllVehicles();
-      return true;
-    } catch (e) {
-      _errorMessage =
-          '${LocaleKeys.vehicle_unassign_error.tr(args: [e.toString()])}';
-      _isUpdating = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
   Future<void> refresh() async {
-    if (_currentUser?.isAdmin ?? false) {
-      await fetchAllVehicles();
-    } else {
-      await fetchAssignedVehicle();
-    }
+    await fetchAssignedVehicle();
   }
 
   void clearError() {

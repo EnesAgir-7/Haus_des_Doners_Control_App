@@ -223,8 +223,8 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                           return AppButton(
                             isLoading: branchContr.isLoading,
                             text: updatedBranch.isRouteAssigned
-                                ? LocaleKeys.unassign.tr()
-                                : LocaleKeys.assign_to_me.tr(),
+                                ? "Remove from Route"
+                                : "Add to Route",
                             onPressed: () async {
                               if (updatedBranch.isRouteAssigned) {
                                 // Unassign
@@ -250,7 +250,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                       initialDate: DateTime.now(),
                                       firstDate: DateTime.now(),
                                       lastDate: DateTime.now().add(
-                                        const Duration(days: 365),
+                                        const Duration(days: 7),
                                       ),
                                     );
 
@@ -264,7 +264,6 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                         branchName: branch.name,
                                         timeSlot: timeSlot,
                                         context: context,
-                                        
                                       );
 
                                   if (success) {

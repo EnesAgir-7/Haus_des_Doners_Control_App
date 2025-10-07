@@ -65,7 +65,7 @@ class BranchService {
         .collection(_collectionBranches)
         .where('assignedInspectorId', isEqualTo: inspectorId)
         .where('status', isEqualTo: 'active')
-        .orderBy('name')
+        .orderBy(AppConstants.name)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
@@ -78,7 +78,7 @@ class BranchService {
   Stream<List<BranchModel>> streamAllBranches() {
     return _db
         .collection(_collectionBranches)
-        .orderBy('name')
+        .orderBy(AppConstants.name)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs

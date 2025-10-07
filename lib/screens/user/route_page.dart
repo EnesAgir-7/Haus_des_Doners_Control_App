@@ -20,8 +20,8 @@ class _RoutePageState extends State<RoutePage> {
       context: context,
       locale: context.locale,
       initialDate: provider.filterDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 7)),
       builder: (context, child) {
         return child!;
       },
@@ -342,9 +342,7 @@ class _RoutePageState extends State<RoutePage> {
 
     return RefreshIndicator(
       color: AppColors.primaryRed,
-      onRefresh: () async {
-        await provider.fetchAllRoutes();
-      },
+      onRefresh: provider.refresh,
       child: ListView.builder(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),

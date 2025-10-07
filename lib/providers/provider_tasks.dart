@@ -22,9 +22,10 @@ class ProviderTasks extends ChangeNotifier {
   String? _successMessage;
 
   // Filters
-  String _statusFilter = 'all'; // all, pending, in_progress, completed
-  String _priorityFilter = 'all'; // all, low, medium, high
-  String _sortBy = 'dueDate'; // dueDate, priority, createdAt
+  String _statusFilter =
+      AppConstants.all; 
+  String _priorityFilter = AppConstants.all; 
+  String _sortBy = AppConstants.dueDate; 
 
   // Comment input
   final TextEditingController commentController = TextEditingController();
@@ -51,41 +52,36 @@ class ProviderTasks extends ChangeNotifier {
   int get overdueTasksCount => _tasks.where((t) => t.isOverdue).length;
 
   List<TaskModel> get overdueTasks => _tasks.where((t) => t.isOverdue).toList();
-
   List<TaskModel> get highPriorityTasks => _tasks
       .where((t) => t.priority == AppConstants.high && !t.isCompleted)
       .toList();
 
-  // Initialize
+  Stream<List<TaskModel>>? _tasksStream;
+
+  /// Initialize provider with Firestore stream
   Future<void> initialize() async {
-    await fetchTasks();
+    initializeTasksStream();
   }
 
-  // Fetch tasks for current inspector
-  Future<void> fetchTasks() async {
+  initializeTasksStream() {
+    _isLoading = true;
+    notifyListeners();
+
     try {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
-      _tasks = await _taskService.getTasksByInspector(loggedInUser!.id);
+      final inspectorId = loggedInUser!.id;
 
-      _isLoading = false;
-      notifyListeners();
+      // Attach stream listener
+      _tasksStream = _taskService.streamTasksByInspector(inspectorId);
+      _tasksStream!.listen((tasks) {
+        _tasks = tasks;
+        _isLoading = false;
+        notifyListeners();
+      });
     } catch (e) {
-      _errorMessage = 'Error loading tasks: ${e.toString()}';
+      _errorMessage = 'Error initializing tasks stream: $e';
       _isLoading = false;
       notifyListeners();
-      print(_errorMessage);
     }
-  }
-
-  // Stream-based initialization (real-time updates)
-  void initializeWithStreams() {
-
-    _taskService.streamTasksByInspector(loggedInUser!.id).listen((tasks) {
-      _tasks = tasks;
-      notifyListeners();
-    });
   }
 
   // Select a task
@@ -197,8 +193,6 @@ class ProviderTasks extends ChangeNotifier {
         notifyListeners();
       }
 
-      // Clear success message after 2 seconds
-      await Future.delayed(Duration(seconds: 2));
       _successMessage = null;
       notifyListeners();
 
@@ -233,8 +227,7 @@ class ProviderTasks extends ChangeNotifier {
       final storageRef = FirebaseStorage.instance.ref().child(path);
       final uploadTask = storageRef.putFile(photo);
       final snapshot = await uploadTask;
-      final downloadUrl = await snapshot.ref.getDownloadURL();
-      return downloadUrl;
+      return await snapshot.ref.getDownloadURL();
     } catch (e) {
       print('Error uploading comment photo: $e');
       rethrow;
@@ -245,7 +238,7 @@ class ProviderTasks extends ChangeNotifier {
   Future<bool> addComment(String taskId) async {
     final commentText = commentController.text.trim();
     if (commentText.isEmpty && _commentPhotos.isEmpty) {
-      _errorMessage = 'Lütfen yorum veya fotoğraf ekleyin';
+      _errorMessage = 'Please add a comment or photo';
       notifyListeners();
       return false;
     }
@@ -273,47 +266,37 @@ class ProviderTasks extends ChangeNotifier {
 
       await _taskService.addTaskComment(taskId, comment);
 
-      _successMessage = 'Yorum eklendi';
+      _successMessage = 'Comment added successfully';
       _isAddingComment = false;
       notifyListeners();
 
-      // Clear input
       commentController.clear();
       _commentPhotos.clear();
 
-      // Refresh tasks
-      await fetchTasks();
-
-      // Clear success message
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
       _successMessage = null;
       notifyListeners();
 
       return true;
     } catch (e) {
-      _errorMessage = 'Yorum eklenirken hata oluştu: ${e.toString()}';
+      _errorMessage = 'Error adding comment: ${e.toString()}';
       _isAddingComment = false;
       notifyListeners();
       return false;
     }
   }
 
-  // Mark task as pending
-  Future<bool> markAsPending(String taskId) async {
-    return await updateTaskStatus(taskId, 'pending');
-  }
+  // Helper methods for status
+  Future<bool> markAsPending(String taskId) async =>
+      await updateTaskStatus(taskId, 'pending');
 
-  // Mark task as in progress
-  Future<bool> markAsInProgress(String taskId) async {
-    return await updateTaskStatus(taskId, 'in_progress');
-  }
+  Future<bool> markAsInProgress(String taskId) async =>
+      await updateTaskStatus(taskId, 'in_progress');
 
-  // Mark task as completed
-  Future<bool> markAsCompleted(String taskId) async {
-    return await updateTaskStatus(taskId, 'completed');
-  }
+  Future<bool> markAsCompleted(String taskId) async =>
+      await updateTaskStatus(taskId, 'completed');
 
-  // Get task by ID
+  // Utility methods
   TaskModel? getTaskById(String taskId) {
     try {
       return _tasks.firstWhere((t) => t.id == taskId);
@@ -322,17 +305,14 @@ class ProviderTasks extends ChangeNotifier {
     }
   }
 
-  // Get tasks by related branch
   List<TaskModel> getTasksByBranch(String branchId) {
     return _tasks.where((t) => t.relatedBranchId == branchId).toList();
   }
 
-  // Refresh
   Future<void> refresh() async {
-    await fetchTasks();
+    initializeTasksStream();
   }
 
-  // Clear messages
   void clearError() {
     _errorMessage = null;
     notifyListeners();

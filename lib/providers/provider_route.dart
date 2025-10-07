@@ -1,4 +1,5 @@
-// lib/providers/route_provider.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
@@ -19,6 +20,9 @@ class ProviderRoute extends ChangeNotifier {
   double todaysProgressValue = 0.0;
   int todaysCompletedCount = 0;
 
+  // Stream subscription
+  StreamSubscription<RouteModel?>? _routeSubscription;
+
   // Getters
   RouteModel? get allRoute => _allRoute;
   DateTime get selectedDate => _selectedDate;
@@ -34,9 +38,7 @@ class ProviderRoute extends ChangeNotifier {
 
   // Filtered stops based on selected date
   List<RouteStopModel> get filteredStops {
-    if (_filterDate == null) {
-      return stops;
-    }
+    if (_filterDate == null) return stops;
 
     final filterKey =
         "${_filterDate!.year}-${_filterDate!.month}-${_filterDate!.day}";
@@ -60,7 +62,7 @@ class ProviderRoute extends ChangeNotifier {
     if (_allRoute == null) return null;
     try {
       return _allRoute!.stops.firstWhere((stop) => stop.isCurrent);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
@@ -69,23 +71,24 @@ class ProviderRoute extends ChangeNotifier {
     if (_allRoute == null) return null;
     try {
       return _allRoute!.stops.firstWhere((stop) => stop.isPending);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }
 
-  // Set date filter
+  // 🔹 Set date filter
   void setDateFilter(DateTime date) {
     _filterDate = DateTime(date.year, date.month, date.day);
     notifyListeners();
   }
 
-  // Clear date filter
+  // 🔹 Clear date filter
   void clearDateFilter() {
     _filterDate = null;
     notifyListeners();
   }
 
+  // 🔹 Calculate today’s route summary
   void calculateTodaysData() {
     if (_allRoute == null) {
       todaysStopsList = [];
@@ -97,85 +100,81 @@ class ProviderRoute extends ChangeNotifier {
     final today = DateTime.now();
     final todayKey = "${today.year}-${today.month}-${today.day}";
 
-    // Filter stops for today
     todaysStopsList = _allRoute!.stops
         .where((stop) => stop.timeSlot == todayKey)
         .toList();
 
-    // Completed stops count
     todaysCompletedCount = todaysStopsList
         .where((stop) => stop.status == AppConstants.completed)
         .length;
 
-    // Progress
     todaysProgressValue = todaysStopsList.isEmpty
         ? 0.0
         : todaysCompletedCount / todaysStopsList.length;
   }
 
-  // Initialize
+  // 🔹 Normal (non-stream) initialization
   Future<void> initialize() async {
-    await fetchAllRoutes();
+    // await fetchAllRoutes();
+    initializeWithStreams();
   }
 
-  // Fetch today's route
-  Future<void> fetchAllRoutes() async {
-    try {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
+  // 🔹 Fetch today's route (one-time)
+  // Future<void> fetchAllRoutes() async {
+  //   try {
+  //     _isLoading = true;
+  //     _errorMessage = null;
+  //     notifyListeners();
 
-      _allRoute = await _routeService.getAllRoutes(loggedInUser!.id);
-      calculateTodaysData();
+  //     _allRoute = await _routeService.getAllRoutes(loggedInUser!.id);
+  //     calculateTodaysData();
 
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _errorMessage = 'Error loading route: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
-      print(_errorMessage);
-    }
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   } catch (e) {
+  //     _errorMessage = 'Error loading route: ${e.toString()}';
+  //     _isLoading = false;
+  //     notifyListeners();
+  //     print(_errorMessage);
+  //   }
+  // }
+
+  // 🔥 Real-time route stream initialization
+  initializeWithStreams() {
+    _routeSubscription?.cancel();
+
+    _isLoading = true;
+    notifyListeners();
+
+    _routeSubscription = _routeService
+        .getAllRoutesStream(loggedInUser!.id)
+        .listen(
+          (route) {
+            _allRoute = route;
+            calculateTodaysData();
+            _isLoading = false;
+            notifyListeners();
+          },
+          onError: (error) {
+            _errorMessage = 'Stream error: $error';
+            _isLoading = false;
+            notifyListeners();
+            print(_errorMessage);
+          },
+          onDone: () {
+            _isLoading = false;
+            notifyListeners();
+          },
+        );
   }
 
-  // Stream-based initialization (real-time updates)
-  void initializeWithStreams() {
-    _routeService.streamTodaysRoute(loggedInUser!.id).listen((route) {
-      _allRoute = route;
-      calculateTodaysData();
-      notifyListeners();
-    });
-  }
-
-  // Fetch route by specific date
-  Future<void> fetchRouteByDate(DateTime date) async {
-    try {
-      _isLoading = true;
-      _selectedDate = date;
-      _errorMessage = null;
-      notifyListeners();
-
-      _allRoute = await _routeService.getRouteByDate(loggedInUser!.id, date);
-      calculateTodaysData();
-
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _errorMessage = 'Error loading route: ${e.toString()}';
-      _isLoading = false;
-      notifyListeners();
-      print(_errorMessage);
-    }
-  }
-
-  // Update stop status
+  // 🔹 Update stop status (optimistic update)
   Future<void> updateStopStatus(int stopIndex, String newStatus) async {
     if (_allRoute == null) return;
 
     try {
       await _routeService.updateStopStatus(_allRoute!.id, stopIndex, newStatus);
 
-      // Update local state immediately for better UX
       final updatedStops = List<RouteStopModel>.from(_allRoute!.stops);
       updatedStops[stopIndex] = RouteStopModel(
         timeSlot: updatedStops[stopIndex].timeSlot,
@@ -205,51 +204,66 @@ class ProviderRoute extends ChangeNotifier {
     }
   }
 
-  // Mark stop as completed
-  Future<void> markStopCompleted(int stopIndex) async {
-    await updateStopStatus(stopIndex, AppConstants.completed);
-  }
+  // 🔹 Helper mark methods
+  Future<void> markStopCompleted(int stopIndex) async =>
+      updateStopStatus(stopIndex, AppConstants.completed);
 
-  // Mark stop as current
-  Future<void> markStopCurrent(int stopIndex) async {
-    await updateStopStatus(stopIndex, AppConstants.current);
-  }
+  Future<void> markStopCurrent(int stopIndex) async =>
+      updateStopStatus(stopIndex, AppConstants.current);
 
-  // Mark stop as pending
-  Future<void> markStopPending(int stopIndex) async {
-    await updateStopStatus(stopIndex, AppConstants.pending);
-  }
+  Future<void> markStopPending(int stopIndex) async =>
+      updateStopStatus(stopIndex, AppConstants.pending);
 
-  // Get stop by index
+  // 🔹 Utility getters
   RouteStopModel? getStopByIndex(int index) {
-    if (_allRoute == null || index >= _allRoute!.stops.length) {
-      return null;
-    }
+    if (_allRoute == null || index >= _allRoute!.stops.length) return null;
     return _allRoute!.stops[index];
   }
 
-  // Get stop index by branch ID
   int? getStopIndexByBranchId(String branchId) {
     if (_allRoute == null) return null;
     return _allRoute!.stops.indexWhere((stop) => stop.branchId == branchId);
   }
 
-  // Check if there's a route for today
   bool get hasRouteForToday => _allRoute != null;
 
-  // Refresh
+  // 🔹 Refresh manually
   Future<void> refresh() async {
-    await fetchAllRoutes();
+    // await fetchAllRoutes();
+    initializeWithStreams();
   }
 
-  // Clear error
+  // 🔹 Clear error
   void clearError() {
     _errorMessage = null;
     notifyListeners();
   }
 
+  // 🔹 Cleanup
   @override
   void dispose() {
+    _routeSubscription?.cancel();
     super.dispose();
   }
+
+  // 🔹 Fetch route by specific date (non-stream)
+  // Future<void> fetchRouteByDate(DateTime date) async {
+  //   try {
+  //     _isLoading = true;
+  //     _selectedDate = date;
+  //     _errorMessage = null;
+  //     notifyListeners();
+
+  //     _allRoute = await _routeService.getRouteByDate(loggedInUser!.id, date);
+  //     calculateTodaysData();
+
+  //     _isLoading = false;
+  //     notifyListeners();
+  //   } catch (e) {
+  //     _errorMessage = 'Error loading route: ${e.toString()}';
+  //     _isLoading = false;
+  //     notifyListeners();
+  //     print(_errorMessage);
+  //   }
+  // }
 }
