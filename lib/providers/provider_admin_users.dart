@@ -17,6 +17,9 @@ class ProviderAdminUsers extends ChangeNotifier {
       )
       .toList();
 
+  List<UserModel> get inspectors =>
+      _users.where((user) => user.role.toLowerCase() == 'inspector').toList();
+
   bool get isLoading => _isLoading;
   String? get error => _error;
 

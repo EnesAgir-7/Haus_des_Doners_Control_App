@@ -96,6 +96,7 @@ abstract class LocaleKeys {
   static const hours_ago = 'hours_ago';
   static const days_ago = 'days_ago';
   static const search_branch_hint = 'search_branch_hint';
+  static const search = 'search';
   static const branch_count = 'branch_count';
   static const sort_by_name = 'sort_by_name';
   static const sort_by_score = 'sort_by_score';
@@ -165,4 +166,69 @@ abstract class LocaleKeys {
   static const no_branches_found = 'no_branches_found';
   static const no_branches_available = 'no_branches_available';
   static const unassigned = 'unassigned';
+  static const days_late = 'days_late';
+  static const no_assigned_tasks = 'no_assigned_tasks';
+  static const no_comments_yet = 'no_comments_yet';
+  static const just_now = 'just_now';
+  static const upcoming_routes = 'upcoming_routes';
+  static const enter_new_km = 'enter_new_km';
+  static const new_kilometers = 'new_kilometers';
+  static const update_kilometers = 'update_kilometers';
+  static const error_loading_fleet = 'error_loading_fleet';
+  static const plate = 'plate';
+  static const current = 'current';
+  static const km = 'km';
+  static const used = 'used';
+  static const days_until_service = 'days_until_service';
+  static const days_overdue = 'days_overdue';
+  static const service_due = 'service_due';
+  static const kilometers_updated_successfully =
+      'kilometers_updated_successfully';
+  static const in_queue = 'in_queue';
+  static const last_inspected = 'last_inspected';
+  static const pending_first = 'pending_first';
+  static const assigned_branches = 'assigned_branches';
+  static const this_month = 'this_month';
+  static const today_checks = 'today_checks';
+  static const todays_progress = 'todays_progress';
+  static const please_contact_admin_for_vehicle_assignment =
+      'please_contact_admin_for_vehicle_assignment';
+  static const about_the_branch = 'about_the_branch';
+  static const high = 'high';
+  static const medium = 'medium';
+  static const low = 'low';
+  static const tasks_overdue = 'tasks_overdue';
+  static const dart_io = 'dart_io';
+  static const dart_typed_data = 'dart_typed_data';
+  static const no_template_selected = 'no_template_selected';
+  static const please_rate_all_categories_before_submitting =
+      'please_rate_all_categories_before_submitting';
+  static const inspection_saved_successfully = 'inspection_saved_successfully';
+  static const error_generating_pdf_preview = 'error_generating_pdf_preview';
+  static const dd_mmmm_yyyy_hh_mm = 'dd_mmmm_yyyy_hh_mm';
+  static const inspection_photos = 'inspection_photos';
+  static const inspection_report = 'inspection_report';
+  static const report_id = 'report_id';
+  static const branch_information = 'branch_information';
+  static const n_a = 'n_a';
+  static const inspection_details = 'inspection_details';
+  static const no_signature = 'no_signature';
+  static const gorev_durumu_guncellendi = 'gorev_durumu_guncellendi';
+  static const lutfen_yorum_veya_fotograf_ekleyin =
+      'lutfen_yorum_veya_fotograf_ekleyin';
+  static const yorum_eklendi = 'yorum_eklendi';
+  static const branch_assigned_successfully = 'branch_assigned_successfully';
+  static const branch_unassigned_successfully =
+      'branch_unassigned_successfully';
+  static const filtered = 'filtered';
+  static const done = 'done';
+  static const left = 'left';
+  static const select_date = 'select_date';
+  static const show_all_routes = 'show_all_routes';
+  static const no_stops_for_date = 'no_stops_for_date';
+  static const start_inspection = 'start_inspection';
+  static const search_users = 'search_users';
+  static const no_users_found = 'no_users_found';
+  static const no_users_available = 'no_users_available';
+  static const role = 'role';
 }

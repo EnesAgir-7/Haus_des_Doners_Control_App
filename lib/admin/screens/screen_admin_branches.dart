@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../widgets/branch_card.dart';
-import '../widgets/assign_inspector_dialog.dart';
 import '../../providers/provider_admin_branches.dart';
 import '../../translations/locale_keys.g.dart';
 
@@ -40,7 +39,7 @@ class _AdminBranchesScreenState extends State<AdminBranchesScreen> {
           child: TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: LocaleKeys.search_branches.tr(),
+              hintText: LocaleKeys.search.tr(),
               prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),

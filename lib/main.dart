@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:haus_des_control/admin/layouts/admin_bottom_nav_bar.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/firebase_options.dart';
+import 'package:haus_des_control/providers/provider_admin_fleet.dart';
 import 'package:haus_des_control/providers/provider_auth.dart';
 import 'package:haus_des_control/providers/provider_fleet.dart';
 import 'package:haus_des_control/providers/provider_route.dart';
@@ -64,6 +65,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderControl()),
         ChangeNotifierProvider(create: (_) => BranchMapController()),
         ChangeNotifierProvider(create: (_) => ProviderAdminBranches()),
+        ChangeNotifierProvider(create: (_) => ProviderAdminFleet()),
         ChangeNotifierProvider(create: (_) => ProviderAdminUsers()),
       ],
       child: MaterialApp(
