@@ -259,5 +259,9 @@
   "next_service": "Next Service",
   "assignment_info": "Assignment Information",
   "assign_inspector": "Assign Inspector",
-  "unassign_inspector": "Unassign Inspector"
+  "unassign_inspector": "Unassign Inspector",
+  "user_details": "User Details",
+  "inactive": "Inactive",
+  "user_updated_successfully": "User updated successfully",
+  "assign_branch": "Assign Branch"
 }

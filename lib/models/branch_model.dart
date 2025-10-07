@@ -5,6 +5,7 @@ class BranchModel {
   final String name;
   final String address;
   final String templateId;
+  final String? region;
   final GeoPoint gps;
   final String contactName;
   final String contactPhone;
@@ -23,6 +24,7 @@ class BranchModel {
     required this.templateId,
     required this.name,
     required this.address,
+    this.region,
     required this.gps,
     required this.contactName,
     required this.contactPhone,
@@ -44,6 +46,7 @@ class BranchModel {
       name: data['name'] ?? '',
       address: data['address'] ?? '',
       templateId: data['templateId'] ?? '',
+      region: data['region'],
       gps: data['gps'] as GeoPoint,
       contactName: data['contactName'] ?? '',
       contactPhone: data['contactPhone'] ?? '',
@@ -71,6 +74,7 @@ class BranchModel {
       name: data['name'] ?? '',
       address: data['address'] ?? '',
       templateId: data['templateId'] ?? '',
+      region: data['region'],
       gps: data['gps'] ?? const GeoPoint(0, 0),
       contactName: data['contactName'] ?? '',
       contactPhone: data['contactPhone'] ?? '',
@@ -95,6 +99,7 @@ class BranchModel {
     String? name,
     String? address,
     String? templateId,
+    String? region,
     GeoPoint? gps,
     String? contactName,
     String? contactPhone,
@@ -113,6 +118,7 @@ class BranchModel {
       name: name ?? this.name,
       address: address ?? this.address,
       templateId: templateId ?? this.templateId,
+      region: region ?? this.region,
       gps: gps ?? this.gps,
       contactName: contactName ?? this.contactName,
       contactPhone: contactPhone ?? this.contactPhone,
@@ -128,12 +134,11 @@ class BranchModel {
     );
   }
 
-
-
   Map<String, dynamic> toMap() {
     return {
       'name': name,
       'address': address,
+      'region': region,
       'gps': gps,
       'contactName': contactName,
       'contactPhone': contactPhone,

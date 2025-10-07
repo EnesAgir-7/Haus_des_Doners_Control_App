@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../core/constants/app_colors.dart';
 import '../../providers/provider_admin_users.dart';
 import '../../providers/provider_auth.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../models/user_model.dart';
+import 'screen_admin_user_details.dart';
 
 class AdminUsersScreen extends StatefulWidget {
   const AdminUsersScreen({super.key});
@@ -114,40 +116,80 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   }
 }
 
-class _UserListItem extends StatelessWidget {
+class _UserListItem extends StatefulWidget {
   final UserModel user;
 
-  const _UserListItem({required this.user});
+  const _UserListItem({super.key, required this.user});
+
+  @override
+  State<_UserListItem> createState() => _UserListItemState();
+}
+
+class _UserListItemState extends State<_UserListItem> {
+  late UserModel user;
+
+  @override
+  void initState() {
+    super.initState();
+    user = widget.user;
+  }
+
+  void _handleUserUpdated(UserModel updatedUser) {
+    setState(() {
+      user = updatedUser;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        leading: CircleAvatar(child: Text(user.name[0].toUpperCase())),
-        title: Text(user.name),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(user.email),
-            Text(
-              '${LocaleKeys.role.tr()}: ${user.role.toUpperCase()}',
-              style: TextStyle(
-                color: user.isAdmin ? Colors.red : Colors.blue,
-                fontWeight: FontWeight.bold,
+      color: AppColors.lightBlack,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: AppColors.primaryRed),
+      ),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AdminUserDetailsScreen(
+                initialUser: user,
+                onUserUpdated: _handleUserUpdated,
               ),
             ),
-            if (user.region != null)
-              Text('${LocaleKeys.region.tr()}: ${user.region}'),
-          ],
+          );
+        },
+        child: ListTile(
+          leading: CircleAvatar(child: Text(user.name[0].toUpperCase())),
+          title: Text(user.name),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(user.email),
+              Text(
+                '${LocaleKeys.role.tr()}: ${user.role.toUpperCase()}',
+                style: TextStyle(
+                  color: user.isAdmin ? Colors.red : Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (user.region != null)
+                Text('${LocaleKeys.region.tr()}: ${user.region}'),
+            ],
+          ),
+          trailing: Switch(
+            value: user.active,
+            onChanged: (value) {
+              context.read<ProviderAdminUsers>().toggleUserActive(
+                user.id,
+                value,
+              );
+            },
+          ),
+          isThreeLine: true,
         ),
-        trailing: Switch(
-          value: user.active,
-          onChanged: (value) {
-            context.read<ProviderAdminUsers>().toggleUserActive(user.id, value);
-          },
-        ),
-        isThreeLine: true,
       ),
     );
   }

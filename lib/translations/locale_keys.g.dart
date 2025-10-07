@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class  LocaleKeys {
+abstract class LocaleKeys {
   static const panel = 'panel';
   static const subsidiaries = 'subsidiaries';
   static const fleet = 'fleet';
@@ -179,7 +179,8 @@ abstract class  LocaleKeys {
   static const days_until_service = 'days_until_service';
   static const days_overdue = 'days_overdue';
   static const service_due = 'service_due';
-  static const kilometers_updated_successfully = 'kilometers_updated_successfully';
+  static const kilometers_updated_successfully =
+      'kilometers_updated_successfully';
   static const in_queue = 'in_queue';
   static const last_inspected = 'last_inspected';
   static const pending_first = 'pending_first';
@@ -187,7 +188,8 @@ abstract class  LocaleKeys {
   static const this_month = 'this_month';
   static const today_checks = 'today_checks';
   static const todays_progress = 'todays_progress';
-  static const please_contact_admin_for_vehicle_assignment = 'please_contact_admin_for_vehicle_assignment';
+  static const please_contact_admin_for_vehicle_assignment =
+      'please_contact_admin_for_vehicle_assignment';
   static const about_the_branch = 'about_the_branch';
   static const high = 'high';
   static const medium = 'medium';
@@ -196,7 +198,8 @@ abstract class  LocaleKeys {
   static const dart_io = 'dart_io';
   static const dart_typed_data = 'dart_typed_data';
   static const no_template_selected = 'no_template_selected';
-  static const please_rate_all_categories_before_submitting = 'please_rate_all_categories_before_submitting';
+  static const please_rate_all_categories_before_submitting =
+      'please_rate_all_categories_before_submitting';
   static const inspection_saved_successfully = 'inspection_saved_successfully';
   static const error_generating_pdf_preview = 'error_generating_pdf_preview';
   static const dd_mmmm_yyyy_hh_mm = 'dd_mmmm_yyyy_hh_mm';
@@ -208,10 +211,12 @@ abstract class  LocaleKeys {
   static const inspection_details = 'inspection_details';
   static const no_signature = 'no_signature';
   static const gorev_durumu_guncellendi = 'gorev_durumu_guncellendi';
-  static const lutfen_yorum_veya_fotograf_ekleyin = 'lutfen_yorum_veya_fotograf_ekleyin';
+  static const lutfen_yorum_veya_fotograf_ekleyin =
+      'lutfen_yorum_veya_fotograf_ekleyin';
   static const yorum_eklendi = 'yorum_eklendi';
   static const branch_assigned_successfully = 'branch_assigned_successfully';
-  static const branch_unassigned_successfully = 'branch_unassigned_successfully';
+  static const branch_unassigned_successfully =
+      'branch_unassigned_successfully';
   static const filtered = 'filtered';
   static const done = 'done';
   static const left = 'left';
@@ -224,5 +229,11 @@ abstract class  LocaleKeys {
   static const no_users_available = 'no_users_available';
   static const role = 'role';
   static const region = 'region';
-
+  static const user_details = 'user_details';
+  static const name = 'name';
+  static const status = 'status';
+  static const active = 'active';
+  static const inactive = 'inactive';
+  static const user_updated_successfully = 'user_updated_successfully';
+  static const assign_branch = 'assign_branch';
 }

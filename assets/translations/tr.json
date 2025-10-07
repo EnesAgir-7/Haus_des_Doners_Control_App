@@ -219,5 +219,9 @@
   "no_users_found": "Aramanızla eşleşen kullanıcı bulunamadı",
   "no_users_available": "Mevcut kullanıcı yok",
   "role": "Rol",
-  "region": "Bölge"
+  "region": "Bölge",
+  "user_details": "Kullanıcı Detayları",
+  "inactive": "Pasif",
+  "user_updated_successfully": "Kullanıcı başarıyla güncellendi",
+  "assign_branch": "Şube Ata"
 }

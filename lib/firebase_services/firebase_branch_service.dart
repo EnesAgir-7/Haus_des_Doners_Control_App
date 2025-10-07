@@ -10,7 +10,37 @@ class BranchService {
   final String _collectionBranches = Collections.branches;
   final String _collectionRoutes = Collections.routes;
 
-  // Get branches assigned to inspector
+  // Get all branches
+  Future<List<BranchModel>> getAllBranches() async {
+    try {
+      final snapshot = await _db.collection(_collectionBranches).get();
+      return snapshot.docs
+          .map((doc) => BranchModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      console('Error getting all branches: $e');
+      return [];
+    }
+  }
+
+  // Get all branches assigned to an inspector
+  Future<List<BranchModel>> getInspectorBranches(String inspectorId) async {
+    try {
+      final snapshot = await _db
+          .collection(_collectionBranches)
+          .where('assignedInspectorId', isEqualTo: inspectorId)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => BranchModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      console('Error getting inspector branches: $e');
+      return [];
+    }
+  }
+
+  // Get active branches assigned to inspector
   Future<List<BranchModel>> getBranchesByInspector(String inspectorId) async {
     try {
       final snapshot = await _db
@@ -148,6 +178,22 @@ class BranchService {
       console('Branch updated successfully');
     } catch (e) {
       print("Error updating branch: $e");
+      rethrow;
+    }
+  }
+
+  Future<void> updateBranchAssignedInspector(
+    String branchId,
+    Map<String, String> inspectorData,
+  ) async {
+    try {
+      await _db.collection(_collectionBranches).doc(branchId).update({
+        'assignedInspector': inspectorData,
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+      console('Branch assigned inspector updated successfully');
+    } catch (e) {
+      print("Error updating branch assigned inspector: $e");
       rethrow;
     }
   }

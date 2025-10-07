@@ -238,5 +238,9 @@
   "next_service": "Nächster Service",
   "assignment_info": "Zuweisungsinformationen",
   "assign_inspector": "Inspektor zuweisen",
-  "unassign_inspector": "Inspektor entfernen"
+  "unassign_inspector": "Inspektor entfernen",
+  "user_details": "Benutzerdetails",
+  "inactive": "Inaktiv",
+  "user_updated_successfully": "Benutzer erfolgreich aktualisiert",
+  "assign_branch": "Filiale zuweisen"
 }
