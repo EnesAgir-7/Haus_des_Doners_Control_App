@@ -1,11 +1,12 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:easy_localization/easy_localization.dart';
+
 import '../../core/constants/app_colors.dart';
+import '../../models/user_model.dart';
 import '../../providers/provider_admin_users.dart';
 import '../../providers/provider_auth.dart';
 import '../../translations/locale_keys.g.dart';
-import '../../models/user_model.dart';
 import 'screen_admin_user_details.dart';
 
 class AdminUsersScreen extends StatefulWidget {

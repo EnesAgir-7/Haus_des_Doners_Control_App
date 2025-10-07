@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../models/branch_model.dart';
-import '../../models/user_model.dart';
 import '../../providers/provider_admin_branches.dart';
 
 class AssignInspectorDialog extends StatefulWidget {
