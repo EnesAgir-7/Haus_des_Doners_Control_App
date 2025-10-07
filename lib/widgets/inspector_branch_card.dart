@@ -136,7 +136,7 @@ class InspectorBranchCard extends StatelessWidget {
           const Spacer(),
           Text(
             branch.lastInspectionDate != null
-                ? formatDate(branch.lastInspectionDate!)
+                ? "${formatDate(branch.lastInspectionDate!)} (${branch.lastInspectionScore})"
                 : LocaleKeys.pending_first.tr(),
             style: const TextStyle(
               color: Colors.white70,
