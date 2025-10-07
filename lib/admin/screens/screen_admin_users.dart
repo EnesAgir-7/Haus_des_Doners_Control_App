@@ -19,18 +19,14 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUsers();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadUsers();
+    });
   }
 
   void _loadUsers() {
     final currentUserId = context.read<ProviderAuth>().currentUser?.uid ?? '';
     context.read<ProviderAdminUsers>().loadUsers(currentUserId);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _loadUsers();
   }
 
   @override
@@ -48,7 +44,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           child: TextField(
             controller: _searchController,
             decoration: InputDecoration(
-              hintText: LocaleKeys.search_users.tr(),
+              hintText: LocaleKeys.search.tr(),
               prefixIcon: const Icon(Icons.search),
               border: const OutlineInputBorder(),
             ),

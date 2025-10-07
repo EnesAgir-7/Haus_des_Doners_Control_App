@@ -80,8 +80,8 @@ class _AssignVehicleInspectorDialogState
                   role: '',
                   active: true,
                   region: '',
-                  createdAt: DateTime.now(),
-                  updatedAt: DateTime.now(),
+                  createdAt: DateTime.now().toString(),
+                  updatedAt: DateTime.now().toString(),
                 ),
               );
 

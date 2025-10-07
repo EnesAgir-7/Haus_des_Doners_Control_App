@@ -19,7 +19,7 @@ class _AdminBranchesScreenState extends State<AdminBranchesScreen> {
   void initState() {
     super.initState();
     // Load branches and inspectors when screen opens
-    Future.microtask(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProviderAdminBranches>().loadData();
     });
   }

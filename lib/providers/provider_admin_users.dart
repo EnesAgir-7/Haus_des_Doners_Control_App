@@ -33,19 +33,19 @@ class ProviderAdminUsers extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    try {
-      final allUsers = await _userService.getAllUsers();
-      print('Fetched ${allUsers.length} users from Firebase');
-      _users = allUsers.where((user) => user.id != currentUserId).toList();
-      print('Filtered to ${_users.length} users (excluding current user)');
-      _error = null;
-    } catch (e) {
-      _error = e.toString();
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    // try {
+    final allUsers = await _userService.getAllUsers();
+    print('Fetched ${allUsers.length} users from Firebase');
+    _users = allUsers.where((user) => user.id != currentUserId).toList();
+    print('Filtered to ${_users.length} users (excluding current user)');
+    // _error = null;
+    // } catch (e) {
+    // _error = e.toString();
+    // } finally {
+    // _isLoading = false;
+    // notifyListeners();
   }
+  // }
 
   Future<void> toggleUserActive(String userId, bool active) async {
     try {

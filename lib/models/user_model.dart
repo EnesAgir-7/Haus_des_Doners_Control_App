@@ -8,8 +8,8 @@ class UserModel {
   final bool active;
   final String? region;
   final String? assignedVehicleId;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String createdAt;
+  final String updatedAt;
 
   UserModel({
     required this.id,
@@ -33,8 +33,8 @@ class UserModel {
       active: data['active'] ?? true,
       region: data['region'],
       assignedVehicleId: data['assignedVehicleId'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: data['createdAt'],
+      updatedAt: data['updatedAt'],
     );
   }
 
@@ -48,8 +48,8 @@ class UserModel {
       active: map['active'] ?? true,
       region: map['region'],
       assignedVehicleId: map['assignedVehicleId'],
-      createdAt: DateTime.parse(map['createdAt']),
-      updatedAt: DateTime.parse(map['updatedAt']),
+      createdAt: map['createdAt'],
+      updatedAt: map['updatedAt'],
     );
   }
 
@@ -62,8 +62,8 @@ class UserModel {
       'active': active,
       'region': region,
       'assignedVehicleId': assignedVehicleId,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 

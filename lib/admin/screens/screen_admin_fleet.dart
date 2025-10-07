@@ -18,7 +18,7 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProviderAdminFleet>().loadData();
     });
   }

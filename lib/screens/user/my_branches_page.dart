@@ -95,7 +95,7 @@ class _BranchesPageState extends State<BranchesPage> {
                     onChanged: (value) => provider.setSearchQuery(value),
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: LocaleKeys.search_branch_hint.tr(),
+                      hintText: LocaleKeys.search.tr(),
                       hintStyle: TextStyle(color: Colors.white54),
                       prefixIcon: Icon(Icons.search, color: Colors.white54),
                       suffixIcon: provider.searchQuery.isNotEmpty
