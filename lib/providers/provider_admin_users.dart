@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../firebase_services/firebase_user_service.dart';
 import '../firebase_services/firebase_branch_service.dart';
+import '../firebase_services/firebase_auth_service.dart';
 import '../models/user_model.dart';
 import '../models/branch_model.dart';
 
 class ProviderAdminUsers extends ChangeNotifier {
   final UserService _userService = UserService();
   final BranchService _branchService = BranchService();
+  final FirebaseAuthHelper _authHelper = FirebaseAuthHelper();
   List<UserModel> _users = [];
   Map<String, List<BranchModel>> _userBranches = {};
   List<BranchModel>? _allBranches;
@@ -129,6 +131,42 @@ class ProviderAdminUsers extends ChangeNotifier {
       userBranches.add(branch);
       _userBranches[userId] = userBranches;
 
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> createUser({
+    required String email,
+    required String password,
+    required String name,
+    required String role,
+    String? region,
+  }) async {
+    try {
+      // 1. Create user in Firebase Auth
+      final userId = await _authHelper.createUser(
+        email: email,
+        password: password,
+      );
+
+      // 2. Create user in Firestore
+      final user = UserModel(
+        id: userId,
+        name: name,
+        email: email,
+        role: role,
+        active: true,
+        region: region,
+        createdAt: DateTime.now().toIso8601String(),
+        updatedAt: DateTime.now().toIso8601String(),
+      );
+
+      await _userService.createUser(userId, user);
+
+      // 3. Add user to local state
+      _users.add(user);
       notifyListeners();
     } catch (e) {
       rethrow;

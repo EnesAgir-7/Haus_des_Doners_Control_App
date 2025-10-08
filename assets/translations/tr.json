@@ -219,11 +219,21 @@
   "no_users_found": "Aramanızla eşleşen kullanıcı bulunamadı",
   "no_users_available": "Mevcut kullanıcı yok",
   "role": "Rol",
+  "active": "Aktif",
   "region": "Bölge",
   "user_details": "Kullanıcı Detayları",
   "inactive": "Pasif",
   "user_updated_successfully": "Kullanıcı başarıyla güncellendi",
   "assign_branch": "Şube Ata",
   "status": "Status",
-  "name": "Name"
+  "name": "İsim",
+  "create_user": "Kullanıcı Oluştur",
+  "name_required": "İsim gerekli",
+  "admin": "Yönetici",
+  "inspector": "Denetçi",
+  "user_created_successfully": "Kullanıcı başarıyla oluşturuldu",
+  "reenter_password": "Şifreyi Tekrar Girin",
+  "passwords_not_match": "Şifreler eşleşmiyor",
+  "show_password": "Şifreyi Göster",
+  "hide_password": "Şifreyi Gizle"
 }

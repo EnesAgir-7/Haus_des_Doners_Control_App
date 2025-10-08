@@ -244,5 +244,14 @@
   "assign_branch": "Filiale zuweisen", 
   "search_branches": "Filialen suchen", 
   "status": "Status", 
-  "name": "Name"
+  "name": "Name",
+  "create_user": "Benutzer erstellen",
+  "name_required": "Name ist erforderlich",
+  "admin": "Administrator",
+  "inspector": "Inspektor",
+  "user_created_successfully": "Benutzer erfolgreich erstellt",
+  "reenter_password": "Passwort wiederholen",
+  "passwords_not_match": "Passwörter stimmen nicht überein",
+  "show_password": "Passwort anzeigen",
+  "hide_password": "Passwort verbergen"
 }

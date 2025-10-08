@@ -24,6 +24,22 @@ class FirebaseAuthHelper {
     await _auth.signOut();
   }
 
+  // Create user
+  Future<String> createUser({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      return userCredential.user!.uid;
+    } on FirebaseAuthException catch (e) {
+      throw e.message ?? 'An error occurred';
+    }
+  }
+
   // Get current user
   User? get currentUser => _auth.currentUser;
 }

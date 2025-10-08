@@ -263,5 +263,14 @@
   "inactive": "Inactive",
   "user_updated_successfully": "User updated successfully",
   "assign_branch": "Assign Branch", 
-  "search_branches": "Search Branches"
+  "search_branches": "Search Branches",
+  "create_user": "Create User",
+  "name_required": "Name is required",
+  "admin": "Admin",
+  "inspector": "Inspector",
+  "user_created_successfully": "User created successfully",
+  "reenter_password": "Re-enter Password",
+  "passwords_not_match": "Passwords do not match",
+  "show_password": "Show Password",
+  "hide_password": "Hide Password"
 }

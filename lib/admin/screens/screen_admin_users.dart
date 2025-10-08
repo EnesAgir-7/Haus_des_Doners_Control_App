@@ -8,6 +8,7 @@ import '../../providers/provider_admin_users.dart';
 import '../../providers/provider_auth.dart';
 import '../../translations/locale_keys.g.dart';
 import 'screen_admin_user_details.dart';
+import 'screen_create_user.dart';
 
 class AdminUsersScreen extends StatefulWidget {
   const AdminUsersScreen({super.key});
@@ -44,16 +45,42 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.all(16.0),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: LocaleKeys.search.tr(),
-              prefixIcon: const Icon(Icons.search),
-              border: const OutlineInputBorder(),
-            ),
-            onChanged: (value) {
-              context.read<ProviderAdminUsers>().setSearchQuery(value);
-            },
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: LocaleKeys.search.tr(),
+                    prefixIcon: const Icon(Icons.search),
+                    border: const OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    context.read<ProviderAdminUsers>().setSearchQuery(value);
+                  },
+                ),
+              ),
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateUserScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.add),
+                label: Text(LocaleKeys.create_user.tr()),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryRed,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 19,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         Expanded(
