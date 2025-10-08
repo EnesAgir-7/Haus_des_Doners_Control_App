@@ -55,6 +55,26 @@ class ProviderRoute extends ChangeNotifier {
         .length;
   }
 
+// In ProviderRoute class, add this computed property:
+
+  // Filtered overdue count
+  int get filteredOverdueCount {
+
+    return filteredStops.where((stop) {
+      if (stop.status == AppConstants.completed) return false;
+
+      final stopParts = stop.timeSlot.split('-');
+      final stopDate = DateTime(
+        int.parse(stopParts[0]),
+        int.parse(stopParts[1]),
+        int.parse(stopParts[2]),
+      );
+      final today = DateTime.now();
+      final todayDate = DateTime(today.year, today.month, today.day);
+
+      return stopDate.isBefore(todayDate);
+    }).length;
+  }
   // Filtered progress value
   double get filteredProgressValue {
     if (filteredStops.isEmpty) return 0.0;

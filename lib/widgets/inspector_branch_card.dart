@@ -80,6 +80,7 @@ class InspectorBranchCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(bool isAssigned) {
+    
     if (!isAssigned) return SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

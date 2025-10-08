@@ -60,19 +60,21 @@ class _RoutePageState extends State<RoutePage> {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
+              if (provider.filterDate == null) ...[
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.route_outlined,
+                    color: Colors.white,
+                    size: 24,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.route_outlined,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
+                const SizedBox(width: 12),
+              ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,6 +157,39 @@ class _RoutePageState extends State<RoutePage> {
                   ],
                 ),
               ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.calendar_today,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                  onPressed: () => _selectDate(context, provider),
+                  tooltip: LocaleKeys.select_date.tr(),
+                ),
+              ),
+              if (provider.filterDate != null) ...[
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.clear,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: () => provider.clearDateFilter(),
+                    tooltip: LocaleKeys.show_all_routes.tr(),
+                  ),
+                ),
+              ],
             ],
           ),
           if (provider.allRoute != null) ...[
@@ -165,6 +200,7 @@ class _RoutePageState extends State<RoutePage> {
                   child: SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
+                      spacing: 4,
                       children: [
                         _buildStatChip(
                           icon: Icons.location_on,
@@ -172,58 +208,28 @@ class _RoutePageState extends State<RoutePage> {
                               '${provider.filteredStops.length} ${LocaleKeys.stops.tr()}',
                           color: Colors.white,
                         ),
-                        const SizedBox(width: 12),
                         _buildStatChip(
                           icon: Icons.check_circle,
                           label:
                               '${provider.filteredCompletedCount} ${LocaleKeys.done.tr()}',
                           color: Colors.green.shade300,
                         ),
-                        const SizedBox(width: 12),
                         _buildStatChip(
                           icon: Icons.pending,
                           label:
                               '${provider.filteredStops.length - provider.filteredCompletedCount} ${LocaleKeys.left.tr()}',
                           color: Colors.orange.shade300,
                         ),
+                        if (provider.filteredOverdueCount > 0)
+                          _buildStatChip(
+                            icon: Icons.alarm,
+                            label: '${provider.filteredOverdueCount} Overdue',
+                            color: Colors.orange.shade300,
+                          ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.calendar_today,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    onPressed: () => _selectDate(context, provider),
-                    tooltip: LocaleKeys.select_date.tr(),
-                  ),
-                ),
-                if (provider.filterDate != null) ...[
-                  const SizedBox(width: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.clear,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      onPressed: () => provider.clearDateFilter(),
-                      tooltip: LocaleKeys.show_all_routes.tr(),
-                    ),
-                  ),
-                ],
               ],
             ),
             const SizedBox(height: 12),
@@ -251,7 +257,7 @@ class _RoutePageState extends State<RoutePage> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -373,6 +379,17 @@ class _RoutePageState extends State<RoutePage> {
     final todayKey = "${today.year}-${today.month}-${today.day}";
     final isToday = stop.timeSlot == todayKey;
 
+    // Check if this stop is overdue (past date and not completed)
+    final stopParts = stop.timeSlot.split('-');
+    final stopDate = DateTime(
+      int.parse(stopParts[0]),
+      int.parse(stopParts[1]),
+      int.parse(stopParts[2]),
+    );
+    final isOverdue =
+        stopDate.isBefore(DateTime(today.year, today.month, today.day)) &&
+        !isCompleted;
+
     Color statusColor;
     IconData statusIcon;
     String statusLabel;
@@ -381,6 +398,10 @@ class _RoutePageState extends State<RoutePage> {
       statusColor = Colors.green;
       statusIcon = Icons.check_circle;
       statusLabel = LocaleKeys.completed.tr();
+    } else if (isOverdue) {
+      statusColor = Colors.deepOrange;
+      statusIcon = Icons.warning_amber_rounded;
+      statusLabel = "Overdue";
     } else if (isToday) {
       statusColor = AppColors.primaryRed;
       statusIcon = Icons.hourglass_bottom;
@@ -468,12 +489,11 @@ class _RoutePageState extends State<RoutePage> {
               child: Card(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(color: Colors.transparent),
                 ),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    gradient: (isToday
+                    gradient: isOverdue
                         ? LinearGradient(
                             colors: [
                               AppColors.primaryRed,
@@ -482,7 +502,15 @@ class _RoutePageState extends State<RoutePage> {
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           )
-                        : null),
+                        : (isToday
+                              ? LinearGradient(
+                                  colors: [
+                                    Color(0xFF4CAF50),
+                                    Color(0xFF4CAF50),
+                                    // Color(0xFF81C784),
+                                  ],
+                                )
+                              : null),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -497,11 +525,58 @@ class _RoutePageState extends State<RoutePage> {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: null,
+                                  color: isToday ? Colors.white : null,
                                 ),
                               ),
                             ),
-                            if (isToday)
+                            if (isOverdue)
+                              Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.deepOrange.shade400,
+                                      Colors.red.shade400,
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.deepOrange.withValues(
+                                        alpha: 0.4,
+                                      ),
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.warning_amber_rounded,
+                                      size: 13,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "Missed",
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            if (isToday && !isOverdue)
                               Container(
                                 margin: const EdgeInsets.only(right: 8),
                                 padding: const EdgeInsets.symmetric(
@@ -552,7 +627,9 @@ class _RoutePageState extends State<RoutePage> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.2),
+                                color: isToday
+                                    ? Colors.white.withValues(alpha: 0.3)
+                                    : statusColor.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
@@ -561,7 +638,7 @@ class _RoutePageState extends State<RoutePage> {
                                   Icon(
                                     statusIcon,
                                     size: 14,
-                                    color: statusColor,
+                                    color: isToday ? Colors.white : statusColor,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
@@ -569,7 +646,9 @@ class _RoutePageState extends State<RoutePage> {
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
-                                      color: statusColor,
+                                      color: isToday
+                                          ? Colors.white
+                                          : statusColor,
                                     ),
                                   ),
                                 ],
@@ -583,20 +662,24 @@ class _RoutePageState extends State<RoutePage> {
                             Icon(
                               Icons.calendar_today,
                               size: 16,
-                              color: Colors.grey.shade600,
+                              color: isToday || isOverdue
+                                  ? Colors.white.withValues(alpha: 0.9)
+                                  : Colors.grey.shade600,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               _formatTimeSlot(stop.timeSlot),
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey.shade600,
+                                color: isToday || isOverdue
+                                    ? Colors.white.withValues(alpha: 0.9)
+                                    : Colors.grey.shade600,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
-                        if (isToday && !isCompleted) ...[
+                        if ((isToday || isOverdue) && !isCompleted) ...[
                           const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
@@ -613,9 +696,15 @@ class _RoutePageState extends State<RoutePage> {
                                 );
                               },
                               icon: const Icon(Icons.arrow_forward),
-                              label: Text(LocaleKeys.start_inspection.tr()),
+                              label: Text(
+                                isOverdue
+                                    ? "Inspect now"
+                                    : LocaleKeys.start_inspection.tr(),
+                              ),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryRed,
+                                backgroundColor: isOverdue
+                                    ? Colors.deepOrange
+                                    : AppColors.primaryRed,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
