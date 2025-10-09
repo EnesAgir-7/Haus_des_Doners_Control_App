@@ -19,7 +19,6 @@ class AdminVehicleDetailsScreen extends StatefulWidget {
 class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
   final _kmController = TextEditingController();
   bool _isEditing = false;
-  bool _isAssigning = false;
 
   String? _selectedInspectorId;
 
@@ -45,28 +44,21 @@ class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
       appBar: AppBar(
         title: Text(widget.vehicle.plate),
         actions: [
-          if (_isEditing || _isAssigning)
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: () async {
-                if (_isEditing) {
-                  await _saveChanges();
-                }
+          IconButton(
+            icon: Icon(_isEditing ? Icons.save : Icons.edit),
+            onPressed: () async {
+              if (_isEditing) {
+                await _saveChanges();
                 setState(() {
                   _isEditing = false;
-                  _isAssigning = false;
                 });
-              },
-            )
-          else
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {
+              } else {
                 setState(() {
                   _isEditing = true;
                 });
-              },
-            ),
+              }
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -119,7 +111,7 @@ class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
                 _buildInfoRow(
                   'Status',
                   widget.vehicle.status,
-                  dropdown: !_isAssigning
+                  dropdown: !_isEditing
                       ? null
                       : DropdownButtonFormField<String>(
                           value: widget.vehicle.status,
@@ -148,7 +140,7 @@ class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
                 _buildInfoRow(
                   'Assigned Inspector',
                   widget.vehicle.assignedInspectorName ?? 'Unassigned',
-                  dropdown: !_isAssigning
+                  dropdown: !_isEditing
                       ? null
                       : Consumer<ProviderAdminUsers>(
                           builder: (context, provider, child) {
