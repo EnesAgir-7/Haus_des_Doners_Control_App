@@ -104,6 +104,26 @@ class VehicleService {
     String inspectorName,
   ) async {
     try {
+      // First, find if inspector has any assigned vehicle
+      final currentVehicle = await _db
+          .collection(_collectionVehicles)
+          .where('assignedInspectorId', isEqualTo: inspectorId)
+          .get();
+
+      // If inspector has a vehicle, unassign it
+      if (currentVehicle.docs.isNotEmpty) {
+        await _db
+            .collection(_collectionVehicles)
+            .doc(currentVehicle.docs.first.id)
+            .update({
+              'assignedInspectorId': null,
+              'assignedInspectorName': null,
+              'status': 'available',
+              'updatedAt': FieldValue.serverTimestamp(),
+            });
+      }
+
+      // Assign new vehicle to inspector
       await _db.collection(_collectionVehicles).doc(vehicleId).update({
         'assignedInspectorId': inspectorId,
         'assignedInspectorName': inspectorName,
@@ -127,6 +147,51 @@ class VehicleService {
       });
     } catch (e) {
       print('Error unassigning vehicle: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> createVehicle({
+    required String plate,
+    required String model,
+    required int currentKm,
+    required int maxKm,
+    required int remainingKm,
+    required int usagePercent,
+    required DateTime lastServiceDate,
+    required DateTime nextServiceDue,
+    required String status,
+  }) async {
+    try {
+      await _db.collection(_collectionVehicles).add({
+        'plate': plate,
+        'model': model,
+        'currentKm': currentKm,
+        'maxKm': maxKm,
+        'remainingKm': remainingKm,
+        'usagePercent': usagePercent,
+        'lastServiceDate': Timestamp.fromDate(lastServiceDate),
+        'nextServiceDue': Timestamp.fromDate(nextServiceDue),
+        'status': status,
+        'assignedInspectorId': null,
+        'assignedInspectorName': null,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error creating vehicle: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> updateVehicleStatus(String vehicleId, String status) async {
+    try {
+      await _db.collection(_collectionVehicles).doc(vehicleId).update({
+        'status': status,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error updating vehicle status: $e');
       rethrow;
     }
   }

@@ -272,5 +272,10 @@
   "reenter_password": "Re-enter Password",
   "passwords_not_match": "Passwords do not match",
   "show_password": "Show Password",
-  "hide_password": "Hide Password"
+  "hide_password": "Hide Password",
+  "create_vehicle": "Create Vehicle",
+  "plate_required": "Plate is required",
+  "model_required": "Model is required",
+  "km_required": "Kilometer is required",
+  "max_km_must_be_greater": "Maximum kilometer must be greater than current kilometer"
 }

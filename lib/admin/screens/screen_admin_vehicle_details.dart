@@ -5,7 +5,7 @@ import '../../core/constants/app_colors.dart';
 import '../../models/vehicle_model.dart';
 import '../../providers/provider_admin_fleet.dart';
 import '../../translations/locale_keys.g.dart';
-import '../widgets/assign_vehicle_inspector_dialog.dart';
+import '../../providers/provider_admin_users.dart';
 
 class AdminVehicleDetailsScreen extends StatefulWidget {
   final VehicleModel vehicle;
@@ -19,11 +19,18 @@ class AdminVehicleDetailsScreen extends StatefulWidget {
 class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
   final _kmController = TextEditingController();
   bool _isEditing = false;
+  bool _isAssigning = false;
+
+  String? _selectedInspectorId;
 
   @override
   void initState() {
     super.initState();
     _kmController.text = widget.vehicle.currentKm.toString();
+    _selectedInspectorId = widget.vehicle.assignedInspectorId;
+    Future.microtask(() {
+      context.read<ProviderAdminUsers>().loadUsers('');
+    });
   }
 
   @override
@@ -38,17 +45,28 @@ class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
       appBar: AppBar(
         title: Text(widget.vehicle.plate),
         actions: [
-          IconButton(
-            icon: Icon(_isEditing ? Icons.save : Icons.edit),
-            onPressed: () {
-              if (_isEditing) {
-                _saveChanges();
-              }
-              setState(() {
-                _isEditing = !_isEditing;
-              });
-            },
-          ),
+          if (_isEditing || _isAssigning)
+            IconButton(
+              icon: const Icon(Icons.save),
+              onPressed: () async {
+                if (_isEditing) {
+                  await _saveChanges();
+                }
+                setState(() {
+                  _isEditing = false;
+                  _isAssigning = false;
+                });
+              },
+            )
+          else
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                setState(() {
+                  _isEditing = true;
+                });
+              },
+            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -98,31 +116,81 @@ class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
             _buildSection(
               title: LocaleKeys.inspection_details.tr(),
               children: [
-                _buildInfoRow('Status', widget.vehicle.status),
-                if (widget.vehicle.assignedInspectorName != null) ...[
-                  _buildInfoRow(
-                    LocaleKeys.assigned_to.tr(),
-                    widget.vehicle.assignedInspectorName!,
-                  ),
-                ],
-                const SizedBox(height: 16),
-                Center(
-                  child: ElevatedButton(
-                    onPressed: widget.vehicle.assignedInspectorId == null
-                        ? _showAssignDialog
-                        : _unassignInspector,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          widget.vehicle.assignedInspectorId == null
-                          ? AppColors.primaryRed
-                          : Colors.grey,
-                    ),
-                    child: Text(
-                      widget.vehicle.assignedInspectorId == null
-                          ? LocaleKeys.assign_to_me.tr()
-                          : LocaleKeys.unassign.tr(),
-                    ),
-                  ),
+                _buildInfoRow(
+                  'Status',
+                  widget.vehicle.status,
+                  dropdown: !_isAssigning
+                      ? null
+                      : DropdownButtonFormField<String>(
+                          value: widget.vehicle.status,
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'active',
+                              child: Text('Active'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'passive',
+                              child: Text('Passive'),
+                            ),
+                          ],
+                          onChanged: (value) async {
+                            if (value != null) {
+                              await context
+                                  .read<ProviderAdminFleet>()
+                                  .updateVehicleStatus(
+                                    widget.vehicle.id,
+                                    value,
+                                  );
+                            }
+                          },
+                        ),
+                ),
+                _buildInfoRow(
+                  'Assigned Inspector',
+                  widget.vehicle.assignedInspectorName ?? 'Unassigned',
+                  dropdown: !_isAssigning
+                      ? null
+                      : Consumer<ProviderAdminUsers>(
+                          builder: (context, provider, child) {
+                            final inspectors = provider.inspectors;
+                            return DropdownButtonFormField<String>(
+                              value: _selectedInspectorId,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                              ),
+                              items: [
+                                const DropdownMenuItem(
+                                  value: '',
+                                  child: Text('Unassigned'),
+                                ),
+                                ...inspectors.where((i) => i.active).map((
+                                  inspector,
+                                ) {
+                                  return DropdownMenuItem(
+                                    value: inspector.id,
+                                    child: Text(inspector.name),
+                                  );
+                                }),
+                              ],
+                              onChanged: (value) async {
+                                setState(() {
+                                  _selectedInspectorId = value;
+                                });
+                                if (value == null || value.isEmpty) {
+                                  await _unassignInspector();
+                                } else {
+                                  final inspector = inspectors.firstWhere(
+                                    (i) => i.id == value,
+                                  );
+                                  await _assignInspector(
+                                    inspector.id,
+                                    inspector.name,
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        ),
                 ),
               ],
             ),
@@ -132,22 +200,21 @@ class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
     );
   }
 
-  Future<void> _showAssignDialog() async {
-    final result = await showDialog<Map<String, String>>(
-      context: context,
-      builder: (context) =>
-          AssignVehicleInspectorDialog(vehicle: widget.vehicle),
-    );
-
-    if (result != null) {
-      if (!mounted) return;
+  Future<void> _assignInspector(
+    String inspectorId,
+    String inspectorName,
+  ) async {
+    try {
       await context.read<ProviderAdminFleet>().assignInspector(
         widget.vehicle.id,
-        result['id']!,
-        result['name']!,
+        inspectorId,
+        inspectorName,
       );
+    } catch (e) {
       if (!mounted) return;
-      Navigator.pop(context);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
   }
 
@@ -201,6 +268,7 @@ class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
     String label,
     String value, {
     TextEditingController? controller,
+    Widget? dropdown,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -220,19 +288,21 @@ class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
           const SizedBox(width: 16),
           Expanded(
             flex: 3,
-            child: _isEditing && controller != null
-                ? TextField(
-                    controller: controller,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 8,
-                      ),
-                    ),
-                  )
-                : Text(value, style: const TextStyle(fontSize: 16)),
+            child:
+                dropdown ??
+                (_isEditing && controller != null
+                    ? TextField(
+                        controller: controller,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 8,
+                          ),
+                        ),
+                      )
+                    : Text(value, style: const TextStyle(fontSize: 16))),
           ),
         ],
       ),

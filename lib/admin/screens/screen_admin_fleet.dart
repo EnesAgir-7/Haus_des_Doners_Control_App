@@ -4,6 +4,8 @@ import 'package:easy_localization/easy_localization.dart';
 import '../widgets/vehicle_card.dart';
 import '../../providers/provider_admin_fleet.dart';
 import '../../translations/locale_keys.g.dart';
+import '../../core/constants/app_colors.dart';
+import 'screen_create_vehicle.dart';
 
 class AdminFleetScreen extends StatefulWidget {
   const AdminFleetScreen({super.key});
@@ -35,22 +37,51 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
-          child: TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: LocaleKeys.search.tr(),
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: LocaleKeys.search.tr(),
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    context.read<ProviderAdminFleet>().setSearchQuery(value);
+                  },
+                ),
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CreateVehicleScreen(),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryRed,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                icon: const Icon(Icons.add, color: Colors.white),
+                label: Text(
+                  'Create Vehicle',
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
-            ),
-            onChanged: (value) {
-              context.read<ProviderAdminFleet>().setSearchQuery(value);
-            },
+            ],
           ),
         ),
         Expanded(

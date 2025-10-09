@@ -253,5 +253,10 @@
   "reenter_password": "Passwort wiederholen",
   "passwords_not_match": "Passwörter stimmen nicht überein",
   "show_password": "Passwort anzeigen",
-  "hide_password": "Passwort verbergen"
+  "hide_password": "Passwort verbergen",
+  "create_vehicle": "Fahrzeug erstellen",
+  "plate_required": "Kennzeichen erforderlich",
+  "model_required": "Modell erforderlich",
+  "km_required": "Kilometer erforderlich",
+  "max_km_must_be_greater": "Maximale Kilometer müssen größer als aktuelle Kilometer sein"
 }

@@ -235,5 +235,10 @@
   "reenter_password": "Şifreyi Tekrar Girin",
   "passwords_not_match": "Şifreler eşleşmiyor",
   "show_password": "Şifreyi Göster",
-  "hide_password": "Şifreyi Gizle"
+  "hide_password": "Şifreyi Gizle",
+  "create_vehicle": "Araç Oluştur",
+  "plate_required": "Plaka gerekli",
+  "model_required": "Model gerekli",
+  "km_required": "Kilometre gerekli",
+  "max_km_must_be_greater": "Maksimum kilometre mevcut kilometreden büyük olmalı"
 }

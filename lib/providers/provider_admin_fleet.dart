@@ -84,4 +84,46 @@ class ProviderAdminFleet extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> createVehicle({
+    required String plate,
+    required String model,
+    required int currentKm,
+    required int maxKm,
+    required int remainingKm,
+    required int usagePercent,
+    required DateTime lastServiceDate,
+    required DateTime nextServiceDue,
+    required String status,
+  }) async {
+    try {
+      await _vehicleService.createVehicle(
+        plate: plate,
+        model: model,
+        currentKm: currentKm,
+        maxKm: maxKm,
+        remainingKm: remainingKm,
+        usagePercent: usagePercent,
+        lastServiceDate: lastServiceDate,
+        nextServiceDue: nextServiceDue,
+        status: status,
+      );
+      await loadData(); // Refresh data after creation
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      throw e; // Re-throw to show error in UI
+    }
+  }
+
+  Future<void> updateVehicleStatus(String vehicleId, String status) async {
+    try {
+      await _vehicleService.updateVehicleStatus(vehicleId, status);
+      await loadData(); // Refresh data after update
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      throw e; // Re-throw to show error in UI
+    }
+  }
 }
