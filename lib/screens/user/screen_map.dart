@@ -10,11 +10,13 @@ import '../../models/branch_model.dart';
 import '../../providers/provider_map.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/custom_app_bar.dart';
+import 'control_page.dart';
 
+//TODO: locale
 class BranchMapScreen extends StatefulWidget {
-  final List<BranchModel> branches;
+  // final List<BranchModel> branches;
 
-  const BranchMapScreen({super.key, required this.branches});
+  const BranchMapScreen({super.key});
 
   @override
   State<BranchMapScreen> createState() => _BranchMapScreenState();
@@ -27,14 +29,20 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
     // Initialize the controller with branches after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final controller = context.read<BranchMapController>();
-      controller.initializeBranches(widget.branches);
+      final provider = context.read<ProviderBranches>();
+
+      controller.initializeBranches(context.read<ProviderBranches>().branches);
+      // Listen to provider changes
+      provider.addListener(() {
+        controller.updateBranches(provider.branches);
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BranchMapController>(
-      builder: (context, controller, _) {
+    return Consumer2<BranchMapController, ProviderBranches>(
+      builder: (context, controller, brr, _) {
         // Show loading or empty state if no branches
         if (controller.branches.isEmpty) {
           return Scaffold(
@@ -85,231 +93,210 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
   }
 
   Widget _branchCard(BranchModel branch) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: AppColors.lightBlack,
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Row(
-                children: [
-                  // Uncomment to show branch image
-                  // if (branch.imageUrl != null && branch.imageUrl!.isNotEmpty)
-                  //   ClipRRect(
-                  //     borderRadius: BorderRadius.circular(8),
-                  //     child: Image.network(
-                  //       branch.imageUrl!,
-                  //       width: 60,
-                  //       height: 60,
-                  //       fit: BoxFit.cover,
-                  //       errorBuilder: (_, __, ___) => const Icon(
-                  //         Icons.apartment,
-                  //         size: 50,
-                  //         color: Colors.white24,
-                  //       ),
-                  //     ),
-                  //   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
+    final isNextInspectionToday =
+        branch.nextInspectionDate != null &&
+        branch.nextInspectionDate!.isNotEmpty &&
+        branch.nextInspectionDate ==
+            DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+    return Consumer<ProviderBranches>(
+      builder: (context, brrl, child) {
+        return Padding(
+          padding: const EdgeInsets.all(10),
+          child: Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.lightBlack,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      // Uncomment to show branch image
+                      // if (branch.imageUrl != null && branch.imageUrl!.isNotEmpty)
+                      //   ClipRRect(
+                      //     borderRadius: BorderRadius.circular(8),
+                      //     child: Image.network(
+                      //       branch.imageUrl!,
+                      //       width: 60,
+                      //       height: 60,
+                      //       fit: BoxFit.cover,
+                      //       errorBuilder: (_, __, ___) => const Icon(
+                      //         Icons.apartment,
+                      //         size: 50,
+                      //         color: Colors.white24,
+                      //       ),
+                      //     ),
+                      //   ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              branch.name,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              branch.address,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 11,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (branch.nextInspectionDate != null)
+                              Text(
+                                "Next Inspection: ${isNextInspectionToday ? "Today" : branch.nextInspectionDate.toString()}",
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 11,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: SizedBox(
+                    height: 40,
+                    child: Row(
                       children: [
-                        Text(
-                          branch.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
+                        Expanded(
+                          // Listen to both providers to get real-time updates
+                          child: Consumer2<ProviderBranches, BranchMapController>(
+                            builder: (context, branchContr, mapContr, child) {
+                              // Get the updated branch from map controller
+                              final updatedBranch = mapContr.branches
+                                  .firstWhere(
+                                    (b) => b.id == branch.id,
+                                    orElse: () => branch,
+                                  );
+
+                              return AppButton(
+                                isLoading: branchContr.isLoading,
+                                text: updatedBranch.isRouteAssigned
+                                    ? "Remove from Route"
+                                    : "Add to Route",
+                                onPressed: () async {
+                                  if (updatedBranch.isRouteAssigned) {
+                                    // Unassign
+                                    final success = await branchContr
+                                        .unAssignBranchToMe(
+                                          branchId: updatedBranch.id,
+                                          context: context,
+                                        );
+
+                                    if (success) {
+                                      // Update marker to red
+                                      mapContr.updateBranchMarker(
+                                        updatedBranch.id,
+                                        false,
+                                      );
+                                    }
+                                  } else {
+                                    // Show date picker before assigning
+                                    final DateTime? pickedDate =
+                                        await showDatePicker(
+                                          locale: context.locale,
+                                          context: context,
+                                          initialDate: DateTime.now(),
+                                          firstDate: DateTime.now(),
+                                          lastDate: DateTime.now().add(
+                                            const Duration(days: 7),
+                                          ),
+                                        );
+
+                                    if (pickedDate != null) {
+                                      final String timeSlot =
+                                          "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+
+                                      final success = await branchContr
+                                          .assignBranchToMe(
+                                            branchId: branch.id,
+                                            branchName: branch.name,
+                                            timeSlot: timeSlot,
+                                            context: context,
+                                            branchTemplateId: branch.templateId,
+                                          );
+
+                                      if (success) {
+                                        // Update marker to green
+                                        mapContr.updateBranchMarker(
+                                          updatedBranch.id,
+                                          true,
+                                        );
+                                      }
+                                    }
+                                  }
+                                },
+                                backgroundColor: updatedBranch.isRouteAssigned
+                                    ? AppColors.primaryRed
+                                    : AppColors.amber,
+                                textStyle: TextStyle(
+                                  fontSize: 11,
+                                  color: updatedBranch.isRouteAssigned
+                                      ? Colors.white
+                                      : AppColors.primaryDark,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                ),
+                                borderRadius: 10,
+                              );
+                            },
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          branch.address,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 11,
+                        const SizedBox(width: 10),
+                        if (branch.isRouteAssigned && isNextInspectionToday)
+                          Expanded(
+                            child: AppButton(
+                              text: LocaleKeys.submit_inspection.tr(),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ControlPage(
+                                      selectedBranch: branch,
+                                      branchId: branch.id,
+                                      branchTemplateId: branch.templateId,
+                                      // branchId: stop.branchId,
+                                      // branchTemplateId: stop.branchTemplateId,
+                                    ),
+                                  ),
+                                );
+                              },
+                              backgroundColor: AppColors.primaryRed,
+                              textStyle: const TextStyle(fontSize: 11),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              borderRadius: 10,
+                            ),
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: SizedBox(
-                height: 40,
-                child: Row(
-                  children: [
-                    // Expanded(
-                    //   child: Consumer<ProviderBranches>(
-                    //     builder: (context, branchContr, child) {
-                    //       return AppButton(
-                    //         isLoading: branchContr.isLoading,
-                    //         text: branch.isRouteAssigned
-                    //             ? "Un Assign"
-                    //             : "Assign to Me",
-                    //         onPressed: () async {
-                    //           if (branch.isRouteAssigned) {
-                    //             branchContr.unAssignBranchToMe(
-                    //               branchId: branch.id,
-                    //               context: context,
-                    //             );
-                    //           } else {
-                    //             // show date picker before assigning
-                    //             final DateTime? pickedDate =
-                    //                 await showDatePicker(
-                    //                   locale: context.locale,
-                    //                   context: context,
-                    //                   initialDate: DateTime.now(),
-                    //                   firstDate: DateTime.now(),
-                    //                   lastDate: DateTime.now().add(
-                    //                     const Duration(days: 365),
-                    //                   ),
-                    //                 );
-
-                    //             if (pickedDate != null) {
-                    //               // format the slot however you want
-                    //               final String timeSlot =
-                    //                   //  Timestamp.fromDate(
-                    //                   //   pickedDate,
-                    //                   // );
-                    //                   "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
-
-                    //               branchContr.assignBranchToMe(
-                    //                 branch: branch,
-                    //                 timeSlot: timeSlot,
-                    //                 context: context,
-                    //               );
-                    //             }
-                    //           }
-                    //         },
-                    //         backgroundColor: branch.isRouteAssigned
-                    //             ? AppColors.primaryRed
-                    //             : AppColors.amber,
-                    //         textStyle: TextStyle(
-                    //           fontSize: 11,
-                    //           color: branch.isRouteAssigned
-                    //               ? Colors.white
-                    //               : AppColors.primaryDark,
-                    //         ),
-                    //         padding: const EdgeInsets.symmetric(vertical: 8),
-                    //         borderRadius: 10,
-                    //       );
-                    //     },
-                    //   ),
-                    // ),
-                    Expanded(
-                      // Listen to both providers to get real-time updates
-                      child: Consumer2<ProviderBranches, BranchMapController>(
-                        builder: (context, branchContr, mapContr, child) {
-                          // Get the updated branch from map controller
-                          final updatedBranch = mapContr.branches.firstWhere(
-                            (b) => b.id == branch.id,
-                            orElse: () => branch,
-                          );
-
-                          return AppButton(
-                            isLoading: branchContr.isLoading,
-                            text: updatedBranch.isRouteAssigned
-                                ? "Remove from Route"
-                                : "Add to Route",
-                            onPressed: () async {
-                              if (updatedBranch.isRouteAssigned) {
-                                // Unassign
-                                final success = await branchContr
-                                    .unAssignBranchToMe(
-                                      branchId: updatedBranch.id,
-                                      context: context,
-                                    );
-
-                                if (success) {
-                                  // Update marker to red
-                                  mapContr.updateBranchMarker(
-                                    updatedBranch.id,
-                                    false,
-                                  );
-                                }
-                              } else {
-                                // Show date picker before assigning
-                                final DateTime? pickedDate =
-                                    await showDatePicker(
-                                      locale: context.locale,
-                                      context: context,
-                                      initialDate: DateTime.now(),
-                                      firstDate: DateTime.now(),
-                                      lastDate: DateTime.now().add(
-                                        const Duration(days: 7),
-                                      ),
-                                    );
-
-                                if (pickedDate != null) {
-                                  final String timeSlot =
-                                      "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
-
-                                  final success = await branchContr
-                                      .assignBranchToMe(
-                                        branchId: branch.id,
-                                        branchName: branch.name,
-                                        timeSlot: timeSlot,
-                                        context: context,
-                                        branchTemplateId: branch.templateId,
-                                      );
-
-                                  if (success) {
-                                    // Update marker to green
-                                    mapContr.updateBranchMarker(
-                                      updatedBranch.id,
-                                      true,
-                                    );
-                                  }
-                                }
-                              }
-                            },
-                            backgroundColor: updatedBranch.isRouteAssigned
-                                ? AppColors.primaryRed
-                                : AppColors.amber,
-                            textStyle: TextStyle(
-                              fontSize: 11,
-                              color: updatedBranch.isRouteAssigned
-                                  ? Colors.white
-                                  : AppColors.primaryDark,
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            borderRadius: 10,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: AppButton(
-                        text: LocaleKeys.submit_inspection.tr(),
-                        onPressed: () {},
-                        backgroundColor: AppColors.primaryRed,
-                        textStyle: const TextStyle(fontSize: 11),
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        borderRadius: 10,
-                      ),
-                    ),
-                  ],
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

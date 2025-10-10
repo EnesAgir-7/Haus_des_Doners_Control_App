@@ -167,6 +167,7 @@ class BranchService {
       // 4. Update branch to mark as assigned
       await _db.collection(_collectionBranches).doc(branchId).update({
         'isAssigned': true,
+        'nextInspectionDate': timeSlot,
         'updatedAt': Timestamp.fromDate(DateTime.now()),
       });
 
@@ -232,6 +233,7 @@ class BranchService {
       // Mark branch as unassigned
       await _db.collection(_collectionBranches).doc(branchId).update({
         'isAssigned': false,
+        'nextInspectionDate': null,
         'updatedAt': Timestamp.fromDate(DateTime.now()),
       });
 

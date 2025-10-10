@@ -4,6 +4,7 @@ import 'package:haus_des_control/helpers/app_helpers.dart';
 
 import '../core/constants/app_colors.dart';
 import '../models/branch_model.dart';
+import '../screens/common_methods.dart';
 import '../translations/locale_keys.g.dart';
 
 class InspectorBranchCard extends StatelessWidget {
@@ -14,6 +15,12 @@ class InspectorBranchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNextInspectionToday =
+        branch.nextInspectionDate != null &&
+        branch.nextInspectionDate!.isNotEmpty &&
+        branch.nextInspectionDate ==
+            DateFormat('yyyy-MM-dd').format(DateTime.now());
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -39,7 +46,7 @@ class InspectorBranchCard extends StatelessWidget {
             _buildLastInspectionInfo(),
             if (branch.totalInspections > 0) ...[
               const SizedBox(height: 12),
-              _buildTotalInspections(),
+              _buildTotalInspections(isNextInspectionToday),
             ],
           ],
         ),
@@ -80,7 +87,6 @@ class InspectorBranchCard extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(bool isAssigned) {
-    
     if (!isAssigned) return SizedBox.shrink();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -150,20 +156,42 @@ class InspectorBranchCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalInspections() {
+  Widget _buildTotalInspections(bool isNextInspectionToday) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Icon(Icons.fact_check_outlined, size: 14, color: Colors.grey.shade600),
-        const SizedBox(width: 6),
-        Text(
-          '${branch.totalInspections} ${LocaleKeys.total_inspections.tr()}',
-          style: TextStyle(
-            color: Colors.grey.shade600,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.fact_check_outlined,
+              size: 14,
+              color: Colors.grey.shade600,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '${branch.totalInspections} ${LocaleKeys.total_inspections.tr()}',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
+        if (branch.isRouteAssigned && branch.nextInspectionDate != null)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Icon(Icons.next_plan, size: 14, color: Colors.green),
+              const SizedBox(width: 6),
+              Text(
+                isNextInspectionToday
+                    ? "Today"
+                    : formatTimeSlot(branch.nextInspectionDate.toString()),
+              ),
+            ],
+          ),
       ],
     );
   }

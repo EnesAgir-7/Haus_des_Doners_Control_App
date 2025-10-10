@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 
 import 'core/theme/app_theme.dart';
 import 'layouts/bottom_nav_bar.dart';
+import 'providers/provider_bottom_nav_bar.dart';
 import 'providers/provider_branches.dart';
 import 'providers/provider_control.dart';
 import 'providers/provider_map.dart';
@@ -67,6 +68,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderAdminBranches()),
         ChangeNotifierProvider(create: (_) => ProviderAdminFleet()),
         ChangeNotifierProvider(create: (_) => ProviderAdminUsers()),
+        ChangeNotifierProvider(create: (_) => ProviderBottomNavBar()),
       ],
       child: MaterialApp(
         localizationsDelegates: context.localizationDelegates,

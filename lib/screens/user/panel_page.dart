@@ -1,7 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:haus_des_control/layouts/bottom_nav_bar.dart';
+import 'package:haus_des_control/providers/provider_bottom_nav_bar.dart';
 import 'package:haus_des_control/providers/provider_branches.dart';
+import 'package:haus_des_control/widgets/custom_toast.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_assets.dart';
@@ -229,6 +232,9 @@ class DashboardCard extends StatelessWidget {
                       label: LocaleKeys.assigned_branches.tr(),
                       icon: Icons.apartment,
                       color: Colors.blue,
+                      onTap: () {
+                        context.read<ProviderBottomNavBar>().onItemTapped(1);
+                      },
                     );
                   },
                 ),
@@ -246,6 +252,9 @@ class DashboardCard extends StatelessWidget {
                       label: LocaleKeys.pending_task.tr(),
                       icon: Icons.pending_actions,
                       color: Colors.orange,
+                      onTap: () {
+                        context.read<ProviderBottomNavBar>().onItemTapped(4);
+                      },
                     );
                   },
                 ),
@@ -339,56 +348,69 @@ class StatBox extends StatelessWidget {
   final IconData? icon;
   final Color? color;
   final bool isLoading;
+  final VoidCallback? onTap;
 
   const StatBox({
     super.key,
     required this.number,
     required this.label,
     this.isLoading = false,
+    this.onTap,
     this.icon,
     this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.lightRed,
+    final boxColor = color ?? const Color(0xFFEF5350);
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+        splashColor: boxColor.withValues(alpha: 0.2),
+        highlightColor: boxColor.withValues(alpha: 0.1),
+        child: Ink(
+          decoration: BoxDecoration(
+            color: boxColor.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (icon != null) ...[
-                Icon(icon, size: 16, color: color ?? AppColors.primaryRed),
-                const SizedBox(width: 6),
-              ],
-              Expanded(
-                child: Text(
-                  isLoading ? "Loading" : number,
-                  style: TextStyle(
-                    color: color ?? AppColors.primaryRed,
-                    fontSize: isLoading ? 14 : 20,
-                    fontWeight: FontWeight.bold,
+              Row(
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, size: 16, color: boxColor),
+                    const SizedBox(width: 6),
+                  ],
+                  Expanded(
+                    child: Text(
+                      isLoading ? "Loading" : number,
+                      style: TextStyle(
+                        color: boxColor,
+                        fontSize: isLoading ? 14 : 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: const TextStyle(color: Colors.white70, fontSize: 11),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white70, fontSize: 11),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -495,6 +517,14 @@ class DailySummarySection extends StatelessWidget {
                 return StatisticCard(
                   stop: stop,
                   onTap: () {
+                    if (stop.status == AppConstants.completed) {
+                      showSnakBarr(
+                        context,
+                        "You have already completed this stop.",
+                      );
+                      return;
+                    }
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(

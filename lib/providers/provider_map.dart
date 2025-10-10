@@ -22,6 +22,13 @@ class BranchMapController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // New method to update branches dynamically
+  void updateBranches(List<BranchModel> branches) {
+    _branches = branches;
+    _initMarkers();
+    notifyListeners();
+  }
+
   void setMapController(GoogleMapController controller) {
     mapController = controller;
     _setMapStyle();
@@ -84,14 +91,14 @@ class BranchMapController extends ChangeNotifier {
     }
   }
 
-    // Update a specific branch's marker after assignment change
+  // Update a specific branch's marker after assignment change
   void updateBranchMarker(String branchId, bool isAssigned) {
     final branchIndex = _branches.indexWhere((b) => b.id == branchId);
     if (branchIndex != -1) {
       // Update the branch in the list
-      _branches[branchIndex] = _branches[branchIndex].copyWith(
-        isRouteAssigned: isAssigned,
-      );
+      // _branches[branchIndex] = _branches[branchIndex].copyWith(
+      //   isRouteAssigned: isAssigned,
+      // );
 
       // Recreate the marker with new color
       markers[branchId] = Marker(

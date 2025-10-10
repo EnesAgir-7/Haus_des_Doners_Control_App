@@ -8,6 +8,8 @@ import '../../core/constants/app_colors.dart';
 import '../../models/route_model.dart';
 import '../../providers/provider_route.dart';
 import '../../translations/locale_keys.g.dart';
+import '../bottom_sheets/stop_info_sheet.dart';
+import '../common_methods.dart';
 import 'control_page.dart';
 
 class RoutePage extends StatefulWidget {
@@ -373,351 +375,232 @@ class _RoutePageState extends State<RoutePage> {
     required bool isLast,
   }) {
     final isCompleted = stop.status == AppConstants.completed;
+    final statusInfo = getStatusInfo(stop, isCompleted);
 
-    // Check if this stop is for today
-    final today = DateTime.now();
-    final todayKey = "${today.year}-${today.month}-${today.day}";
-    final isToday = stop.timeSlot == todayKey;
-
-    // Check if this stop is overdue (past date and not completed)
-    final stopParts = stop.timeSlot.split('-');
-    final stopDate = DateTime(
-      int.parse(stopParts[0]),
-      int.parse(stopParts[1]),
-      int.parse(stopParts[2]),
-    );
-    final isOverdue =
-        stopDate.isBefore(DateTime(today.year, today.month, today.day)) &&
-        !isCompleted;
-
-    Color statusColor;
-    IconData statusIcon;
-    String statusLabel;
-
-    if (isCompleted) {
-      statusColor = Colors.green;
-      statusIcon = Icons.check_circle;
-      statusLabel = LocaleKeys.completed.tr();
-    } else if (isOverdue) {
-      statusColor = Colors.deepOrange;
-      statusIcon = Icons.warning_amber_rounded;
-      statusLabel = "Overdue";
-    } else if (isToday) {
-      statusColor = AppColors.primaryRed;
-      statusIcon = Icons.hourglass_bottom;
-      statusLabel = LocaleKeys.waiting.tr();
-    } else {
-      statusColor = Colors.grey;
-      statusIcon = Icons.radio_button_unchecked;
-      statusLabel = LocaleKeys.pending.tr();
-    }
-
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            width: 40,
-            child: Column(
-              children: [
-                if (!isFirst)
-                  Expanded(
-                    child: Container(
-                      width: 3,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            isCompleted ? Colors.green : Colors.grey.shade300,
-                            isCompleted ? Colors.green : Colors.grey.shade300,
+    return GestureDetector(
+      onTap: () {
+        showStopInfoBottomSheet(stop, context);
+      },
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildTimelineIndicator(
+              index,
+              isFirst,
+              isLast,
+              isCompleted,
+              statusInfo.color,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.only(bottom: isLast ? 0 : 24),
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Container(
+                    decoration: _buildCardDecoration(
+                      statusInfo.isOverdue,
+                      statusInfo.isToday,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildWidgetHeader(stop, statusInfo),
+                          const SizedBox(height: 8),
+                          _buildDateRow(
+                            stop.timeSlot,
+                            statusInfo.isToday,
+                            statusInfo.isOverdue,
+                          ),
+                          if (isCompleted && stop.completedAt != null) ...[
+                            const SizedBox(height: 8),
+                            _buildCompletedAtRow(stop.completedAt!.toString()),
                           ],
-                        ),
+                          if ((statusInfo.isToday || statusInfo.isOverdue) &&
+                              !isCompleted) ...[
+                            const SizedBox(height: 12),
+                            _buildActionButton(stop, statusInfo.isOverdue),
+                          ],
+                        ],
                       ),
                     ),
-                  ),
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.2),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: statusColor, width: 3),
-                  ),
-                  child: Center(
-                    child: isCompleted
-                        ? Icon(Icons.check, color: statusColor, size: 20)
-                        : Text(
-                            '${index + 1}',
-                            style: TextStyle(
-                              color: statusColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
                   ),
                 ),
-                if (!isLast)
-                  Expanded(
-                    child: Container(
-                      width: 3,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            isCompleted ? Colors.green : Colors.grey.shade300,
-                            isCompleted && index < index + 1
-                                ? Colors.green
-                                : Colors.grey.shade300,
-                          ],
-                        ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimelineIndicator(
+    int index,
+    bool isFirst,
+    bool isLast,
+    bool isCompleted,
+    Color statusColor,
+  ) {
+    return SizedBox(
+      width: 40,
+      child: Column(
+        children: [
+          if (!isFirst)
+            Expanded(
+              child: Container(
+                width: 3,
+                color: isCompleted ? Colors.green : Colors.grey.shade300,
+              ),
+            ),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: statusColor.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+              border: Border.all(color: statusColor, width: 3),
+            ),
+            child: Center(
+              child: isCompleted
+                  ? Icon(Icons.check, color: statusColor, size: 20)
+                  : Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        color: statusColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
                       ),
                     ),
-                  ),
-              ],
             ),
           ),
-          const SizedBox(width: 16),
-          // Content card
-          Expanded(
-            child: Container(
-              margin: EdgeInsets.only(
-                bottom: isLast ? 0 : 24,
-                top: isFirst ? 0 : 0,
+          if (!isLast)
+            Expanded(
+              child: Container(
+                width: 3,
+                color: isCompleted ? Colors.green : Colors.grey.shade300,
               ),
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    gradient: isOverdue
-                        ? LinearGradient(
-                            colors: [
-                              AppColors.primaryRed,
-                              AppColors.primaryDark,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          )
-                        : (isToday
-                              ? LinearGradient(
-                                  colors: [
-                                    Color(0xFF4CAF50),
-                                    Color(0xFF4CAF50),
-                                    // Color(0xFF81C784),
-                                  ],
-                                )
-                              : null),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                stop.branchName,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: isToday ? Colors.white : null,
-                                ),
-                              ),
-                            ),
-                            if (isOverdue)
-                              Container(
-                                margin: const EdgeInsets.only(right: 8),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.deepOrange.shade400,
-                                      Colors.red.shade400,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.deepOrange.withValues(
-                                        alpha: 0.4,
-                                      ),
-                                      blurRadius: 4,
-                                      offset: Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.warning_amber_rounded,
-                                      size: 13,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      "Missed",
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            if (isToday && !isOverdue)
-                              Container(
-                                margin: const EdgeInsets.only(right: 8),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.teal.shade400,
-                                      Colors.green.shade400,
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.teal.withValues(alpha: 0.3),
-                                      blurRadius: 4,
-                                      offset: Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.today,
-                                      size: 13,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      LocaleKeys.today.tr(),
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isToday
-                                    ? Colors.white.withValues(alpha: 0.3)
-                                    : statusColor.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    statusIcon,
-                                    size: 14,
-                                    color: isToday ? Colors.white : statusColor,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    statusLabel,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: isToday
-                                          ? Colors.white
-                                          : statusColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.calendar_today,
-                              size: 16,
-                              color: isToday || isOverdue
-                                  ? Colors.white.withValues(alpha: 0.9)
-                                  : Colors.grey.shade600,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatTimeSlot(stop.timeSlot),
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: isToday || isOverdue
-                                    ? Colors.white.withValues(alpha: 0.9)
-                                    : Colors.grey.shade600,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if ((isToday || isOverdue) && !isCompleted) ...[
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ControlPage(
-                                      branchId: stop.branchId,
-                                      branchTemplateId: stop.branchTemplateId,
-                                    ),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.arrow_forward),
-                              label: Text(
-                                isOverdue
-                                    ? "Inspect now"
-                                    : LocaleKeys.start_inspection.tr(),
-                              ),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isOverdue
-                                    ? Colors.deepOrange
-                                    : AppColors.primaryRed,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  BoxDecoration? _buildCardDecoration(bool isOverdue, bool isToday) {
+    if (isOverdue) {
+      return BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [AppColors.primaryRed, AppColors.primaryDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      );
+    }
+    if (isToday) {
+      return BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        gradient: LinearGradient(
+          colors: [Color(0xFF4CAF50), Color(0xFF4CAF50)],
+        ),
+      );
+    }
+    return null;
+  }
+
+  Widget _buildWidgetHeader(RouteStopModel stop, StatusInfo statusInfo) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            stop.branchName,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: statusInfo.isToday ? Colors.white : null,
+            ),
+          ),
+        ),
+        if (statusInfo.isOverdue)
+          _buildBadge(
+            "Missed",
+            Icons.warning_amber_rounded,
+            Colors.deepOrange,
+            Colors.red,
+          ),
+        if (statusInfo.isToday && !statusInfo.isOverdue)
+          _buildBadge(
+            LocaleKeys.today.tr(),
+            Icons.today,
+            Colors.teal,
+            Colors.green,
+          ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: statusInfo.isToday
+                ? Colors.white.withValues(alpha: 0.3)
+                : statusInfo.color.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                statusInfo.icon,
+                size: 14,
+                color: statusInfo.isToday ? Colors.white : statusInfo.color,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                statusInfo.label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: statusInfo.isToday ? Colors.white : statusInfo.color,
                 ),
               ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBadge(String text, IconData icon, Color color1, Color color2) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [color1, color2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: color1.withValues(alpha: 0.4),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: Colors.white),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
         ],
@@ -725,21 +608,93 @@ class _RoutePageState extends State<RoutePage> {
     );
   }
 
-  String _formatTimeSlot(String timeSlot) {
-    try {
-      final parts = timeSlot.split('-');
-      if (parts.length == 3) {
-        final year = int.parse(parts[0]);
-        final month = int.parse(parts[1]);
-        final day = int.parse(parts[2]);
-        final date = DateTime(year, month, day);
+  Widget _buildDateRow(String timeSlot, bool isToday, bool isOverdue) {
+    return Row(
+      children: [
+        Icon(
+          Icons.calendar_today,
+          size: 16,
+          color: isToday || isOverdue
+              ? Colors.white.withValues(alpha: 0.9)
+              : Colors.grey.shade600,
+        ),
+        const SizedBox(width: 4),
+        Text(
+          formatTimeSlot(timeSlot),
+          style: TextStyle(
+            fontSize: 14,
+            color: isToday || isOverdue
+                ? Colors.white.withValues(alpha: 0.9)
+                : Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
 
-        // Format: "Monday, Oct 7"
-        return DateFormat('EEEE, MMM d yyyy').format(date);
-      }
-    } catch (e) {
-      // If parsing fails, return original
-    }
-    return timeSlot;
+  Widget _buildCompletedAtRow(String completedAt) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        gradient: LinearGradient(
+          colors: [AppColors.primaryRed, AppColors.primaryDark],
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Icon(
+                  Icons.check_circle_outline,
+                  size: 16,
+                  color: AppColors.white,
+                ),
+                const SizedBox(width: 4),
+                Text("Submitted"),
+              ],
+            ),
+          ),
+          Text(
+            '${DateFormat("MMMM d, h:mm a").format(DateTime.parse(completedAt))}',
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.white,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(RouteStopModel stop, bool isOverdue) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ControlPage(
+                branchId: stop.branchId,
+                branchTemplateId: stop.branchTemplateId,
+              ),
+            ),
+          );
+        },
+        icon: const Icon(Icons.arrow_forward),
+        label: Text(
+          isOverdue ? "Inspect now" : LocaleKeys.start_inspection.tr(),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isOverdue ? Colors.deepOrange : AppColors.primaryRed,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
+    );
   }
 }

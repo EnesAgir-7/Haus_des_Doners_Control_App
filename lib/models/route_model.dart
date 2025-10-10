@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 class RouteModel {
   final String id;
@@ -38,7 +39,7 @@ class RouteModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id, 
+      'id': id,
       'date': Timestamp.fromDate(date),
       'inspectorId': inspectorId,
       'inspectorName': inspectorName,
@@ -62,17 +63,19 @@ class RouteStopModel {
   final String status; // "completed" | "pending" | "current"
   final String? inspectionId;
   final DateTime? createdAt;
+  final DateTime? completedAt;
   int order;
 
   RouteStopModel({
     required this.timeSlot,
     required this.branchId,
     required this.branchName,
-    required this.branchTemplateId, 
+    required this.branchTemplateId,
     required this.status,
     this.inspectionId,
     required this.order,
     this.createdAt,
+    this.completedAt,
   });
 
   factory RouteStopModel.fromMap(Map<String, dynamic> data) {
@@ -80,13 +83,20 @@ class RouteStopModel {
       timeSlot: data['timeSlot'] ?? '',
       branchId: data['branchId'] ?? '',
       branchName: data['branchName'] ?? '',
-      branchTemplateId: data["branchTemplateId"],
+      branchTemplateId: data["branchTemplateId"] ?? '',
       status: data['status'] ?? 'pending',
       inspectionId: data['inspectionId'],
       order: data['order'] ?? 0,
       createdAt: data["createdAt"] != null
-          ? DateTime.parse(data["createdAt"].toDate().toIso8601String())
-          : DateTime.now(),
+          ? (data["createdAt"] is Timestamp
+                ? (data["createdAt"] as Timestamp).toDate()
+                : DateTime.tryParse(data["createdAt"].toString()))
+          : null,
+      completedAt: data["completedAt"] != null
+          ? (data["completedAt"] is Timestamp
+                ? (data["completedAt"] as Timestamp).toDate()
+                : DateTime.tryParse(data["completedAt"].toString()))
+          : null,
     );
   }
 
@@ -95,11 +105,14 @@ class RouteStopModel {
       'timeSlot': timeSlot,
       'branchId': branchId,
       'branchName': branchName,
+      'branchTemplateId': branchTemplateId,
       'status': status,
       'inspectionId': inspectionId,
       'order': order,
-      'createdAt': DateTime.now(),
-      'branchTemplateId': branchTemplateId, 
+      // FIXED: Only set createdAt if it exists, otherwise null
+      'createdAt': createdAt?.toIso8601String(),
+      // FIXED: Only set completedAt if it exists, otherwise null
+      'completedAt': completedAt?.toIso8601String(),
     };
   }
 
@@ -107,25 +120,27 @@ class RouteStopModel {
     String? timeSlot,
     String? branchId,
     String? branchName,
+    String? branchTemplateId,
     String? status,
     String? inspectionId,
-    String? branchTemplateId,
     int? order,
     DateTime? createdAt,
+    DateTime? completedAt,
   }) {
     return RouteStopModel(
-      branchTemplateId: branchTemplateId ?? this.branchTemplateId,
       timeSlot: timeSlot ?? this.timeSlot,
       branchId: branchId ?? this.branchId,
       branchName: branchName ?? this.branchName,
+      branchTemplateId: branchTemplateId ?? this.branchTemplateId,
       status: status ?? this.status,
       inspectionId: inspectionId ?? this.inspectionId,
       order: order ?? this.order,
       createdAt: createdAt ?? this.createdAt,
+      completedAt: completedAt ?? this.completedAt,
     );
   }
 
-  bool get isCompleted => status == 'completed';
-  bool get isPending => status == 'pending';
-  bool get isCurrent => status == 'current';
+  bool get isCompleted => status == AppConstants.completed;
+  bool get isPending => status == AppConstants.pending;
+  bool get isCurrent => status == AppConstants.current;
 }

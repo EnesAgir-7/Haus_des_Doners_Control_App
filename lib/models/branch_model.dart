@@ -12,6 +12,7 @@ class BranchModel {
   final AssignedInspector? assignedInspector;
   final bool isRouteAssigned;
   final DateTime? lastInspectionDate;
+  final String? nextInspectionDate; // ✅ New field
   final double? lastInspectionScore;
   final int totalInspections;
   final double averageScore;
@@ -31,6 +32,7 @@ class BranchModel {
     this.assignedInspector,
     required this.isRouteAssigned,
     this.lastInspectionDate,
+    this.nextInspectionDate, // ✅ Added
     this.lastInspectionScore,
     required this.totalInspections,
     required this.averageScore,
@@ -60,6 +62,7 @@ class BranchModel {
       lastInspectionDate: data['lastInspectionDate'] != null
           ? (data['lastInspectionDate'] as Timestamp).toDate()
           : null,
+      nextInspectionDate: data['nextInspectionDate'] , 
       lastInspectionScore: data['lastInspectionScore']?.toDouble(),
       totalInspections: data['totalInspections'] ?? 0,
       averageScore: (data['averageScore'] ?? 0.0).toDouble(),
@@ -85,6 +88,7 @@ class BranchModel {
     AssignedInspector? assignedInspector,
     bool? isRouteAssigned,
     DateTime? lastInspectionDate,
+    String? nextInspectionDate, // ✅ Added
     double? lastInspectionScore,
     int? totalInspections,
     double? averageScore,
@@ -104,6 +108,8 @@ class BranchModel {
       assignedInspector: assignedInspector ?? this.assignedInspector,
       isRouteAssigned: isRouteAssigned ?? this.isRouteAssigned,
       lastInspectionDate: lastInspectionDate ?? this.lastInspectionDate,
+      nextInspectionDate:
+          nextInspectionDate ?? this.nextInspectionDate, // ✅ Added
       lastInspectionScore: lastInspectionScore ?? this.lastInspectionScore,
       totalInspections: totalInspections ?? this.totalInspections,
       averageScore: averageScore ?? this.averageScore,
@@ -130,6 +136,9 @@ class BranchModel {
       'lastInspectionDate': lastInspectionDate != null
           ? Timestamp.fromDate(lastInspectionDate!)
           : null,
+      'nextInspectionDate': nextInspectionDate != null
+          ? nextInspectionDate
+          : null, // ✅ Added
       'lastInspectionScore': lastInspectionScore,
       'totalInspections': totalInspections,
       'averageScore': averageScore,
@@ -139,13 +148,27 @@ class BranchModel {
     };
   }
 
-  // Helper method to get days since last inspection
+  // Helper: Days since last inspection
   int? get daysSinceLastInspection {
     if (lastInspectionDate == null) return null;
     return DateTime.now().difference(lastInspectionDate!).inDays;
   }
 
-  // Helper to get formatted last inspection text
+  // Helper: Days until next inspection
+int? get daysUntilNextInspection {
+    if (nextInspectionDate == null || nextInspectionDate!.isEmpty) return null;
+    try {
+      final nextDate = DateTime.parse(nextInspectionDate!);
+      final difference = nextDate.difference(DateTime.now());
+      return difference.inDays;
+    } catch (e) {
+      // Parsing failed
+      return null;
+    }
+  }
+
+
+  // Helper: Last inspection text (Turkish)
   String get lastInspectionText {
     if (lastInspectionDate == null) return 'Henüz kontrol edilmedi';
     final days = daysSinceLastInspection!;

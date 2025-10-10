@@ -155,19 +155,21 @@ class InspectionService {
     try {
       final docRef = await _db.collection(_collection).add(inspection.toMap());
       // Update branch statistics
-      await updateBranchStatistics(
-        branchId: inspection.branchId,
-        inspectionScore: inspection.score,
-      );
+      Future.wait([
+        updateBranchStatistics(
+          branchId: inspection.branchId,
+          inspectionScore: inspection.score,
+        ),
 
-      // 2. Update the route stop to mark as completed
-      await updateRouteStopStatus(
-        inspectorId: inspection.inspectorId,
-        branchId: inspection.branchId,
-        inspectionId: docRef.id,
-        status: AppConstants.completed,
-      );
-      
+        // 2. Update the route stop to mark as completed
+        completeStopInspection(
+          inspectorId: inspection.inspectorId,
+          branchId: inspection.branchId,
+          inspectionId: docRef.id,
+          status: AppConstants.completed,
+        ),
+      ]);
+
       return docRef.id;
     } catch (e) {
       print('Error creating inspection: $e');
@@ -277,12 +279,11 @@ class InspectionService {
     }
   }
 
-
-  Future<void> updateRouteStopStatus({
+  Future<void> completeStopInspection({
     required String inspectorId,
     required String branchId,
     required String inspectionId,
-    String status = 'completed',
+    String status = AppConstants.completed,
   }) async {
     try {
       final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
@@ -302,6 +303,7 @@ class InspectionService {
             status: status,
             inspectionId: inspectionId,
             createdAt: DateTime.now(),
+            completedAt: DateTime.now(),
           );
         }
         return stop;
@@ -317,5 +319,4 @@ class InspectionService {
       print('Error updating route stop status: $e');
     }
   }
-
 }

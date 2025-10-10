@@ -4,12 +4,14 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/models/branch_model.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../helpers/app_helpers.dart';
 import '../../providers/provider_branches.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/inspector_branch_card.dart';
+import '../common_methods.dart';
 import 'screen_map.dart';
 
 class BranchesPage extends StatefulWidget {
@@ -37,7 +39,7 @@ class _BranchesPageState extends State<BranchesPage> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => BranchMapScreen(
-                branches: context.read<ProviderBranches>().branches,
+                // branches: context.read<ProviderBranches>().branches,
               ),
             ),
           );
@@ -333,6 +335,11 @@ class BranchDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNextInspectionToday =
+        branch.nextInspectionDate != null &&
+        branch.nextInspectionDate!.isNotEmpty &&
+        branch.nextInspectionDate ==
+            DateFormat('yyyy-MM-dd').format(DateTime.now());
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
@@ -414,6 +421,50 @@ class BranchDetailsSheet extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 16),
+              if (branch.isRouteAssigned && branch.nextInspectionDate != null)
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(5),
+
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Icon(Icons.next_plan),
+                            SizedBox(width: 8),
+                            Text("Your Next Inspection"),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(6),
+                        decoration: shadowDeco.copyWith(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          isNextInspectionToday
+                              ? "Today"
+                              : formatTimeSlot(
+                                  branch.nextInspectionDate.toString(),
+                                ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              // SizedBox(height: 16),
               Divider(color: Colors.white24),
               SizedBox(height: 12),
               Text(
@@ -434,21 +485,6 @@ class BranchDetailsSheet extends StatelessWidget {
               SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(
-                    child: AppButton(
-                      text: "Back",
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      backgroundColor: AppColors.primaryRed,
-                      textStyle: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      height: 48,
-                    ),
-                  ),
-                  SizedBox(width: 10),
                   Expanded(
                     child: Consumer<ProviderBranches>(
                       builder: (context, prod, child) {
@@ -510,6 +546,21 @@ class BranchDetailsSheet extends StatelessWidget {
                           borderRadius: 10,
                         );
                       },
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Expanded(
+                    child: AppButton(
+                      text: "Back",
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      backgroundColor: AppColors.primaryRed,
+                      textStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      height: 48,
                     ),
                   ),
                 ],
