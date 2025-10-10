@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
-import 'package:haus_des_control/layouts/bottom_nav_bar.dart';
 import 'package:haus_des_control/providers/provider_bottom_nav_bar.dart';
 import 'package:haus_des_control/providers/provider_branches.dart';
 import 'package:haus_des_control/widgets/custom_toast.dart';
