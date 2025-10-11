@@ -67,7 +67,6 @@ class ProviderBranches extends ChangeNotifier {
         .listen(
           (branches) {
             _branches = branches;
-            console("Branches updated");
             notifyListeners();
           },
           onError: (error) {
