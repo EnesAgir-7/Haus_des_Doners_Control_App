@@ -205,6 +205,7 @@ class InspectionService {
         'totalInspections': newTotal,
         'lastInspectionDate': FieldValue.serverTimestamp(),
         'averageRating': newAverage,
+        'nextInspectionDate': null,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
@@ -304,6 +305,7 @@ class InspectionService {
             inspectionId: inspectionId,
             createdAt: DateTime.now(),
             completedAt: DateTime.now(),
+            expiryDate: DateTime.now().add(Duration(days: 1)),
           );
         }
         return stop;

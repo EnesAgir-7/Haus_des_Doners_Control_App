@@ -64,7 +64,8 @@ class RouteStopModel {
   final String? inspectionId;
   final DateTime? createdAt;
   final DateTime? completedAt;
-  int order;
+  final DateTime? expiryDate; // ✅ new field
+  final int order;
 
   RouteStopModel({
     required this.timeSlot,
@@ -76,9 +77,16 @@ class RouteStopModel {
     required this.order,
     this.createdAt,
     this.completedAt,
+    this.expiryDate, // ✅ added
   });
 
   factory RouteStopModel.fromMap(Map<String, dynamic> data) {
+    DateTime? parseDate(dynamic value) {
+      if (value == null) return null;
+      if (value is Timestamp) return value.toDate();
+      return DateTime.tryParse(value.toString());
+    }
+
     return RouteStopModel(
       timeSlot: data['timeSlot'] ?? '',
       branchId: data['branchId'] ?? '',
@@ -87,16 +95,9 @@ class RouteStopModel {
       status: data['status'] ?? 'pending',
       inspectionId: data['inspectionId'],
       order: data['order'] ?? 0,
-      createdAt: data["createdAt"] != null
-          ? (data["createdAt"] is Timestamp
-                ? (data["createdAt"] as Timestamp).toDate()
-                : DateTime.tryParse(data["createdAt"].toString()))
-          : null,
-      completedAt: data["completedAt"] != null
-          ? (data["completedAt"] is Timestamp
-                ? (data["completedAt"] as Timestamp).toDate()
-                : DateTime.tryParse(data["completedAt"].toString()))
-          : null,
+      createdAt: parseDate(data["createdAt"]),
+      completedAt: parseDate(data["completedAt"]),
+      expiryDate: parseDate(data["expiryDate"]), // ✅ handle expiryDate
     );
   }
 
@@ -109,10 +110,9 @@ class RouteStopModel {
       'status': status,
       'inspectionId': inspectionId,
       'order': order,
-      // FIXED: Only set createdAt if it exists, otherwise null
       'createdAt': createdAt?.toIso8601String(),
-      // FIXED: Only set completedAt if it exists, otherwise null
       'completedAt': completedAt?.toIso8601String(),
+      'expiryDate': expiryDate?.toIso8601String(), // ✅ added
     };
   }
 
@@ -126,6 +126,7 @@ class RouteStopModel {
     int? order,
     DateTime? createdAt,
     DateTime? completedAt,
+    DateTime? expiryDate, // ✅ added
   }) {
     return RouteStopModel(
       timeSlot: timeSlot ?? this.timeSlot,
@@ -137,10 +138,103 @@ class RouteStopModel {
       order: order ?? this.order,
       createdAt: createdAt ?? this.createdAt,
       completedAt: completedAt ?? this.completedAt,
+      expiryDate: expiryDate ?? this.expiryDate, // ✅ added
     );
   }
 
   bool get isCompleted => status == AppConstants.completed;
   bool get isPending => status == AppConstants.pending;
   bool get isCurrent => status == AppConstants.current;
+
+  /// ✅ Helper: check if stop is expired
+  bool get isExpired =>
+      expiryDate != null && DateTime.now().isAfter(expiryDate!);
 }
+
+// class RouteStopModel {
+//   final String timeSlot;
+//   final String branchId;
+//   final String branchName;
+//   final String branchTemplateId;
+//   final String status; // "completed" | "pending" | "current"
+//   final String? inspectionId;
+//   final DateTime? createdAt;
+//   final DateTime? completedAt;
+//   int order;
+
+//   RouteStopModel({
+//     required this.timeSlot,
+//     required this.branchId,
+//     required this.branchName,
+//     required this.branchTemplateId,
+//     required this.status,
+//     this.inspectionId,
+//     required this.order,
+//     this.createdAt,
+//     this.completedAt,
+//   });
+
+//   factory RouteStopModel.fromMap(Map<String, dynamic> data) {
+//     return RouteStopModel(
+//       timeSlot: data['timeSlot'] ?? '',
+//       branchId: data['branchId'] ?? '',
+//       branchName: data['branchName'] ?? '',
+//       branchTemplateId: data["branchTemplateId"] ?? '',
+//       status: data['status'] ?? 'pending',
+//       inspectionId: data['inspectionId'],
+//       order: data['order'] ?? 0,
+//       createdAt: data["createdAt"] != null
+//           ? (data["createdAt"] is Timestamp
+//                 ? (data["createdAt"] as Timestamp).toDate()
+//                 : DateTime.tryParse(data["createdAt"].toString()))
+//           : null,
+//       completedAt: data["completedAt"] != null
+//           ? (data["completedAt"] is Timestamp
+//                 ? (data["completedAt"] as Timestamp).toDate()
+//                 : DateTime.tryParse(data["completedAt"].toString()))
+//           : null,
+//     );
+//   }
+
+//   Map<String, dynamic> toMap() {
+//     return {
+//       'timeSlot': timeSlot,
+//       'branchId': branchId,
+//       'branchName': branchName,
+//       'branchTemplateId': branchTemplateId,
+//       'status': status,
+//       'inspectionId': inspectionId,
+//       'order': order,
+//       'createdAt': createdAt?.toIso8601String(),
+//       'completedAt': completedAt?.toIso8601String(),
+//     };
+//   }
+
+//   RouteStopModel copyWith({
+//     String? timeSlot,
+//     String? branchId,
+//     String? branchName,
+//     String? branchTemplateId,
+//     String? status,
+//     String? inspectionId,
+//     int? order,
+//     DateTime? createdAt,
+//     DateTime? completedAt,
+//   }) {
+//     return RouteStopModel(
+//       timeSlot: timeSlot ?? this.timeSlot,
+//       branchId: branchId ?? this.branchId,
+//       branchName: branchName ?? this.branchName,
+//       branchTemplateId: branchTemplateId ?? this.branchTemplateId,
+//       status: status ?? this.status,
+//       inspectionId: inspectionId ?? this.inspectionId,
+//       order: order ?? this.order,
+//       createdAt: createdAt ?? this.createdAt,
+//       completedAt: completedAt ?? this.completedAt,
+//     );
+//   }
+
+//   bool get isCompleted => status == AppConstants.completed;
+//   bool get isPending => status == AppConstants.pending;
+//   bool get isCurrent => status == AppConstants.current;
+// }

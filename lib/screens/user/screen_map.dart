@@ -23,20 +23,31 @@ class BranchMapScreen extends StatefulWidget {
 }
 
 class _BranchMapScreenState extends State<BranchMapScreen> {
+  ProviderBranches? _provider;
+  BranchMapController? _controller;
+
   @override
   void initState() {
     super.initState();
     // Initialize the controller with branches after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final controller = context.read<BranchMapController>();
-      final provider = context.read<ProviderBranches>();
+      _controller = context.read<BranchMapController>();
+      _provider = context.read<ProviderBranches>();
 
-      controller.initializeBranches(context.read<ProviderBranches>().branches);
-      // Listen to provider changes
-      provider.addListener(() {
-        controller.updateBranches(provider.branches);
-      });
+      _controller?.initializeBranches(_provider!.branches);
+      _provider?.addListener(_onBranchesChanged);
     });
+  }
+
+  void _onBranchesChanged() {
+    if (!mounted) return;
+    _controller?.updateBranches(_provider!.branches);
+  }
+
+  @override
+  void dispose() {
+    _provider?.removeListener(_onBranchesChanged);
+    super.dispose();
   }
 
   @override
@@ -93,14 +104,13 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
   }
 
   Widget _branchCard(BranchModel branch) {
-    final isNextInspectionToday =
-        branch.nextInspectionDate != null &&
-        branch.nextInspectionDate!.isNotEmpty &&
-        branch.nextInspectionDate ==
-            DateFormat('yyyy-MM-dd').format(DateTime.now());
-
     return Consumer<ProviderBranches>(
       builder: (context, brrl, child) {
+        final isNextInspectionToday =
+            branch.nextInspectionDate != null &&
+            branch.nextInspectionDate!.isNotEmpty &&
+            branch.nextInspectionDate ==
+                DateFormat('yyyy-MM-dd').format(DateTime.now());
         return Padding(
           padding: const EdgeInsets.all(10),
           child: Container(
@@ -157,7 +167,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                             ),
                             if (branch.nextInspectionDate != null)
                               Text(
-                                "Next Inspection: ${isNextInspectionToday ? "Today" : branch.nextInspectionDate.toString()}",
+                                "Next Inspection: ${isNextInspectionToday ? "Today" : branch.nextInspectionDate.toString()} (${branch.daysUntilNextInspection} days left)",
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 11,
@@ -264,7 +274,9 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        if (branch.isRouteAssigned && isNextInspectionToday)
+                        if (branch.isRouteAssigned &&
+                            isNextInspectionToday &&
+                            branch.nextInspectionDate != null)
                           Expanded(
                             child: AppButton(
                               text: LocaleKeys.submit_inspection.tr(),
@@ -276,8 +288,6 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                       selectedBranch: branch,
                                       branchId: branch.id,
                                       branchTemplateId: branch.templateId,
-                                      // branchId: stop.branchId,
-                                      // branchTemplateId: stop.branchTemplateId,
                                     ),
                                   ),
                                 );

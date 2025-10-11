@@ -154,7 +154,6 @@ class BranchModel {
     return DateTime.now().difference(lastInspectionDate!).inDays;
   }
 
-  // Helper: Days until next inspection
 int? get daysUntilNextInspection {
     if (nextInspectionDate == null || nextInspectionDate!.isEmpty) return null;
     try {
