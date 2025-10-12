@@ -7,7 +7,7 @@ import '../admin/screens/screen_admin_tasks.dart';
 import '../admin/screens/screen_admin_users.dart';
 import '../layouts/bottom_nav_bar.dart';
 import '../screens/screen_auth.dart';
-import '../screens/user/control_page.dart';
+import '../screens/user/control_page_new.dart';
 import '../screens/user/fleet_page.dart';
 import '../screens/user/my_branches_page.dart';
 import '../screens/user/panel_page.dart';

@@ -9,6 +9,7 @@ import 'language_button.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showLogout;
   final bool showLang;
+
   const CustomAppBar({super.key, this.showLogout = true, this.showLang = true});
 
   @override
@@ -16,135 +17,230 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: AppColors.primaryRed,
-      elevation: 0,
-      title: Image.asset(kAppLogo, height: 32),
-      centerTitle: true,
-      actions: [
-        if (showLang) const LanguageButton(),
-        if (showLogout)
-          IconButton(
-            onPressed: () {
-              context.read<ProviderAuth>().logout();
-            },
-            icon: const Icon(Icons.logout, color: AppColors.white),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.primaryRed,
+            AppColors.primaryDark.withValues(alpha: 0.85),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryRed.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
-      ],
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Hero(
+          tag: 'app_logo',
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Image.asset(kAppLogo, height: 32, fit: BoxFit.contain),
+          ),
+        ),
+        centerTitle: true,
+        leading: Navigator.canPop(context)
+            ? Container(
+                margin: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
+              )
+            : null,
+        actions: [
+          if (showLang) const LanguageButton(),
+          if (showLogout)
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.white.withValues(alpha: 0.2),
+                    Colors.white.withValues(alpha: 0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                onPressed: () {
+                  _showLogoutDialog(context);
+                },
+                icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                tooltip: 'Logout',
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.7),
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.lightBlack,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: AppColors.primaryRed.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primaryRed.withValues(alpha: 0.2),
+                    AppColors.primaryRed.withValues(alpha: 0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.logout_rounded,
+                color: AppColors.primaryRed,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Text(
+                'Confirm Logout',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to logout?',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 14,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primaryRed,
+                  AppColors.primaryRed.withValues(alpha: 0.8),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryRed.withValues(alpha: 0.4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                context.read<ProviderAuth>().logout();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text(
+                'Logout',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-
 // class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-//   final String currentRoute;
-//   final Function(String) onRouteSelected;
-
-//   const CustomAppBar({
-//     super.key,
-//     required this.currentRoute,
-//     required this.onRouteSelected,
-//   });
+//   final bool showLogout;
+//   final bool showLang;
+//   const CustomAppBar({super.key, this.showLogout = true, this.showLang = true});
 
 //   @override
-//   Size get preferredSize => const Size.fromHeight(120);
+//   Size get preferredSize => const Size.fromHeight(60);
 
 //   @override
 //   Widget build(BuildContext context) {
-//     return Container(
-//       color: AppColors.primaryRed,
-//       child: SafeArea(
-//         child: Column(
-//           children: [
-//             // Top row with logo, language button, and logout button
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 Container(
-//                   padding: const EdgeInsets.symmetric(vertical: 16),
-//                   child: Padding(
-//                     padding: const EdgeInsets.symmetric(horizontal: 20),
-//                     child: Image.asset(kAppLogo, height: 36),
-//                   ),
-//                 ),
-
-//                 Row(
-//                   children: [
-//                     LanguageButton(),
-//                     const SizedBox(width: 12),
-//                     IconButton(
-//                       onPressed: () {
-//                         // Logout via ProviderAuth
-//                         context.read<ProviderAuth>().logout();
-//                       },
-//                       icon: const Icon(Icons.logout, color: AppColors.white),
-//                     ),
-//                     const SizedBox(width: 12),
-//                   ],
-//                 ),
-//               ],
-//             ),
-
-//             Container(
-//               color: AppColors.primaryDark,
-//               child: Center(
-//                 child: SingleChildScrollView(
-//                   scrollDirection: Axis.horizontal,
-//                   child: Row(
-//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                     children: [
-//                       _buildNavLink(
-//                         context,
-//                         LocaleKeys.panel.tr(),
-//                         RouteNames.panel,
-//                       ),
-//                       _buildNavLink(
-//                         context,
-//                         LocaleKeys.my_branches.tr(),
-//                         RouteNames.subsidiaries,
-//                       ),
-//                       _buildNavLink(
-//                         context,
-//                         LocaleKeys.route.tr(),
-//                         RouteNames.route,
-//                       ),
-//                       _buildNavLink(
-//                         context,
-//                         LocaleKeys.file.tr(),
-//                         RouteNames.fleet,
-//                       ),
-//                       _buildNavLink(
-//                         context,
-//                         LocaleKeys.tasks.tr(),
-//                         RouteNames.tasks,
-//                       ),
-//                     ],
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-//   Widget _buildNavLink(BuildContext context, String title, String route) {
-//     final bool isCurrentRoute = currentRoute == route;
-
-//     return TextButton(
-//       onPressed: () => onRouteSelected(route),
-//       style: TextButton.styleFrom(
-//         backgroundColor: isCurrentRoute
-//             ? AppColors.primaryRed
-//             : Colors.transparent,
-//         foregroundColor: AppColors.white,
-//         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-//         textStyle: const TextStyle(fontSize: 14),
-//         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-//       ),
-//       child: Text(title),
+//     return AppBar(
+//       backgroundColor: AppColors.primaryRed,
+//       elevation: 0,
+//       title: Image.asset(kAppLogo, height: 32),
+//       centerTitle: true,
+//       actions: [
+//         if (showLang) const LanguageButton(),
+//         if (showLogout)
+//           IconButton(
+//             onPressed: () {
+//               context.read<ProviderAuth>().logout();
+//             },
+//             icon: const Icon(Icons.logout, color: AppColors.white),
+//           ),
+//       ],
 //     );
 //   }
 // }
-

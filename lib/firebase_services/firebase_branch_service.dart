@@ -107,6 +107,57 @@ class BranchService {
         );
   }
 
+  Future<void> updateStopTimeSlot({
+    required String inspectorId,
+    required String branchId,
+    required int order,
+    required String newTimeSlot,
+  }) async {
+    try {
+      final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
+
+      // 1. Get the route document for this inspector
+      final docSnap = await routeDocRef.get();
+      if (!docSnap.exists) {
+        throw Exception("No route found for inspectorId: $inspectorId");
+      }
+
+      // 2. Parse existing route
+      final route = RouteModel.fromFirestore(docSnap);
+
+      // 3. Find the stop by order number
+      final stopIndex = route.stops.indexWhere((s) => s.order == order);
+      if (stopIndex == -1) {
+        throw Exception("No stop found with order: $order");
+      }
+
+      // 4. Update only that stop
+      final updatedStop = route.stops[stopIndex].copyWith(
+        timeSlot: newTimeSlot,
+      );
+
+      final updatedStops = List<RouteStopModel>.from(route.stops);
+      updatedStops[stopIndex] = updatedStop;
+
+      // 5. Update Firestore document
+      await routeDocRef.update({
+        'stops': updatedStops.map((s) => s.toMap()).toList(),
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+
+      // 6. Update branch next inspection date
+      await _db.collection(_collectionBranches).doc(branchId).update({
+        'nextInspectionDate': newTimeSlot,
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+
+      console('Stop timeSlot updated successfully');
+    } catch (e) {
+      print("Error updating stop timeSlot: $e");
+      rethrow;
+    }
+  }
+
   Future<void> assignBranchToHimself({
     required String inspectorId,
     required String inspectorName,

@@ -155,6 +155,36 @@ class ProviderBranches extends ChangeNotifier {
     return filtered;
   }
 
+Future<bool> updateStopTimeSlotForMe({
+    required String branchId,
+    required String newTimeSlot,
+    required int order,
+    required BuildContext context,
+  }) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      await _branchService.updateStopTimeSlot(
+        inspectorId: loggedInUser!.id,
+        branchId: branchId,
+        newTimeSlot: newTimeSlot,
+        order: order
+      );
+
+      _isLoading = false;
+      notifyListeners();
+      showSnakBarr(context, "Stop time slot updated successfully");
+      return true;
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      showSnakBarr(context, "Failed to update stop time slot: $e");
+      return false;
+    }
+  }
+
+
   Future<bool> assignBranchToMe({
     required String branchId,
     required String branchName,

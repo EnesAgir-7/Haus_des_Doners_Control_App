@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 class InspectionModel {
   final String id;
@@ -12,6 +13,8 @@ class InspectionModel {
   final double score;
   final Map<String, InspectionCategoryModel> categories; // ✅ dynamic categories
   final String overallNotes;
+  final String? pdfReportUrl; // Add this
+  final String? pdfReportWebUrl; // Add this
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -28,6 +31,8 @@ class InspectionModel {
     required this.categories,
     required this.overallNotes,
     required this.createdAt,
+    this.pdfReportUrl,
+    this.pdfReportWebUrl,
     required this.updatedAt,
   });
 
@@ -57,6 +62,8 @@ class InspectionModel {
       score: (data['score'] ?? 0.0).toDouble(),
       categories: parsedCategories,
       overallNotes: data['overallNotes'] ?? '',
+      pdfReportUrl: data['pdfReportUrl'],
+      pdfReportWebUrl: data['pdfReportWebUrl'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
@@ -78,15 +85,17 @@ class InspectionModel {
       'categories': categories.map(
         (key, value) => MapEntry(key, value.toMap()),
       ),
+      'pdfReportUrl': pdfReportUrl,
+      'pdfReportWebUrl': pdfReportWebUrl,
       'overallNotes': overallNotes,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
 
-  bool get isCompleted => status == 'completed';
-  bool get isPending => status == 'pending';
-  bool get isCurrent => status == 'current';
+  bool get isCompleted => status == AppConstants.completed;
+  bool get isPending => status == AppConstants.pending;
+  bool get isCurrent => status == AppConstants.current;
 }
 
 class InspectionCategoryModel {

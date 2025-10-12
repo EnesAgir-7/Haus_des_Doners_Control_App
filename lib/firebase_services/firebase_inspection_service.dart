@@ -55,6 +55,7 @@ class InspectionService {
         .collection(_collection)
         .where('branchId', isEqualTo: branchId)
         .orderBy('scheduledTime', descending: true)
+        .limit(10)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs

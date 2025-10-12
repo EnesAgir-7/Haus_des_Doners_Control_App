@@ -12,6 +12,7 @@ import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/inspector_branch_card.dart';
 import '../common_methods.dart';
+import 'control_page_new.dart';
 import 'screen_map.dart';
 
 class BranchesPage extends StatefulWidget {
@@ -35,15 +36,9 @@ class _BranchesPageState extends State<BranchesPage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         heroTag: "branchesFab",
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => BranchMapScreen(
-                // branches: context.read<ProviderBranches>().branches,
-              ),
-            ),
-          );
-        },
+        onPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (context) => BranchMapScreen())),
         child: Icon(Icons.location_on, size: 36),
       ),
       body: SafeArea(
@@ -54,113 +49,14 @@ class _BranchesPageState extends State<BranchesPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(Icons.apartment, color: Colors.lightBlueAccent),
-                      SizedBox(width: 6),
-                      Text(
-                        LocaleKeys.my_branches.tr(),
-                        style: TextStyle(
-                          color: AppColors.primaryRed,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Spacer(),
-                      // Branch count badge
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.lightRed,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '${LocaleKeys.branch_count.tr().replaceAll(AppConstants.count, provider.branchCount.toString())}',
-                          style: TextStyle(
-                            color: AppColors.primaryRed,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildHeader(provider),
                   const SizedBox(height: 12),
-
-                  // Search bar
-                  TextField(
-                    onChanged: (value) => provider.setSearchQuery(value),
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: LocaleKeys.search.tr(),
-                      hintStyle: TextStyle(color: Colors.white54),
-                      prefixIcon: Icon(Icons.search, color: Colors.white54),
-                      suffixIcon: provider.searchQuery.isNotEmpty
-                          ? IconButton(
-                              icon: Icon(Icons.clear, color: Colors.white54),
-                              onPressed: () => provider.setSearchQuery(''),
-                            )
-                          : null,
-                      filled: true,
-                      fillColor: AppColors.lightBlack,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.white24),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.white24),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: AppColors.primaryRed),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-
+                  _buildSearchBar(provider),
                   const SizedBox(height: 12),
-
-                  // Sort options
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildSortChip(
-                          context,
-                          label: LocaleKeys.sort_by_name.tr(),
-                          value: 'name',
-                          icon: Icons.sort_by_alpha,
-                          provider: provider,
-                        ),
-                        SizedBox(width: 8),
-                        _buildSortChip(
-                          context,
-                          label: LocaleKeys.sort_by_score.tr(),
-                          value: 'score',
-                          icon: Icons.star,
-                          provider: provider,
-                        ),
-                        SizedBox(width: 8),
-                        _buildSortChip(
-                          context,
-                          label: LocaleKeys.sort_by_last_control.tr(),
-                          value: 'lastInspection',
-                          icon: Icons.access_time,
-                          provider: provider,
-                        ),
-                      ],
-                    ),
-                  ),
-
+                  _buildSortOptions(provider),
                   const SizedBox(height: 12),
                   Container(height: 1, color: Colors.white24),
                   const SizedBox(height: 12),
-
-                  // Branch list
                   Expanded(child: _buildBranchList(provider)),
                 ],
               ),
@@ -171,8 +67,106 @@ class _BranchesPageState extends State<BranchesPage> {
     );
   }
 
-  Widget _buildSortChip(
-    BuildContext context, {
+  Widget _buildHeader(ProviderBranches provider) {
+    return Row(
+      children: [
+        Icon(Icons.apartment, color: Colors.lightBlueAccent),
+        SizedBox(width: 6),
+        Text(
+          LocaleKeys.my_branches.tr(),
+          style: TextStyle(
+            color: AppColors.primaryRed,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+        Spacer(),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.lightRed,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            LocaleKeys.branch_count.tr().replaceAll(
+              AppConstants.count,
+              provider.branchCount.toString(),
+            ),
+            style: TextStyle(
+              color: AppColors.primaryRed,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar(ProviderBranches provider) {
+    return TextField(
+      onChanged: provider.setSearchQuery,
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: LocaleKeys.search.tr(),
+        hintStyle: TextStyle(color: Colors.white54),
+        prefixIcon: Icon(Icons.search, color: Colors.white54),
+        suffixIcon: provider.searchQuery.isNotEmpty
+            ? IconButton(
+                icon: Icon(Icons.clear, color: Colors.white54),
+                onPressed: () => provider.setSearchQuery(''),
+              )
+            : null,
+        filled: true,
+        fillColor: AppColors.lightBlack,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white24),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white24),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.primaryRed),
+        ),
+        contentPadding: EdgeInsets.symmetric(vertical: 12),
+      ),
+    );
+  }
+
+  Widget _buildSortOptions(ProviderBranches provider) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          _buildSortChip(
+            label: LocaleKeys.sort_by_name.tr(),
+            value: 'name',
+            icon: Icons.sort_by_alpha,
+            provider: provider,
+          ),
+          SizedBox(width: 8),
+          _buildSortChip(
+            label: LocaleKeys.sort_by_score.tr(),
+            value: 'score',
+            icon: Icons.star,
+            provider: provider,
+          ),
+          SizedBox(width: 8),
+          _buildSortChip(
+            label: LocaleKeys.sort_by_last_control.tr(),
+            value: 'lastInspection',
+            icon: Icons.access_time,
+            provider: provider,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSortChip({
     required String label,
     required String value,
     required IconData icon,
@@ -221,71 +215,11 @@ class _BranchesPageState extends State<BranchesPage> {
     }
 
     if (provider.errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
-            SizedBox(height: 16),
-            Text(
-              LocaleKeys.error_occurred.tr(),
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 32),
-              child: Text(
-                provider.errorMessage!,
-                style: TextStyle(color: Colors.white70),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => provider.refresh(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryRed,
-              ),
-              child: Text(LocaleKeys.try_again.tr()),
-            ),
-          ],
-        ),
-      );
+      return _buildErrorState(provider);
     }
 
     if (provider.branches.isEmpty) {
-      return Center(
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.apartment, size: 80, color: Colors.white24),
-              SizedBox(height: 16),
-              Text(
-                provider.searchQuery.isEmpty
-                    ? LocaleKeys.no_branches_assigned.tr()
-                    : LocaleKeys.branch_not_found.tr(),
-                style: TextStyle(color: Colors.white70, fontSize: 16),
-              ),
-              if (provider.searchQuery.isNotEmpty) ...[
-                SizedBox(height: 8),
-                TextButton(
-                  onPressed: () => provider.setSearchQuery(''),
-                  child: Text(
-                    LocaleKeys.clear_search.tr(),
-                    style: TextStyle(color: AppColors.primaryRed),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      );
+      return _buildEmptyState(provider);
     }
 
     return RefreshIndicator(
@@ -302,6 +236,74 @@ class _BranchesPageState extends State<BranchesPage> {
             child: InspectorBranchCard(branch: branchModel),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildErrorState(ProviderBranches provider) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          SizedBox(height: 16),
+          Text(
+            LocaleKeys.error_occurred.tr(),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              provider.errorMessage!,
+              style: TextStyle(color: Colors.white70),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: provider.refresh,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryRed,
+            ),
+            child: Text(LocaleKeys.try_again.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ProviderBranches provider) {
+    return Center(
+      child: SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.apartment, size: 80, color: Colors.white24),
+            SizedBox(height: 16),
+            Text(
+              provider.searchQuery.isEmpty
+                  ? LocaleKeys.no_branches_assigned.tr()
+                  : LocaleKeys.branch_not_found.tr(),
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+            if (provider.searchQuery.isNotEmpty) ...[
+              SizedBox(height: 8),
+              TextButton(
+                onPressed: () => provider.setSearchQuery(''),
+                child: Text(
+                  LocaleKeys.clear_search.tr(),
+                  style: TextStyle(color: AppColors.primaryRed),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -331,15 +333,18 @@ class BranchDetailsSheet extends StatelessWidget {
   final BranchModel branch;
   final ProviderBranches provider;
 
-  BranchDetailsSheet({required this.branch, required this.provider});
+  const BranchDetailsSheet({required this.branch, required this.provider});
+
+  bool get isNextInspectionToday {
+    if (branch.nextInspectionDate == null || branch.nextInspectionDate!.isEmpty)
+      return false;
+
+    return branch.nextInspectionDate ==
+        DateFormat('yyyy-MM-dd').format(DateTime.now());
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isNextInspectionToday =
-        branch.nextInspectionDate != null &&
-        branch.nextInspectionDate!.isNotEmpty &&
-        branch.nextInspectionDate ==
-            DateFormat('yyyy-MM-dd').format(DateTime.now());
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
@@ -351,17 +356,53 @@ class BranchDetailsSheet extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+              _buildDragHandle(),
+              SizedBox(height: 12),
+              _buildHeader(context),
+              SizedBox(height: 16),
+              _buildStatCards(),
+              SizedBox(height: 16),
+              if (branch.isRouteAssigned && branch.nextInspectionDate != null)
+                _buildNextInspectionCard(),
+              Divider(color: Colors.white24),
+              SizedBox(height: 12),
+              _buildInspectionHistoryHeader(),
+              SizedBox(height: 12),
+              Expanded(
+                child: Consumer<ProviderBranches>(
+                  builder: (context, co, _) =>
+                      _buildInspectionHistory(scrollController),
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 16),
+              _buildActionButtons(context),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDragHandle() {
+    return Center(
+      child: Container(
+        width: 40,
+        height: 4,
+        decoration: BoxDecoration(
+          color: Colors.white24,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
                 branch.name,
                 style: TextStyle(
@@ -383,7 +424,7 @@ class BranchDetailsSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 12),
+              SizedBox(height: 8),
               Row(
                 children: [
                   Icon(Icons.person, size: 16, color: Colors.white54),
@@ -394,181 +435,42 @@ class BranchDetailsSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildStatCard(
-                      label: LocaleKeys.average_score.tr(),
-                      value: branch.averageScore.toStringAsFixed(1),
-                      icon: Icons.star,
-                      color: Colors.amber,
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Expanded(
-                    child: Consumer<ProviderBranches>(
-                      builder: (context, pro, child) {
-                        return _buildStatCard(
-                          label: LocaleKeys.total_inspections.tr(),
-                          value: branch.totalInspections.toString(),
-                          icon: Icons.fact_check,
-                          color: Colors.blue,
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              if (branch.isRouteAssigned && branch.nextInspectionDate != null)
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.green,
-                    borderRadius: BorderRadius.circular(5),
-
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Row(
-                          children: [
-                            Icon(Icons.next_plan),
-                            SizedBox(width: 8),
-                            Text("Your Next Inspection"),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(6),
-                        decoration: shadowDeco.copyWith(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          isNextInspectionToday
-                              ? "Today"
-                              : formatTimeSlot(
-                                  branch.nextInspectionDate.toString(),
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              // SizedBox(height: 16),
-              Divider(color: Colors.white24),
-              SizedBox(height: 12),
-              Text(
-                "Last 10 Inspections",
-                style: TextStyle(
-                  color: AppColors.primaryRed,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 12),
-              Expanded(
-                child: Consumer<ProviderBranches>(
-                  builder: (context, co, _) =>
-                      _buildInspectionHistory(scrollController),
-                ),
-              ),
-              SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Consumer<ProviderBranches>(
-                      builder: (context, prod, child) {
-                        return AppButton(
-                          isLoading: prod.isLoading,
-                          text: branch.isRouteAssigned
-                              ? "Remove from Route"
-                              : "Add to Route",
-                          onPressed: () async {
-                            if (branch.isRouteAssigned) {
-                              // Unassign
-                              final success = await prod.unAssignBranchToMe(
-                                branchId: branch.id,
-                                context: context,
-                              );
-
-                              if (success) {
-                                Navigator.pop(context);
-                              }
-                            } else {
-                              // Show date picker before assigning
-                              final DateTime? pickedDate = await showDatePicker(
-                                locale: context.locale,
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime.now().add(
-                                  const Duration(days: 7),
-                                ),
-                              );
-
-                              if (pickedDate != null) {
-                                final String timeSlot =
-                                    "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
-
-                                final success = await prod.assignBranchToMe(
-                                  branchId: branch.id,
-                                  branchName: branch.name,
-                                  timeSlot: timeSlot,
-                                  context: context,
-                                  branchTemplateId: branch.templateId,
-                                );
-
-                                if (success) {
-                                  Navigator.pop(context);
-                                }
-                              }
-                            }
-                          },
-                          backgroundColor: branch.isRouteAssigned
-                              ? AppColors.primaryRed
-                              : AppColors.amber,
-                          textStyle: TextStyle(
-                            color: branch.isRouteAssigned
-                                ? Colors.white
-                                : AppColors.primaryDark,
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          borderRadius: 10,
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: AppButton(
-                      text: "Back",
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      backgroundColor: AppColors.primaryRed,
-                      textStyle: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      height: 48,
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
-        );
-      },
+        ),
+        IconButton(
+          icon: Icon(Icons.close, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCards() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            label: LocaleKeys.average_score.tr(),
+            value: branch.averageScore.toStringAsFixed(1),
+            icon: Icons.star,
+            color: Colors.amber,
+          ),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: Consumer<ProviderBranches>(
+            builder: (context, pro, child) {
+              return _buildStatCard(
+                label: LocaleKeys.total_inspections.tr(),
+                value: branch.totalInspections.toString(),
+                icon: Icons.fact_check,
+                color: Colors.blue,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -608,6 +510,65 @@ class BranchDetailsSheet extends StatelessWidget {
     );
   }
 
+  Widget _buildNextInspectionCard() {
+    return Container(
+      padding: EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.green,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.next_plan, color: Colors.white),
+              SizedBox(width: 8),
+              Text(
+                "Your Next Inspection",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: shadowDeco.copyWith(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              isNextInspectionToday
+                  ? "Today"
+                  : formatTimeSlot(branch.nextInspectionDate.toString()),
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInspectionHistoryHeader() {
+    return Text(
+      "Last 10 Inspections",
+      style: TextStyle(
+        color: AppColors.primaryRed,
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
   Widget _buildInspectionHistory(ScrollController scrollController) {
     if (provider.isLoadingInspections) {
       return Center(
@@ -632,7 +593,6 @@ class BranchDetailsSheet extends StatelessWidget {
     }
 
     return ListView.builder(
-      shrinkWrap: true,
       controller: scrollController,
       itemCount: provider.branchInspections.length,
       itemBuilder: (context, index) {
@@ -651,24 +611,26 @@ class BranchDetailsSheet extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Inspected by: ${inspection.inspectorName}",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Inspected by: ${inspection.inspectorName}",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      Text(
-                        formatDate(inspection.updatedAt),
-                        style: TextStyle(
-                          color: AppColors.whiteWithOpacity(.7),
-                          fontSize: 12,
+                        Text(
+                          formatDate(inspection.updatedAt),
+                          style: TextStyle(
+                            color: AppColors.whiteWithOpacity(.7),
+                            fontSize: 12,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -718,9 +680,219 @@ class BranchDetailsSheet extends StatelessWidget {
     );
   }
 
+  Widget _buildActionButtons(BuildContext context) {
+    return Consumer<ProviderBranches>(
+      builder: (context, prod, child) {
+        // Show Start Inspection if assigned and today is inspection day
+        if (branch.isRouteAssigned && isNextInspectionToday) {
+          return Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  text: "Start Inspection",
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ControlPage(
+                          selectedBranch: branch,
+                          branchId: branch.id,
+                          branchTemplateId: branch.templateId,
+                        ),
+                      ),
+                    );
+                  },
+                  backgroundColor: Colors.green,
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  borderRadius: 10,
+                ),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: AppButton(
+                  text: "Edit Route",
+                  onPressed: () => _showRouteManagementSheet(context, prod),
+                  backgroundColor: AppColors.primaryRed,
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  borderRadius: 10,
+                ),
+              ),
+            ],
+          );
+        }
+
+        // Show Edit Route or Add to Route
+        return AppButton(
+          isLoading: prod.isLoading,
+          text: branch.isRouteAssigned ? "Edit Route" : "Add to Route",
+          onPressed: () async {
+            if (branch.isRouteAssigned) {
+              _showRouteManagementSheet(context, prod);
+            } else {
+              await _handleAddToRoute(context, prod);
+            }
+          },
+          backgroundColor: branch.isRouteAssigned
+              ? AppColors.primaryRed
+              : AppColors.amber,
+          textStyle: TextStyle(
+            color: branch.isRouteAssigned
+                ? Colors.white
+                : AppColors.primaryDark,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          borderRadius: 10,
+        );
+      },
+    );
+  }
+
+  Future<void> _handleAddToRoute(
+    BuildContext context,
+    ProviderBranches prod,
+  ) async {
+    final DateTime? pickedDate = await showDatePicker(
+      locale: context.locale,
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 7)),
+    );
+
+    if (pickedDate != null) {
+      final String timeSlot =
+          "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+
+      final success = await prod.assignBranchToMe(
+        branchId: branch.id,
+        branchName: branch.name,
+        timeSlot: timeSlot,
+        context: context,
+        branchTemplateId: branch.templateId,
+      );
+
+      if (success && context.mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  void _showRouteManagementSheet(BuildContext context, ProviderBranches prod) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.lightBlack,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) =>
+          RouteManagementSheet(branch: branch, provider: prod),
+    );
+  }
+
   Color _getScoreColor(double score) {
     if (score <= 3.0) return Colors.green;
     if (score <= 7.0) return Colors.amber;
     return Colors.red;
+  }
+}
+
+// Route Management Bottom Sheet
+class RouteManagementSheet extends StatelessWidget {
+  final BranchModel branch;
+  final ProviderBranches provider;
+
+  const RouteManagementSheet({required this.branch, required this.provider});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          SizedBox(height: 20),
+          Icon(Icons.route, size: 48, color: AppColors.primaryRed),
+          SizedBox(height: 16),
+          Text(
+            "Manage Route",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            branch.name,
+            style: TextStyle(color: Colors.white70, fontSize: 14),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 24),
+          Consumer<ProviderBranches>(
+            builder: (context, prod, child) {
+              return Column(
+                children: [
+                  SizedBox(height: 12),
+                  AppButton(
+                    isLoading: prod.isLoading,
+                    text: "Remove from Route",
+                    onPressed: () async {
+                      final success = await prod.unAssignBranchToMe(
+                        branchId: branch.id,
+                        context: context,
+                      );
+
+                      if (success && context.mounted) {
+                        Navigator.pop(context); // Close route management sheet
+                        Navigator.pop(context); // Close branch details sheet
+                      }
+                    },
+                    backgroundColor: AppColors.primaryRed,
+                    textStyle: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    borderRadius: 10,
+                  ),
+                  SizedBox(height: 12),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          SizedBox(height: 8),
+        ],
+      ),
+    );
   }
 }
