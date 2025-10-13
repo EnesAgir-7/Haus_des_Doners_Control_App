@@ -436,7 +436,7 @@ class DashboardCard extends StatelessWidget {
               children: [
                 Consumer<ProviderBranches>(
                   builder: (context, brachCont, child) {
-                    return EnhancedStatBox(
+                    return StatBox(
                       isLoading: brachCont.isLoading,
                       number: brachCont.branchCount.toString(),
                       label: LocaleKeys.assigned_branches.tr(),
@@ -451,7 +451,7 @@ class DashboardCard extends StatelessWidget {
                     );
                   },
                 ),
-                EnhancedStatBox(
+                StatBox(
                   number: provider.completedInspections.toString(),
                   label: _getRangeLabel(provider.selectedRange, context),
                   icon: Icons.check_circle_outline,
@@ -462,7 +462,7 @@ class DashboardCard extends StatelessWidget {
                 ),
                 Consumer<ProviderTasks>(
                   builder: (context, taskPro, child) {
-                    return EnhancedStatBox(
+                    return StatBox(
                       isLoading: taskPro.isLoading,
                       number: taskPro.pendingTasksCount.toString(),
                       label: LocaleKeys.pending_task.tr(),
@@ -477,7 +477,7 @@ class DashboardCard extends StatelessWidget {
                     );
                   },
                 ),
-                EnhancedStatBox(
+                StatBox(
                   number: provider.averageScore.toStringAsFixed(1),
                   label: LocaleKeys.average_score.tr(),
                   icon: Icons.star_outline,
@@ -653,7 +653,7 @@ class DashboardCard extends StatelessWidget {
   }
 }
 
-class EnhancedStatBox extends StatelessWidget {
+class StatBox extends StatelessWidget {
   final String number;
   final String label;
   final IconData? icon;
@@ -662,7 +662,7 @@ class EnhancedStatBox extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onTap;
 
-  const EnhancedStatBox({
+  const StatBox({
     super.key,
     required this.number,
     required this.label,
@@ -908,7 +908,7 @@ class DailySummarySection extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    LocaleKeys.daily_summary.tr(),
+                    LocaleKeys.your_route_plan.tr(),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -966,7 +966,7 @@ class DailySummarySection extends StatelessWidget {
                 },
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: EnhancedStatisticCard(
+                  child: DailyRouteCard(
                     stop: entry.value,
                     onTap: () {
                       if (entry.value.status == AppConstants.completed) {
@@ -998,11 +998,11 @@ class DailySummarySection extends StatelessWidget {
   }
 }
 
-class EnhancedStatisticCard extends StatelessWidget {
+class DailyRouteCard extends StatelessWidget {
   final RouteStopModel stop;
   final VoidCallback? onTap;
 
-  const EnhancedStatisticCard({super.key, required this.stop, this.onTap});
+  const DailyRouteCard({super.key, required this.stop, this.onTap});
 
   StopStatus getStatus() {
     if (stop.isCompleted) {
@@ -1018,6 +1018,53 @@ class EnhancedStatisticCard extends StatelessWidget {
         icon: Icons.hourglass_bottom,
       );
     }
+  }
+
+  // Reusable helper widget for the info sections
+  Widget _buildInfoColumn({
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(icon, size: 16, color: iconColor),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: TextStyle(
+                color: AppColors.white.withValues(alpha: 0.6),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: AppColors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -1043,10 +1090,7 @@ class EnhancedStatisticCard extends StatelessWidget {
               ],
             ),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: status.color.withValues(alpha: 0.3),
-              width: 1,
-            ),
+            border: Border.all(color: status.color.withValues(alpha: 0.3)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.2),
@@ -1063,7 +1107,7 @@ class EnhancedStatisticCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header with colored accent
+              // Header (remains the same)
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -1080,78 +1124,50 @@ class EnhancedStatisticCard extends StatelessWidget {
                     left: BorderSide(width: 4, color: status.color),
                   ),
                 ),
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Time Slot
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                status.color,
-                                status.color.withValues(alpha: 0.8),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: status.color.withValues(alpha: 0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.access_time_rounded,
-                            size: 18,
-                            color: Colors.white,
-                          ),
+                    // Branch Name (Moved to header for compactness)
+                    Expanded(
+                      child: Text(
+                        stop.branchName,
+                        style: const TextStyle(
+                          color: AppColors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.3,
                         ),
-                        const SizedBox(width: 12),
-                        Text(
-                          stop.timeSlot.toString(),
-                          style: TextStyle(
-                            color: status.color,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                      ],
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
+                    const SizedBox(width: 12),
                     // Status Badge
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                        horizontal: 10,
+                        vertical: 5,
                       ),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            status.color.withValues(alpha: 0.2),
-                            status.color.withValues(alpha: 0.1),
-                          ],
-                        ),
+                        color: status.color.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: status.color.withValues(alpha: 0.4),
-                          width: 1,
                         ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(status.icon, size: 14, color: status.color),
-                          const SizedBox(width: 6),
+                          Icon(status.icon, size: 13, color: status.color),
+                          const SizedBox(width: 5),
                           Text(
                             status.text,
                             style: TextStyle(
                               color: status.color,
-                              fontSize: 12,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -1162,208 +1178,33 @@ class EnhancedStatisticCard extends StatelessWidget {
                 ),
               ),
 
-              // Content Section
+              // Content Section with side-by-side info
               Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Branch Name with icon
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.05),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Icon(
-                            Icons.store_outlined,
-                            size: 18,
-                            color: AppColors.primaryRed,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            stop.branchName,
-                            style: const TextStyle(
-                              color: AppColors.white,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              height: 1.3,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Info Row - Assigned Date
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.white.withValues(alpha: 0.08),
-                            Colors.white.withValues(alpha: 0.03),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  AppColors.primaryRed.withValues(alpha: 0.2),
-                                  AppColors.primaryRed.withValues(alpha: 0.1),
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(
-                              Icons.event_rounded,
-                              size: 18,
-                              color: AppColors.primaryRed,
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  LocaleKeys.assigned_at.tr(),
-                                  style: TextStyle(
-                                    color: AppColors.white.withValues(
-                                      alpha: 0.6,
-                                    ),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w500,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  DateFormat(
-                                    'dd MMM yyyy, HH:mm',
-                                  ).format(stop.createdAt ?? DateTime.now()),
-                                  style: const TextStyle(
-                                    color: AppColors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                    // Assigned Date Info
+                    Expanded(
+                      child: _buildInfoColumn(
+                        icon: Icons.calendar_today_rounded,
+                        iconColor: AppColors.primaryRed,
+                        label: LocaleKeys.assigned_at.tr(),
+                        value: DateFormat(
+                          'dd MMM, HH:mm',
+                        ).format(stop.createdAt ?? DateTime.now()),
                       ),
                     ),
 
-                    // Score Section (if completed)
+                    // Conditionally display Score Info
                     if (stop.isCompleted) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.amber.withValues(alpha: 0.15),
-                              AppColors.amber.withValues(alpha: 0.05),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.amber.withValues(alpha: 0.3),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.amber.withValues(alpha: 0.1),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    AppColors.amber,
-                                    AppColors.amber.withValues(alpha: 0.8),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: AppColors.amber.withValues(
-                                      alpha: 0.4,
-                                    ),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(
-                                Icons.star_rounded,
-                                size: 18,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 14),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    LocaleKeys.score.tr(),
-                                    style: TextStyle(
-                                      color: AppColors.white.withValues(
-                                        alpha: 0.6,
-                                      ),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    stop.inspectionId != null ? '9.0' : '-',
-                                    style: const TextStyle(
-                                      color: AppColors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: -0.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            if (stop.inspectionId != null)
-                              Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Icon(
-                                  Icons.check,
-                                  size: 18,
-                                  color: Colors.green,
-                                ),
-                              ),
-                          ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildInfoColumn(
+                          icon: Icons.star_rounded,
+                          iconColor: AppColors.amber,
+                          label: LocaleKeys.score.tr(),
+                          value: stop.inspectionId != null ? '9.0 / 10' : '-',
                         ),
                       ),
                     ],

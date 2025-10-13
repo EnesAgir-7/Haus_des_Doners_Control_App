@@ -17,7 +17,11 @@ class AppColors {
   static const Color lightGrey = Color(0xFFC2C0B6);     
   static const Color amber = Colors.amber;         
   static const Color alertColor = Color(0xFFFF0000);         
-  static const Color greyCardColor = Color(0xFF3A3A3A);         
+  static const Color greyCardColor = Color(0xFF3A3A3A);       
+  static const Color primaryBlue = Colors.blueAccent;
+  static const Color darkGrey = Color(0xFF48484A);
+  static const Color shimmerBase = Color(0xFF3A3A3C);
+  static const Color shimmerHighlight = Color(0xFF48484A);  
 
   /// Utility methods for color opacity variations
   static Color redWithOpacity(double opacity) => primaryRed.withValues(alpha:  opacity);
