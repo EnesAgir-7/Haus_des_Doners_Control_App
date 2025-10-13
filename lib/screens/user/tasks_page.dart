@@ -4,6 +4,7 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/constants/app_colors.dart';
 import '../../models/task_model.dart';
 import '../../providers/provider_tasks.dart';
 
@@ -23,34 +24,49 @@ class _TasksPageState extends State<TasksPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProviderTasks>(
-      builder: (context, provider, child) {
-        if (provider.isLoading) {
-          return Center(
-            child: CircularProgressIndicator(color: Color(0xFFE53935)),
-          );
-        }
-        return Column(
-          children: [
-            // Filter chips
-            _buildFilterSection(provider),
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primaryRed.withValues(alpha: 0.08),
+              AppColors.primaryDark,
+              AppColors.primaryDark,
+            ],
+            stops: const [0.0, 0.25, 1.0],
+          ),
+        ),
+        child: Consumer<ProviderTasks>(
+          builder: (context, provider, child) {
+            if (provider.isLoading) {
+              return Center(
+                child: CircularProgressIndicator(color: Color(0xFFE53935)),
+              );
+            }
+            return Column(
+              children: [
+                // Filter chips
+                _buildFilterSection(provider),
 
-            // Task list
-            Expanded(
-              child: provider.tasks.isEmpty
-                  ? _buildEmptyState()
-                  : _buildTaskList(provider),
-            ),
-          ],
-        );
-      },
+                // Task list
+                Expanded(
+                  child: provider.tasks.isEmpty
+                      ? _buildEmptyState()
+                      : _buildTaskList(provider),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
     );
   }
 
   Widget _buildFilterSection(ProviderTasks provider) {
     return Container(
       padding: EdgeInsets.all(16),
-      color: Color(0xFF1A1A1A),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

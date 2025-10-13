@@ -41,27 +41,41 @@ class _BranchesPageState extends State<BranchesPage> {
         ).push(MaterialPageRoute(builder: (context) => BranchMapScreen())),
         child: Icon(Icons.location_on, size: 36),
       ),
-      body: SafeArea(
-        child: Consumer<ProviderBranches>(
-          builder: (context, provider, child) {
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(provider),
-                  const SizedBox(height: 12),
-                  _buildSearchBar(provider),
-                  const SizedBox(height: 12),
-                  _buildSortOptions(provider),
-                  const SizedBox(height: 12),
-                  Container(height: 1, color: Colors.white24),
-                  const SizedBox(height: 12),
-                  Expanded(child: _buildBranchList(provider)),
-                ],
-              ),
-            );
-          },
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primaryRed.withValues(alpha: 0.08),
+              AppColors.primaryDark,
+              AppColors.primaryDark,
+            ],
+            stops: const [0.0, 0.25, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Consumer<ProviderBranches>(
+            builder: (context, provider, child) {
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeader(provider),
+                    const SizedBox(height: 12),
+                    _buildSearchBar(provider),
+                    const SizedBox(height: 12),
+                    _buildSortOptions(provider),
+                    const SizedBox(height: 12),
+                    Container(height: 1, color: Colors.white24),
+                    const SizedBox(height: 12),
+                    Expanded(child: _buildBranchList(provider)),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

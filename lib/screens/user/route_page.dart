@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/constants/app_assets.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/route_model.dart';
 import '../../providers/provider_route.dart';
@@ -42,7 +41,19 @@ class _RoutePageState extends State<RoutePage> {
     final routeProvider = Provider.of<ProviderRoute>(context);
 
     return Scaffold(
-      body: SafeArea(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primaryRed.withValues(alpha: 0.08),
+              AppColors.primaryDark,
+              AppColors.primaryDark,
+            ],
+            stops: const [0.0, 0.25, 1.0],
+          ),
+        ),
         child: Column(
           children: [
             _buildHeader(routeProvider),
@@ -56,7 +67,7 @@ class _RoutePageState extends State<RoutePage> {
   Widget _buildHeader(ProviderRoute provider) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: shadowDeco,
+      color: Colors.transparent,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

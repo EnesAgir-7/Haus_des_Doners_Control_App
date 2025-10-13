@@ -404,17 +404,11 @@ class _EnhancedCurrentVehicleCard extends StatelessWidget {
           ],
         ),
         borderRadius: BorderRadius.circular(20),
+
         border: Border.all(
           color: AppColors.primaryRed.withValues(alpha: 0.3),
-          width: 2,
+          width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryRed.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
       child: Row(
         children: [
