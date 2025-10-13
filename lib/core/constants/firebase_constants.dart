@@ -28,6 +28,7 @@ class AppConstants {
   static const dueDate = "dueDate";
   static const priority = "priority";
   static const createdAt = "createdAt";
+  static const details = "details";
 }
 
 UserModel? loggedInUser;

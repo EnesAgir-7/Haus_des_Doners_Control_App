@@ -207,6 +207,7 @@ class InspectionService {
         'lastInspectionDate': FieldValue.serverTimestamp(),
         'averageRating': newAverage,
         'nextInspectionDate': null,
+        'lastInspectionScore': inspectionScore,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 

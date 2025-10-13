@@ -243,7 +243,7 @@ class ProviderControl extends ChangeNotifier {
   bool get isSubmittingOrUploading => _isSubmitting || _isUploading;
 
   // Submit inspection
-  Future<bool> submitInspection() async {
+  Future<bool> submitInspection({from = ""}) async {
     if (selectedTemplate == null) {
       _errorMessage = 'No template selected.';
       notifyListeners();

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/widgets/custom_toast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -18,10 +19,12 @@ class ControlPage extends StatefulWidget {
   final BranchModel? selectedBranch;
   final String? branchId;
   final String? branchTemplateId;
+  final String? from;
 
   const ControlPage({
     super.key,
     this.selectedBranch,
+    this.from = "",
     this.branchId,
     this.branchTemplateId,
   });
@@ -1449,6 +1452,8 @@ class _ControlPageState extends State<ControlPage>
       showSnakBarr(context, LocaleKeys.inspection_submitted.tr());
 
       if (mounted) {
+        if (widget.from == AppConstants.details)
+          Navigator.maybeOf(context)!.pop();
         Navigator.pop(context);
       }
     } else if (mounted && provider.errorMessage != null) {

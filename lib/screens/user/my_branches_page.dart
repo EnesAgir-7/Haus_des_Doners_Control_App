@@ -709,6 +709,7 @@ class BranchDetailsSheet extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => ControlPage(
+                          from: AppConstants.details,
                           selectedBranch: branch,
                           branchId: branch.id,
                           branchTemplateId: branch.templateId,
@@ -729,7 +730,7 @@ class BranchDetailsSheet extends StatelessWidget {
               SizedBox(width: 10),
               Expanded(
                 child: AppButton(
-                  text: "Edit Route",
+                  text: "Remove Route",
                   onPressed: () => _showRouteManagementSheet(context, prod),
                   backgroundColor: AppColors.primaryRed,
                   textStyle: TextStyle(
