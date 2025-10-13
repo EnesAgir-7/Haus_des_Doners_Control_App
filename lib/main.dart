@@ -15,6 +15,7 @@ import 'package:haus_des_control/providers/provider_tasks.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 
+import 'core/constants/app_colors.dart';
 import 'core/global_focus_manager.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_services/onedrive_service.dart';
@@ -35,6 +36,15 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await EasyLocalization.ensureInitialized();
   // Initialize OneDrive
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      // statusBarColor: Colors.transparent, // Transparent status bar
+      // statusBarIconBrightness: Brightness.light, // Light icons
+      systemNavigationBarColor: AppColors.primaryDark, // 👈 Your desired color
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
+
   final oneDriveService = OneDriveService();
   await oneDriveService.initialize();
   SystemChrome.setPreferredOrientations([
@@ -89,7 +99,7 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Haus des Control',
           theme: AppTheme.light,
-          navigatorKey: navigatorKey, 
+          navigatorKey: navigatorKey,
           navigatorObservers: [GlobalFocusManager()],
 
           darkTheme: AppTheme.dark,
