@@ -10,7 +10,7 @@ import '../../models/branch_model.dart';
 import '../../providers/provider_map.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/custom_app_bar.dart';
-import 'control_page_new.dart';
+import 'control_page.dart';
 
 //TODO: locale
 class BranchMapScreen extends StatefulWidget {

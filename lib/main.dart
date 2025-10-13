@@ -15,6 +15,7 @@ import 'package:haus_des_control/providers/provider_tasks.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 
+import 'core/global_focus_manager.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_services/onedrive_service.dart';
 import 'layouts/bottom_nav_bar.dart';
@@ -76,41 +77,48 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderAdminUsers()),
         ChangeNotifierProvider(create: (_) => ProviderBottomNavBar()),
       ],
-      child: MaterialApp(
-        localizationsDelegates: context.localizationDelegates,
-        supportedLocales: context.supportedLocales,
-        locale: context.locale,
-        debugShowCheckedModeBanner: false,
-        title: 'Haus des Control',
-        theme: AppTheme.light,
-        navigatorKey: navigatorKey, // Add this line
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+        },
+        child: MaterialApp(
+          localizationsDelegates: context.localizationDelegates,
+          supportedLocales: context.supportedLocales,
+          locale: context.locale,
+          debugShowCheckedModeBanner: false,
+          title: 'Haus des Control',
+          theme: AppTheme.light,
+          navigatorKey: navigatorKey, 
+          navigatorObservers: [GlobalFocusManager()],
 
-        darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.dark,
-        home: AuthWrapper(),
-        routes: AppRouter.routes,
-        localeListResolutionCallback: (deviceLocales, supportedLocales) {
-          if (deviceLocales != null) {
-            for (var deviceLocale in deviceLocales) {
+          darkTheme: AppTheme.dark,
+          themeMode: ThemeMode.dark,
+          home: AuthWrapper(),
+          routes: AppRouter.routes,
+          localeListResolutionCallback: (deviceLocales, supportedLocales) {
+            if (deviceLocales != null) {
+              for (var deviceLocale in deviceLocales) {
+                for (var locale in supportedLocales) {
+                  if (locale.languageCode == deviceLocale.languageCode) {
+                    return locale;
+                  }
+                }
+              }
+            }
+            return context.fallbackLocale;
+          },
+          localeResolutionCallback: (deviceLocale, supportedLocales) {
+            if (deviceLocale != null) {
               for (var locale in supportedLocales) {
                 if (locale.languageCode == deviceLocale.languageCode) {
                   return locale;
                 }
               }
             }
-          }
-          return context.fallbackLocale;
-        },
-        localeResolutionCallback: (deviceLocale, supportedLocales) {
-          if (deviceLocale != null) {
-            for (var locale in supportedLocales) {
-              if (locale.languageCode == deviceLocale.languageCode) {
-                return locale;
-              }
-            }
-          }
-          return context.fallbackLocale;
-        },
+            return context.fallbackLocale;
+          },
+        ),
       ),
     );
   }

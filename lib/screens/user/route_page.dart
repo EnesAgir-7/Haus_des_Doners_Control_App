@@ -10,7 +10,7 @@ import '../../providers/provider_route.dart';
 import '../../translations/locale_keys.g.dart';
 import '../bottom_sheets/stop_info_sheet.dart';
 import '../common_methods.dart';
-import 'control_page_new.dart';
+import 'control_page.dart';
 
 class RoutePage extends StatefulWidget {
   const RoutePage({super.key});

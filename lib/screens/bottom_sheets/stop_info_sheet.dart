@@ -9,7 +9,7 @@ import '../../models/route_model.dart';
 import '../../providers/provider_route.dart';
 import '../../widgets/app_button.dart';
 import '../common_methods.dart';
-import '../user/control_page_new.dart';
+import '../user/control_page.dart';
 // void showStopInfoBottomSheet(RouteStopModel stop, BuildContext context) {
 //   final isCompleted = stop.status == AppConstants.completed;
 //   final statusInfo = getStatusInfo(stop, isCompleted);

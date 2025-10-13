@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:haus_des_control/widgets/custom_toast.dart';
 
 import '../firebase_services/firebase_vehicle_service.dart';
 import '../models/vehicle_model.dart';
@@ -46,7 +47,9 @@ class ProviderFleet extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      _assignedVehicle = await _vehicleService.getVehicleByInspector(loggedInUser!.id);
+      _assignedVehicle = await _vehicleService.getVehicleByInspector(
+        loggedInUser!.id,
+      );
 
       if (_assignedVehicle != null) {
         kmController.text = _assignedVehicle!.currentKm.toString();
@@ -64,8 +67,9 @@ class ProviderFleet extends ChangeNotifier {
   }
 
   void initializeWithStreams() {
-
-    _vehicleService.streamVehicleByInspector(loggedInUser!.id).listen((vehicle) {
+    _vehicleService.streamVehicleByInspector(loggedInUser!.id).listen((
+      vehicle,
+    ) {
       _assignedVehicle = vehicle;
       if (vehicle != null) {
         kmController.text = vehicle.currentKm.toString();
@@ -74,7 +78,7 @@ class ProviderFleet extends ChangeNotifier {
     });
   }
 
-  Future<bool> updateVehicleKm(int newKm) async {
+  Future<bool> updateVehicleKm(int newKm, BuildContext context) async {
     if (_assignedVehicle == null) {
       _errorMessage = LocaleKeys.no_vehicle_assigned.tr();
       notifyListeners();
@@ -83,13 +87,12 @@ class ProviderFleet extends ChangeNotifier {
 
     if (newKm < _assignedVehicle!.currentKm) {
       _errorMessage = LocaleKeys.km_less_than_current.tr();
-      notifyListeners();
+      showSnakBarr(context, LocaleKeys.km_less_than_current.tr());
       return false;
     }
 
     if (newKm > _assignedVehicle!.maxKm) {
-      _errorMessage = LocaleKeys.km_exceeds_limit.tr();
-      notifyListeners();
+      showSnakBarr(context, LocaleKeys.km_exceeds_limit.tr());
       return false;
     }
 
@@ -103,11 +106,12 @@ class ProviderFleet extends ChangeNotifier {
 
       _successMessage = LocaleKeys.km_update_success.tr();
       _isUpdating = false;
+      if (_successMessage != null)
+        showSnakBarr(context, _successMessage.toString());
       notifyListeners();
 
       await fetchAssignedVehicle();
 
-      await Future.delayed(Duration(seconds: 3));
       _successMessage = null;
       notifyListeners();
 
@@ -121,22 +125,21 @@ class ProviderFleet extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateKmFromController() async {
+  Future updateKmFromController(BuildContext context) async {
     final kmText = kmController.text.trim();
     if (kmText.isEmpty) {
-      _errorMessage = LocaleKeys.enter_km.tr();
-      notifyListeners();
+      showSnakBarr(context, LocaleKeys.enter_km.tr());
       return false;
     }
 
     final newKm = int.tryParse(kmText);
     if (newKm == null) {
-      _errorMessage = LocaleKeys.invalid_km_value.tr();
-      notifyListeners();
+      showSnakBarr(context, LocaleKeys.invalid_km_value.tr());
       return false;
     }
 
-    return await updateVehicleKm(newKm);
+    if (context.mounted) Navigator.pop(context);
+    await updateVehicleKm(newKm, context);
   }
 
   Future<VehicleModel?> getVehicleById(String vehicleId) async {

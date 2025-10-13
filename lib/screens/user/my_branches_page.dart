@@ -12,7 +12,7 @@ import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/inspector_branch_card.dart';
 import '../common_methods.dart';
-import 'control_page_new.dart';
+import 'control_page.dart';
 import 'screen_map.dart';
 
 class BranchesPage extends StatefulWidget {

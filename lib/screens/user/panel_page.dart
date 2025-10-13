@@ -13,7 +13,7 @@ import '../../providers/provider_panel.dart';
 import '../../providers/provider_route.dart';
 import '../../providers/provider_tasks.dart';
 import '../../translations/locale_keys.g.dart';
-import 'control_page_new.dart';
+import 'control_page.dart';
 
 class PanelPage extends StatefulWidget {
   const PanelPage({super.key});
