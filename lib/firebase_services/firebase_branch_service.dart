@@ -205,14 +205,19 @@ class BranchService {
           branchName: branchName,
           status: AppConstants.pending,
           order: route.stops.length + 1,
+          createdAt: DateTime.now(),
         );
 
-        final updatedStops = [...route.stops, newStop];
-
+        // Append only the new stop safely
         await routeDocRef.update({
-          'stops': updatedStops.map((s) => s.toMap()).toList(),
+          'stops': FieldValue.arrayUnion([newStop.toMap()]),
           'updatedAt': Timestamp.fromDate(DateTime.now()),
         });
+        // final updatedStops = [...route.stops, newStop];
+        // await routeDocRef.update({
+        //   'stops': updatedStops.map((s) => s.toMap()).toList(),
+        //   'updatedAt': Timestamp.fromDate(DateTime.now()),
+        // });
       }
 
       // 4. Update branch to mark as assigned

@@ -4,14 +4,23 @@ import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
 import '../generated/lib/translations/locale_keys.g.dart';
 import '../models/route_model.dart';
+
 class StatusInfo {
   final Color color;
   final IconData icon;
   final String label;
   final bool isToday;
   final bool isOverdue;
+  final bool isExpired;
 
-  StatusInfo(this.color, this.icon, this.label, this.isToday, this.isOverdue);
+  StatusInfo(
+    this.color,
+    this.icon,
+    this.label,
+    this.isToday,
+    this.isOverdue,
+    this.isExpired,
+  );
 }
 
 StatusInfo getStatusInfo(RouteStopModel stop, bool isCompleted) {
@@ -25,6 +34,11 @@ StatusInfo getStatusInfo(RouteStopModel stop, bool isCompleted) {
     int.parse(stopParts[1]),
     int.parse(stopParts[2]),
   );
+  final bool isExpired =
+      stop.isCompleted &&
+      stop.completedAt != null &&
+      stop.completedAt!.isBefore(today);
+
   final isOverdue =
       stopDate.isBefore(DateTime(today.year, today.month, today.day)) &&
       !isCompleted;
@@ -32,8 +46,11 @@ StatusInfo getStatusInfo(RouteStopModel stop, bool isCompleted) {
   Color color;
   IconData icon;
   String label;
-
-  if (isCompleted) {
+  if (isExpired && isCompleted && !isToday) {
+    color = Colors.deepOrange;
+    icon = Icons.warning_amber_rounded;
+    label = "Expired";
+  } else if (isCompleted) {
     color = Colors.green;
     icon = Icons.check_circle;
     label = LocaleKeys.completed.tr();
@@ -51,9 +68,8 @@ StatusInfo getStatusInfo(RouteStopModel stop, bool isCompleted) {
     label = LocaleKeys.pending.tr();
   }
 
-  return StatusInfo(color, icon, label, isToday, isOverdue);
+  return StatusInfo(color, icon, label, isToday, isOverdue, isExpired);
 }
-
 
 String formatTimeSlot(String timeSlot) {
   try {

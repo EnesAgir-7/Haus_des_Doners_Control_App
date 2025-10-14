@@ -6,9 +6,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../generated/lib/translations/locale_keys.g.dart';
 import '../../models/route_model.dart';
-import '../../providers/provider_route.dart';
 import '../../widgets/app_button.dart';
-import '../common_methods.dart';
 import '../user/control_page.dart';
 // void showStopInfoBottomSheet(RouteStopModel stop, BuildContext context) {
 //   final isCompleted = stop.status == AppConstants.completed;
@@ -289,54 +287,55 @@ void showStopInfoBottomSheet(RouteStopModel stop, BuildContext context) {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (context) => StopInfoSheet(stop: stop),
+    builder: (context) => CompactStopInfoSheet(stop: stop),
   );
 }
 
-class StopInfoSheet extends StatelessWidget {
+class CompactStopInfoSheet extends StatelessWidget {
   final RouteStopModel stop;
 
-  const StopInfoSheet({required this.stop});
+  const CompactStopInfoSheet({super.key, required this.stop});
 
   @override
   Widget build(BuildContext context) {
     final statusInfo = _getStopStatusInfo();
 
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.primaryDark,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildDragHandle(),
-          _buildHeader(context, statusInfo),
-          _buildInfoCards(statusInfo),
-          _buildActionButtons(context, statusInfo),
-          SizedBox(height: 16),
-        ],
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildDragHandle(),
+            _buildHeaderAndInfo(context, statusInfo),
+            _buildActionButtons(context, statusInfo),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildDragHandle() {
     return Container(
-      margin: EdgeInsets.only(top: 12),
+      margin: const EdgeInsets.only(top: 12, bottom: 4),
       width: 40,
       height: 4,
       decoration: BoxDecoration(
-        color: Colors.grey.shade300,
+        color: Colors.grey.shade700,
         borderRadius: BorderRadius.circular(2),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, _StopStatusInfo statusInfo) {
+  Widget _buildHeaderAndInfo(BuildContext context, _StopStatusInfo statusInfo) {
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.all(16),
-      padding: EdgeInsets.all(20),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: statusInfo.gradientColors,
@@ -348,39 +347,40 @@ class StopInfoSheet extends StatelessWidget {
           BoxShadow(
             color: statusInfo.color.withValues(alpha: 0.3),
             blurRadius: 12,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.store, color: Colors.white, size: 28),
+                child: const Icon(Icons.store, color: Colors.white, size: 24),
               ),
-              SizedBox(width: 12),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       stop.branchName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 5),
                     Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
@@ -391,10 +391,10 @@ class StopInfoSheet extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(statusInfo.icon, size: 14, color: Colors.white),
-                          SizedBox(width: 6),
+                          const SizedBox(width: 6),
                           Text(
                             statusInfo.label,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -407,9 +407,27 @@ class StopInfoSheet extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.close, color: Colors.white),
+                icon: const Icon(Icons.close, color: Colors.white, size: 24),
                 onPressed: () => Navigator.pop(context),
               ),
+            ],
+          ),
+          const Divider(color: Colors.white24, height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildCompactInfoItem(
+                icon: Icons.calendar_today,
+                label: "Scheduled Date",
+                value: formatTimeSlot(stop.timeSlot),
+              ),
+              if ((stop.isCompleted || stop.isExpired) &&
+                  stop.completedAt != null)
+                _buildCompactInfoItem(
+                  icon: Icons.check_circle,
+                  label: "Completed At",
+                  value: DateFormat("h:mm a").format(stop.completedAt!),
+                ),
             ],
           ),
         ],
@@ -417,312 +435,174 @@ class StopInfoSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCards(_StopStatusInfo statusInfo) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          _buildInfoCard(
-            icon: Icons.calendar_today,
-            iconColor: AppColors.primaryRed,
-            title: "Scheduled Date",
-            value: formatTimeSlot(stop.timeSlot),
-          ),
-          SizedBox(height: 12),
-          _buildInfoCard(
-            icon: Icons.format_list_numbered,
-            iconColor: Colors.orange,
-            title: "Stop Order",
-            value: "#${stop.order}",
-          ),
-          if (stop.isCompleted && stop.completedAt != null) ...[
-            SizedBox(height: 12),
-            _buildInfoCard(
-              icon: Icons.check_circle,
-              iconColor: Colors.green,
-              title: "Completed At",
-              value: DateFormat(
-                "MMMM d, yyyy 'at' h:mm a",
-              ).format(stop.completedAt!),
+  Widget _buildCompactInfoItem({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Colors.white70, size: 14),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 12),
             ),
           ],
-          if (stop.isExpired) ...[
-            SizedBox(height: 12),
-            _buildWarningCard(
-              icon: Icons.warning,
-              iconColor: Colors.deepOrange,
-              title: "Expired",
-              message:
-                  "This inspection was due on ${DateFormat("MMM d, yyyy").format(stop.expiryDate!)}",
-            ),
-          ],
-          SizedBox(height: 16),
-        ],
-      ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
     );
   }
 
+  // --- FULLY CORRECTED BUTTON AND STATUS LOGIC ---
   Widget _buildActionButtons(BuildContext context, _StopStatusInfo statusInfo) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8), // Added top padding
       child: Column(
         children: [
-          // Show Start/Continue button for pending/current stops
-          if (!stop.isCompleted &&
-              (statusInfo.isToday || statusInfo.isOverdue || stop.isExpired))
-            Column(
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ControlPage(
-                                branchId: stop.branchId,
-                                branchTemplateId: stop.branchTemplateId,
-                              ),
-                            ),
-                          );
-                        },
-                        icon: Icon(Icons.arrow_forward),
-                        label: Text(_getActionButtonText(statusInfo)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _getActionButtonColor(statusInfo),
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 4,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Consumer<ProviderRoute>(
-                      builder: (context, provider, child) {
-                        return ElevatedButton(
-                          onPressed: () => _showRouteManagementSheet(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.lightBlack,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                              vertical: 16,
-                              horizontal: 16,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 4,
-                          ),
-                          child: Icon(Icons.edit, size: 20),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12),
-              ],
-            ),
-
-          // Show Edit Route button for future stops
-          if (!stop.isCompleted &&
-              !statusInfo.isToday &&
-              !statusInfo.isOverdue &&
-              !stop.isExpired)
-            Column(
-              children: [
-                Consumer<ProviderRoute>(
-                  builder: (context, provider, child) {
-                    return AppButton(
-                      text: "Edit Route",
-                      onPressed: () => _showRouteManagementSheet(context),
-                      backgroundColor: AppColors.primaryRed,
-                      textStyle: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      borderRadius: 12,
-                    );
-                  },
-                ),
-                SizedBox(height: 12),
-              ],
-            ),
-
-          // Show completed message for completed stops with edit option
-          if (stop.isCompleted) ...[
+          // Case 1: Stop is completed OR expired (show info banner)
+          if (stop.isCompleted || stop.isExpired)
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
+                color: statusInfo.color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                border: Border.all(
+                  color: statusInfo.color.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green, size: 24),
-                  SizedBox(width: 12),
+                  Icon(statusInfo.icon, color: statusInfo.color, size: 24),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      "Inspection Completed",
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          stop.isExpired
+                              ? "Route Expired"
+                              : "Inspection Completed",
+                          style: TextStyle(
+                            color: statusInfo.color,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          stop.isExpired
+                              ? "This route is expired. You can remove it from your routes."
+                              : stop.isCompleted
+                              ? "This inspection is already completed. You can remove it from your routes."
+                              : "Inspection Completed",
+                          style: TextStyle(fontSize: 10),
+                        ),
+                      ],
                     ),
                   ),
-                  Consumer<ProviderRoute>(
-                    builder: (context, provider, child) {
-                      return IconButton(
-                        icon: Icon(Icons.edit, color: Colors.green),
-                        onPressed: () => _showRouteManagementSheet(context),
-                      );
-                    },
+                  IconButton(
+                    icon: Icon(Icons.edit, color: statusInfo.color),
+                    onPressed: () => _showRouteManagementSheet(context),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 12),
-          ],
 
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              "Close",
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+          // Case 2: Stop is actionable (Today or Overdue, but NOT completed)
+          if (!stop.isCompleted && (statusInfo.isToday || statusInfo.isOverdue))
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ControlPage(
+                            branchId: stop.branchId,
+                            branchTemplateId: stop.branchTemplateId,
+                          ),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.arrow_forward, size: 20),
+                    label: Text(_getActionButtonText(statusInfo)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _getActionButtonColor(statusInfo),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 4,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () => _showRouteManagementSheet(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.lightBlack,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.all(14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 4,
+                  ),
+                  child: const Icon(Icons.edit, size: 20),
+                ),
+              ],
             ),
-          ),
+
+          // Case 3: Stop is in the future (and not completed)
+          if (!stop.isCompleted && !statusInfo.isToday && !statusInfo.isOverdue)
+            AppButton(
+              text: "Edit Route",
+              onPressed: () => _showRouteManagementSheet(context),
+              backgroundColor: AppColors.primaryRed,
+              textStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              borderRadius: 12,
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String value,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            iconColor.withValues(alpha: 0.1),
-            iconColor.withValues(alpha: 0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: iconColor.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: iconColor, size: 22),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  value,
-                  style: TextStyle(
-                    color: AppColors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // --- LOGIC HELPERS ---
 
-  Widget _buildWarningCard({
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String message,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: iconColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: iconColor.withValues(alpha: 0.3), width: 2),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: iconColor, size: 22),
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: iconColor,
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  message,
-                  style: TextStyle(
-                    color: Colors.grey.shade300,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+  String formatTimeSlot(String timeSlot) {
+    try {
+      final date = _parseTimeSlot(timeSlot);
+      return date != null ? DateFormat("MMMM d, yyyy").format(date) : timeSlot;
+    } catch (e) {
+      return timeSlot;
+    }
   }
 
   void _showRouteManagementSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.primaryDark,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => StopRouteManagementSheet(stop: stop),
@@ -730,53 +610,43 @@ class StopInfoSheet extends StatelessWidget {
   }
 
   String _getActionButtonText(_StopStatusInfo statusInfo) {
-    if (stop.isExpired) return "Complete Overdue Inspection";
     if (statusInfo.isOverdue) return "Inspect Now";
-    if (stop.isCurrent) return "Continue Inspection";
+    if (stop.isCurrent) return "Continue";
     return LocaleKeys.start_inspection.tr();
   }
 
   Color _getActionButtonColor(_StopStatusInfo statusInfo) {
-    if (stop.isExpired) return Colors.deepOrange;
     if (statusInfo.isOverdue) return Colors.red.shade700;
-    if (stop.isCurrent) return Colors.amber;
+    if (stop.isCurrent) return Colors.amber.shade700;
     return AppColors.primaryRed;
   }
 
   _StopStatusInfo _getStopStatusInfo() {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final scheduledDate = _parseTimeSlot(stop.timeSlot);
 
+    // Corrected Logic: Check for Expired BEFORE Completed, as an expired stop is a subset of completed.
+    if (stop.isExpired) {
+      return _StopStatusInfo(
+        label: "Expired",
+        icon: Icons.warning_amber_rounded,
+        color: Colors.deepOrange,
+        gradientColors: [Colors.deepOrange, Colors.red],
+      );
+    }
     if (stop.isCompleted) {
       return _StopStatusInfo(
         label: "Completed",
         icon: Icons.check_circle,
         color: Colors.green,
-        gradientColors: [Colors.green, Color(0xFF2E7D32)],
-        isToday: false,
-        isOverdue: false,
-      );
-    }
-
-    if (stop.isExpired) {
-      return _StopStatusInfo(
-        label: "Expired",
-        icon: Icons.warning,
-        color: Colors.deepOrange,
-        gradientColors: [Colors.deepOrange, Colors.red],
-        isToday: false,
-        isOverdue: true,
+        gradientColors: [Colors.green, const Color(0xFF2E7D32)],
       );
     }
 
     final isToday =
-        scheduledDate != null &&
-        scheduledDate.year == now.year &&
-        scheduledDate.month == now.month &&
-        scheduledDate.day == now.day;
-
-    final isOverdue =
-        scheduledDate != null && scheduledDate.isBefore(now) && !isToday;
+        scheduledDate != null && scheduledDate.isAtSameMomentAs(today);
+    final isOverdue = scheduledDate != null && scheduledDate.isBefore(today);
 
     if (isOverdue) {
       return _StopStatusInfo(
@@ -784,11 +654,9 @@ class StopInfoSheet extends StatelessWidget {
         icon: Icons.error_outline,
         color: Colors.red,
         gradientColors: [Colors.red.shade700, Colors.red.shade900],
-        isToday: false,
         isOverdue: true,
       );
     }
-
     if (isToday) {
       if (stop.isCurrent) {
         return _StopStatusInfo(
@@ -797,44 +665,50 @@ class StopInfoSheet extends StatelessWidget {
           color: Colors.amber,
           gradientColors: [Colors.amber, Colors.orange],
           isToday: true,
-          isOverdue: false,
         );
       }
       return _StopStatusInfo(
         label: "Today",
         icon: Icons.today,
         color: Colors.green,
-        gradientColors: [Color(0xFF4CAF50), Color(0xFF2E7D32)],
+        gradientColors: [const Color(0xFF4CAF50), const Color(0xFF2E7D32)],
         isToday: true,
-        isOverdue: false,
       );
     }
-
     return _StopStatusInfo(
       label: "Scheduled",
       icon: Icons.schedule,
       color: Colors.blue,
       gradientColors: [AppColors.primaryRed, AppColors.primaryDark],
-      isToday: false,
-      isOverdue: false,
     );
   }
 
   DateTime? _parseTimeSlot(String timeSlot) {
     try {
-      final parts = timeSlot.split('-');
-      if (parts.length == 3) {
-        return DateTime(
-          int.parse(parts[0]),
-          int.parse(parts[1]),
-          int.parse(parts[2]),
-        );
-      }
+      return DateTime.parse(timeSlot);
     } catch (e) {
-      // Invalid format
+      return null;
     }
-    return null;
   }
+}
+
+// Helper class to hold status info
+class _StopStatusInfo {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final List<Color> gradientColors;
+  final bool isToday;
+  final bool isOverdue;
+
+  _StopStatusInfo({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.gradientColors,
+    this.isToday = false,
+    this.isOverdue = false,
+  });
 }
 
 // Stop Route Management Bottom Sheet
@@ -1004,22 +878,4 @@ class StopRouteManagementSheet extends StatelessWidget {
       ),
     );
   }
-}
-
-class _StopStatusInfo {
-  final String label;
-  final IconData icon;
-  final Color color;
-  final List<Color> gradientColors;
-  final bool isToday;
-  final bool isOverdue;
-
-  _StopStatusInfo({
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.gradientColors,
-    required this.isToday,
-    required this.isOverdue,
-  });
 }

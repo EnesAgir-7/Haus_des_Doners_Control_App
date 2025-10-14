@@ -168,6 +168,7 @@ class InspectionService {
           branchId: inspection.branchId,
           inspectionId: docRef.id,
           status: AppConstants.completed,
+          score: inspection.score,
         ),
       ]);
 
@@ -286,6 +287,7 @@ class InspectionService {
     required String inspectorId,
     required String branchId,
     required String inspectionId,
+    required double score,
     String status = AppConstants.completed,
   }) async {
     try {
@@ -307,6 +309,7 @@ class InspectionService {
             inspectionId: inspectionId,
             createdAt: DateTime.now(),
             completedAt: DateTime.now(),
+            inspectionScore: score,
             expiryDate: DateTime.now().add(Duration(days: 1)),
           );
         }

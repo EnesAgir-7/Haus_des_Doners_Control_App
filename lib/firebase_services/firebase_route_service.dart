@@ -8,21 +8,21 @@ class RouteService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collection = Collections.routes;
 
-  Future<RouteModel?> getAllRoutes(String userId) async {
-    try {
-      final docSnap = await _db.collection(_collection).doc(userId).get();
+  // Future<RouteModel?> getAllRoutes(String userId) async {
+  //   try {
+  //     final docSnap = await _db.collection(_collection).doc(userId).get();
 
-      if (!docSnap.exists) {
-        print("No route found for user $userId.");
-        return null;
-      }
+  //     if (!docSnap.exists) {
+  //       print("No route found for user $userId.");
+  //       return null;
+  //     }
 
-      return RouteModel.fromFirestore(docSnap);
-    } catch (e) {
-      print("Error fetching today's route for user $userId: $e");
-      return null;
-    }
-  }
+  //     return RouteModel.fromFirestore(docSnap);
+  //   } catch (e) {
+  //     print("Error fetching today's route for user $userId: $e");
+  //     return null;
+  //   }
+  // }
 
   Stream<RouteModel?> getAllRoutesStream(String userId) {
     return _db.collection(_collection).doc(userId).snapshots().map((docSnap) {

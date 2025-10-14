@@ -55,11 +55,10 @@ class ProviderRoute extends ChangeNotifier {
         .length;
   }
 
-// In ProviderRoute class, add this computed property:
+  // In ProviderRoute class, add this computed property:
 
   // Filtered overdue count
   int get filteredOverdueCount {
-
     return filteredStops.where((stop) {
       if (stop.status == AppConstants.completed) return false;
 
@@ -75,6 +74,7 @@ class ProviderRoute extends ChangeNotifier {
       return stopDate.isBefore(todayDate);
     }).length;
   }
+
   // Filtered progress value
   double get filteredProgressValue {
     if (filteredStops.isEmpty) return 0.0;
@@ -165,12 +165,12 @@ class ProviderRoute extends ChangeNotifier {
             _isLoading = false;
             notifyListeners();
           },
-          onError: (error) {
-            _errorMessage = 'Stream error: $error';
-            _isLoading = false;
-            notifyListeners();
-            print(_errorMessage);
-          },
+          // onError: (error) {
+          //   _errorMessage = 'Stream error: $error';
+          //   _isLoading = false;
+          //   notifyListeners();
+          //   console(_errorMessage);
+          // },
         );
   }
 
@@ -207,7 +207,7 @@ class ProviderRoute extends ChangeNotifier {
     } catch (e) {
       _errorMessage = 'Error updating stop status: ${e.toString()}';
       notifyListeners();
-      print(_errorMessage);
+      console(_errorMessage);
     }
   }
 
@@ -269,7 +269,7 @@ class ProviderRoute extends ChangeNotifier {
   //     _errorMessage = 'Error loading route: ${e.toString()}';
   //     _isLoading = false;
   //     notifyListeners();
-  //     print(_errorMessage);
+  //     console(_errorMessage);
   //   }
   // }
 
@@ -289,7 +289,7 @@ class ProviderRoute extends ChangeNotifier {
   //     _errorMessage = 'Error loading route: ${e.toString()}';
   //     _isLoading = false;
   //     notifyListeners();
-  //     print(_errorMessage);
+  //     console(_errorMessage);
   //   }
   // }
 }

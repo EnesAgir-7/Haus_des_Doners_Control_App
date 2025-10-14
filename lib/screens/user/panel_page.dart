@@ -1153,24 +1153,39 @@ class DailyRouteCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: status.color.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: status.color.withValues(alpha: 0.4),
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(status.icon, size: 13, color: status.color),
-                          const SizedBox(width: 5),
-                          Text(
-                            status.text,
-                            style: TextStyle(
-                              color: status.color,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(status.icon, size: 13, color: status.color),
+                              const SizedBox(width: 5),
+                              Text(
+                                status.text,
+                                style: TextStyle(
+                                  color: status.color,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
+                          if (stop.completedAt != null)
+                            Text(
+                              DateFormat(
+                                'MMMM d, yyyy \'at\' h:mm a',
+                              ).format(stop.completedAt!),
+                              style: TextStyle(
+                                color: AppColors.white.withValues(alpha: 0.6),
+                                fontSize: 8,
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -1185,16 +1200,17 @@ class DailyRouteCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Assigned Date Info
-                    Expanded(
-                      child: _buildInfoColumn(
-                        icon: Icons.calendar_today_rounded,
-                        iconColor: AppColors.primaryRed,
-                        label: LocaleKeys.assigned_at.tr(),
-                        value: DateFormat(
-                          'dd MMM, HH:mm',
-                        ).format(stop.createdAt ?? DateTime.now()),
+                    if (stop.createdAt != null)
+                      Expanded(
+                        child: _buildInfoColumn(
+                          icon: Icons.calendar_today_rounded,
+                          iconColor: AppColors.primaryRed,
+                          label: LocaleKeys.assigned_at.tr(),
+                          value: DateFormat(
+                            'MMMM d, yyyy \'at\' h:mm a',
+                          ).format(stop.createdAt!),
+                        ),
                       ),
-                    ),
 
                     // Conditionally display Score Info
                     if (stop.isCompleted) ...[
@@ -1204,7 +1220,9 @@ class DailyRouteCard extends StatelessWidget {
                           icon: Icons.star_rounded,
                           iconColor: AppColors.amber,
                           label: LocaleKeys.score.tr(),
-                          value: stop.inspectionId != null ? '9.0 / 10' : '-',
+                          value: stop.inspectionScore != null
+                              ? '${stop.inspectionScore}'
+                              : '-',
                         ),
                       ),
                     ],

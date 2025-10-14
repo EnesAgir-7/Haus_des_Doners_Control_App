@@ -11,7 +11,7 @@ import 'package:signature/signature.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../models/branch_model.dart';
-import '../../providers/provider_control_old.dart';
+import '../../providers/provider_control.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
 
