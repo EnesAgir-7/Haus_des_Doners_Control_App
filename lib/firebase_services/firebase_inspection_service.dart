@@ -310,7 +310,9 @@ class InspectionService {
             createdAt: DateTime.now(),
             completedAt: DateTime.now(),
             inspectionScore: score,
-            expiryDate: DateTime.now().add(Duration(days: 1)),
+            expiryDate: Timestamp.fromDate(
+              DateTime.now().add(Duration(days: 1)),
+            ),
           );
         }
         return stop;

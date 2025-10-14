@@ -188,6 +188,7 @@ Future<bool> updateStopTimeSlotForMe({
   Future<bool> assignBranchToMe({
     required String branchId,
     required String branchName,
+    required String branchAddress,
     required String timeSlot,
     required String branchTemplateId,
     required BuildContext context,
@@ -203,6 +204,7 @@ Future<bool> updateStopTimeSlotForMe({
         branchId: branchId,
         branchName: branchName,
         branchTemplateId: branchTemplateId,
+        branchAddress: branchAddress, 
       );
 
       _isLoading = false;

@@ -426,7 +426,9 @@ class CompactStopInfoSheet extends StatelessWidget {
                 _buildCompactInfoItem(
                   icon: Icons.check_circle,
                   label: "Completed At",
-                  value: DateFormat("h:mm a").format(stop.completedAt!),
+                  value: DateFormat(
+                    "MMMM d, yyyy 'at' h:mm a",
+                  ).format(stop.completedAt!),
                 ),
             ],
           ),
@@ -440,28 +442,31 @@ class CompactStopInfoSheet extends StatelessWidget {
     required String label,
     required String value,
   }) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: Colors.white70, size: 14),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.white70, fontSize: 12),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
+    return Flexible(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: Colors.white70, size: 14),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -165,12 +165,12 @@ class ProviderRoute extends ChangeNotifier {
             _isLoading = false;
             notifyListeners();
           },
-          // onError: (error) {
-          //   _errorMessage = 'Stream error: $error';
-          //   _isLoading = false;
-          //   notifyListeners();
-          //   console(_errorMessage);
-          // },
+          onError: (error) {
+            _errorMessage = 'Stream error: $error';
+            _isLoading = false;
+            notifyListeners();
+            console(_errorMessage);
+          },
         );
   }
 

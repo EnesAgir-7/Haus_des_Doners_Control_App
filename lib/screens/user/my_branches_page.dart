@@ -793,6 +793,7 @@ class BranchDetailsSheet extends StatelessWidget {
       final success = await prod.assignBranchToMe(
         branchId: branch.id,
         branchName: branch.name,
+        branchAddress: branch.address,
         timeSlot: timeSlot,
         context: context,
         branchTemplateId: branch.templateId,

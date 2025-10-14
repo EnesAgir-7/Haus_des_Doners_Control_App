@@ -163,6 +163,7 @@ class BranchService {
     required String inspectorName,
     required String branchId,
     required String branchName,
+    required String branchAddress,
     required String timeSlot,
     required String branchTemplateId,
   }) async {
@@ -185,6 +186,7 @@ class BranchService {
               timeSlot: timeSlot,
               branchId: branchId,
               branchName: branchName,
+              branchAddress: branchAddress,
               status: AppConstants.pending,
               order: 1,
               inspectionId: inspectorId,
@@ -203,6 +205,7 @@ class BranchService {
           branchTemplateId: branchTemplateId,
           branchId: branchId,
           branchName: branchName,
+          branchAddress: branchAddress,
           status: AppConstants.pending,
           order: route.stops.length + 1,
           createdAt: DateTime.now(),

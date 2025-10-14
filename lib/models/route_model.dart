@@ -64,9 +64,10 @@ class RouteStopModel {
   final String? inspectionId;
   final DateTime? createdAt;
   final DateTime? completedAt;
-  final DateTime? expiryDate; //
+  final Timestamp? expiryDate; //
   final int order;
   final double? inspectionScore; //
+  final String? branchAddress; // added
 
   RouteStopModel({
     required this.timeSlot,
@@ -80,6 +81,7 @@ class RouteStopModel {
     this.completedAt,
     this.expiryDate, //
     this.inspectionScore, //
+    this.branchAddress, // added
   });
 
   factory RouteStopModel.fromMap(Map<String, dynamic> data) {
@@ -99,10 +101,11 @@ class RouteStopModel {
       order: data['order'] ?? 0,
       createdAt: parseDate(data["createdAt"]),
       completedAt: parseDate(data["completedAt"]),
-      expiryDate: parseDate(data["expiryDate"]), //
+      expiryDate: data["expiryDate"], //
       inspectionScore: data['inspectionScore'] != null
           ? double.tryParse(data['inspectionScore'].toString())
           : null, //
+      branchAddress: data['branchAddress'], // added
     );
   }
 
@@ -117,8 +120,9 @@ class RouteStopModel {
       'order': order,
       'createdAt': createdAt?.toIso8601String(),
       'completedAt': completedAt?.toIso8601String(),
-      'expiryDate': expiryDate?.toIso8601String(), //
+      'expiryDate': expiryDate, //
       'inspectionScore': inspectionScore?.toDouble(), //
+      'branchAddress': branchAddress, // added
     };
   }
 
@@ -132,8 +136,9 @@ class RouteStopModel {
     int? order,
     DateTime? createdAt,
     DateTime? completedAt,
-    DateTime? expiryDate, //
+    Timestamp? expiryDate, //
     double? inspectionScore, //
+    String? branchAddress, // added
   }) {
     return RouteStopModel(
       timeSlot: timeSlot ?? this.timeSlot,
@@ -147,6 +152,7 @@ class RouteStopModel {
       completedAt: completedAt ?? this.completedAt,
       expiryDate: expiryDate ?? this.expiryDate, //
       inspectionScore: inspectionScore ?? this.inspectionScore, //
+      branchAddress: branchAddress ?? this.branchAddress, // added
     );
   }
 
@@ -156,5 +162,5 @@ class RouteStopModel {
 
   /// Helper: check if stop is expired
   bool get isExpired =>
-      expiryDate != null && DateTime.now().isAfter(expiryDate!);
+      expiryDate != null && DateTime.now().isAfter(expiryDate!.toDate());
 }

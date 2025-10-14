@@ -1133,15 +1133,31 @@ class DailyRouteCard extends StatelessWidget {
                   children: [
                     // Branch Name (Moved to header for compactness)
                     Expanded(
-                      child: Text(
-                        stop.branchName,
-                        style: const TextStyle(
-                          color: AppColors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: -0.3,
-                        ),
-                        overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            stop.branchName,
+                            style: const TextStyle(
+                              color: AppColors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: -0.3,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (stop.branchAddress != null)
+                            Text(
+                              stop.branchAddress!,
+                              style: TextStyle(
+                                color: AppColors.whiteWithOpacity(0.6),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: -0.3,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
                       ),
                     ),
                     const SizedBox(width: 12),
