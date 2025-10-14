@@ -38,14 +38,14 @@ class RouteNames {
 class AppRouter {
   static Map<String, Widget Function(BuildContext)> routes = {
     // User routes
-    RouteNames.panel: (context) => const PanelPage(),
-    RouteNames.subsidiaries: (context) => const BranchesPage(),
-    RouteNames.control: (context) => const ControlPage(),
+    RouteNames.panel: (context) => PanelPage(),
+    RouteNames.subsidiaries: (context) => BranchesPage(),
+    RouteNames.control: (context) => ControlPage(),
     RouteNames.route: (context) => RoutePage(),
-    RouteNames.fleet: (context) => const FleetPage(),
+    RouteNames.fleet: (context) => FleetPage(),
     RouteNames.tasks: (context) => TasksPage(),
     RouteNames.auth: (context) => ScreenAuth(),
-    RouteNames.mainLayout: (context) => const ScreenBottomNavBar(),
+    RouteNames.mainLayout: (context) => ScreenBottomNavBar(),
 
     // Admin routes
     RouteNames.admin: (context) => AdminDashboard(),
