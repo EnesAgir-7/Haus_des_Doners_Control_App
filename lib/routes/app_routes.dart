@@ -7,12 +7,12 @@ import '../admin/screens/screen_admin_tasks.dart';
 import '../admin/screens/screen_admin_users.dart';
 import '../layouts/bottom_nav_bar.dart';
 import '../screens/screen_auth.dart';
-import '../screens/user/control_page.dart';
-import '../screens/user/fleet_page.dart';
-import '../screens/user/my_branches_page.dart';
-import '../screens/user/panel_page.dart';
-import '../screens/user/route_page.dart';
-import '../screens/user/tasks_page.dart';
+import '../screens/user/screen_submit_report.dart';
+import '../screens/user/screen_vehicle.dart';
+import '../screens/user/screen_branches.dart';
+import '../screens/user/screen_home.dart';
+import '../screens/user/screen_routes.dart';
+import '../screens/user/screen_tasks.dart';
 
 /// Contains all route names as constants
 class RouteNames {
@@ -38,12 +38,12 @@ class RouteNames {
 class AppRouter {
   static Map<String, Widget Function(BuildContext)> routes = {
     // User routes
-    RouteNames.panel: (context) => const  PanelPage(),
-    RouteNames.subsidiaries: (context) => const BranchesPage(),
-    RouteNames.control: (context) => const ControlPage(),
-    RouteNames.route: (context) => const RoutePage(),
-    RouteNames.fleet: (context) => const FleetPage(),
-    RouteNames.tasks: (context) => TasksPage(),
+    RouteNames.panel: (context) => const ScreenHome(),
+    RouteNames.subsidiaries: (context) => const ScreenBranches(),
+    RouteNames.control: (context) => const ScreenSubmitReport(),
+    RouteNames.route: (context) => const ScreenRoutes(),
+    RouteNames.fleet: (context) => const ScreenVehicle(),
+    RouteNames.tasks: (context) => ScreenTasks(),
     RouteNames.auth: (context) => const ScreenAuth(),
     RouteNames.mainLayout: (context) => ScreenBottomNavBar(),
 

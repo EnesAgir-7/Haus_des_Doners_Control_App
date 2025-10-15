@@ -13,16 +13,16 @@ import '../../providers/provider_panel.dart';
 import '../../providers/provider_route.dart';
 import '../../providers/provider_tasks.dart';
 import '../../translations/locale_keys.g.dart';
-import 'control_page.dart';
+import 'screen_submit_report.dart';
 
-class PanelPage extends StatefulWidget {
-  const PanelPage({super.key});
+class ScreenHome extends StatefulWidget {
+  const ScreenHome({super.key});
 
   @override
-  State<PanelPage> createState() => _PanelPageState();
+  State<ScreenHome> createState() => _ScreenHomeState();
 }
 
-class _PanelPageState extends State<PanelPage> with TickerProviderStateMixin {
+class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
 
@@ -980,7 +980,7 @@ class DailySummarySection extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ControlPage(
+                          builder: (context) => ScreenSubmitReport(
                             branchId: entry.value.branchId,
                             branchTemplateId: entry.value.branchTemplateId,
                           ),

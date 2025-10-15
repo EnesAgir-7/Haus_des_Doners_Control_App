@@ -1,20 +1,20 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../providers/provider_fleet.dart';
 import '../../translations/locale_keys.g.dart';
 
-class FleetPage extends StatefulWidget {
-  const FleetPage({super.key});
+class ScreenVehicle extends StatefulWidget {
+  const ScreenVehicle({super.key});
 
   @override
-  State<FleetPage> createState() => _FleetPageState();
+  State<ScreenVehicle> createState() => _ScreenVehicleState();
 }
 
-class _FleetPageState extends State<FleetPage> with TickerProviderStateMixin {
+class _ScreenVehicleState extends State<ScreenVehicle>
+    with TickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
 
@@ -88,7 +88,7 @@ class _FleetPageState extends State<FleetPage> with TickerProviderStateMixin {
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Loading fleet data...',
+                      'Loading Vehicle data...',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 14,
@@ -210,27 +210,27 @@ class _FleetPageState extends State<FleetPage> with TickerProviderStateMixin {
                         icon: Icons.local_shipping_outlined,
                         title: LocaleKeys.fleet_management.tr(),
                       ),
-                      const SizedBox(height: 20),
 
+                      const SizedBox(height: 20),
                       if (provider.hasAssignedVehicle) ...[
-                        TweenAnimationBuilder<double>(
-                          duration: const Duration(milliseconds: 400),
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          curve: Curves.easeOutCubic,
-                          builder: (context, value, child) {
-                            return Opacity(
-                              opacity: value,
-                              child: Transform.translate(
-                                offset: Offset(0, 20 * (1 - value)),
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: _EnhancedCurrentVehicleCard(
-                            provider: provider,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
+                        // TweenAnimationBuilder<double>(
+                        //   duration: const Duration(milliseconds: 400),
+                        //   tween: Tween(begin: 0.0, end: 1.0),
+                        //   curve: Curves.easeOutCubic,
+                        //   builder: (context, value, child) {
+                        //     return Opacity(
+                        //       opacity: value,
+                        //       child: Transform.translate(
+                        //         offset: Offset(0, 20 * (1 - value)),
+                        //         child: child,
+                        //       ),
+                        //     );
+                        //   },
+                        //   child: _EnhancedCurrentVehicleCard(
+                        //     provider: provider,
+                        //   ),
+                        // ),
+                        // const SizedBox(height: 20),
                         TweenAnimationBuilder<double>(
                           duration: const Duration(milliseconds: 500),
                           tween: Tween(begin: 0.0, end: 1.0),
@@ -381,111 +381,6 @@ class _EnhancedNoVehicleCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _EnhancedCurrentVehicleCard extends StatelessWidget {
-  final ProviderFleet provider;
-  const _EnhancedCurrentVehicleCard({required this.provider});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primaryRed.withValues(alpha: 0.2),
-            AppColors.primaryRed.withValues(alpha: 0.1),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-
-        border: Border.all(
-          color: AppColors.primaryRed.withValues(alpha: 0.3),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primaryRed,
-                  AppColors.primaryRed.withValues(alpha: 0.8),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryRed.withValues(alpha: 0.4),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.vpn_key_rounded,
-              color: Colors.white,
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  LocaleKeys.current_rented_vehicle.tr(),
-                  style: TextStyle(
-                    color: AppColors.primaryRed,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.person_outline,
-                      size: 16,
-                      color: Colors.white.withValues(alpha: 0.7),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      loggedInUser!.name,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
-            ),
-            child: const Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 24,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1403,3 +1298,107 @@ void _showEnhancedUpdateKmDialog(BuildContext context, ProviderFleet provider) {
     ),
   );
 }
+// class _EnhancedCurrentVehicleCard extends StatelessWidget {
+//   final ProviderFleet provider;
+//   const _EnhancedCurrentVehicleCard({required this.provider});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: const EdgeInsets.all(20),
+//       decoration: BoxDecoration(
+//         gradient: LinearGradient(
+//           begin: Alignment.topLeft,
+//           end: Alignment.bottomRight,
+//           colors: [
+//             AppColors.primaryRed.withValues(alpha: 0.2),
+//             AppColors.primaryRed.withValues(alpha: 0.1),
+//           ],
+//         ),
+//         borderRadius: BorderRadius.circular(20),
+
+//         border: Border.all(
+//           color: AppColors.primaryRed.withValues(alpha: 0.3),
+//           width: 1,
+//         ),
+//       ),
+//       child: Row(
+//         children: [
+//           Container(
+//             padding: const EdgeInsets.all(16),
+//             decoration: BoxDecoration(
+//               gradient: LinearGradient(
+//                 colors: [
+//                   AppColors.primaryRed,
+//                   AppColors.primaryRed.withValues(alpha: 0.8),
+//                 ],
+//               ),
+//               borderRadius: BorderRadius.circular(16),
+//               boxShadow: [
+//                 BoxShadow(
+//                   color: AppColors.primaryRed.withValues(alpha: 0.4),
+//                   blurRadius: 12,
+//                   offset: const Offset(0, 4),
+//                 ),
+//               ],
+//             ),
+//             child: const Icon(
+//               Icons.vpn_key_rounded,
+//               color: Colors.white,
+//               size: 28,
+//             ),
+//           ),
+//           const SizedBox(width: 16),
+//           Expanded(
+//             child: Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                 Text(
+//                   LocaleKeys.current_rented_vehicle.tr(),
+//                   style: TextStyle(
+//                     color: AppColors.primaryRed,
+//                     fontWeight: FontWeight.bold,
+//                     fontSize: 16,
+//                     letterSpacing: -0.3,
+//                   ),
+//                 ),
+//                 const SizedBox(height: 6),
+//                 Row(
+//                   children: [
+//                     Icon(
+//                       Icons.person_outline,
+//                       size: 16,
+//                       color: Colors.white.withValues(alpha: 0.7),
+//                     ),
+//                     const SizedBox(width: 6),
+//                     Text(
+//                       loggedInUser!.name,
+//                       style: TextStyle(
+//                         color: Colors.white.withValues(alpha: 0.9),
+//                         fontSize: 14,
+//                         fontWeight: FontWeight.w500,
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ],
+//             ),
+//           ),
+//           Container(
+//             padding: const EdgeInsets.all(8),
+//             decoration: BoxDecoration(
+//               color: Colors.green.withValues(alpha: 0.2),
+//               borderRadius: BorderRadius.circular(10),
+//               border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+//             ),
+//             child: const Icon(
+//               Icons.check_circle,
+//               color: Colors.green,
+//               size: 24,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }

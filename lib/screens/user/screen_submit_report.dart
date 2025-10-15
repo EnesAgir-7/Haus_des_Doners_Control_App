@@ -15,13 +15,13 @@ import '../../providers/provider_control_old.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
 
-class ControlPage extends StatefulWidget {
+class ScreenSubmitReport extends StatefulWidget {
   final BranchModel? selectedBranch;
   final String? branchId;
   final String? branchTemplateId;
   final String? from;
 
-  const ControlPage({
+  const ScreenSubmitReport({
     super.key,
     this.selectedBranch,
     this.from = "",
@@ -30,10 +30,10 @@ class ControlPage extends StatefulWidget {
   });
 
   @override
-  State<ControlPage> createState() => _ControlPageState();
+  State<ScreenSubmitReport> createState() => _ScreenSubmitReportState();
 }
 
-class _ControlPageState extends State<ControlPage>
+class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     with TickerProviderStateMixin {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _overallNotesController = TextEditingController();

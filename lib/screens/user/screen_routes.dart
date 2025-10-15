@@ -9,16 +9,16 @@ import '../../providers/provider_route.dart';
 import '../../translations/locale_keys.g.dart';
 import '../bottom_sheets/stop_info_sheet.dart';
 import '../common_methods.dart';
-import 'control_page.dart';
+import 'screen_submit_report.dart';
 
-class RoutePage extends StatefulWidget {
-  const RoutePage({super.key});
+class ScreenRoutes extends StatefulWidget {
+  const ScreenRoutes({super.key});
 
   @override
-  State<RoutePage> createState() => _RoutePageState();
+  State<ScreenRoutes> createState() => _ScreenRoutesState();
 }
 
-class _RoutePageState extends State<RoutePage> {
+class _ScreenRoutesState extends State<ScreenRoutes> {
   Future<void> _selectDate(BuildContext context, ProviderRoute provider) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -689,7 +689,7 @@ class _RoutePageState extends State<RoutePage> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ControlPage(
+              builder: (context) => ScreenSubmitReport(
                 branchId: stop.branchId,
                 branchTemplateId: stop.branchTemplateId,
               ),

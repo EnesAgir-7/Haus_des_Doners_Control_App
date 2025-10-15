@@ -7,7 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../generated/lib/translations/locale_keys.g.dart';
 import '../../models/route_model.dart';
 import '../../widgets/app_button.dart';
-import '../user/control_page.dart';
+import '../user/screen_submit_report.dart';
 // void showStopInfoBottomSheet(RouteStopModel stop, BuildContext context) {
 //   final isCompleted = stop.status == AppConstants.completed;
 //   final statusInfo = getStatusInfo(stop, isCompleted);
@@ -536,7 +536,7 @@ class CompactStopInfoSheet extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ControlPage(
+                          builder: (context) => ScreenSubmitReport(
                             branchId: stop.branchId,
                             branchTemplateId: stop.branchTemplateId,
                           ),

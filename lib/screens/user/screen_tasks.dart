@@ -8,12 +8,12 @@ import '../../core/constants/app_colors.dart';
 import '../../models/task_model.dart';
 import '../../providers/provider_tasks.dart';
 
-class TasksPage extends StatefulWidget {
+class ScreenTasks extends StatefulWidget {
   @override
-  _TasksPageState createState() => _TasksPageState();
+  _ScreenTasksState createState() => _ScreenTasksState();
 }
 
-class _TasksPageState extends State<TasksPage> {
+class _ScreenTasksState extends State<ScreenTasks> {
   @override
   void initState() {
     super.initState();

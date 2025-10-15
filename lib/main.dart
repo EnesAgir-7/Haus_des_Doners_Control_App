@@ -155,9 +155,7 @@ class AuthWrapper extends StatelessWidget {
         final user = providerAuth.userModel!;
         loggedInUser = user; // keep global in sync
 
-        return user.isAdmin
-            ? const AdminBottomNavBar()
-            : const ScreenBottomNavBar();
+        return user.isAdmin ? const AdminBottomNavBar() : ScreenBottomNavBar();
       },
     );
   }

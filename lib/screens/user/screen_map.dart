@@ -10,7 +10,7 @@ import '../../models/branch_model.dart';
 import '../../providers/provider_map.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/custom_app_bar.dart';
-import 'control_page.dart';
+import 'screen_submit_report.dart';
 
 //TODO: locale
 class BranchMapScreen extends StatefulWidget {
@@ -244,7 +244,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                             timeSlot: timeSlot,
                                             context: context,
                                             branchTemplateId: branch.templateId,
-                                            branchAddress: branch.address, 
+                                            branchAddress: branch.address,
                                           );
 
                                       if (success) {
@@ -285,7 +285,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ControlPage(
+                                    builder: (context) => ScreenSubmitReport(
                                       selectedBranch: branch,
                                       branchId: branch.id,
                                       branchTemplateId: branch.templateId,

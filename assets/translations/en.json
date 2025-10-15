@@ -1,7 +1,7 @@
 {
-  "panel": "Panel",
+  "panel": "Home",
   "subsidiaries": "Subsidiaries",
-  "fleet": "Fleet",
+  "fleet": "Vehicle",
   "route": "Route",
   "file": "File",
   "tasks": "Tasks",
@@ -40,7 +40,7 @@
   "cleanliness_hygiene": "Cleanliness & Hygiene",
   "personnel_service": "Personnel & Service",
   "store_organization": "Store Organization",
-  "fleet_management": "Fleet Management",
+  "fleet_management": "Vehicle Management",
   "other_controller_vehicles": "Other Controller Vehicles",
   "current_rented_vehicle": "Current Rented Vehicle",
   "controller_name": "Controller: Mehmet Yılmaz",

@@ -12,17 +12,17 @@ import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/inspector_branch_card.dart';
 import '../common_methods.dart';
-import 'control_page.dart';
+import 'screen_submit_report.dart';
 import 'screen_map.dart';
 
-class BranchesPage extends StatefulWidget {
-  const BranchesPage({super.key});
+class ScreenBranches extends StatefulWidget {
+  const ScreenBranches({super.key});
 
   @override
-  State<BranchesPage> createState() => _BranchesPageState();
+  State<ScreenBranches> createState() => _ScreenBranchesState();
 }
 
-class _BranchesPageState extends State<BranchesPage> {
+class _ScreenBranchesState extends State<ScreenBranches> {
   @override
   void initState() {
     super.initState();
@@ -708,7 +708,7 @@ class BranchDetailsSheet extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ControlPage(
+                        builder: (context) => ScreenSubmitReport(
                           from: AppConstants.details,
                           selectedBranch: branch,
                           branchId: branch.id,
