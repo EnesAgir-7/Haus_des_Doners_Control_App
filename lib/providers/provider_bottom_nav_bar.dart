@@ -1,27 +1,21 @@
 import 'package:flutter/material.dart';
-import '../routes/app_routes.dart';
+import 'package:haus_des_control/screens/user/fleet_page.dart';
+import 'package:haus_des_control/screens/user/my_branches_page.dart';
+import 'package:haus_des_control/screens/user/panel_page.dart';
+import 'package:haus_des_control/screens/user/route_page.dart';
+import 'package:haus_des_control/screens/user/tasks_page.dart';
 
 class ProviderBottomNavBar extends ChangeNotifier {
   int _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
 
-  late final List<Widget> screens;
-
-  bool _isInitialized = false;
-
-  /// Initialize all screens once (preserve their state)
-  void initScreens(BuildContext context) {
-    if (_isInitialized) return;
-    _isInitialized = true;
-
-    screens = [
-      AppRouter.routes[RouteNames.panel]!(context),
-      AppRouter.routes[RouteNames.subsidiaries]!(context),
-      AppRouter.routes[RouteNames.route]!(context),
-      AppRouter.routes[RouteNames.fleet]!(context),
-      AppRouter.routes[RouteNames.tasks]!(context),
-    ];
-  }
+  final List<Widget> screens = [
+    PanelPage(),
+    BranchesPage(),
+    RoutePage(),
+    FleetPage(),
+    TasksPage(),
+  ];
 
   void onItemTapped(int index) {
     if (_selectedIndex != index) {

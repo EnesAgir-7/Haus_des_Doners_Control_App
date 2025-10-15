@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:haus_des_control/widgets/custom_app_bar.dart';
+import 'package:provider/provider.dart';
 
 import '../core/constants/app_colors.dart';
 import '../providers/provider_bottom_nav_bar.dart';
@@ -12,14 +12,12 @@ class ScreenBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = context.read<ProviderBottomNavBar>();
-    controller.initScreens(context);
-
     return Consumer<ProviderBottomNavBar>(
       builder: (context, controller, _) {
         return Scaffold(
           appBar: CustomAppBar(),
           body: IndexedStack(
+            key: Key("stack${context.locale.languageCode}"),
             index: controller.selectedIndex,
             children: controller.screens,
           ),
