@@ -211,7 +211,7 @@ class _ScreenVehicleState extends State<ScreenVehicle>
                         title: LocaleKeys.fleet_management.tr(),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       if (provider.hasAssignedVehicle) ...[
                         // TweenAnimationBuilder<double>(
                         //   duration: const Duration(milliseconds: 400),

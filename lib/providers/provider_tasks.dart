@@ -1,11 +1,11 @@
 // lib/providers/tasks_provider.dart
 import 'dart:async';
-
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
+
 import '../core/console.dart';
 import '../firebase_services/firebase_tasks_service.dart';
 import '../models/task_model.dart';
@@ -30,7 +30,9 @@ class ProviderTasks extends ChangeNotifier {
   String _sortBy = AppConstants.dueDate;
 
   // Comment input
-  final TextEditingController commentController = TextEditingController();
+  final TextEditingController commentController = TextEditingController(
+    text: "Hello, this is a testing comment ",
+  );
   List<File> _commentPhotos = [];
 
   // Getters
@@ -276,7 +278,7 @@ class ProviderTasks extends ChangeNotifier {
       // Create comment
       final comment = TaskCommentModel(
         userId: loggedInUser!.id,
-        userName: FirebaseAuth.instance.currentUser?.displayName ?? 'Inspector',
+        userName: loggedInUser?.name ?? 'Inspector',
         text: commentText,
         timestamp: DateTime.now(),
         photos: photoUrls,

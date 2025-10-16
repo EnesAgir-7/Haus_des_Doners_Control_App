@@ -487,11 +487,21 @@ class _ScreenTasksState extends State<ScreenTasks> {
 }
 
 // Task Details Bottom Sheet
-class TaskDetailsSheet extends StatelessWidget {
+class TaskDetailsSheet extends StatefulWidget {
   final TaskModel task;
   final ProviderTasks provider;
 
   TaskDetailsSheet({required this.task, required this.provider});
+
+  @override
+  State<TaskDetailsSheet> createState() => _TaskDetailsSheetState();
+}
+
+class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -521,7 +531,7 @@ class TaskDetailsSheet extends StatelessWidget {
 
               // Title
               Text(
-                task.title,
+                widget.task.title,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 22,
@@ -535,14 +545,14 @@ class TaskDetailsSheet extends StatelessWidget {
                 children: [
                   _buildDetailBadge(
                     icon: Icons.flag,
-                    label: _getPriorityText(task.priority),
-                    color: _getPriorityColor(task.priority),
+                    label: _getPriorityText(widget.task.priority),
+                    color: _getPriorityColor(widget.task.priority),
                   ),
                   SizedBox(width: 12),
                   _buildDetailBadge(
                     icon: Icons.schedule,
-                    label: _getStatusText(task.status),
-                    color: _getStatusColor(task.status),
+                    label: _getStatusText(widget.task.status),
+                    color: _getStatusColor(widget.task.status),
                   ),
                 ],
               ),
@@ -559,7 +569,7 @@ class TaskDetailsSheet extends StatelessWidget {
               ),
               SizedBox(height: 8),
               Text(
-                task.description,
+                widget.task.description,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 15,
@@ -569,12 +579,12 @@ class TaskDetailsSheet extends StatelessWidget {
               SizedBox(height: 20),
 
               // Meta info
-              if (task.dueDate != null) ...[
+              if (widget.task.dueDate != null) ...[
                 _buildInfoRow(
                   icon: Icons.calendar_today,
                   label: LocaleKeys.due_date.tr(),
                   value:
-                      '${task.dueDate!.day}/${task.dueDate!.month}/${task.dueDate!.year}',
+                      '${widget.task.dueDate!.day}/${widget.task.dueDate!.month}/${widget.task.dueDate!.year}',
                 ),
                 SizedBox(height: 12),
               ],
@@ -583,7 +593,7 @@ class TaskDetailsSheet extends StatelessWidget {
                 icon: Icons.person,
                 //TODO: locale
                 label: "Assigned Inspector",
-                value: task.assignedInspectorName,
+                value: widget.task.assignedInspectorName,
               ),
 
               SizedBox(height: 24),
@@ -593,31 +603,37 @@ class TaskDetailsSheet extends StatelessWidget {
               // Comments section
               Expanded(child: _buildCommentsSection(scrollController)),
 
+              // Comment input field for non-completed tasks
+              if (!widget.task.isCompleted) ...[
+                SizedBox(height: 16),
+                _buildCommentInputField(),
+              ],
+
               // Status update buttons
-              if (!task.isCompleted) ...[
+              if (!widget.task.isCompleted) ...[
                 SizedBox(height: 16),
                 Row(
                   children: [
-                    if (task.isPending)
+                    if (widget.task.isPending)
                       Expanded(
                         child: _buildActionButton(
                           label: LocaleKeys.start.tr(),
                           icon: Icons.play_arrow,
                           color: Color(0xFFFFA726),
                           onPressed: () {
-                            provider.markAsInProgress(task.id);
+                            widget.provider.markAsInProgress(widget.task.id);
                             Navigator.pop(context);
                           },
                         ),
                       ),
-                    if (task.isInProgress) ...[
+                    if (widget.task.isInProgress) ...[
                       Expanded(
                         child: _buildActionButton(
                           label: LocaleKeys.complete.tr(),
                           icon: Icons.check_circle,
                           color: Color(0xFF4CAF50),
                           onPressed: () {
-                            provider.markAsCompleted(task.id);
+                            widget.provider.markAsCompleted(widget.task.id);
                             Navigator.pop(context);
                           },
                         ),
@@ -626,6 +642,51 @@ class TaskDetailsSheet extends StatelessWidget {
                   ],
                 ),
               ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCommentInputField() {
+    return Consumer<ProviderTasks>(
+      builder: (context, taskCont, child) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Color(0xFF2A2A2A),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Color(0xFF3A3A3A), width: 1),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: taskCont.commentController,
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                  maxLines: null,
+                  decoration: InputDecoration(
+                    hintText:
+                        "Add comment", // TODO: Add this to your locale keys
+                    hintStyle: TextStyle(
+                      color: Color(0xFF606060),
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.send, color: Color(0xFFE53935)),
+                onPressed: () {
+                  // Add comment logic here
+                  widget.provider.addComment(widget.task.id);
+                },
+              ),
             ],
           ),
         );
@@ -689,7 +750,7 @@ class TaskDetailsSheet extends StatelessWidget {
   }
 
   Widget _buildCommentsSection(ScrollController scrollController) {
-    if (task.comments.isEmpty) {
+    if (widget.task.comments.isEmpty) {
       return Center(
         child: Text(
           LocaleKeys.no_comments.tr(),
@@ -700,9 +761,9 @@ class TaskDetailsSheet extends StatelessWidget {
 
     return ListView.builder(
       controller: scrollController,
-      itemCount: task.comments.length,
+      itemCount: widget.task.comments.length,
       itemBuilder: (context, index) {
-        final comment = task.comments[index];
+        final comment = widget.task.comments[index];
         return Container(
           margin: EdgeInsets.only(bottom: 12),
           padding: EdgeInsets.all(12),

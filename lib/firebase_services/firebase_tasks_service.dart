@@ -120,6 +120,7 @@ class TaskService {
 
   // Add comment to task
   Future<void> addTaskComment(String taskId, TaskCommentModel comment) async {
+    console("Adding comnet");
     try {
       await _db.collection(_collection).doc(taskId).update({
         'comments': FieldValue.arrayUnion([comment.toMap()]),
