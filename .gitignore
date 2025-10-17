@@ -26,3 +26,4 @@ key.properties
 .pub/
 .flutter-plugins
 .flutter-plugins-dependencies
+.env
