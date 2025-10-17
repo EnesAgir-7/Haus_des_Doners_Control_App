@@ -27,3 +27,4 @@ key.properties
 .flutter-plugins
 .flutter-plugins-dependencies
 .env
+*.env
