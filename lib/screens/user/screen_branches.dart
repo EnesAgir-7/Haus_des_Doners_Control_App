@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/models/branch_model.dart';
-import 'package:haus_des_control/screens/user/screen_online_pdf_viewer.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_assets.dart';
@@ -13,8 +12,8 @@ import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/inspector_branch_card.dart';
 import '../common_methods.dart';
-import 'screen_submit_report.dart';
 import 'screen_map.dart';
+import 'screen_submit_report.dart';
 
 class ScreenBranches extends StatefulWidget {
   const ScreenBranches({super.key});
@@ -651,10 +650,8 @@ class BranchDetailsSheet extends StatelessWidget {
                     ),
                   ),
 
-                  // Right Side — PDF Icon + Score Badge
                   Row(
                     children: [
-                      // ✅ Compact PDF icon (if report exists)
                       if (inspection.publicUrl != null &&
                           inspection.publicUrl!.isNotEmpty)
                         IconButton(
@@ -665,19 +662,10 @@ class BranchDetailsSheet extends StatelessWidget {
                             size: 20,
                           ),
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PdfViewerScreen(
-                                  pdfUrl: inspection.pdfReportWebUrl!,
-                                  inspectorName: inspection.inspectorName!,
-                                ),
-                              ),
-                            );
+                            openInBrowser(inspection.publicUrl!, context);
                           },
                         ),
 
-                      // Score Badge
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,

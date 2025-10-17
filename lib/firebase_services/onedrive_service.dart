@@ -69,8 +69,15 @@ class OneDriveService {
   }
 
   // Use service account drive
+  // String _driveRoot() {
+  //   return 'users/${OneDriveConfig.myUserId}/drive/root';
+  // }
+  String _driveBase() {
+    return 'users/${OneDriveConfig.myUserId}/drive';
+  }
+
   String _driveRoot() {
-    return 'users/${OneDriveConfig.myUserId}/drive/root';
+    return '${_driveBase()}/root';
   }
 
   Future<String> createInspectionFolder(
@@ -135,7 +142,8 @@ class OneDriveService {
         }),
       );
 
-      if (createResponse.statusCode == 201 || createResponse.statusCode == 200) {
+      if (createResponse.statusCode == 201 ||
+          createResponse.statusCode == 200) {
         print('✅ Folder created: $folderPath');
       } else {
         final error = jsonDecode(createResponse.body);
@@ -171,7 +179,12 @@ class OneDriveService {
     if (fileSize < 4 * 1024 * 1024) {
       uploadedData = await _simpleUpload(file, remotePath, fileName);
     } else {
-      uploadedData = await _resumableUpload(file, remotePath, fileName, onProgress);
+      uploadedData = await _resumableUpload(
+        file,
+        remotePath,
+        fileName,
+        onProgress,
+      );
     }
 
     if (returnPublicLink) {
@@ -245,7 +258,8 @@ class OneDriveService {
       }),
     );
 
-    if (sessionResponse.statusCode != 200 && sessionResponse.statusCode != 201) {
+    if (sessionResponse.statusCode != 200 &&
+        sessionResponse.statusCode != 201) {
       final error = jsonDecode(sessionResponse.body);
       throw Exception(
         'Failed to create upload session: ${error['error']?['message'] ?? sessionResponse.body}',
@@ -286,7 +300,8 @@ class OneDriveService {
         '📊 Upload progress: ${(uploadedBytes / fileSize * 100).toStringAsFixed(1)}%',
       );
 
-      if (uploadResponse.statusCode == 200 || uploadResponse.statusCode == 201) {
+      if (uploadResponse.statusCode == 200 ||
+          uploadResponse.statusCode == 201) {
         final data = jsonDecode(uploadResponse.body);
         print('✅ Resumable upload complete: $fileName');
 
@@ -308,32 +323,48 @@ class OneDriveService {
   }
 
   // Create public link for any uploaded file
-  Future<String> createPublicLink(String itemId) async {
+  // REPLACE your existing createPublicLink function with this one.
+  Future<String> createPublicLink(String itemId, {int retries = 3}) async {
     await _ensureToken();
 
+    // ✅ CORRECTED PATH: Use _driveBase() instead of _driveRoot()
     final url = Uri.parse(
-        '${OneDriveConfig.graphApiBaseUrl}/me/drive/items/$itemId/createLink');
-
-    final response = await http.post(
-      url,
-      headers: {
-        'Authorization': 'Bearer $_accessToken',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'type': 'view',
-        'scope': 'anonymous', // Publicly accessible
-      }),
+      '${OneDriveConfig.graphApiBaseUrl}/${_driveBase()}/items/$itemId/createLink',
     );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
-      return data['link']['webUrl'];
-    } else {
-      final error = jsonDecode(response.body);
-      throw Exception(
-          'Failed to create public link: ${error['error']?['message'] ?? response.body}');
+    for (int i = 0; i < retries; i++) {
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({'type': 'view', 'scope': 'anonymous'}),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+        print('✅ Public link created successfully for item $itemId');
+        return data['link']['webUrl'];
+      } else {
+        final error = jsonDecode(response.body);
+        final errorMessage = error['error']?['message'] ?? response.body;
+
+        // If item is not found, wait and retry.
+        if (response.statusCode == 404 && i < retries - 1) {
+          print(
+            '⚠️ Item not found, retrying in 2 seconds... (${i + 1}/$retries)',
+          );
+          await Future.delayed(const Duration(seconds: 2));
+        } else {
+          // For other errors or if all retries fail, throw the exception.
+          throw Exception('Failed to create public link: $errorMessage');
+        }
+      }
     }
+
+    // This should not be reached if logic is correct
+    throw Exception('Failed to create public link after $retries retries.');
   }
 
   // Upload PDF Report
@@ -371,6 +402,7 @@ class OneDriveService {
           file: images[i],
           remotePath: categoryFolder,
         );
+        console(result.toString(), tag: "THe resutl");
         uploadedFiles.add(result);
 
         if (onProgress != null) {

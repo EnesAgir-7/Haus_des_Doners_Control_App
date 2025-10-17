@@ -58,8 +58,7 @@ dependencies:
   http: ^1.5.0
   crypto: ^3.0.6
   flutter_dotenv: ^6.0.0
-  syncfusion_flutter_pdfviewer: ^31.2.2
-  webview_flutter: ^4.13.0
+  url_launcher: ^6.3.2
   
 
 dev_dependencies:

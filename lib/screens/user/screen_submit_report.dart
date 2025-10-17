@@ -71,6 +71,51 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     super.dispose();
   }
 
+  Future<void> _pickFromGallery(String category) async {
+    try {
+      final provider = context.read<ProviderControl>();
+      final existingCount = provider.getCategoryPhotos(category).length;
+      const maxPhotos = 4;
+
+      if (existingCount >= maxPhotos) {
+        if (mounted) showSnakBarr(context, LocaleKeys.maximum_photos.tr());
+        return;
+      }
+
+      final List<XFile> selectedImages = await _picker.pickMultiImage(
+        imageQuality: 85,
+      );
+
+      if (selectedImages.isEmpty || !mounted) return;
+
+      final totalAfterAdd = existingCount + selectedImages.length;
+
+      // If user selects too many
+      if (totalAfterAdd > maxPhotos) {
+        if (mounted) {
+          showSnakBarr(
+            context,
+            "You can only upload a total of $maxPhotos photos per category.",
+          );
+        }
+      }
+
+      // Only take up to the remaining allowed number
+      final remaining = maxPhotos - existingCount;
+      final allowedImages = selectedImages.take(remaining);
+
+      for (final image in allowedImages) {
+        final file = File(image.path);
+        provider.addCategoryPhoto(category, file);
+      }
+    } catch (e, st) {
+      debugPrint('Error picking from gallery: $e\n$st');
+      if (mounted) {
+        showSnakBarr(context, "Error Picking from Gallery");
+      }
+    }
+  }
+
   Future<void> _takePhoto(String category) async {
     try {
       final XFile? photo = await _picker.pickImage(
@@ -592,22 +637,49 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                AppButton(
-                  text: '${LocaleKeys.take_photo.tr()} (${photos.length}/4)',
-                  textStyle: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  icon: photos.length < 4
-                      ? Icons.camera_alt
-                      : Icons.check_circle,
-                  onPressed: photos.length < 4
-                      ? () => _takePhoto(category)
-                      : null,
-                  backgroundColor: photos.length < 4
-                      ? AppColors.primaryRed
-                      : Colors.green,
-                  height: 48,
+                Row(
+                  spacing: 13,
+                  children: [
+                    Expanded(
+                      child: AppButton(
+                        text:
+                            '${LocaleKeys.take_photo.tr()} (${photos.length}/4)',
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        icon: photos.length < 4
+                            ? Icons.camera_alt
+                            : Icons.check_circle,
+                        onPressed: photos.length < 4
+                            ? () => _takePhoto(category)
+                            : null,
+                        backgroundColor: photos.length < 4
+                            ? AppColors.primaryRed
+                            : Colors.green,
+                        height: 48,
+                      ),
+                    ),
+                    Expanded(
+                      child: AppButton(
+                        text: 'Browse (${photos.length}/4)',
+                        textStyle: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        icon: photos.length < 4
+                            ? Icons.camera_alt
+                            : Icons.check_circle,
+                        onPressed: photos.length < 4
+                            ? () => _pickFromGallery(category)
+                            : null,
+                        backgroundColor: photos.length < 4
+                            ? AppColors.primaryRed
+                            : Colors.green,
+                        height: 48,
+                      ),
+                    ),
+                  ],
                 ),
                 if (photos.isNotEmpty) ...[
                   const SizedBox(height: 16),
