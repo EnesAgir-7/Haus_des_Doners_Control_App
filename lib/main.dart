@@ -22,6 +22,7 @@ import 'layouts/bottom_nav_bar.dart';
 import 'providers/provider_bottom_nav_bar.dart';
 import 'providers/provider_branches.dart';
 import 'providers/provider_control.dart';
+import 'providers/provider_inspections.dart';
 import 'providers/provider_map.dart';
 import 'providers/provider_panel.dart';
 import 'providers/provider_report_photo.dart';
@@ -85,6 +86,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderAdminFleet()),
         ChangeNotifierProvider(create: (_) => ProviderAdminUsers()),
         ChangeNotifierProvider(create: (_) => ProviderBottomNavBar()),
+        ChangeNotifierProvider(create: (_) => ProviderInspection()),
       ],
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,

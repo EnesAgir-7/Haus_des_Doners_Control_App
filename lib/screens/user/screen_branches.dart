@@ -12,6 +12,7 @@ import '../../translations/locale_keys.g.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/inspector_branch_card.dart';
 import '../common_methods.dart';
+import 'screen_inspection_details.dart';
 import 'screen_map.dart';
 import 'screen_submit_report.dart';
 
@@ -612,109 +613,101 @@ class BranchDetailsSheet extends StatelessWidget {
       itemBuilder: (context, index) {
         final inspection = provider.branchInspections[index];
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.lightRed,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white24),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// Header Row — Inspector Info + Score + PDF Button
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Inspector Info
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Inspected by: ${inspection.inspectorName}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    ScreenInspectionDetails(inspectionId: inspection.id),
+              ),
+            );
+          },
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.lightRed,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white24),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// Header Row — Inspector Info + Score + PDF Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Inspector Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Inspected by: ${inspection.inspectorName}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        Text(
-                          formatDate(inspection.updatedAt),
-                          style: TextStyle(
-                            color: AppColors.whiteWithOpacity(.7),
-                            fontSize: 12,
+                          Text(
+                            formatDate(inspection.updatedAt),
+                            style: TextStyle(
+                              color: AppColors.whiteWithOpacity(.7),
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
 
-                  Row(
-                    children: [
-                      if (inspection.publicUrl != null &&
-                          inspection.publicUrl!.isNotEmpty)
-                        IconButton(
-                          tooltip: 'View Report',
-                          icon: const Icon(
-                            Icons.picture_as_pdf,
-                            color: Colors.redAccent,
-                            size: 20,
-                          ),
-                          onPressed: () {
-                            openInBrowser(inspection.publicUrl!, context);
-                          },
-                        ),
-
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getScoreColor(
-                            inspection.score,
-                          ).withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: _getScoreColor(inspection.score),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              size: 14,
-                              color: _getScoreColor(inspection.score),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              inspection.score.toStringAsFixed(1),
-                              style: TextStyle(
-                                color: _getScoreColor(inspection.score),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getScoreColor(
+                          inspection.score,
+                        ).withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: _getScoreColor(inspection.score),
                         ),
                       ),
-                    ],
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.star,
+                            size: 14,
+                            color: _getScoreColor(inspection.score),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            inspection.score.toStringAsFixed(1),
+                            style: TextStyle(
+                              color: _getScoreColor(inspection.score),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Optional overall notes
+                if (inspection.overallNotes.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    inspection.overallNotes,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
-              ),
-
-              // Optional overall notes
-              if (inspection.overallNotes.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  inspection.overallNotes,
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
               ],
-            ],
+            ),
           ),
         );
       },
