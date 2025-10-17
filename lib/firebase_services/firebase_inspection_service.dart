@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../models/inspection_model.dart';
@@ -153,6 +154,7 @@ class InspectionService {
 
   // Create inspection
   Future<String> createInspection(InspectionModel inspection) async {
+    console('Creating inspection...');
     try {
       final docRef = await _db.collection(_collection).add(inspection.toMap());
       // Update branch statistics

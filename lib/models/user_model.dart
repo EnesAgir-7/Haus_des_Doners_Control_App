@@ -10,6 +10,7 @@ class UserModel {
   final String? assignedVehicleId;
   final String createdAt;
   final String updatedAt;
+  final String? serviceAccount;
 
   UserModel({
     required this.id,
@@ -18,6 +19,7 @@ class UserModel {
     required this.role,
     required this.active,
     this.region,
+    this.serviceAccount, 
     this.assignedVehicleId,
     required this.createdAt,
     required this.updatedAt,
@@ -32,9 +34,11 @@ class UserModel {
       role: data['role'] ?? 'inspector',
       active: data['active'] ?? true,
       region: data['region'],
+      serviceAccount: data['serviceAccount'],
       assignedVehicleId: data['assignedVehicleId'],
       createdAt: data['createdAt'].toString(),
       updatedAt: data['updatedAt'].toString(),
+
     );
   }
 
@@ -48,6 +52,7 @@ class UserModel {
       active: map['active'] ?? true,
       region: map['region'],
       assignedVehicleId: map['assignedVehicleId'],
+      serviceAccount: map['serviceAccount'],
       createdAt: map['createdAt'],
       updatedAt: map['updatedAt'],
     );
@@ -62,6 +67,7 @@ class UserModel {
       'active': active,
       'region': region,
       'assignedVehicleId': assignedVehicleId,
+      "serviceAccount": serviceAccount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };

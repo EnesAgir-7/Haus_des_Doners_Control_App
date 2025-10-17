@@ -18,16 +18,16 @@ import 'package:provider/provider.dart';
 import 'core/constants/app_colors.dart';
 import 'core/global_focus_manager.dart';
 import 'core/theme/app_theme.dart';
-import 'firebase_services/onedrive_service.dart';
 import 'layouts/bottom_nav_bar.dart';
 import 'providers/provider_bottom_nav_bar.dart';
 import 'providers/provider_branches.dart';
-import 'providers/provider_control_old.dart';
+import 'providers/provider_control.dart';
 import 'providers/provider_map.dart';
 import 'providers/provider_panel.dart';
 import 'providers/provider_report_photo.dart';
 import 'routes/app_routes.dart';
 import 'screens/screen_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -35,6 +35,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await EasyLocalization.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   // Initialize OneDrive
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -45,8 +46,6 @@ void main() async {
     ),
   );
 
-  final oneDriveService = OneDriveService();
-  await oneDriveService.initialize();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

@@ -25,32 +25,39 @@ class StatusInfo {
 
 StatusInfo getStatusInfo(RouteStopModel stop, bool isCompleted) {
   final today = DateTime.now();
-  final todayKey = "${today.year}-${today.month}-${today.day}";
-  final isToday = stop.timeSlot == todayKey;
+  final todayDate = DateTime(today.year, today.month, today.day);
 
+  // Parse stop date from timeSlot (format: yyyy-MM-dd)
   final stopParts = stop.timeSlot.split('-');
   final stopDate = DateTime(
     int.parse(stopParts[0]),
     int.parse(stopParts[1]),
     int.parse(stopParts[2]),
   );
+
+  final todayKey = "${today.year}-${today.month}-${today.day}";
+  final isToday = stop.timeSlot == todayKey;
+
+  // Expired if completed before today
   final bool isExpired =
       stop.isCompleted &&
       stop.completedAt != null &&
-      stop.completedAt!.isBefore(today);
+      stop.completedAt!.isBefore(todayDate);
 
-  final isOverdue =
-      stopDate.isBefore(DateTime(today.year, today.month, today.day)) &&
-      !isCompleted;
+  // Overdue if the stop date is before today and not completed
+  final bool isOverdue = stopDate.isBefore(todayDate) && !isCompleted;
 
   Color color;
   IconData icon;
   String label;
-  if (isExpired && isCompleted && !isToday) {
+
+  if (isExpired) {
+    // Completed earlier than today = expired
     color = Colors.deepOrange;
     icon = Icons.warning_amber_rounded;
     label = "Expired";
   } else if (isCompleted) {
+    // Completed today (or not expired)
     color = Colors.green;
     icon = Icons.check_circle;
     label = LocaleKeys.completed.tr();

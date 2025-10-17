@@ -57,6 +57,7 @@ dependencies:
   mime: ^2.0.0
   http: ^1.5.0
   crypto: ^3.0.6
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_launcher_icons: "^0.14.4"
@@ -94,6 +95,7 @@ flutter:
     - assets/translations/
     - assets/fonts/
     - assets/map_styles/
+    - .env
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
