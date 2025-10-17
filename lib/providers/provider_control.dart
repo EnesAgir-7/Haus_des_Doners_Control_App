@@ -185,7 +185,6 @@ class ProviderControl extends ChangeNotifier {
       _successMessage = null;
       notifyListeners();
 
-   
       // 🔹 No OneDrive login needed anymore
       // The OneDriveService will already handle token automatically internally
 
@@ -276,6 +275,7 @@ class ProviderControl extends ChangeNotifier {
         overallNotes: _overallNotes,
         pdfReportUrl: pdfUploadResult['downloadUrl'],
         pdfReportWebUrl: pdfUploadResult['webUrl'],
+        publicUrl: pdfUploadResult['publicUrl'],
         createdAt: now,
         updatedAt: now,
       );

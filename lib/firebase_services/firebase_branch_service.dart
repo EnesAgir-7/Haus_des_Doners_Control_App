@@ -283,18 +283,18 @@ class BranchService {
       final updatedStops = route.stops
           .where((s) => s.branchId != branchId)
           .toList();
+      Future.wait([
+        routeDocRef.update({
+          'stops': updatedStops.map((s) => s.toMap()).toList(),
+          'updatedAt': Timestamp.fromDate(DateTime.now()),
+        }),
 
-      await routeDocRef.update({
-        'stops': updatedStops.map((s) => s.toMap()).toList(),
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
-      });
-
-      // Mark branch as unassigned
-      await _db.collection(_collectionBranches).doc(branchId).update({
-        'isAssigned': false,
-        'nextInspectionDate': null,
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
-      });
+        _db.collection(_collectionBranches).doc(branchId).update({
+          'isAssigned': false,
+          'nextInspectionDate': null,
+          'updatedAt': Timestamp.fromDate(DateTime.now()),
+        }),
+      ]);
 
       console('Branch unassigned successfully');
     } catch (e) {

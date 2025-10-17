@@ -464,7 +464,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeOutCubic,
-                        height: isSelected ? 90 : 80,
+                        height: isSelected ? 100 : 80,
                         decoration: BoxDecoration(
                           gradient: isSelected
                               ? LinearGradient(
@@ -507,7 +507,6 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                               ratingData['emoji'],
                               style: TextStyle(fontSize: isSelected ? 28 : 24),
                             ),
-                            const SizedBox(height: 6),
                             Text(
                               rating.toString(),
                               style: TextStyle(
@@ -521,7 +520,6 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                               ),
                             ),
                             if (isSelected) ...[
-                              const SizedBox(height: 2),
                               Text(
                                 ratingData['label'],
                                 style: const TextStyle(

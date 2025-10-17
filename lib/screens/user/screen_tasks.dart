@@ -505,113 +505,126 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final viewInsets = MediaQuery.of(context).viewInsets;
+
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
       minChildSize: 0.5,
       maxChildSize: 0.95,
       expand: false,
       builder: (context, scrollController) {
-        return Container(
-          padding: EdgeInsets.all(20),
+        return AnimatedPadding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: viewInsets.bottom + 20,
+          ),
+          duration: Duration(milliseconds: 100),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Color(0xFF3A3A3A),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
+              // Scrollable content
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  children: [
+                    // Handle bar
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF3A3A3A),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
 
-              // Title
-              Text(
-                widget.task.title,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 12),
+                    // Title
+                    Text(
+                      widget.task.title,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 12),
 
-              // Status and Priority
-              Row(
-                children: [
-                  _buildDetailBadge(
-                    icon: Icons.flag,
-                    label: _getPriorityText(widget.task.priority),
-                    color: _getPriorityColor(widget.task.priority),
-                  ),
-                  SizedBox(width: 12),
-                  _buildDetailBadge(
-                    icon: Icons.schedule,
-                    label: _getStatusText(widget.task.status),
-                    color: _getStatusColor(widget.task.status),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
+                    // Status and Priority
+                    Row(
+                      children: [
+                        _buildDetailBadge(
+                          icon: Icons.flag,
+                          label: _getPriorityText(widget.task.priority),
+                          color: _getPriorityColor(widget.task.priority),
+                        ),
+                        SizedBox(width: 12),
+                        _buildDetailBadge(
+                          icon: Icons.schedule,
+                          label: _getStatusText(widget.task.status),
+                          color: _getStatusColor(widget.task.status),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
 
-              // Description
-              Text(
-                LocaleKeys.description.tr(),
-                style: TextStyle(
-                  color: Color(0xFFB0B0B0),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                widget.task.description,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 15,
-                  height: 1.5,
-                ),
-              ),
-              SizedBox(height: 20),
+                    // Description
+                    Text(
+                      LocaleKeys.description.tr(),
+                      style: TextStyle(
+                        color: Color(0xFFB0B0B0),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      widget.task.description,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        height: 1.5,
+                      ),
+                    ),
+                    SizedBox(height: 20),
 
-              // Meta info
-              if (widget.task.dueDate != null) ...[
-                _buildInfoRow(
-                  icon: Icons.calendar_today,
-                  label: LocaleKeys.due_date.tr(),
-                  value:
-                      '${widget.task.dueDate!.day}/${widget.task.dueDate!.month}/${widget.task.dueDate!.year}',
+                    // Meta info
+                    if (widget.task.dueDate != null) ...[
+                      _buildInfoRow(
+                        icon: Icons.calendar_today,
+                        label: LocaleKeys.due_date.tr(),
+                        value:
+                            '${widget.task.dueDate!.day}/${widget.task.dueDate!.month}/${widget.task.dueDate!.year}',
+                      ),
+                      SizedBox(height: 12),
+                    ],
+
+                    _buildInfoRow(
+                      icon: Icons.person,
+                      //TODO: locale
+                      label: "Assigned Inspector",
+                      value: widget.task.assignedInspectorName,
+                    ),
+
+                    SizedBox(height: 24),
+                    Divider(color: Color(0xFF3A3A3A)),
+                    SizedBox(height: 16),
+
+                    // Comments section
+                    _buildCommentsSection(),
+                    SizedBox(height: 20),
+                  ],
                 ),
+              ),
+
+              // Fixed bottom section (Comment input and action buttons)
+              if (!widget.task.isCompleted) ...[
+                Divider(color: Color(0xFF3A3A3A), height: 1),
                 SizedBox(height: 12),
-              ],
-
-              _buildInfoRow(
-                icon: Icons.person,
-                //TODO: locale
-                label: "Assigned Inspector",
-                value: widget.task.assignedInspectorName,
-              ),
-
-              SizedBox(height: 24),
-              Divider(color: Color(0xFF3A3A3A)),
-              SizedBox(height: 16),
-
-              // Comments section
-              Expanded(child: _buildCommentsSection(scrollController)),
-
-              // Comment input field for non-completed tasks
-              if (!widget.task.isCompleted) ...[
-                SizedBox(height: 16),
                 _buildCommentInputField(),
-              ],
-
-              // Status update buttons
-              if (!widget.task.isCompleted) ...[
-                SizedBox(height: 16),
+                SizedBox(height: 12),
                 Row(
                   children: [
                     if (widget.task.isPending)
@@ -680,11 +693,23 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                   ),
                 ),
               ),
-              IconButton(
-                icon: Icon(Icons.send, color: Color(0xFFE53935)),
-                onPressed: () {
-                  // Add comment logic here
-                  widget.provider.addComment(widget.task.id);
+              Consumer<ProviderTasks>(
+                builder: (context, tasks, child) {
+                  return IconButton(
+                    icon: Icon(Icons.send, color: Color(0xFFE53935)),
+                    onPressed: tasks.isAddingComment
+                        ? null
+                        : () async {
+                            // Add comment logic here
+                            final TaskCommentModel? commnet = await widget
+                                .provider
+                                .addComment(widget.task.id, context);
+                            if (commnet != null) {
+                              FocusScope.of(context).unfocus();
+                              widget.task.comments.add(commnet);
+                            }
+                          },
+                  );
                 },
               ),
             ],
@@ -749,21 +774,21 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
     );
   }
 
-  Widget _buildCommentsSection(ScrollController scrollController) {
+  Widget _buildCommentsSection() {
     if (widget.task.comments.isEmpty) {
       return Center(
-        child: Text(
-          LocaleKeys.no_comments.tr(),
-          style: TextStyle(color: Color(0xFF606060), fontSize: 14),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 24),
+          child: Text(
+            LocaleKeys.no_comments.tr(),
+            style: TextStyle(color: Color(0xFF606060), fontSize: 14),
+          ),
         ),
       );
     }
 
-    return ListView.builder(
-      controller: scrollController,
-      itemCount: widget.task.comments.length,
-      itemBuilder: (context, index) {
-        final comment = widget.task.comments[index];
+    return Column(
+      children: widget.task.comments.map((comment) {
         return Container(
           margin: EdgeInsets.only(bottom: 12),
           padding: EdgeInsets.all(12),
@@ -823,7 +848,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
             ],
           ),
         );
-      },
+      }).toList(),
     );
   }
 

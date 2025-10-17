@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/models/branch_model.dart';
+import 'package:haus_des_control/screens/user/screen_online_pdf_viewer.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/constants/app_assets.dart';
@@ -611,9 +612,10 @@ class BranchDetailsSheet extends StatelessWidget {
       itemCount: provider.branchInspections.length,
       itemBuilder: (context, index) {
         final inspection = provider.branchInspections[index];
+
         return Container(
-          margin: EdgeInsets.only(bottom: 12),
-          padding: EdgeInsets.all(12),
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: AppColors.lightRed,
             borderRadius: BorderRadius.circular(12),
@@ -622,16 +624,18 @@ class BranchDetailsSheet extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              /// Header Row — Inspector Info + Score + PDF Button
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Inspector Info
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           "Inspected by: ${inspection.inspectorName}",
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
                           ),
@@ -646,43 +650,78 @@ class BranchDetailsSheet extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _getScoreColor(
-                        inspection.score,
-                      ).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: _getScoreColor(inspection.score),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.star,
-                          size: 14,
-                          color: _getScoreColor(inspection.score),
+
+                  // Right Side — PDF Icon + Score Badge
+                  Row(
+                    children: [
+                      // ✅ Compact PDF icon (if report exists)
+                      if (inspection.publicUrl != null &&
+                          inspection.publicUrl!.isNotEmpty)
+                        IconButton(
+                          tooltip: 'View Report',
+                          icon: const Icon(
+                            Icons.picture_as_pdf,
+                            color: Colors.redAccent,
+                            size: 20,
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PdfViewerScreen(
+                                  pdfUrl: inspection.pdfReportWebUrl!,
+                                  inspectorName: inspection.inspectorName!,
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                        SizedBox(width: 4),
-                        Text(
-                          inspection.score.toStringAsFixed(1),
-                          style: TextStyle(
+
+                      // Score Badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getScoreColor(
+                            inspection.score,
+                          ).withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
                             color: _getScoreColor(inspection.score),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
                           ),
                         ),
-                      ],
-                    ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.star,
+                              size: 14,
+                              color: _getScoreColor(inspection.score),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              inspection.score.toStringAsFixed(1),
+                              style: TextStyle(
+                                color: _getScoreColor(inspection.score),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
+
+              // Optional overall notes
               if (inspection.overallNotes.isNotEmpty) ...[
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   inspection.overallNotes,
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

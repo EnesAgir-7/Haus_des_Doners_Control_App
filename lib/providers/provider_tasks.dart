@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:haus_des_control/widgets/custom_toast.dart';
 
 import '../core/console.dart';
 import '../firebase_services/firebase_tasks_service.dart';
@@ -30,9 +31,7 @@ class ProviderTasks extends ChangeNotifier {
   String _sortBy = AppConstants.dueDate;
 
   // Comment input
-  final TextEditingController commentController = TextEditingController(
-    text: "Hello, this is a testing comment ",
-  );
+  final TextEditingController commentController = TextEditingController();
   List<File> _commentPhotos = [];
 
   // Getters
@@ -255,17 +254,16 @@ class ProviderTasks extends ChangeNotifier {
   }
 
   // Add comment to task
-  Future<bool> addComment(String taskId) async {
+  Future<TaskCommentModel?> addComment(String taskId, BuildContext context) async {
     final commentText = commentController.text.trim();
+
     if (commentText.isEmpty && _commentPhotos.isEmpty) {
-      _errorMessage = 'Please add a comment or photo';
-      notifyListeners();
-      return false;
+      showSnakBarr(context, 'Please add a comment or photo');
+      return null;
     }
 
     try {
       _isAddingComment = true;
-      _errorMessage = null;
       notifyListeners();
 
       // Upload photos
@@ -284,27 +282,27 @@ class ProviderTasks extends ChangeNotifier {
         photos: photoUrls,
       );
 
+      // Save comment in backend
       await _taskService.addTaskComment(taskId, comment);
 
-      _successMessage = 'Comment added successfully';
       _isAddingComment = false;
       notifyListeners();
 
       commentController.clear();
       _commentPhotos.clear();
 
-      await Future.delayed(const Duration(seconds: 2));
-      _successMessage = null;
       notifyListeners();
 
-      return true;
+      // ✅ Return the created comment so the UI can append it locally
+      return comment;
     } catch (e) {
-      _errorMessage = 'Error adding comment: ${e.toString()}';
+      showSnakBarr(context, 'Failed to add comment: $e');
       _isAddingComment = false;
       notifyListeners();
-      return false;
+      return null;
     }
   }
+
 
   // Helper methods for status
   Future<bool> markAsPending(String taskId) async =>

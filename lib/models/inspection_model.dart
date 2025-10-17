@@ -11,10 +11,11 @@ class InspectionModel {
   final DateTime? completedTime;
   final String status; // "scheduled" | "completed" | "pending" | "current"
   final double score;
-  final Map<String, InspectionCategoryModel> categories; // ✅ dynamic categories
+  final Map<String, InspectionCategoryModel> categories;
   final String overallNotes;
-  final String? pdfReportUrl; // Add this
-  final String? pdfReportWebUrl; // Add this
+  final String? pdfReportUrl;
+  final String? pdfReportWebUrl;
+  final String? publicUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -33,6 +34,7 @@ class InspectionModel {
     required this.createdAt,
     this.pdfReportUrl,
     this.pdfReportWebUrl,
+    this.publicUrl,
     required this.updatedAt,
   });
 
@@ -64,6 +66,7 @@ class InspectionModel {
       overallNotes: data['overallNotes'] ?? '',
       pdfReportUrl: data['pdfReportUrl'],
       pdfReportWebUrl: data['pdfReportWebUrl'],
+      publicUrl: data['publicUrl'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
@@ -87,6 +90,7 @@ class InspectionModel {
       ),
       'pdfReportUrl': pdfReportUrl,
       'pdfReportWebUrl': pdfReportWebUrl,
+      'publicUrl': publicUrl,
       'overallNotes': overallNotes,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
