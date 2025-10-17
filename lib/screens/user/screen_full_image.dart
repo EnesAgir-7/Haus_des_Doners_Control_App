@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/app_colors.dart';
+import 'package:haus_des_control/widgets/custom_app_bar.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
@@ -37,13 +39,12 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Text(
-          'Photo ${_currentIndex + 1} of ${widget.images.length}',
-          style: const TextStyle(color: Colors.white),
-        ),
+      appBar: CustomAppBar(
+        showLang: false,
+        showLogout: false,
+        title: 'Photo ${_currentIndex + 1} of ${widget.images.length}',
       ),
+
       body: PhotoViewGallery.builder(
         pageController: _pageController,
         itemCount: widget.images.length,
@@ -56,9 +57,21 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
             heroAttributes: PhotoViewHeroAttributes(tag: widget.images[index]),
           );
         },
-        loadingBuilder: (context, event) =>
-            const Center(child: CircularProgressIndicator(color: Colors.white)),
-        backgroundDecoration: const BoxDecoration(color: Colors.black),
+        loadingBuilder: (context, event) => const Center(
+          child: CircularProgressIndicator(color: AppColors.primaryRed),
+        ),
+        backgroundDecoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primaryRed.withValues(alpha: 0.08),
+              AppColors.primaryDark,
+              AppColors.primaryDark,
+            ],
+            stops: const [0.0, 0.25, 1.0],
+          ),
+        ),
       ),
     );
   }

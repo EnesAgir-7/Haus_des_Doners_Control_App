@@ -9,8 +9,14 @@ import 'language_button.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showLogout;
   final bool showLang;
+  final String? title;
 
-  const CustomAppBar({super.key, this.showLogout = true, this.showLang = true});
+  const CustomAppBar({
+    super.key,
+    this.showLogout = true,
+    this.showLang = true,
+    this.title,
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(60);
@@ -43,13 +49,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       child: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Hero(
-          tag: 'app_logo',
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Image.asset(kAppLogo, height: 32, fit: BoxFit.contain),
-          ),
-        ),
+        title: title != null
+            ? Text(title!)
+            : Hero(
+                tag: 'app_logo',
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Image.asset(kAppLogo, height: 32, fit: BoxFit.contain),
+                ),
+              ),
         centerTitle: true,
         leading: Navigator.canPop(context)
             ? Container(
