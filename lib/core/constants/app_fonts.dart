@@ -1,1 +1,1 @@
-const kAppFont = "GTWalsheimPro-Regular.ttf";
+const kAppFont = "Roboto";

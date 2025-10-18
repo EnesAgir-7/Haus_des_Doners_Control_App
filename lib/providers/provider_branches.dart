@@ -140,6 +140,18 @@ class ProviderBranches extends ChangeNotifier {
       case AppConstants.name:
         filtered.sort((a, b) => a.name.compareTo(b.name));
         break;
+      case AppConstants.nextInspection:
+        filtered.sort((a, b) {
+          if (a.nextInspectionDate == null) return 1;
+          if (b.nextInspectionDate == null) return -1;
+
+          DateTime aDate = DateTime.parse(a.nextInspectionDate!);
+          DateTime bDate = DateTime.parse(b.nextInspectionDate!);
+
+          // Earlier date first
+          return aDate.compareTo(bDate);
+        });
+        break;
       case AppConstants.score:
         filtered.sort((a, b) => b.averageScore.compareTo(a.averageScore));
         break;
@@ -155,7 +167,7 @@ class ProviderBranches extends ChangeNotifier {
     return filtered;
   }
 
-Future<bool> updateStopTimeSlotForMe({
+  Future<bool> updateStopTimeSlotForMe({
     required String branchId,
     required String newTimeSlot,
     required int order,
@@ -169,7 +181,7 @@ Future<bool> updateStopTimeSlotForMe({
         inspectorId: loggedInUser!.id,
         branchId: branchId,
         newTimeSlot: newTimeSlot,
-        order: order
+        order: order,
       );
 
       _isLoading = false;
@@ -183,7 +195,6 @@ Future<bool> updateStopTimeSlotForMe({
       return false;
     }
   }
-
 
   Future<bool> assignBranchToMe({
     required String branchId,
@@ -204,7 +215,7 @@ Future<bool> updateStopTimeSlotForMe({
         branchId: branchId,
         branchName: branchName,
         branchTemplateId: branchTemplateId,
-        branchAddress: branchAddress, 
+        branchAddress: branchAddress,
       );
 
       _isLoading = false;

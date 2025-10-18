@@ -29,6 +29,7 @@ class AppConstants {
   static const priority = "priority";
   static const createdAt = "createdAt";
   static const details = "details";
+  static const nextInspection = "nextInspection";
 }
 
 UserModel? loggedInUser;

@@ -4,7 +4,6 @@ import 'package:haus_des_control/helpers/app_helpers.dart';
 
 import '../core/constants/app_colors.dart';
 import '../models/branch_model.dart';
-import '../screens/common_methods.dart';
 import '../translations/locale_keys.g.dart';
 
 class InspectorBranchCard extends StatelessWidget {
@@ -42,12 +41,36 @@ class InspectorBranchCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _buildLastInspectionInfo(),
-            if (branch.totalInspections > 0) ...[
-              const SizedBox(height: 12),
-              _buildTotalInspections(isNextInspectionToday),
-            ],
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (branch.totalInspections > 0)
+                  _buildTotalInspections(isNextInspectionToday),
+
+                if (branch.isRouteAssigned && branch.nextInspectionDate != null)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Icon(Icons.next_plan, size: 14, color: Colors.green),
+                      const SizedBox(width: 6),
+                      Text(
+                        style: TextStyle(fontSize: 12),
+                        isNextInspectionToday
+                            ? "Today"
+                            : branch.daysUntilNextInspection == 0
+                            ? "Tomorrow"
+                            : "${branch.daysUntilNextInspection} (days) left until next inspection",
+                        // formatTimeSlot(
+                        //     branch.nextInspectionDate.toString(),
+                        //   ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
           ],
         ),
       ),
@@ -158,40 +181,18 @@ class InspectorBranchCard extends StatelessWidget {
 
   Widget _buildTotalInspections(bool isNextInspectionToday) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.fact_check_outlined,
-              size: 14,
-              color: Colors.grey.shade600,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              '${branch.totalInspections} ${LocaleKeys.total_inspections.tr()}',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-        if (branch.isRouteAssigned && branch.nextInspectionDate != null)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Icon(Icons.next_plan, size: 14, color: Colors.green),
-              const SizedBox(width: 6),
-              Text(
-                isNextInspectionToday
-                    ? "Today"
-                    : formatTimeSlot(branch.nextInspectionDate.toString()),
-              ),
-            ],
+        Icon(Icons.fact_check_outlined, size: 14, color: Colors.grey.shade600),
+        const SizedBox(width: 6),
+        Text(
+          '${branch.totalInspections} ${LocaleKeys.total_inspections.tr()}',
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
           ),
+        ),
       ],
     );
   }

@@ -155,24 +155,29 @@ class _ScreenBranchesState extends State<ScreenBranches> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
+        spacing: 8,
         children: [
           _buildSortChip(
             label: LocaleKeys.sort_by_name.tr(),
-            value: 'name',
+            value: AppConstants.name,
             icon: Icons.sort_by_alpha,
             provider: provider,
           ),
-          SizedBox(width: 8),
           _buildSortChip(
             label: LocaleKeys.sort_by_score.tr(),
-            value: 'score',
+            value: AppConstants.score,
             icon: Icons.star,
             provider: provider,
           ),
-          SizedBox(width: 8),
+          _buildSortChip(
+            label: "By Next Inspection",
+            value: AppConstants.nextInspection,
+            icon: Icons.access_time,
+            provider: provider,
+          ),
           _buildSortChip(
             label: LocaleKeys.sort_by_last_control.tr(),
-            value: 'lastInspection',
+            value: AppConstants.lastInspection,
             icon: Icons.access_time,
             provider: provider,
           ),
