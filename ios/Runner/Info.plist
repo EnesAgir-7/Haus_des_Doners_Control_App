@@ -85,6 +85,9 @@
 	<array>
     <string>msauthv2</string>
     <string>msauthv3</string>
+
+	<key>GoogleMapsApiKey</key>
+    <string>$(MAPS_API_KEY)</string>
 </array>
 
 </array>
