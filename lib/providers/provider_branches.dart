@@ -142,15 +142,24 @@ class ProviderBranches extends ChangeNotifier {
         break;
       case AppConstants.nextInspection:
         filtered.sort((a, b) {
-          if (a.nextInspectionDate == null) return 1;
-          if (b.nextInspectionDate == null) return -1;
+          final aDateStr = a.stop?.timeSlot;
+          final bDateStr = b.stop?.timeSlot;
 
-          DateTime aDate = DateTime.parse(a.nextInspectionDate!);
-          DateTime bDate = DateTime.parse(b.nextInspectionDate!);
+          // Handle nulls first
+          if (aDateStr == null && bDateStr == null) return 0;
+          if (aDateStr == null) return 1; // put nulls at bottom
+          if (bDateStr == null) return -1;
 
-          // Earlier date first
-          return aDate.compareTo(bDate);
+          try {
+            final aDate = DateTime.parse(aDateStr);
+            final bDate = DateTime.parse(bDateStr);
+            return aDate.compareTo(bDate); // earliest first
+          } catch (_) {
+            // If parsing fails, keep the same order
+            return 0;
+          }
         });
+
         break;
       case AppConstants.score:
         filtered.sort((a, b) => b.averageScore.compareTo(a.averageScore));

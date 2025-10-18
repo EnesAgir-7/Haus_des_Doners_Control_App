@@ -188,7 +188,6 @@ class ProviderRoute extends ChangeNotifier {
         branchId: updatedStops[stopIndex].branchId,
         branchName: updatedStops[stopIndex].branchName,
         status: newStatus,
-        inspectionId: updatedStops[stopIndex].inspectionId,
         order: updatedStops[stopIndex].order,
       );
 

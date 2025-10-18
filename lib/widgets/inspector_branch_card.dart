@@ -15,9 +15,9 @@ class InspectorBranchCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isNextInspectionToday =
-        branch.nextInspectionDate != null &&
-        branch.nextInspectionDate!.isNotEmpty &&
-        branch.nextInspectionDate ==
+        branch.stop?.timeSlot != null &&
+        branch.stop!.timeSlot.isNotEmpty &&
+        branch.stop?.timeSlot ==
             DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     return GestureDetector(
@@ -50,7 +50,7 @@ class InspectorBranchCard extends StatelessWidget {
                 if (branch.totalInspections > 0)
                   _buildTotalInspections(isNextInspectionToday),
 
-                if (branch.isRouteAssigned && branch.nextInspectionDate != null)
+                if (branch.stop != null)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
@@ -104,7 +104,7 @@ class InspectorBranchCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        _buildStatusBadge(branch.isRouteAssigned),
+        _buildStatusBadge(branch.stop != null),
       ],
     );
   }

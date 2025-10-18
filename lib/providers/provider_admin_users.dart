@@ -89,7 +89,7 @@ class ProviderAdminUsers extends ChangeNotifier {
         final snapshot = await _branchService.getAllBranches();
         _allBranches = snapshot;
       }
-      return _allBranches!.where((branch) => !branch.isRouteAssigned).toList();
+      return _allBranches!.where((branch) => branch.stop == null).toList();
     } catch (e) {
       rethrow;
     }
@@ -107,7 +107,6 @@ class ProviderAdminUsers extends ChangeNotifier {
       await _branchService.updateBranch(
         branch.copyWith(
           assignedInspector: AssignedInspector(id: user.id, name: user.name),
-          isRouteAssigned: true,
         ),
       );
 
@@ -122,7 +121,6 @@ class ProviderAdminUsers extends ChangeNotifier {
       if (index != -1) {
         _allBranches![index] = _allBranches![index].copyWith(
           assignedInspector: AssignedInspector(id: user.id, name: user.name),
-          isRouteAssigned: true,
         );
       }
 

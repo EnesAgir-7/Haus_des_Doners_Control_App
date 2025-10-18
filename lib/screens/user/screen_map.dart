@@ -107,9 +107,9 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
     return Consumer<ProviderBranches>(
       builder: (context, brrl, child) {
         final isNextInspectionToday =
-            branch.nextInspectionDate != null &&
-            branch.nextInspectionDate!.isNotEmpty &&
-            branch.nextInspectionDate ==
+            branch.stop?.timeSlot != null &&
+            branch.stop!.timeSlot.isNotEmpty &&
+            branch.stop?.timeSlot ==
                 DateFormat('yyyy-MM-dd').format(DateTime.now());
         return Padding(
           padding: const EdgeInsets.all(10),
@@ -165,9 +165,9 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            if (branch.nextInspectionDate != null)
+                            if (branch.stop?.timeSlot != null)
                               Text(
-                                "Next Inspection: ${isNextInspectionToday ? "Today" : branch.nextInspectionDate.toString()} (${branch.daysUntilNextInspection} days left)",
+                                "Next Inspection: ${isNextInspectionToday ? "Today" : branch.stop?.timeSlot.toString()} (${branch.daysUntilNextInspection} days left)",
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 11,
@@ -201,11 +201,11 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
 
                               return AppButton(
                                 isLoading: branchContr.isLoading,
-                                text: updatedBranch.isRouteAssigned
+                                text: updatedBranch.stop != null
                                     ? "Remove from Route"
                                     : "Add to Route",
                                 onPressed: () async {
-                                  if (updatedBranch.isRouteAssigned) {
+                                  if (updatedBranch.stop != null) {
                                     // Unassign
                                     final success = await branchContr
                                         .unAssignBranchToMe(
@@ -257,12 +257,12 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                     }
                                   }
                                 },
-                                backgroundColor: updatedBranch.isRouteAssigned
+                                backgroundColor: updatedBranch.stop != null
                                     ? AppColors.primaryRed
                                     : AppColors.amber,
                                 textStyle: TextStyle(
                                   fontSize: 11,
-                                  color: updatedBranch.isRouteAssigned
+                                  color: updatedBranch.stop != null
                                       ? Colors.white
                                       : AppColors.primaryDark,
                                 ),
@@ -275,9 +275,9 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        if (branch.isRouteAssigned &&
+                        if (branch.stop != null &&
                             isNextInspectionToday &&
-                            branch.nextInspectionDate != null)
+                            branch.stop?.timeSlot != null)
                           Expanded(
                             child: AppButton(
                               text: LocaleKeys.submit_inspection.tr(),

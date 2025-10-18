@@ -356,10 +356,10 @@ class BranchDetailsSheet extends StatelessWidget {
   const BranchDetailsSheet({required this.branch, required this.provider});
 
   bool get isNextInspectionToday {
-    if (branch.nextInspectionDate == null || branch.nextInspectionDate!.isEmpty)
+    if (branch.stop?.timeSlot == null || branch.stop!.timeSlot.isEmpty)
       return false;
 
-    return branch.nextInspectionDate ==
+    return branch.stop?.timeSlot ==
         DateFormat('yyyy-MM-dd').format(DateTime.now());
   }
 
@@ -382,8 +382,7 @@ class BranchDetailsSheet extends StatelessWidget {
               SizedBox(height: 16),
               _buildStatCards(),
               SizedBox(height: 16),
-              if (branch.isRouteAssigned && branch.nextInspectionDate != null)
-                _buildNextInspectionCard(),
+              if (branch.stop != null) _buildNextInspectionCard(),
               Divider(color: Colors.white24),
               SizedBox(height: 12),
               _buildInspectionHistoryHeader(),
@@ -569,7 +568,7 @@ class BranchDetailsSheet extends StatelessWidget {
             child: Text(
               isNextInspectionToday
                   ? "Today"
-                  : formatTimeSlot(branch.nextInspectionDate.toString()),
+                  : formatTimeSlot(branch.stop!.timeSlot.toString()),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -723,7 +722,7 @@ class BranchDetailsSheet extends StatelessWidget {
     return Consumer<ProviderBranches>(
       builder: (context, prod, child) {
         // Show Start Inspection if assigned and today is inspection day
-        if (branch.isRouteAssigned && isNextInspectionToday) {
+        if (branch.stop != null && isNextInspectionToday) {
           return Row(
             children: [
               Expanded(
@@ -774,21 +773,19 @@ class BranchDetailsSheet extends StatelessWidget {
         // Show Edit Route or Add to Route
         return AppButton(
           isLoading: prod.isLoading,
-          text: branch.isRouteAssigned ? "Edit Route" : "Add to Route",
+          text: branch.stop != null ? "Edit Route" : "Add to Route",
           onPressed: () async {
-            if (branch.isRouteAssigned) {
+            if (branch.stop != null) {
               _showRouteManagementSheet(context, prod);
             } else {
               await _handleAddToRoute(context, prod);
             }
           },
-          backgroundColor: branch.isRouteAssigned
+          backgroundColor: branch.stop != null
               ? AppColors.primaryRed
               : AppColors.amber,
           textStyle: TextStyle(
-            color: branch.isRouteAssigned
-                ? Colors.white
-                : AppColors.primaryDark,
+            color: branch.stop != null ? Colors.white : AppColors.primaryDark,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),

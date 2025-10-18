@@ -305,7 +305,7 @@ class ProviderControl extends ChangeNotifier {
         branchName: _selectedBranch!.name,
         inspectorId: loggedInUser!.id,
         inspectorName: loggedInUser!.name,
-        scheduledTime: _selectedBranch!.nextInspectionDate.toString(),
+        scheduledTime: _selectedBranch!.stop!.timeSlot.toString(),
         completedTime: now,
         status: AppConstants.completed,
         score: totalScore,

@@ -61,7 +61,6 @@ class RouteStopModel {
   final String branchName;
   final String branchTemplateId;
   final String status; // "completed" | "pending" | "current"
-  final String? inspectionId;
   final DateTime? createdAt;
   final DateTime? completedAt;
   final Timestamp? expiryDate; //
@@ -75,7 +74,6 @@ class RouteStopModel {
     required this.branchName,
     required this.branchTemplateId,
     required this.status,
-    this.inspectionId,
     required this.order,
     this.createdAt,
     this.completedAt,
@@ -97,7 +95,6 @@ class RouteStopModel {
       branchName: data['branchName'] ?? '',
       branchTemplateId: data["branchTemplateId"] ?? '',
       status: data['status'] ?? 'pending',
-      inspectionId: data['inspectionId'],
       order: data['order'] ?? 0,
       createdAt: parseDate(data["createdAt"]),
       completedAt: parseDate(data["completedAt"]),
@@ -116,7 +113,6 @@ class RouteStopModel {
       'branchName': branchName,
       'branchTemplateId': branchTemplateId,
       'status': status,
-      'inspectionId': inspectionId,
       'order': order,
       'createdAt': createdAt?.toIso8601String(),
       'completedAt': completedAt?.toIso8601String(),
@@ -146,7 +142,6 @@ class RouteStopModel {
       branchName: branchName ?? this.branchName,
       branchTemplateId: branchTemplateId ?? this.branchTemplateId,
       status: status ?? this.status,
-      inspectionId: inspectionId ?? this.inspectionId,
       order: order ?? this.order,
       createdAt: createdAt ?? this.createdAt,
       completedAt: completedAt ?? this.completedAt,

@@ -124,7 +124,6 @@ class RouteService {
         branchId: route.stops[stopIndex].branchId,
         branchName: route.stops[stopIndex].branchName,
         status: newStatus,
-        inspectionId: route.stops[stopIndex].inspectionId,
         order: route.stops[stopIndex].order,
       );
 

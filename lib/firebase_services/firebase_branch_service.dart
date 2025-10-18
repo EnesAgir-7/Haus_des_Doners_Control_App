@@ -169,73 +169,143 @@ class BranchService {
   }) async {
     try {
       final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
+      final branchDocRef = _db.collection(_collectionBranches).doc(branchId);
 
-      // 1. Check if a route document already exists for this inspector
-      final docSnap = await routeDocRef.get();
+      final now = DateTime.now();
+      final newStop = RouteStopModel(
+        branchTemplateId: branchTemplateId,
+        timeSlot: timeSlot,
+        branchId: branchId,
+        branchName: branchName,
+        branchAddress: branchAddress,
+        status: AppConstants.pending,
+        order: 1,
+        createdAt: now,
+      );
 
-      if (!docSnap.exists) {
-        // 2. Create a new route document directly under inspectorId
-        final route = RouteModel(
-          id: inspectorId,
-          date: DateTime.now(),
-          inspectorId: inspectorId,
-          inspectorName: inspectorName,
-          stops: [
-            RouteStopModel(
-              branchTemplateId: branchTemplateId,
-              timeSlot: timeSlot,
-              branchId: branchId,
-              branchName: branchName,
-              branchAddress: branchAddress,
-              status: AppConstants.pending,
-              order: 1,
-              inspectionId: inspectorId,
-              createdAt: DateTime.now(),
-            ),
-          ],
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-        await routeDocRef.set(route.toMap());
-      } else {
-        // 3. Append stop to existing route
-        final route = RouteModel.fromFirestore(docSnap);
-        final newStop = RouteStopModel(
-          timeSlot: timeSlot,
-          branchTemplateId: branchTemplateId,
-          branchId: branchId,
-          branchName: branchName,
-          branchAddress: branchAddress,
-          status: AppConstants.pending,
-          order: route.stops.length + 1,
-          createdAt: DateTime.now(),
-        );
+      await _db.runTransaction((transaction) async {
+        final docSnap = await transaction.get(routeDocRef);
 
-        // Append only the new stop safely
-        await routeDocRef.update({
-          'stops': FieldValue.arrayUnion([newStop.toMap()]),
-          'updatedAt': Timestamp.fromDate(DateTime.now()),
+        if (!docSnap.exists) {
+          // Create a new route for this inspector
+          final route = RouteModel(
+            id: inspectorId,
+            date: now,
+            inspectorId: inspectorId,
+            inspectorName: inspectorName,
+            stops: [newStop],
+            createdAt: now,
+            updatedAt: now,
+          );
+          transaction.set(routeDocRef, route.toMap());
+        } else {
+          // Route exists, append new stop only if not already assigned
+          final data = docSnap.data() as Map<String, dynamic>;
+          final stops = (data['stops'] as List?) ?? [];
+
+          final alreadyAssigned = stops.any((s) => s['branchId'] == branchId);
+          if (alreadyAssigned) {
+            console('Branch already assigned in route, skipping duplicate.');
+            return;
+          }
+
+          // Update stop order dynamically
+          newStop.copyWith(order: stops.length + 1);
+
+          transaction.update(routeDocRef, {
+            'stops': FieldValue.arrayUnion([newStop.toMap()]),
+            'updatedAt': Timestamp.fromDate(now),
+          });
+        }
+
+        // Update branch assignment atomically
+        transaction.update(branchDocRef, {
+          'nextInspectionDate': timeSlot,
+          'stop': newStop.toMap(),
+          'updatedAt': Timestamp.fromDate(now),
         });
-        // final updatedStops = [...route.stops, newStop];
-        // await routeDocRef.update({
-        //   'stops': updatedStops.map((s) => s.toMap()).toList(),
-        //   'updatedAt': Timestamp.fromDate(DateTime.now()),
-        // });
-      }
-
-      // 4. Update branch to mark as assigned
-      await _db.collection(_collectionBranches).doc(branchId).update({
-        'isAssigned': true,
-        'nextInspectionDate': timeSlot,
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
       });
 
-      console('Branch assigned successfully');
-    } catch (e) {
-      print("Error assigning branch: $e");
+      console('✅ Branch assigned successfully to inspector $inspectorName');
+    } catch (e, st) {
+      print("❌ Error assigning branch: $e\n$st");
       rethrow;
     }
   }
+
+  // Future<void> assignBranchToHimself({
+  //   required String inspectorId,
+  //   required String inspectorName,
+  //   required String branchId,
+  //   required String branchName,
+  //   required String branchAddress,
+  //   required String timeSlot,
+  //   required String branchTemplateId,
+  // }) async {
+  //   try {
+  //     final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
+
+  //     // 1. Check if a route document already exists for this inspector
+  //     final docSnap = await routeDocRef.get();
+
+  //     if (!docSnap.exists) {
+  //       // 2. Create a new route document directly under inspectorId
+  //       final route = RouteModel(
+  //         id: inspectorId,
+  //         date: DateTime.now(),
+  //         inspectorId: inspectorId,
+  //         inspectorName: inspectorName,
+  //         stops: [
+  //           RouteStopModel(
+  //             branchTemplateId: branchTemplateId,
+  //             timeSlot: timeSlot,
+  //             branchId: branchId,
+  //             branchName: branchName,
+  //             branchAddress: branchAddress,
+  //             status: AppConstants.pending,
+  //             order: 1,
+  //             inspectionId: inspectorId,
+  //             createdAt: DateTime.now(),
+  //           ),
+  //         ],
+  //         createdAt: DateTime.now(),
+  //         updatedAt: DateTime.now(),
+  //       );
+  //       await routeDocRef.set(route.toMap());
+  //     } else {
+  //       // 3. Append stop to existing route
+  //       final route = RouteModel.fromFirestore(docSnap);
+  //       final newStop = RouteStopModel(
+  //         timeSlot: timeSlot,
+  //         branchTemplateId: branchTemplateId,
+  //         branchId: branchId,
+  //         branchName: branchName,
+  //         branchAddress: branchAddress,
+  //         status: AppConstants.pending,
+  //         order: route.stops.length + 1,
+  //         createdAt: DateTime.now(),
+  //       );
+
+  //       // Append only the new stop safely
+  //       await routeDocRef.update({
+  //         'stops': FieldValue.arrayUnion([newStop.toMap()]),
+  //         'updatedAt': Timestamp.fromDate(DateTime.now()),
+  //       });
+  //     }
+
+  //     // 4. Update branch to mark as assigned
+  //     await _db.collection(_collectionBranches).doc(branchId).update({
+  //       'isAssigned': true,
+  //       'nextInspectionDate': timeSlot,
+  //       'updatedAt': Timestamp.fromDate(DateTime.now()),
+  //     });
+
+  //     console('Branch assigned successfully');
+  //   } catch (e) {
+  //     print("Error assigning branch: $e");
+  //     rethrow;
+  //   }
+  // }
 
   Future<void> updateBranch(BranchModel branch) async {
     try {
@@ -290,7 +360,7 @@ class BranchService {
         }),
 
         _db.collection(_collectionBranches).doc(branchId).update({
-          'isAssigned': false,
+          'stop': null,
           'nextInspectionDate': null,
           'updatedAt': Timestamp.fromDate(DateTime.now()),
         }),

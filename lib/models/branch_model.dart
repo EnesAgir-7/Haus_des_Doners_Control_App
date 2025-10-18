@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'route_model.dart';
+
 class BranchModel {
   final String id;
   final String name;
@@ -9,10 +11,9 @@ class BranchModel {
   final GeoPoint gps;
   final String contactName;
   final String contactPhone;
+  final RouteStopModel? stop; 
   final AssignedInspector? assignedInspector;
-  final bool isRouteAssigned;
   final DateTime? lastInspectionDate;
-  final String? nextInspectionDate; // ✅ New field
   final double? lastInspectionScore;
   final int totalInspections;
   final double averageScore;
@@ -30,15 +31,14 @@ class BranchModel {
     required this.contactName,
     required this.contactPhone,
     this.assignedInspector,
-    required this.isRouteAssigned,
     this.lastInspectionDate,
-    this.nextInspectionDate, // ✅ Added
     this.lastInspectionScore,
     required this.totalInspections,
     required this.averageScore,
     required this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.stop, 
   });
 
   factory BranchModel.fromFirestore(DocumentSnapshot doc) {
@@ -58,11 +58,9 @@ class BranchModel {
               name: data['assignedInspector']['name'] ?? '',
             )
           : null,
-      isRouteAssigned: data['isAssigned'] ?? false,
       lastInspectionDate: data['lastInspectionDate'] != null
           ? (data['lastInspectionDate'] as Timestamp).toDate()
           : null,
-      nextInspectionDate: data['nextInspectionDate'],
       lastInspectionScore: data['lastInspectionScore']?.toDouble(),
       totalInspections: data['totalInspections'] ?? 0,
       averageScore: (data['averageScore'] ?? 0.0).toDouble(),
@@ -73,6 +71,9 @@ class BranchModel {
       updatedAt: data["updatedAt"] != null
           ? (data['updatedAt'] as Timestamp).toDate()
           : DateTime.now(),
+      stop: data['stop'] != null
+          ? RouteStopModel.fromMap(Map<String, dynamic>.from(data['stop']))
+          : null,
     );
   }
 
@@ -86,15 +87,14 @@ class BranchModel {
     String? contactName,
     String? contactPhone,
     AssignedInspector? assignedInspector,
-    bool? isRouteAssigned,
     DateTime? lastInspectionDate,
-    String? nextInspectionDate, // ✅ Added
     double? lastInspectionScore,
     int? totalInspections,
     double? averageScore,
     String? status,
     DateTime? createdAt,
     DateTime? updatedAt,
+    RouteStopModel? stop, 
   }) {
     return BranchModel(
       id: id ?? this.id,
@@ -106,16 +106,14 @@ class BranchModel {
       contactName: contactName ?? this.contactName,
       contactPhone: contactPhone ?? this.contactPhone,
       assignedInspector: assignedInspector ?? this.assignedInspector,
-      isRouteAssigned: isRouteAssigned ?? this.isRouteAssigned,
       lastInspectionDate: lastInspectionDate ?? this.lastInspectionDate,
-      nextInspectionDate:
-          nextInspectionDate ?? this.nextInspectionDate, // ✅ Added
       lastInspectionScore: lastInspectionScore ?? this.lastInspectionScore,
       totalInspections: totalInspections ?? this.totalInspections,
       averageScore: averageScore ?? this.averageScore,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      stop: stop ?? this.stop, // ✅ Preserve or override
     );
   }
 
@@ -132,19 +130,16 @@ class BranchModel {
         'id': assignedInspector?.id,
         'name': assignedInspector?.name,
       },
-      'isAssigned': isRouteAssigned,
       'lastInspectionDate': lastInspectionDate != null
           ? Timestamp.fromDate(lastInspectionDate!)
           : null,
-      'nextInspectionDate': nextInspectionDate != null
-          ? nextInspectionDate
-          : null, // ✅ Added
       'lastInspectionScore': lastInspectionScore,
       'totalInspections': totalInspections,
       'averageScore': averageScore,
       'status': status,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
+      'stop': stop?.toMap(), // ✅ Serialize stop object if present
     };
   }
 
@@ -155,9 +150,9 @@ class BranchModel {
   }
 
   int? get daysUntilNextInspection {
-    if (nextInspectionDate == null || nextInspectionDate!.isEmpty) return null;
+    if (stop?.timeSlot == null || stop!.timeSlot.isEmpty) return null;
     try {
-      final nextDate = DateTime.parse(nextInspectionDate!);
+      final nextDate = DateTime.parse(stop!.timeSlot);
       final difference = nextDate.difference(DateTime.now());
       return difference.inDays;
     } catch (e) {
