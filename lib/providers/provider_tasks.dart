@@ -18,6 +18,7 @@ class ProviderTasks extends ChangeNotifier {
 
   // State
   List<TaskModel> _tasks = [];
+  List<TaskModel> _allTasks = []; // For admin view
   TaskModel? _selectedTask;
   bool _isLoading = false;
   bool _isUpdating = false;
@@ -36,6 +37,7 @@ class ProviderTasks extends ChangeNotifier {
 
   // Getters
   List<TaskModel> get tasks => _filteredAndSortedTasks();
+  List<TaskModel> get allTasks => _allTasks; // For admin view
   TaskModel? get selectedTask => _selectedTask;
   bool get isLoading => _isLoading;
   bool get isUpdating => _isUpdating;
@@ -64,7 +66,26 @@ class ProviderTasks extends ChangeNotifier {
 
   /// Initialize provider with Firestore stream
   Future<void> initialize() async {
-    initializeTasksStream();
+    if (loggedInUser?.isAdmin == true) {
+      await loadAllTasks();
+    } else {
+      initializeTasksStream();
+    }
+  }
+
+  Future<void> loadAllTasks() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _allTasks = await _taskService.getAllTasks();
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = 'Error loading all tasks: $e';
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   initializeTasksStream() {
@@ -254,7 +275,10 @@ class ProviderTasks extends ChangeNotifier {
   }
 
   // Add comment to task
-  Future<TaskCommentModel?> addComment(String taskId, BuildContext context) async {
+  Future<TaskCommentModel?> addComment(
+    String taskId,
+    BuildContext context,
+  ) async {
     final commentText = commentController.text.trim();
 
     if (commentText.isEmpty && _commentPhotos.isEmpty) {
@@ -302,7 +326,6 @@ class ProviderTasks extends ChangeNotifier {
       return null;
     }
   }
-
 
   // Helper methods for status
   Future<bool> markAsPending(String taskId) async =>

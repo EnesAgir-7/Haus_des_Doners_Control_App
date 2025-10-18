@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../admin/screens/screen_admin_branches.dart';
-import '../admin/screens/screen_admin_dashboard.dart';
 import '../admin/screens/screen_admin_fleet.dart';
+import '../admin/screens/screen_admin_main.dart';
 import '../admin/screens/screen_admin_tasks.dart';
 import '../admin/screens/screen_admin_users.dart';
 import '../layouts/bottom_nav_bar.dart';
@@ -48,10 +48,10 @@ class AppRouter {
     RouteNames.mainLayout: (context) => ScreenBottomNavBar(),
 
     // Admin routes
-    RouteNames.admin: (context) => AdminDashboard(),
+    RouteNames.admin: (context) => const AdminMainScreen(),
     RouteNames.adminUsers: (context) => const AdminUsersScreen(),
     RouteNames.adminBranches: (context) => const AdminBranchesScreen(),
     RouteNames.adminFleet: (context) => const AdminFleetScreen(),
-    RouteNames.adminTasks: (context) => const AdminTasksScreen(),
+    RouteNames.adminTasks: (context) => const ScreenAdminTasks(),
   };
 }
