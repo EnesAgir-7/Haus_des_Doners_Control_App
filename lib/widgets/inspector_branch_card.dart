@@ -104,13 +104,12 @@ class InspectorBranchCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        _buildStatusBadge(branch.stop != null),
+        if (branch.stop != null) _buildStatusBadge(),
       ],
     );
   }
 
-  Widget _buildStatusBadge(bool isAssigned) {
-    if (!isAssigned) return SizedBox.shrink();
+  Widget _buildStatusBadge() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(

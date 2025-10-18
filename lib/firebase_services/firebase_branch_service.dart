@@ -209,8 +209,9 @@ class BranchService {
 
         final alreadyAssigned = stops.any((s) => s['branchId'] == branchId);
         if (alreadyAssigned) {
-          console('⚠️ Branch already assigned in route, skipping duplicate.');
-          return;
+          throw Exception('Branch already assigned in route');
+          // return;
+          // console('⚠️ Branch already assigned in route, skipping duplicate.');
         }
 
         // Update stop order dynamically
