@@ -155,7 +155,7 @@ class _ScreenBranchesState extends State<ScreenBranches> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        spacing: 8,
+        spacing: 6,
         children: [
           _buildSortChip(
             label: LocaleKeys.sort_by_name.tr(),
@@ -199,7 +199,7 @@ class _ScreenBranchesState extends State<ScreenBranches> {
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primaryRed : AppColors.lightBlack,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected ? AppColors.primaryRed : Colors.white24,
           ),
