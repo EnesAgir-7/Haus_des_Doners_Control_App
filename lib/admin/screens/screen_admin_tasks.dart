@@ -25,51 +25,49 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primaryDark,
-      body: Consumer<ProviderTasks>(
-        builder: (context, taskProvider, child) {
-          if (taskProvider.isLoading) {
-            return Center(
-              child: CircularProgressIndicator(color: AppColors.primaryRed),
-            );
-          }
+    return Consumer<ProviderTasks>(
+      builder: (context, taskProvider, child) {
+        if (taskProvider.isLoading) {
+          return Center(
+            child: CircularProgressIndicator(color: AppColors.primaryRed),
+          );
+        }
 
-          final tasks = taskProvider.allTasks;
-          final filteredTasks = _filterTasks(tasks);
+        final tasks = taskProvider.allTasks;
+        final filteredTasks = _filterTasks(tasks);
 
-          return Column(
-            children: [
-              _buildFilterSection(),
-              _buildTaskStats(tasks),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: () => taskProvider.loadAllTasks(),
-                  color: AppColors.primaryRed,
-                  backgroundColor: AppColors.lightBlack,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filteredTasks.length,
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: TaskCard(task: filteredTasks[index]),
-                      );
-                    },
-                  ),
+        return Column(
+          children: [
+            _buildFilterSection(),
+            _buildTaskStats(tasks),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => taskProvider.loadAllTasks(),
+                color: AppColors.primaryRed,
+                backgroundColor: AppColors.lightBlack,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: filteredTasks.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: TaskCard(task: filteredTasks[index]),
+                    );
+                  },
                 ),
               ),
-            ],
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Implement task creation
-        },
-        backgroundColor: AppColors.primaryRed,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+            ),
+          ],
+        );
+      },
+    );
+    floatingActionButton:
+    FloatingActionButton(
+      onPressed: () {
+        // TODO: Implement task creation
+      },
+      backgroundColor: AppColors.primaryRed,
+      child: const Icon(Icons.add, color: Colors.white),
     );
   }
 

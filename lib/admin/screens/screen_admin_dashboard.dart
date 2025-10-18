@@ -46,85 +46,82 @@ class _AdminDashboardState extends State<AdminDashboard>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primaryDark,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primaryRed.withValues(alpha: 0.08),
-              AppColors.primaryDark,
-              AppColors.primaryDark,
-            ],
-            stops: const [0.0, 0.25, 1.0],
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.primaryRed.withValues(alpha: 0.08),
+            AppColors.primaryDark,
+            AppColors.primaryDark,
+          ],
+          stops: const [0.0, 0.25, 1.0],
         ),
-        child: RefreshIndicator(
-          onRefresh: () async {
-            await context.read<ProviderAdminStats>().refresh();
-          },
-          color: AppColors.primaryRed,
-          backgroundColor: AppColors.lightBlack,
-          child: Consumer<ProviderAdminStats>(
-            builder: (context, statsProvider, child) {
-              if (statsProvider.isLoading) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppColors.lightBlack,
-                              AppColors.lightBlack.withValues(alpha: 0.8),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: AppColors.primaryRed.withValues(alpha: 0.3),
-                          ),
+      ),
+      child: RefreshIndicator(
+        onRefresh: () async {
+          await context.read<ProviderAdminStats>().refresh();
+        },
+        color: AppColors.primaryRed,
+        backgroundColor: AppColors.lightBlack,
+        child: Consumer<ProviderAdminStats>(
+          builder: (context, statsProvider, child) {
+            if (statsProvider.isLoading) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            AppColors.lightBlack,
+                            AppColors.lightBlack.withValues(alpha: 0.8),
+                          ],
                         ),
-                        child: CircularProgressIndicator(
-                          color: AppColors.primaryRed,
-                          strokeWidth: 3,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppColors.primaryRed.withValues(alpha: 0.3),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Loading dashboard...',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 14,
-                        ),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryRed,
+                        strokeWidth: 3,
                       ),
-                    ],
-                  ),
-                );
-              }
-
-              return FadeTransition(
-                opacity: _fadeAnimation,
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: BouncingScrollPhysics(),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 24),
-                      DashboardCard(provider: statsProvider),
-                      const SizedBox(height: 24),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Loading dashboard...',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               );
-            },
-          ),
+            }
+
+            return FadeTransition(
+              opacity: _fadeAnimation,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics(),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 24),
+                    DashboardCard(provider: statsProvider),
+                    const SizedBox(height: 24),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
