@@ -12,6 +12,7 @@ import '../../generated/lib/translations/locale_keys.g.dart';
 import '../../helpers/app_helpers.dart';
 import '../../models/inspection_model.dart';
 import '../../providers/provider_inspections.dart';
+import 'screen_pdf_viewer.dart';
 
 class ScreenInspectionDetails extends StatefulWidget {
   final String inspectionId;
@@ -201,11 +202,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
             inspection.inspectorName ?? 'N/A',
           ),
           const SizedBox(height: 12),
-          _infoRow(
-            Icons.calendar_today,
-            "Scheduled",
-            formatDate(inspection.scheduledTime),
-          ),
+          _infoRow(Icons.calendar_today, "Scheduled", inspection.scheduledTime),
           const SizedBox(height: 12),
           _infoRow(
             Icons.done_all,
@@ -214,12 +211,25 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
                 ? formatDate(inspection.completedTime!)
                 : LocaleKeys.in_progress.tr(),
           ),
-          if (inspection.publicUrl != null && inspection.publicUrl!.isNotEmpty)
+          if (inspection.pdfReportUrl != null &&
+              inspection.pdfReportUrl!.isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 12),
               child: AppButton(
                 text: "View pdf report",
-                onPressed: () => openInBrowser(inspection.publicUrl!, context),
+                // onPressed: () => openInBrowser(inspection.pdfReportUrl!, context),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ScreenPdfViewer(
+                        pdfUrl: inspection.pdfReportUrl!,
+                        // inspectionId: inspection.id,
+                        // branchName: inspection.branchName,
+                      ),
+                    ),
+                  );
+                },
                 icon: Icons.picture_as_pdf,
               ),
             ),
@@ -292,7 +302,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Category break down",
+          "Category Breakdown",
           style: TextStyle(
             color: AppColors.primaryRed,
             fontSize: 18,
@@ -301,10 +311,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
         ),
         const SizedBox(height: 12),
         ...inspection.categories.entries.map((entry) {
-          final categoryName = entry.key.replaceAll(
-            '_',
-            ' ',
-          ); // Simple title formatting
+          final categoryName = entry.key.trim();
           final categoryData = entry.value;
 
           return _buildCategoryCard(
@@ -345,7 +352,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
               children: [
                 Expanded(
                   child: Text(
-                    title.toUpperCase(),
+                    title,
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

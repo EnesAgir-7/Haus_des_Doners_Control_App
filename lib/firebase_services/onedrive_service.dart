@@ -68,34 +68,61 @@ class OneDriveService {
     }
   }
 
-  // Use service account drive
-  // String _driveRoot() {
-  //   return 'users/${OneDriveConfig.myUserId}/drive/root';
-  // }
-  String _driveBase() {
-    return 'users/${OneDriveConfig.myUserId}/drive';
-  }
-
   String _driveRoot() {
-    return '${_driveBase()}/root';
+    return 'users/${OneDriveConfig.myUserId}/drive/root';
   }
 
-  Future<String> createInspectionFolder(
-    String branchId,
-    String inspectionId,
+  // Helper to get month folder name
+  String _getMonthFolder(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}';
+  }
+
+  // Create folder structure: RestaurantInspections/{branchName}/{month}/Images
+  Future<String> createImagesFolder(
+    String branchName,
+    DateTime timestamp,
   ) async {
     await _ensureToken();
 
     try {
+      final monthFolder = _getMonthFolder(timestamp);
+
       await _createFolderIfNotExists('RestaurantInspections');
-      await _createFolderIfNotExists('RestaurantInspections/$branchId');
-      final folderPath = 'RestaurantInspections/$branchId/$inspectionId';
+      await _createFolderIfNotExists('RestaurantInspections/$branchName');
+      await _createFolderIfNotExists(
+        'RestaurantInspections/$branchName/$monthFolder',
+      );
+      final folderPath =
+          'RestaurantInspections/$branchName/$monthFolder/Images';
       await _createFolderIfNotExists(folderPath);
 
-      print('✅ Folder structure created: $folderPath');
+      print('✅ Images folder structure created: $folderPath');
       return folderPath;
     } catch (e) {
-      print('❌ Error creating folder structure: $e');
+      print('❌ Error creating images folder structure: $e');
+      rethrow;
+    }
+  }
+
+  // Create folder structure: RestaurantInspections/{branchName}/{month}/PDFs
+  Future<String> createPDFFolder(String branchName, DateTime timestamp) async {
+    await _ensureToken();
+
+    try {
+      final monthFolder = _getMonthFolder(timestamp);
+
+      await _createFolderIfNotExists('RestaurantInspections');
+      await _createFolderIfNotExists('RestaurantInspections/$branchName');
+      await _createFolderIfNotExists(
+        'RestaurantInspections/$branchName/$monthFolder',
+      );
+      final folderPath = 'RestaurantInspections/$branchName/$monthFolder/PDFs';
+      await _createFolderIfNotExists(folderPath);
+
+      print('✅ PDF folder structure created: $folderPath');
+      return folderPath;
+    } catch (e) {
+      print('❌ Error creating PDF folder structure: $e');
       rethrow;
     }
   }
@@ -138,7 +165,7 @@ class OneDriveService {
         body: jsonEncode({
           'name': folderName,
           'folder': {},
-          '@microsoft.graph.conflictBehavior': 'rename',
+          '@microsoft.graph.conflictBehavior': 'replace',
         }),
       );
 
@@ -147,9 +174,17 @@ class OneDriveService {
         print('✅ Folder created: $folderPath');
       } else {
         final error = jsonDecode(createResponse.body);
-        throw Exception(
-          'Failed to create folder "$folderPath": ${error['error']?['message'] ?? createResponse.body}',
-        );
+        final errorMessage = error['error']?['message'] ?? createResponse.body;
+
+        // If error is "name already exists", it means folder was created by another request, ignore it
+        if (errorMessage.toString().toLowerCase().contains(
+          'name already exists',
+        )) {
+          print('ℹ️ Folder already exists (created concurrently): $folderPath');
+          return;
+        }
+
+        throw Exception('Failed to create folder "$folderPath": $errorMessage');
       }
     } else {
       final error = jsonDecode(checkResponse.body);
@@ -159,12 +194,11 @@ class OneDriveService {
     }
   }
 
-  // Upload file with automatic method selection
-  Future<Map<String, dynamic>> uploadFile({
+  // Upload file - no return value needed
+  Future<void> _uploadFile({
     required File file,
     required String remotePath,
     Function(double)? onProgress,
-    bool returnPublicLink = true, // New optional flag
   }) async {
     await _ensureToken();
 
@@ -175,27 +209,14 @@ class OneDriveService {
       '📤 Uploading: $fileName (${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB)',
     );
 
-    Map<String, dynamic> uploadedData;
     if (fileSize < 4 * 1024 * 1024) {
-      uploadedData = await _simpleUpload(file, remotePath, fileName);
+      await _simpleUpload(file, remotePath, fileName);
     } else {
-      uploadedData = await _resumableUpload(
-        file,
-        remotePath,
-        fileName,
-        onProgress,
-      );
+      await _resumableUpload(file, remotePath, fileName, onProgress);
     }
-
-    if (returnPublicLink) {
-      final publicUrl = await createPublicLink(uploadedData['id']);
-      uploadedData['publicUrl'] = publicUrl;
-    }
-
-    return uploadedData;
   }
 
-  Future<Map<String, dynamic>> _simpleUpload(
+  Future<void> _simpleUpload(
     File file,
     String remotePath,
     String fileName,
@@ -217,15 +238,7 @@ class OneDriveService {
     );
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      final data = jsonDecode(response.body);
       print('✅ Upload successful: $fileName');
-
-      return {
-        'id': data['id'],
-        'name': data['name'],
-        'webUrl': data['webUrl'],
-        'downloadUrl': data['@microsoft.graph.downloadUrl'],
-      };
     } else {
       final error = jsonDecode(response.body);
       throw Exception(
@@ -234,7 +247,7 @@ class OneDriveService {
     }
   }
 
-  Future<Map<String, dynamic>> _resumableUpload(
+  Future<void> _resumableUpload(
     File file,
     String remotePath,
     String fileName,
@@ -302,15 +315,8 @@ class OneDriveService {
 
       if (uploadResponse.statusCode == 200 ||
           uploadResponse.statusCode == 201) {
-        final data = jsonDecode(uploadResponse.body);
         print('✅ Resumable upload complete: $fileName');
-
-        return {
-          'id': data['id'],
-          'name': data['name'],
-          'webUrl': data['webUrl'],
-          'downloadUrl': data['@microsoft.graph.downloadUrl'],
-        };
+        return;
       } else if (uploadResponse.statusCode != 202) {
         final error = jsonDecode(uploadResponse.body);
         throw Exception(
@@ -322,88 +328,35 @@ class OneDriveService {
     throw Exception('Upload failed unexpectedly');
   }
 
-  // Create public link for any uploaded file
-  // REPLACE your existing createPublicLink function with this one.
-  Future<String> createPublicLink(String itemId, {int retries = 3}) async {
-    await _ensureToken();
-
-    // ✅ CORRECTED PATH: Use _driveBase() instead of _driveRoot()
-    final url = Uri.parse(
-      '${OneDriveConfig.graphApiBaseUrl}/${_driveBase()}/items/$itemId/createLink',
-    );
-
-    for (int i = 0; i < retries; i++) {
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $_accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({'type': 'view', 'scope': 'anonymous'}),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        print('✅ Public link created successfully for item $itemId');
-        return data['link']['webUrl'];
-      } else {
-        final error = jsonDecode(response.body);
-        final errorMessage = error['error']?['message'] ?? response.body;
-
-        // If item is not found, wait and retry.
-        if (response.statusCode == 404 && i < retries - 1) {
-          print(
-            '⚠️ Item not found, retrying in 2 seconds... (${i + 1}/$retries)',
-          );
-          await Future.delayed(const Duration(seconds: 2));
-        } else {
-          // For other errors or if all retries fail, throw the exception.
-          throw Exception('Failed to create public link: $errorMessage');
-        }
-      }
-    }
-
-    // This should not be reached if logic is correct
-    throw Exception('Failed to create public link after $retries retries.');
-  }
-
-  // Upload PDF Report
-  Future<Map<String, dynamic>> uploadPDFReport({
+  // Upload PDF Report - no return value
+  Future<void> uploadPDFReport({
     required File pdfFile,
-    required String branchId,
+    required String branchName,
     required String inspectionId,
+    required DateTime timestamp,
     Function(double)? onProgress,
   }) async {
-    final folderPath = await createInspectionFolder(branchId, inspectionId);
-    return await uploadFile(
+    final folderPath = await createPDFFolder(branchName, timestamp);
+    await _uploadFile(
       file: pdfFile,
       remotePath: folderPath,
       onProgress: onProgress,
     );
   }
 
-  // Upload multiple images
-  Future<List<Map<String, dynamic>>> uploadImages({
+  // Upload multiple images - all in one Images folder
+  Future<void> uploadImages({
     required List<File> images,
-    required String branchId,
+    required String branchName,
     required String inspectionId,
-    required String categoryId,
+    required DateTime timestamp,
     Function(int current, int total)? onProgress,
   }) async {
-    final folderPath = await createInspectionFolder(branchId, inspectionId);
-    final categoryFolder = '$folderPath/$categoryId';
-    await _createFolderIfNotExists(categoryFolder);
-
-    final List<Map<String, dynamic>> uploadedFiles = [];
+    final folderPath = await createImagesFolder(branchName, timestamp);
 
     for (int i = 0; i < images.length; i++) {
       try {
-        final result = await uploadFile(
-          file: images[i],
-          remotePath: categoryFolder,
-        );
-        console(result.toString(), tag: "THe resutl");
-        uploadedFiles.add(result);
+        await _uploadFile(file: images[i], remotePath: folderPath);
 
         if (onProgress != null) {
           onProgress(i + 1, images.length);
@@ -413,8 +366,6 @@ class OneDriveService {
         rethrow;
       }
     }
-
-    return uploadedFiles;
   }
 
   // Test connection method
@@ -446,7 +397,6 @@ class OneDriveService {
     }
   }
 }
-
 
 // class OneDriveService {
 //   static final OneDriveService _instance = OneDriveService._internal();
@@ -480,7 +430,6 @@ class OneDriveService {
 //         final data = jsonDecode(response.body);
 //         _accessToken = data['access_token'];
 
-//         // Token typically expires in 3600 seconds (1 hour)
 //         final expiresIn = data['expires_in'] as int? ?? 3600;
 //         _tokenExpiry = DateTime.now().add(
 //           Duration(seconds: expiresIn - 300),
@@ -510,10 +459,15 @@ class OneDriveService {
 //   }
 
 //   // Use service account drive
+//   // String _driveRoot() {
+//   //   return 'users/${OneDriveConfig.myUserId}/drive/root';
+//   // }
+//   String _driveBase() {
+//     return 'users/${OneDriveConfig.myUserId}/drive';
+//   }
+
 //   String _driveRoot() {
-//     // Format: users/{user-id-or-email}/drive/root
-//     // Example: users/inspection-service@contoso.com/drive/root
-//     return 'users/${OneDriveConfig.myUserId}/drive/root';
+//     return '${_driveBase()}/root';
 //   }
 
 //   Future<String> createInspectionFolder(
@@ -539,7 +493,6 @@ class OneDriveService {
 //   Future<void> _createFolderIfNotExists(String folderPath) async {
 //     await _ensureToken();
 
-//     // Check if folder exists
 //     final checkUrl = Uri.parse(
 //       '${OneDriveConfig.graphApiBaseUrl}/${_driveRoot()}:/$folderPath',
 //     );
@@ -551,11 +504,10 @@ class OneDriveService {
 
 //     if (checkResponse.statusCode == 200) {
 //       print('ℹ️ Folder already exists: $folderPath');
-//       return; // Folder exists
+//       return;
 //     }
 
 //     if (checkResponse.statusCode == 404) {
-//       // Folder doesn't exist, create it
 //       final parentPath = path.dirname(folderPath);
 //       final folderName = path.basename(folderPath);
 
@@ -590,7 +542,6 @@ class OneDriveService {
 //         );
 //       }
 //     } else {
-//       // Unexpected error
 //       final error = jsonDecode(checkResponse.body);
 //       throw Exception(
 //         'Error checking folder "$folderPath": ${error['error']?['message'] ?? checkResponse.body}',
@@ -603,6 +554,7 @@ class OneDriveService {
 //     required File file,
 //     required String remotePath,
 //     Function(double)? onProgress,
+//     bool returnPublicLink = true, // New optional flag
 //   }) async {
 //     await _ensureToken();
 
@@ -613,11 +565,24 @@ class OneDriveService {
 //       '📤 Uploading: $fileName (${(fileSize / 1024 / 1024).toStringAsFixed(2)} MB)',
 //     );
 
+//     Map<String, dynamic> uploadedData;
 //     if (fileSize < 4 * 1024 * 1024) {
-//       return await _simpleUpload(file, remotePath, fileName);
+//       uploadedData = await _simpleUpload(file, remotePath, fileName);
 //     } else {
-//       return await _resumableUpload(file, remotePath, fileName, onProgress);
+//       uploadedData = await _resumableUpload(
+//         file,
+//         remotePath,
+//         fileName,
+//         onProgress,
+//       );
 //     }
+
+//     if (returnPublicLink) {
+//       final publicUrl = await createPublicLink(uploadedData['id']);
+//       uploadedData['publicUrl'] = publicUrl;
+//     }
+
+//     return uploadedData;
 //   }
 
 //   Future<Map<String, dynamic>> _simpleUpload(
@@ -668,7 +633,6 @@ class OneDriveService {
 //     final fileSize = await file.length();
 //     final fullPath = '$remotePath/$fileName';
 
-//     // Create upload session
 //     final sessionUrl = Uri.parse(
 //       '${OneDriveConfig.graphApiBaseUrl}/${_driveRoot()}:/$fullPath:/createUploadSession',
 //     );
@@ -695,9 +659,7 @@ class OneDriveService {
 //     final sessionData = jsonDecode(sessionResponse.body);
 //     final uploadUrl = sessionData['uploadUrl'];
 
-//     // Upload in chunks
-//     final chunkSize =
-//         320 * 1024 * 10; // 3.2 MB chunks (must be multiple of 320 KB)
+//     final chunkSize = 320 * 1024 * 10; // 3.2 MB chunks
 //     final fileBytes = await file.readAsBytes();
 //     int uploadedBytes = 0;
 
@@ -728,7 +690,6 @@ class OneDriveService {
 //         '📊 Upload progress: ${(uploadedBytes / fileSize * 100).toStringAsFixed(1)}%',
 //       );
 
-//       // Upload completed
 //       if (uploadResponse.statusCode == 200 ||
 //           uploadResponse.statusCode == 201) {
 //         final data = jsonDecode(uploadResponse.body);
@@ -741,7 +702,6 @@ class OneDriveService {
 //           'downloadUrl': data['@microsoft.graph.downloadUrl'],
 //         };
 //       } else if (uploadResponse.statusCode != 202) {
-//         // 202 = Continue, anything else is an error
 //         final error = jsonDecode(uploadResponse.body);
 //         throw Exception(
 //           'Upload chunk failed: ${error['error']?['message'] ?? uploadResponse.body}',
@@ -750,6 +710,51 @@ class OneDriveService {
 //     }
 
 //     throw Exception('Upload failed unexpectedly');
+//   }
+
+//   // Create public link for any uploaded file
+//   // REPLACE your existing createPublicLink function with this one.
+//   Future<String> createPublicLink(String itemId, {int retries = 3}) async {
+//     await _ensureToken();
+
+//     // ✅ CORRECTED PATH: Use _driveBase() instead of _driveRoot()
+//     final url = Uri.parse(
+//       '${OneDriveConfig.graphApiBaseUrl}/${_driveBase()}/items/$itemId/createLink',
+//     );
+
+//     for (int i = 0; i < retries; i++) {
+//       final response = await http.post(
+//         url,
+//         headers: {
+//           'Authorization': 'Bearer $_accessToken',
+//           'Content-Type': 'application/json',
+//         },
+//         body: jsonEncode({'type': 'view', 'scope': 'anonymous'}),
+//       );
+
+//       if (response.statusCode == 200 || response.statusCode == 201) {
+//         final data = jsonDecode(response.body);
+//         print('✅ Public link created successfully for item $itemId');
+//         return data['link']['webUrl'];
+//       } else {
+//         final error = jsonDecode(response.body);
+//         final errorMessage = error['error']?['message'] ?? response.body;
+
+//         // If item is not found, wait and retry.
+//         if (response.statusCode == 404 && i < retries - 1) {
+//           print(
+//             '⚠️ Item not found, retrying in 2 seconds... (${i + 1}/$retries)',
+//           );
+//           await Future.delayed(const Duration(seconds: 2));
+//         } else {
+//           // For other errors or if all retries fail, throw the exception.
+//           throw Exception('Failed to create public link: $errorMessage');
+//         }
+//       }
+//     }
+
+//     // This should not be reached if logic is correct
+//     throw Exception('Failed to create public link after $retries retries.');
 //   }
 
 //   // Upload PDF Report
@@ -787,6 +792,7 @@ class OneDriveService {
 //           file: images[i],
 //           remotePath: categoryFolder,
 //         );
+//         console(result.toString(), tag: "THe resutl");
 //         uploadedFiles.add(result);
 
 //         if (onProgress != null) {
@@ -794,7 +800,6 @@ class OneDriveService {
 //         }
 //       } catch (e) {
 //         print('❌ Failed to upload image ${i + 1}: $e');
-//         // Continue with other images or rethrow based on your needs
 //         rethrow;
 //       }
 //     }
@@ -802,12 +807,11 @@ class OneDriveService {
 //     return uploadedFiles;
 //   }
 
-//   // Test connection method (useful for debugging)
+//   // Test connection method
 //   Future<bool> testConnection() async {
 //     try {
 //       await _ensureToken();
 
-//       // Try to access the drive root
 //       final url = Uri.parse(
 //         '${OneDriveConfig.graphApiBaseUrl}/${_driveRoot()}',
 //       );

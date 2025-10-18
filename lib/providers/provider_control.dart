@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/firebase_services/firebase_branch_service.dart';
@@ -161,152 +162,6 @@ class ProviderControl extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> submitInspection() async {
-    if (selectedTemplate == null) {
-      _errorMessage = 'No template selected.';
-      notifyListeners();
-      return false;
-    }
-
-    bool allScored = selectedTemplate!.categories.every(
-      (cat) => _scores[cat.categoryId] != null,
-    );
-    if (!allScored) {
-      _errorMessage = 'Please rate all categories before submitting.';
-      notifyListeners();
-      return false;
-    }
-
-    try {
-      _isSubmitting = true;
-      _isUploading = true;
-      _uploadProgress = 0.0;
-      _errorMessage = null;
-      _successMessage = null;
-      notifyListeners();
-
-      // 🔹 No OneDrive login needed anymore
-      // The OneDriveService will already handle token automatically internally
-
-      // Generate unique inspection ID
-      final inspectionId = DateTime.now().millisecondsSinceEpoch.toString();
-
-      final Map<String, List<Map<String, dynamic>>> uploadedFiles = {};
-      int processedCategories = 0;
-
-      // 🔹 Upload photos for each category to OneDrive
-      for (final category in selectedTemplate!.categories) {
-        final files = _photos[category.categoryId] ?? [];
-
-        if (files.isNotEmpty) {
-          final uploadedImages = await _oneDriveService.uploadImages(
-            images: files,
-            branchId: _selectedBranch!.id,
-            inspectionId: inspectionId,
-            categoryId: category.categoryId,
-            onProgress: (current, total) {
-              print(
-                'Uploading image $current of $total for ${category.categoryId}',
-              );
-            },
-          );
-
-          uploadedFiles[category.categoryId] = uploadedImages;
-        }
-
-        processedCategories++;
-        _uploadProgress =
-            processedCategories /
-            selectedTemplate!.categories.length *
-            0.8; // 80% for images
-        notifyListeners();
-      }
-
-      // 🔹 Generate PDF report
-      final pdfFile = await generatePDFReport(inspectionId);
-
-      // 🔹 Upload PDF to OneDrive
-      final pdfUploadResult = await _oneDriveService.uploadPDFReport(
-        pdfFile: pdfFile,
-        branchId: _selectedBranch!.id,
-        inspectionId: inspectionId,
-        onProgress: (progress) {
-          _uploadProgress = 0.8 + (progress * 0.2); // Last 20% for PDF
-          notifyListeners();
-        },
-      );
-
-      _uploadProgress = 1.0;
-      _isUploading = false;
-      notifyListeners();
-
-      final now = DateTime.now();
-
-      // 🔹 Build inspection object with OneDrive links
-      final inspection = InspectionModel(
-        id: inspectionId,
-        branchId: _selectedBranch!.id,
-        branchName: _selectedBranch!.name,
-        inspectorId: loggedInUser!.id,
-        inspectorName: loggedInUser!.name,
-        scheduledTime: now,
-        completedTime: now,
-        status: AppConstants.completed,
-        score: totalScore,
-        categories: Map.fromEntries(
-          selectedTemplate!.categories.map((cat) {
-            final score = _scores[cat.categoryId] ?? 0;
-            final notes = _notes[cat.categoryId] ?? '';
-
-            final photos = (uploadedFiles[cat.categoryId] ?? [])
-                .map((file) => file['downloadUrl'] as String)
-                .toList();
-
-            return MapEntry(
-              cat.categoryId,
-              InspectionCategoryModel(
-                score: score,
-                photos: photos,
-                notes: notes,
-              ),
-            );
-          }),
-        ),
-        overallNotes: _overallNotes,
-        pdfReportUrl: pdfUploadResult['downloadUrl'],
-        pdfReportWebUrl: pdfUploadResult['webUrl'],
-        publicUrl: pdfUploadResult['publicUrl'],
-        createdAt: now,
-        updatedAt: now,
-      );
-
-      // 🔹 Save to Firestore
-      await _inspectionService.createInspection(inspection);
-
-      // Delete local PDF file
-      if (await pdfFile.exists()) {
-        await pdfFile.delete();
-      }
-
-      _successMessage =
-          'Inspection saved successfully to OneDrive and Firestore.';
-      _isSubmitting = false;
-      notifyListeners();
-
-      resetForm();
-
-      return true;
-    } catch (e, st) {
-      _errorMessage =
-          'An error occurred while saving inspection: ${e.toString()}';
-      _isSubmitting = false;
-      _isUploading = false;
-      notifyListeners();
-      console('Submit error: $e\n$st');
-      return false;
-    }
-  }
-
   Future<void> fetchTemplateByID(String id) async {
     _isLoading = true;
     notifyListeners();
@@ -350,6 +205,229 @@ class ProviderControl extends ChangeNotifier {
   }
 
   bool get isSubmittingOrUploading => _isSubmitting || _isUploading;
+
+  Future<bool> submitInspection() async {
+    if (selectedTemplate == null) {
+      _errorMessage = 'No template selected.';
+      notifyListeners();
+      return false;
+    }
+
+    bool allScored = selectedTemplate!.categories.every(
+      (cat) => _scores[cat.categoryId] != null,
+    );
+    if (!allScored) {
+      _errorMessage = 'Please rate all categories before submitting.';
+      notifyListeners();
+      return false;
+    }
+
+    try {
+      _isSubmitting = true;
+      _isUploading = true;
+      _uploadProgress = 0.0;
+      _errorMessage = null;
+      _successMessage = null;
+      notifyListeners();
+      // Generate unique inspection ID
+      final inspectionId = DateTime.now().millisecondsSinceEpoch.toString();
+      final now = DateTime.now();
+
+      // 🔹 Upload images to both OneDrive and Firebase concurrently
+      final categoryUploadFutures = selectedTemplate!.categories.map((
+        category,
+      ) async {
+        final files = _photos[category.categoryId] ?? [];
+
+        if (files.isEmpty) {
+          return MapEntry(category.categoryId, <String>[]);
+        }
+
+        // Upload to both services concurrently
+        final results = await Future.wait([
+          // OneDrive upload (no need to store URLs)
+          _oneDriveService.uploadImages(
+            images: files,
+            branchName: _selectedBranch!.name,
+            inspectionId: inspectionId,
+            timestamp: now,
+            onProgress: (a, b) {},
+          ),
+          // Firebase upload (store these URLs)
+          _uploadCategoryPhotos(
+            files,
+            _selectedBranch!.name,
+            category.categoryId,
+            inspectionId,
+            now,
+          ),
+        ]);
+
+        // Return Firebase URLs (results[1])
+        return MapEntry(category.categoryId, results[1] as List<String>);
+      }).toList();
+
+      // Wait for all category uploads to complete
+      final uploadedUrls = Map.fromEntries(
+        await Future.wait(categoryUploadFutures),
+      );
+
+      _uploadProgress = 0.8; // 80% for images
+      notifyListeners();
+
+      // 🔹 Generate PDF report
+      final pdfFile = await generatePDFReport(inspectionId);
+
+      // 🔹 Upload PDF to both OneDrive and Firebase concurrently
+      final pdfUploads = await Future.wait([
+        // OneDrive PDF upload
+        _oneDriveService.uploadPDFReport(
+          pdfFile: pdfFile,
+          branchName: _selectedBranch!.name,
+          inspectionId: inspectionId,
+          timestamp: now,
+          onProgress: (v) {},
+        ),
+        // Firebase PDF upload
+        _uploadPDFToFirebase(pdfFile, _selectedBranch!.name, inspectionId, now),
+      ]);
+
+      final firebasePdfUrl = pdfUploads[1] as String;
+
+      _uploadProgress = 1.0;
+      _isUploading = false;
+      notifyListeners();
+
+      // 🔹 Build inspection object with Firebase URLs
+      final inspection = InspectionModel(
+        id: inspectionId,
+        branchId: _selectedBranch!.id,
+        branchName: _selectedBranch!.name,
+        inspectorId: loggedInUser!.id,
+        inspectorName: loggedInUser!.name,
+        scheduledTime: _selectedBranch!.nextInspectionDate.toString(),
+        completedTime: now,
+        status: AppConstants.completed,
+        score: totalScore,
+        categories: Map.fromEntries(
+          selectedTemplate!.categories.map((cat) {
+            final score = _scores[cat.categoryId] ?? 0;
+            final notes = _notes[cat.categoryId] ?? '';
+            final photos = uploadedUrls[cat.categoryId] ?? [];
+
+            return MapEntry(
+              cat.title,
+              InspectionCategoryModel(
+                score: score,
+                photos: photos,
+                notes: notes,
+              ),
+            );
+          }),
+        ),
+        overallNotes: _overallNotes,
+        pdfReportUrl: firebasePdfUrl,
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      // 🔹 Save to Firestore
+      await _inspectionService.createInspection(inspection);
+
+      // Delete local PDF file
+      if (await pdfFile.exists()) {
+        await pdfFile.delete();
+      }
+
+      _successMessage =
+          'Inspection saved successfully to OneDrive, Firebase, and Firestore.';
+      _isSubmitting = false;
+      notifyListeners();
+
+      resetForm();
+
+      return true;
+    } catch (e, st) {
+      _errorMessage =
+          'An error occurred while saving inspection: ${e.toString()}';
+      _isSubmitting = false;
+      _isUploading = false;
+      notifyListeners();
+      console('Submit error: $e\n$st');
+      return false;
+    }
+  }
+
+  // Helper method to get month folder name (e.g., "2025-10" or "October-2025")
+  String _getMonthFolder(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}';
+    // Or use: DateFormat('MMMM-yyyy').format(date); // e.g., "October-2025"
+  }
+
+  // Upload single photo to Firebase Storage
+  Future<String> _uploadPhoto(File photo, String path) async {
+    try {
+      final storageRef = FirebaseStorage.instance.ref().child(path);
+      final uploadTask = storageRef.putFile(photo);
+
+      final snapshot = await uploadTask;
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      return downloadUrl;
+    } catch (e) {
+      console('Error uploading photo: $e');
+      rethrow;
+    }
+  }
+
+  // Upload all photos for a category with structured path
+  Future<List<String>> _uploadCategoryPhotos(
+    List<File> photos,
+    String branchName,
+    String categoryId,
+    String inspectionId,
+    DateTime timestamp,
+  ) async {
+    final monthFolder = _getMonthFolder(timestamp);
+
+    // Upload all photos concurrently
+    final uploadFutures = photos.asMap().entries.map((entry) {
+      final index = entry.key;
+      final photo = entry.value;
+
+      // Structure: inspections/{branchName}/{month}/{inspectionId}/{categoryId}_{index}.jpg
+      final path =
+          'inspections/$branchName/$monthFolder/$inspectionId/${categoryId}_$index.jpg';
+
+      return _uploadPhoto(photo, path);
+    }).toList();
+
+    // Wait for all uploads to complete
+    final urls = await Future.wait(uploadFutures);
+
+    return urls;
+  }
+
+  // Upload PDF to Firebase Storage with structured path
+  Future<String> _uploadPDFToFirebase(
+    File pdfFile,
+    String branchName,
+    String inspectionId,
+    DateTime timestamp,
+  ) async {
+    final monthFolder = _getMonthFolder(timestamp);
+
+    // Structure: pdf-reports/{branchName}/{month}/{inspectionId}_report.pdf
+    final path =
+        'pdf-reports/$branchName/$monthFolder/${inspectionId}_report.pdf';
+
+    final storageRef = FirebaseStorage.instance.ref().child(path);
+    final uploadTask = storageRef.putFile(pdfFile);
+
+    await uploadTask;
+
+    return await storageRef.getDownloadURL();
+  }
 
   void resetForm() {
     _overallNotes = '';
@@ -959,6 +1037,151 @@ class ProviderControl extends ChangeNotifier {
     }
   }
 }
+/////////////////////////////////////////////////////////////////////////
+// Future<bool> submitInspection() async {
+//     if (selectedTemplate == null) {
+//       _errorMessage = 'No template selected.';
+//       notifyListeners();
+//       return false;
+//     }
+
+//     bool allScored = selectedTemplate!.categories.every(
+//       (cat) => _scores[cat.categoryId] != null,
+//     );
+//     if (!allScored) {
+//       _errorMessage = 'Please rate all categories before submitting.';
+//       notifyListeners();
+//       return false;
+//     }
+
+//     try {
+//       _isSubmitting = true;
+//       _isUploading = true;
+//       _uploadProgress = 0.0;
+//       _errorMessage = null;
+//       _successMessage = null;
+//       notifyListeners();
+
+
+//       // Generate unique inspection ID
+//       final inspectionId = DateTime.now().millisecondsSinceEpoch.toString();
+
+//       final Map<String, List<Map<String, dynamic>>> uploadedFiles = {};
+//       int processedCategories = 0;
+
+//       // 🔹 Upload photos for each category to OneDrive
+//       for (final category in selectedTemplate!.categories) {
+//         final files = _photos[category.categoryId] ?? [];
+
+//         if (files.isNotEmpty) {
+//           final uploadedImages = await _oneDriveService.uploadImages(
+//             images: files,
+//             branchId: _selectedBranch!.id,
+//             inspectionId: inspectionId,
+//             categoryId: category.categoryId,
+//             onProgress: (current, total) {
+//               print(
+//                 'Uploading image $current of $total for ${category.categoryId}',
+//               );
+//             },
+//           );
+
+//           uploadedFiles[category.categoryId] = uploadedImages;
+//         }
+
+//         processedCategories++;
+//         _uploadProgress =
+//             processedCategories /
+//             selectedTemplate!.categories.length *
+//             0.8; // 80% for images
+//         notifyListeners();
+//       }
+
+//       // 🔹 Generate PDF report
+//       final pdfFile = await generatePDFReport(inspectionId);
+
+//       // 🔹 Upload PDF to OneDrive
+//       final pdfUploadResult = await _oneDriveService.uploadPDFReport(
+//         pdfFile: pdfFile,
+//         branchId: _selectedBranch!.id,
+//         inspectionId: inspectionId,
+//         onProgress: (progress) {
+//           _uploadProgress = 0.8 + (progress * 0.2); // Last 20% for PDF
+//           notifyListeners();
+//         },
+//       );
+
+//       _uploadProgress = 1.0;
+//       _isUploading = false;
+//       notifyListeners();
+
+//       final now = DateTime.now();
+
+//       // 🔹 Build inspection object with OneDrive links
+//       final inspection = InspectionModel(
+//         id: inspectionId,
+//         branchId: _selectedBranch!.id,
+//         branchName: _selectedBranch!.name,
+//         inspectorId: loggedInUser!.id,
+//         inspectorName: loggedInUser!.name,
+//         scheduledTime: now,
+//         completedTime: now,
+//         status: AppConstants.completed,
+//         score: totalScore,
+//         categories: Map.fromEntries(
+//           selectedTemplate!.categories.map((cat) {
+//             final score = _scores[cat.categoryId] ?? 0;
+//             final notes = _notes[cat.categoryId] ?? '';
+
+//             final photos = (uploadedFiles[cat.categoryId] ?? [])
+//                 .map((file) => file['downloadUrl'] as String)
+//                 .toList();
+
+//             return MapEntry(
+//               cat.categoryId,
+//               InspectionCategoryModel(
+//                 score: score,
+//                 photos: photos,
+//                 notes: notes,
+//               ),
+//             );
+//           }),
+//         ),
+//         overallNotes: _overallNotes,
+//         pdfReportUrl: pdfUploadResult['downloadUrl'],
+//         pdfReportWebUrl: pdfUploadResult['webUrl'],
+//         publicUrl: pdfUploadResult['publicUrl'],
+//         createdAt: now,
+//         updatedAt: now,
+//       );
+
+//       // 🔹 Save to Firestore
+//       await _inspectionService.createInspection(inspection);
+
+//       // Delete local PDF file
+//       if (await pdfFile.exists()) {
+//         await pdfFile.delete();
+//       }
+
+//       _successMessage =
+//           'Inspection saved successfully to OneDrive and Firestore.';
+//       _isSubmitting = false;
+//       notifyListeners();
+
+//       resetForm();
+
+//       return true;
+//     } catch (e, st) {
+//       _errorMessage =
+//           'An error occurred while saving inspection: ${e.toString()}';
+//       _isSubmitting = false;
+//       _isUploading = false;
+//       notifyListeners();
+//       console('Submit error: $e\n$st');
+//       return false;
+//     }
+//   }
+/////////////////////////////////////////////////////////////////////////
 
   // Future<bool> submitInspection() async {
   //   if (selectedTemplate == null) {

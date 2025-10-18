@@ -62,7 +62,7 @@ class BranchModel {
       lastInspectionDate: data['lastInspectionDate'] != null
           ? (data['lastInspectionDate'] as Timestamp).toDate()
           : null,
-      nextInspectionDate: data['nextInspectionDate'] , 
+      nextInspectionDate: data['nextInspectionDate'],
       lastInspectionScore: data['lastInspectionScore']?.toDouble(),
       totalInspections: data['totalInspections'] ?? 0,
       averageScore: (data['averageScore'] ?? 0.0).toDouble(),
@@ -154,7 +154,7 @@ class BranchModel {
     return DateTime.now().difference(lastInspectionDate!).inDays;
   }
 
-int? get daysUntilNextInspection {
+  int? get daysUntilNextInspection {
     if (nextInspectionDate == null || nextInspectionDate!.isEmpty) return null;
     try {
       final nextDate = DateTime.parse(nextInspectionDate!);
@@ -165,7 +165,6 @@ int? get daysUntilNextInspection {
       return null;
     }
   }
-
 
   // Helper: Last inspection text (Turkish)
   String get lastInspectionText {

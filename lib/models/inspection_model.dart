@@ -7,15 +7,13 @@ class InspectionModel {
   final String branchName;
   final String inspectorId;
   final String? inspectorName;
-  final DateTime scheduledTime;
+  final String scheduledTime;
   final DateTime? completedTime;
   final String status; // "scheduled" | "completed" | "pending" | "current"
   final double score;
   final Map<String, InspectionCategoryModel> categories;
   final String overallNotes;
-  final String? pdfReportUrl;
-  final String? pdfReportWebUrl;
-  final String? publicUrl;
+  final String? pdfReportUrl; // Firebase Storage URL only
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -31,10 +29,8 @@ class InspectionModel {
     required this.score,
     required this.categories,
     required this.overallNotes,
-    required this.createdAt,
     this.pdfReportUrl,
-    this.pdfReportWebUrl,
-    this.publicUrl,
+    required this.createdAt,
     required this.updatedAt,
   });
 
@@ -56,7 +52,7 @@ class InspectionModel {
       branchName: data['branchName'] ?? '',
       inspectorId: data['inspectorId'] ?? '',
       inspectorName: data['inspectorName'],
-      scheduledTime: (data['scheduledTime'] as Timestamp).toDate(),
+      scheduledTime: data['scheduledTime'],
       completedTime: data['completedTime'] != null
           ? (data['completedTime'] as Timestamp).toDate()
           : null,
@@ -65,8 +61,6 @@ class InspectionModel {
       categories: parsedCategories,
       overallNotes: data['overallNotes'] ?? '',
       pdfReportUrl: data['pdfReportUrl'],
-      pdfReportWebUrl: data['pdfReportWebUrl'],
-      publicUrl: data['publicUrl'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       updatedAt: (data['updatedAt'] as Timestamp).toDate(),
     );
@@ -79,7 +73,7 @@ class InspectionModel {
       'branchName': branchName,
       'inspectorId': inspectorId,
       'inspectorName': inspectorName,
-      'scheduledTime': Timestamp.fromDate(scheduledTime),
+      'scheduledTime': scheduledTime,
       'completedTime': completedTime != null
           ? Timestamp.fromDate(completedTime!)
           : null,
@@ -89,8 +83,6 @@ class InspectionModel {
         (key, value) => MapEntry(key, value.toMap()),
       ),
       'pdfReportUrl': pdfReportUrl,
-      'pdfReportWebUrl': pdfReportWebUrl,
-      'publicUrl': publicUrl,
       'overallNotes': overallNotes,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
