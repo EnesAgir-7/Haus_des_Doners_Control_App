@@ -1,5 +1,11 @@
 {
   "panel": "Home",
+  "admin_name": "Admin Name",
+  "admin_panel": "Admin Panel",
+  "total_branches": "Total Branches",
+  "total_users": "Total Users",
+  "total_tasks": "Total Tasks",
+  "total_fleet": "Total Fleet",
   "subsidiaries": "Subsidiaries",
   "fleet": "Vehicle",
   "route": "Route",

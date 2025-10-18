@@ -1,5 +1,11 @@
 {
   "panel": "Panel",
+  "admin_name": "Admin Name",
+  "admin_panel": "Admin Panel",
+  "total_branches": "Gesamtzahl der Filialen",
+  "total_users": "Gesamtzahl der Benutzer",
+  "total_tasks": "Gesamtzahl der Aufgaben",
+  "total_fleet": "Gesamtzahl der Fahrzeuge",
   "subsidiaries": "Şubeler",
   "fleet": "Kontrol",
   "route": "Rota",

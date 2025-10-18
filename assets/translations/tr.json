@@ -1,5 +1,11 @@
 {
   "panel": "Panel",
+  "admin_name": "Yönetici Adı",
+  "admin_panel": "Yönetici Paneli",
+  "total_branches": "Toplam Şube Sayısı",
+  "total_users": "Toplam Kullanıcı Sayısı",
+  "total_tasks": "Toplam Görev Sayısı",
+  "total_fleet": "Toplam Araç Sayısı",
   "subsidiaries": "Şubeler",
   "fleet": "Filo",
   "route": "Rota",
