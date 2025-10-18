@@ -282,7 +282,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
               ),
 
               // Upload Progress Overlay
-              if (provider.isUploading) _buildEnhancedUploadOverlay(provider),
+              if (provider.isSubmitting &&
+                  provider.isUploading &&
+                  provider.currentUploadStage != null)
+                _buildEnhancedUploadOverlay(provider),
             ],
           );
         },
@@ -1272,6 +1275,28 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   }
 
   Widget _buildEnhancedUploadOverlay(ProviderControl provider) {
+    // ✅ Determine the message and icon based on current stage
+    String message;
+    IconData icon;
+
+    switch (provider.currentUploadStage) {
+      case UploadStage.uploadingPhotos:
+        message = LocaleKeys.uploading_photos.tr();
+        icon = Icons.photo_library_outlined;
+        break;
+      case UploadStage.uploadingPDF:
+        message = "Uploading PDF";
+        icon = Icons.picture_as_pdf_outlined;
+        break;
+      case UploadStage.submitting:
+        message = "Submitting Inspection";
+        icon = Icons.send_outlined;
+        break;
+      default:
+        message = "Uploading"; // Fallback
+        icon = Icons.cloud_upload_outlined;
+    }
+
     return Container(
       color: Colors.black.withValues(alpha: 0.95),
       child: Center(
@@ -1330,7 +1355,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.cloud_upload_outlined,
+                      icon, // ✅ Dynamic icon based on stage
                       color: AppColors.primaryRed,
                       size: 32,
                     ),
@@ -1339,7 +1364,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
               ),
               const SizedBox(height: 28),
               Text(
-                LocaleKeys.uploading_photos.tr(),
+                message, // ✅ Dynamic message based on stage
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -1514,19 +1539,26 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       ),
     );
 
+    // ✅ Check if user cancelled
     if (confirm != true) return;
+
+    // ✅ Check if widget is still mounted before async operation
+    if (!mounted) return;
 
     final success = await provider.submitInspection();
 
-    if (success && mounted) {
+    // ✅ Check mounted after async operation
+    if (!mounted) return;
+
+    if (success) {
       showSnakBarr(context, LocaleKeys.inspection_submitted.tr());
 
-      if (mounted) {
-        if (widget.from == AppConstants.details)
-          Navigator.maybeOf(context)!.pop();
-        Navigator.pop(context);
+      // ✅ Navigate properly based on source
+      if (widget.from == AppConstants.details) {
+        Navigator.of(context).pop(); // Pop detail screen
       }
-    } else if (mounted && provider.errorMessage != null) {
+      Navigator.of(context).pop(); // Pop current screen
+    } else if (provider.errorMessage != null) {
       showSnakBarr(context, provider.errorMessage.toString());
     }
   }

@@ -152,110 +152,214 @@ class InspectionService {
     }
   }
 
-  // Create inspection
   Future<String> createInspection(InspectionModel inspection) async {
     console('Creating inspection...');
+    final batch = _db.batch();
     try {
-      final docRef = await _db.collection(_collection).add(inspection.toMap());
-      // Update branch statistics
-      Future.wait([
-        updateBranchStatistics(
-          branchId: inspection.branchId,
-          inspectionScore: inspection.score,
-        ),
+      // Pre-generate docRef for the inspection
+      final docRef = _db.collection(_collection).doc();
+      batch.set(docRef, inspection.toMap());
 
-        // 2. Update the route stop to mark as completed
-        completeStopInspection(
-          inspectorId: inspection.inspectorId,
-          branchId: inspection.branchId,
-          inspectionId: docRef.id,
-          status: AppConstants.completed,
-          score: inspection.score,
-        ),
-      ]);
+      // Prepare branch statistics update
+      await _prepareBranchStatisticsBatch(
+        batch: batch,
+        branchId: inspection.branchId,
+        inspectionScore: inspection.score,
+      );
+
+      // Prepare route stop update
+      await _prepareStopCompletionBatch(
+        batch: batch,
+        inspectorId: inspection.inspectorId,
+        branchId: inspection.branchId,
+        inspectionId: docRef.id,
+        score: inspection.score,
+      );
+
+      await batch.commit();
 
       return docRef.id;
-    } catch (e) {
-      print('Error creating inspection: $e');
+    } catch (e, st) {
+      print('Error creating inspection: $e\n$st');
       rethrow;
     }
   }
 
-  Future<void> updateBranchStatistics({
+  // Helper: adds branch statistics update to batch
+  Future<void> _prepareBranchStatisticsBatch({
+    required WriteBatch batch,
     required String branchId,
     required double inspectionScore,
   }) async {
-    try {
-      final branchRef = _db.collection(_collectionBranches).doc(branchId);
+    final branchRef = _db.collection(_collectionBranches).doc(branchId);
+    final branchDoc = await branchRef.get();
+    if (!branchDoc.exists) throw Exception('Branch not found');
 
-      // Get current branch data
-      final branchDoc = await branchRef.get();
+    final data = branchDoc.data()!;
+    final currentTotal = data['totalInspections'] ?? 0;
+    final currentAverage = (data['averageRating'] ?? 0.0).toDouble();
+    final newTotal = currentTotal + 1;
+    final newAverage =
+        ((currentAverage * currentTotal) + inspectionScore) / newTotal;
 
-      if (!branchDoc.exists) {
-        throw Exception('Branch not found');
+    batch.update(branchRef, {
+      'totalInspections': newTotal,
+      'lastInspectionDate': FieldValue.serverTimestamp(),
+      'averageRating': newAverage,
+      'stop': null,
+      'lastInspectionScore': inspectionScore,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  // Helper: adds route stop update to batch
+  Future<void> _prepareStopCompletionBatch({
+    required WriteBatch batch,
+    required String inspectorId,
+    required String branchId,
+    required String inspectionId,
+    required double score,
+    String status = AppConstants.completed,
+  }) async {
+    final routeRef = _db.collection(_collectionRoutes).doc(inspectorId);
+    final docSnap = await routeRef.get();
+    if (!docSnap.exists) return;
+
+    final route = RouteModel.fromFirestore(docSnap);
+    final updatedStops = route.stops.map((stop) {
+      if (stop.branchId == branchId) {
+        return stop.copyWith(
+          status: status,
+          inspectionId: inspectionId,
+          createdAt: DateTime.now(),
+          completedAt: DateTime.now(),
+          inspectionScore: score,
+          expiryDate: Timestamp.fromDate(DateTime.now().add(Duration(days: 1))),
+        );
       }
+      return stop;
+    }).toList();
 
-      final currentData = branchDoc.data()!;
-      final currentTotal = currentData['totalInspections'] ?? 0;
-      final currentAverage = (currentData['averageRating'] ?? 0.0).toDouble();
-
-      // Calculate new average
-      final newTotal = currentTotal + 1;
-      final newAverage =
-          ((currentAverage * currentTotal) + inspectionScore) / newTotal;
-
-      // Update branch document
-      await branchRef.update({
-        'totalInspections': newTotal,
-        'lastInspectionDate': FieldValue.serverTimestamp(),
-        'averageRating': newAverage,
-        'nextInspectionDate': null,
-        'lastInspectionScore': inspectionScore,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      print('Branch statistics updated: Total=$newTotal, Avg=$newAverage');
-    } catch (e) {
-      print('Error updating branch statistics: $e');
-      rethrow;
-    }
+    batch.update(routeRef, {
+      'stops': updatedStops.map((s) => s.toMap()).toList(),
+      'updatedAt': Timestamp.fromDate(DateTime.now()),
+    });
   }
 
-  // Update inspection
-  Future<void> updateInspection(
-    String inspectionId,
-    Map<String, dynamic> data,
-  ) async {
-    try {
-      data['updatedAt'] = FieldValue.serverTimestamp();
-      await _db.collection(_collection).doc(inspectionId).update(data);
-    } catch (e) {
-      print('Error updating inspection: $e');
-      rethrow;
-    }
-  }
+  // // Create inspection
+  // Future<String> createInspection(InspectionModel inspection) async {
+  //   console('Creating inspection...');
+  //   try {
+  //     final docRef = await _db.collection(_collection).add(inspection.toMap());
+  //     // Update branch statistics
+  //     Future.wait([
+  //       updateBranchStatistics(
+  //         branchId: inspection.branchId,
+  //         inspectionScore: inspection.score,
+  //       ),
 
-  // Complete inspection
-  Future<void> completeInspection(
-    String inspectionId,
-    Map<String, dynamic> categoryScores,
-    double totalScore,
-    String overallNotes,
-  ) async {
-    try {
-      await _db.collection(_collection).doc(inspectionId).update({
-        'status': 'completed',
-        'completedTime': FieldValue.serverTimestamp(),
-        'categories': categoryScores,
-        'score': totalScore,
-        'overallNotes': overallNotes,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Error completing inspection: $e');
-      rethrow;
-    }
-  }
+  //       // 2. Update the route stop to mark as completed
+  //       completeStopInspection(
+  //         inspectorId: inspection.inspectorId,
+  //         branchId: inspection.branchId,
+  //         inspectionId: docRef.id,
+  //         status: AppConstants.completed,
+  //         score: inspection.score,
+  //       ),
+  //     ]);
+
+  //     return docRef.id;
+  //   } catch (e) {
+  //     print('Error creating inspection: $e');
+  //     rethrow;
+  //   }
+  // }
+
+  // Future<void> completeStopInspection({
+  //   required String inspectorId,
+  //   required String branchId,
+  //   required String inspectionId,
+  //   required double score,
+  //   String status = AppConstants.completed,
+  // }) async {
+  //   try {
+  //     final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
+  //     final docSnap = await routeDocRef.get();
+
+  //     if (!docSnap.exists) {
+  //       print("No route found for inspector $inspectorId");
+  //       return;
+  //     }
+
+  //     final route = RouteModel.fromFirestore(docSnap);
+
+  //     // Find the stop that matches the branch
+  //     final updatedStops = route.stops.map((stop) {
+  //       if (stop.branchId == branchId) {
+  //         return stop.copyWith(
+  //           status: status,
+  //           inspectionId: inspectionId,
+  //           createdAt: DateTime.now(),
+  //           completedAt: DateTime.now(),
+  //           inspectionScore: score,
+  //           expiryDate: Timestamp.fromDate(
+  //             DateTime.now().add(Duration(days: 1)),
+  //           ),
+  //         );
+  //       }
+  //       return stop;
+  //     }).toList();
+
+  //     await routeDocRef.update({
+  //       'stops': updatedStops.map((s) => s.toMap()).toList(),
+  //       'updatedAt': Timestamp.fromDate(DateTime.now()),
+  //     });
+
+  //     print('Route stop updated successfully for branch $branchId');
+  //   } catch (e) {
+  //     print('Error updating route stop status: $e');
+  //   }
+  // }
+
+  // Future<void> updateBranchStatistics({
+  //   required String branchId,
+  //   required double inspectionScore,
+  // }) async {
+  //   try {
+  //     final branchRef = _db.collection(_collectionBranches).doc(branchId);
+
+  //     // Get current branch data
+  //     final branchDoc = await branchRef.get();
+
+  //     if (!branchDoc.exists) {
+  //       throw Exception('Branch not found');
+  //     }
+
+  //     final currentData = branchDoc.data()!;
+  //     final currentTotal = currentData['totalInspections'] ?? 0;
+  //     final currentAverage = (currentData['averageRating'] ?? 0.0).toDouble();
+
+  //     // Calculate new average
+  //     final newTotal = currentTotal + 1;
+  //     final newAverage =
+  //         ((currentAverage * currentTotal) + inspectionScore) / newTotal;
+
+  //     // Update branch document
+  //     await branchRef.update({
+  //       'totalInspections': newTotal,
+  //       'lastInspectionDate': FieldValue.serverTimestamp(),
+  //       'averageRating': newAverage,
+  //       'nextInspectionDate': null,
+  //       'lastInspectionScore': inspectionScore,
+  //       'updatedAt': FieldValue.serverTimestamp(),
+  //     });
+
+  //     print('Branch statistics updated: Total=$newTotal, Avg=$newAverage');
+  //   } catch (e) {
+  //     print('Error updating branch statistics: $e');
+  //     rethrow;
+  //   }
+  // }
 
   // Delete inspection
   Future<void> deleteInspection(String inspectionId) async {
@@ -282,52 +386,6 @@ class InspectionService {
     } catch (e) {
       print('Error getting template: $e');
       rethrow;
-    }
-  }
-
-  Future<void> completeStopInspection({
-    required String inspectorId,
-    required String branchId,
-    required String inspectionId,
-    required double score,
-    String status = AppConstants.completed,
-  }) async {
-    try {
-      final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
-      final docSnap = await routeDocRef.get();
-
-      if (!docSnap.exists) {
-        print("No route found for inspector $inspectorId");
-        return;
-      }
-
-      final route = RouteModel.fromFirestore(docSnap);
-
-      // Find the stop that matches the branch
-      final updatedStops = route.stops.map((stop) {
-        if (stop.branchId == branchId) {
-          return stop.copyWith(
-            status: status,
-            inspectionId: inspectionId,
-            createdAt: DateTime.now(),
-            completedAt: DateTime.now(),
-            inspectionScore: score,
-            expiryDate: Timestamp.fromDate(
-              DateTime.now().add(Duration(days: 1)),
-            ),
-          );
-        }
-        return stop;
-      }).toList();
-
-      await routeDocRef.update({
-        'stops': updatedStops.map((s) => s.toMap()).toList(),
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
-      });
-
-      print('Route stop updated successfully for branch $branchId');
-    } catch (e) {
-      print('Error updating route stop status: $e');
     }
   }
 }

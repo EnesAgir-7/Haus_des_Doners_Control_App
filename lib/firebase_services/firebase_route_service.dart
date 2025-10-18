@@ -131,6 +131,7 @@ class RouteService {
         'stops': route.stops.map((s) => s.toMap()).toList(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
+      
     } catch (e) {
       console('Error updating stop status: $e');
       rethrow;

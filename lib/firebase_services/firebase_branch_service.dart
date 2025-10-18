@@ -115,45 +115,48 @@ class BranchService {
   }) async {
     try {
       final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
+      final branchDocRef = _db.collection(_collectionBranches).doc(branchId);
+      final now = DateTime.now();
 
-      // 1. Get the route document for this inspector
       final docSnap = await routeDocRef.get();
       if (!docSnap.exists) {
         throw Exception("No route found for inspectorId: $inspectorId");
       }
 
-      // 2. Parse existing route
       final route = RouteModel.fromFirestore(docSnap);
 
-      // 3. Find the stop by order number
       final stopIndex = route.stops.indexWhere((s) => s.order == order);
       if (stopIndex == -1) {
         throw Exception("No stop found with order: $order");
       }
 
-      // 4. Update only that stop
       final updatedStop = route.stops[stopIndex].copyWith(
         timeSlot: newTimeSlot,
       );
 
-      final updatedStops = List<RouteStopModel>.from(route.stops);
+      final updatedStops = [...route.stops];
       updatedStops[stopIndex] = updatedStop;
 
-      // 5. Update Firestore document
-      await routeDocRef.update({
+      final batch = _db.batch();
+
+      // Update route doc
+      batch.update(routeDocRef, {
         'stops': updatedStops.map((s) => s.toMap()).toList(),
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
+        'updatedAt': Timestamp.fromDate(now),
       });
 
-      // 6. Update branch next inspection date
-      await _db.collection(_collectionBranches).doc(branchId).update({
-        'nextInspectionDate': newTimeSlot,
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      // Update branch doc
+      batch.update(branchDocRef, {
+        'stop': updatedStop.toMap(),
+        'updatedAt': Timestamp.fromDate(now),
       });
 
-      console('Stop timeSlot updated successfully');
-    } catch (e) {
-      print("Error updating stop timeSlot: $e");
+      // Commit the batch
+      await batch.commit();
+
+      console('✅ Stop timeSlot updated successfully for order: $order');
+    } catch (e, st) {
+      print("❌ Error updating stop timeSlot: $e\n$st");
       rethrow;
     }
   }
@@ -183,52 +186,54 @@ class BranchService {
         createdAt: now,
       );
 
-      await _db.runTransaction((transaction) async {
-        final docSnap = await transaction.get(routeDocRef);
+      final batch = _db.batch();
 
-        if (!docSnap.exists) {
-          // Create a new route for this inspector
-          final route = RouteModel(
-            id: inspectorId,
-            date: now,
-            inspectorId: inspectorId,
-            inspectorName: inspectorName,
-            stops: [newStop],
-            createdAt: now,
-            updatedAt: now,
-          );
-          transaction.set(routeDocRef, route.toMap());
-        } else {
-          // Route exists, append new stop only if not already assigned
-          final data = docSnap.data() as Map<String, dynamic>;
-          final stops = (data['stops'] as List?) ?? [];
+      final routeSnapshot = await routeDocRef.get();
 
-          final alreadyAssigned = stops.any((s) => s['branchId'] == branchId);
-          if (alreadyAssigned) {
-            console('Branch already assigned in route, skipping duplicate.');
-            return;
-          }
+      if (!routeSnapshot.exists) {
+        // New route for this inspector
+        final route = RouteModel(
+          id: inspectorId,
+          date: now,
+          inspectorId: inspectorId,
+          inspectorName: inspectorName,
+          stops: [newStop],
+          createdAt: now,
+          updatedAt: now,
+        );
 
-          // Update stop order dynamically
-          newStop.copyWith(order: stops.length + 1);
+        batch.set(routeDocRef, route.toMap());
+      } else {
+        final data = routeSnapshot.data() as Map<String, dynamic>;
+        final stops = (data['stops'] as List?) ?? [];
 
-          transaction.update(routeDocRef, {
-            'stops': FieldValue.arrayUnion([newStop.toMap()]),
-            'updatedAt': Timestamp.fromDate(now),
-          });
+        final alreadyAssigned = stops.any((s) => s['branchId'] == branchId);
+        if (alreadyAssigned) {
+          console('⚠️ Branch already assigned in route, skipping duplicate.');
+          return;
         }
 
-        // Update branch assignment atomically
-        transaction.update(branchDocRef, {
-          'nextInspectionDate': timeSlot,
-          'stop': newStop.toMap(),
+        // Update stop order dynamically
+        final updatedStop = newStop.copyWith(order: stops.length + 1);
+        final updatedStops = [...stops, updatedStop.toMap()];
+
+        batch.update(routeDocRef, {
+          'stops': updatedStops,
           'updatedAt': Timestamp.fromDate(now),
         });
+      }
+
+      // Update branch assignment atomically
+      batch.update(branchDocRef, {
+        'stop': newStop.toMap(),
+        'updatedAt': Timestamp.fromDate(now),
       });
+
+      await batch.commit();
 
       console('✅ Branch assigned successfully to inspector $inspectorName');
     } catch (e, st) {
-      print("❌ Error assigning branch: $e\n$st");
+      print("❌ Error assigning branch with batch: $e\n$st");
       rethrow;
     }
   }
@@ -345,6 +350,7 @@ class BranchService {
   }) async {
     try {
       final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
+      final branchDocRef = _db.collection(_collectionBranches).doc(branchId);
 
       final docSnap = await routeDocRef.get();
       if (!docSnap.exists) return;
@@ -353,22 +359,26 @@ class BranchService {
       final updatedStops = route.stops
           .where((s) => s.branchId != branchId)
           .toList();
-      Future.wait([
-        routeDocRef.update({
-          'stops': updatedStops.map((s) => s.toMap()).toList(),
-          'updatedAt': Timestamp.fromDate(DateTime.now()),
-        }),
 
-        _db.collection(_collectionBranches).doc(branchId).update({
-          'stop': null,
-          'nextInspectionDate': null,
-          'updatedAt': Timestamp.fromDate(DateTime.now()),
-        }),
-      ]);
+      final batch = _db.batch();
 
-      console('Branch unassigned successfully');
-    } catch (e) {
-      print("Error removing branch assignment: $e");
+      // Update route stops
+      batch.update(routeDocRef, {
+        'stops': updatedStops.map((s) => s.toMap()).toList(),
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+
+      // Remove branch assignment
+      batch.update(branchDocRef, {
+        'stop': null,
+        'updatedAt': Timestamp.fromDate(DateTime.now()),
+      });
+
+      await batch.commit();
+
+      console('✅ Branch unassigned successfully from inspector $inspectorId');
+    } catch (e, st) {
+      print("❌ Error removing branch assignment: $e\n$st");
       rethrow;
     }
   }
