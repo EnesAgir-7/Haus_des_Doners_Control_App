@@ -1203,6 +1203,13 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   }
 
   Widget _buildEnhancedActions(ProviderControl provider) {
+    if (provider.isSubmittingOrUploading)
+      return Center(
+        child: SizedBox.square(
+          dimension: 40,
+          child: CircularProgressIndicator(),
+        ),
+      );
     final isEnabled = provider.isFormValid && provider.hasAllSignatures;
 
     return Row(
@@ -1222,7 +1229,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                   : null,
             ),
             child: AppButton(
-              isLoading: provider.isSubmittingOrUploading,
+              // isLoading: provider.isSubmittingOrUploading,
               text: "Preview PDF",
               icon: Icons.preview_outlined,
               onPressed: isEnabled ? () => provider.previewPDF(context) : null,
@@ -1254,7 +1261,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                   : null,
             ),
             child: AppButton(
-              isLoading: provider.isSubmittingOrUploading,
+              // isLoading: provider.isSubmittingOrUploading,
               text: LocaleKeys.submit_inspection.tr(),
               icon: Icons.check_circle_outline,
               onPressed: isEnabled ? () => _submitInspection(provider) : null,
@@ -1298,7 +1305,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     }
 
     return Container(
-      color: Colors.black.withValues(alpha: 0.95),
+      color: Colors.black.withValues(alpha: 0.4),
       child: Center(
         child: Container(
           padding: const EdgeInsets.all(32),

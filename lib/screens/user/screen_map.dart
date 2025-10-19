@@ -221,12 +221,24 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                       );
                                     }
                                   } else {
+                                    DateTime? initialDate;
+                                    try {
+                                      if (branch.stop?.timeSlot != null &&
+                                          branch.stop!.timeSlot.isNotEmpty) {
+                                        initialDate = DateTime.parse(
+                                          branch.stop!.timeSlot,
+                                        );
+                                      }
+                                    } catch (_) {
+                                      initialDate = DateTime.now();
+                                    }
                                     // Show date picker before assigning
                                     final DateTime? pickedDate =
                                         await showDatePicker(
                                           locale: context.locale,
                                           context: context,
-                                          initialDate: DateTime.now(),
+                                          initialDate:
+                                              initialDate ?? DateTime.now(),
                                           firstDate: DateTime.now(),
                                           lastDate: DateTime.now().add(
                                             const Duration(days: 7),

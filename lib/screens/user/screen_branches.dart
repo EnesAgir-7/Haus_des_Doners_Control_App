@@ -247,6 +247,7 @@ class _ScreenBranchesState extends State<ScreenBranches> {
       color: AppColors.primaryRed,
       backgroundColor: AppColors.lightBlack,
       child: ListView.builder(
+        key: const PageStorageKey('branchesList'),
         physics: AlwaysScrollableScrollPhysics(),
         itemCount: provider.branches.length,
         itemBuilder: (context, index) {
@@ -898,7 +899,6 @@ class RouteManagementSheet extends StatelessWidget {
                       isLoading: provider.isLoading,
                       text: "Update Schedule",
                       onPressed: () async {
-                          // Parse existing timeSlot (e.g. "2025-10-23") to DateTime
                         DateTime? initialDate;
                         try {
                           if (branch.stop?.timeSlot != null &&
@@ -912,7 +912,7 @@ class RouteManagementSheet extends StatelessWidget {
                         final DateTime? pickedDate = await showDatePicker(
                           locale: context.locale,
                           context: context,
-                          initialDate: initialDate ?? DateTime.now(), 
+                          initialDate: initialDate ?? DateTime.now(),
                           firstDate: DateTime.now(),
                           lastDate: DateTime.now().add(const Duration(days: 7)),
                         );

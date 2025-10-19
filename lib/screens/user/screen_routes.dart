@@ -360,6 +360,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
       color: AppColors.primaryRed,
       onRefresh: provider.refresh,
       child: ListView.builder(
+        key: const PageStorageKey('routeList'),
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
         itemCount: displayStops.length,
