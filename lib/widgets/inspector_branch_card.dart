@@ -14,11 +14,7 @@ class InspectorBranchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isNextInspectionToday =
-        branch.stop?.timeSlot != null &&
-        branch.stop!.timeSlot.isNotEmpty &&
-        branch.stop?.timeSlot ==
-            DateFormat('yyyy-MM-dd').format(DateTime.now());
+    final bool isNextInspectionToday = _isNextInspectionToday();
 
     return GestureDetector(
       onTap: onTap,
@@ -28,11 +24,10 @@ class InspectorBranchCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF212121),
           borderRadius: BorderRadius.circular(16.0),
-
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,
-              blurRadius: 10,
+              blurRadius: 10.0,
               offset: Offset(0, 4),
             ),
           ],
@@ -41,34 +36,16 @@ class InspectorBranchCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(),
-            const SizedBox(height: 12),
+            const SizedBox(height: 12.0),
             _buildLastInspectionInfo(),
-            const SizedBox(height: 12),
+            const SizedBox(height: 12.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 if (branch.totalInspections > 0)
                   _buildTotalInspections(isNextInspectionToday),
-
                 if (branch.stop != null)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Icon(Icons.next_plan, size: 14, color: Colors.green),
-                      const SizedBox(width: 6),
-                      Text(
-                        style: TextStyle(fontSize: 12),
-                        isNextInspectionToday
-                            ? "Today"
-                            : branch.daysUntilNextInspection == 0
-                            ? "Tomorrow"
-                            : "${branch.daysUntilNextInspection} (days) left until next inspection",
-                        // formatTimeSlot(
-                        //     branch.nextInspectionDate.toString(),
-                        //   ),
-                      ),
-                    ],
-                  ),
+                  _buildNextInspectionInfo(isNextInspectionToday),
               ],
             ),
           ],
@@ -77,6 +54,15 @@ class InspectorBranchCard extends StatelessWidget {
     );
   }
 
+  /// Checks if the next inspection is scheduled for today.
+  bool _isNextInspectionToday() {
+    return branch.stop?.timeSlot != null &&
+        branch.stop!.timeSlot.isNotEmpty &&
+        branch.stop?.timeSlot ==
+            DateFormat('yyyy-MM-dd').format(DateTime.now());
+  }
+
+  /// Builds the header section with branch name, address, and status badge.
   Widget _buildHeader() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,34 +73,35 @@ class InspectorBranchCard extends StatelessWidget {
             children: [
               Text(
                 branch.name,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: 18.0,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 4.0),
               Text(
                 branch.address,
-                style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                style: TextStyle(color: Colors.grey.shade400, fontSize: 13.0),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: 8.0),
         if (branch.stop != null) _buildStatusBadge(),
       ],
     );
   }
 
+  /// Builds a badge indicating the branch is in the inspection route.
   Widget _buildStatusBadge() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
       decoration: BoxDecoration(
         color: AppColors.primaryRed,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.0),
         border: Border.all(color: Colors.white12),
       ),
       child: Row(
@@ -122,15 +109,15 @@ class InspectorBranchCard extends StatelessWidget {
         children: [
           Icon(
             Icons.pending_actions_rounded,
-            size: 14,
+            size: 14.0,
             color: Colors.grey.shade300,
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: 5.0),
           Text(
             "In your route",
             style: TextStyle(
               color: Colors.grey.shade300,
-              fontSize: 11,
+              fontSize: 11.0,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -139,26 +126,27 @@ class InspectorBranchCard extends StatelessWidget {
     );
   }
 
+  /// Builds the section displaying the last inspection details.
   Widget _buildLastInspectionInfo() {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         color: Colors.black26,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.0),
       ),
       child: Row(
         children: [
           Icon(
             Icons.calendar_today_outlined,
-            size: 18,
+            size: 18.0,
             color: Colors.grey.shade500,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 10.0),
           Text(
             LocaleKeys.last_inspected.tr(),
             style: TextStyle(
               color: Colors.grey.shade500,
-              fontSize: 13,
+              fontSize: 13.0,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -169,7 +157,7 @@ class InspectorBranchCard extends StatelessWidget {
                 : LocaleKeys.pending_first.tr(),
             style: const TextStyle(
               color: Colors.white70,
-              fontSize: 13,
+              fontSize: 13.0,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -178,19 +166,41 @@ class InspectorBranchCard extends StatelessWidget {
     );
   }
 
+  /// Builds the section showing the total number of inspections.
   Widget _buildTotalInspections(bool isNextInspectionToday) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Icon(Icons.fact_check_outlined, size: 14, color: Colors.grey.shade600),
-        const SizedBox(width: 6),
+        Icon(
+          Icons.fact_check_outlined,
+          size: 14.0,
+          color: Colors.grey.shade600,
+        ),
+        const SizedBox(width: 6.0),
         Text(
           '${branch.totalInspections} ${LocaleKeys.total_inspections.tr()}',
           style: TextStyle(
             color: Colors.grey.shade600,
-            fontSize: 12,
+            fontSize: 12.0,
             fontWeight: FontWeight.w500,
           ),
+        ),
+      ],
+    );
+  }
+
+  /// Builds the section showing the next inspection details.
+  Widget _buildNextInspectionInfo(bool isNextInspectionToday) {
+    return Row(
+      children: [
+        Icon(Icons.next_plan, size: 14.0, color: Colors.green),
+        const SizedBox(width: 6.0),
+        Text(
+          isNextInspectionToday
+              ? "Today"
+              : branch.daysUntilNextInspection == 0
+              ? "Tomorrow"
+              : "${branch.daysUntilNextInspection} days left",
+          style: const TextStyle(fontSize: 12.0, color: Colors.white70),
         ),
       ],
     );

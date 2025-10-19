@@ -368,7 +368,7 @@ class BranchDetailsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
       initialChildSize: 0.9,
-      minChildSize: 0.5,
+      minChildSize: 0.4,
       maxChildSize: 0.95,
       expand: false,
       builder: (context, scrollController) {

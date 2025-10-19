@@ -1026,11 +1026,14 @@ class DailyRouteCard extends StatelessWidget {
     required Color iconColor,
     required String label,
     required String value,
+    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
   }) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: crossAxisAlignment,
       children: [
         Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Container(
               padding: const EdgeInsets.all(7),
@@ -1058,7 +1061,7 @@ class DailyRouteCard extends StatelessWidget {
             value,
             style: const TextStyle(
               color: AppColors.white,
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -1140,7 +1143,7 @@ class DailyRouteCard extends StatelessWidget {
                             stop.branchName,
                             style: const TextStyle(
                               color: AppColors.white,
-                              fontSize: 16,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
                               letterSpacing: -0.3,
                             ),
@@ -1151,8 +1154,7 @@ class DailyRouteCard extends StatelessWidget {
                               stop.branchAddress!,
                               style: TextStyle(
                                 color: AppColors.whiteWithOpacity(0.6),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
+                                fontSize: 10,
                                 letterSpacing: -0.3,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -1186,7 +1188,7 @@ class DailyRouteCard extends StatelessWidget {
                                 status.text,
                                 style: TextStyle(
                                   color: status.color,
-                                  fontSize: 11,
+                                  fontSize: 10,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -1233,6 +1235,7 @@ class DailyRouteCard extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _buildInfoColumn(
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           icon: Icons.star_rounded,
                           iconColor: AppColors.amber,
                           label: LocaleKeys.score.tr(),
