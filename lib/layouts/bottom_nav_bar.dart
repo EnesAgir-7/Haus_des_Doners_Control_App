@@ -42,36 +42,108 @@ class ScreenBottomNavBar extends StatelessWidget {
               index: controller.selectedIndex,
               children: controller.screens,
             ),
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: controller.selectedIndex,
-              onTap: controller.onItemTapped,
-              backgroundColor: AppColors.primaryDark,
-              selectedItemColor: AppColors.primaryRed,
-              unselectedItemColor: Colors.white70,
-              type: BottomNavigationBarType.fixed,
-              items: [
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.dashboard),
-                  label: LocaleKeys.panel.tr(),
+            bottomNavigationBar: Container(
+              decoration: BoxDecoration(
+                color: AppColors.primaryDark,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
                 ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.apartment),
-                  label: LocaleKeys.my_branches.tr(),
+                border: Border(
+                  top: BorderSide(
+                    color: AppColors.white.withValues(alpha: 0.2),
+                    width: 2,
+                  ),
                 ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.alt_route),
-                  label: LocaleKeys.route.tr(),
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.car_rental),
-                  label: LocaleKeys.fleet.tr(),
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.task),
-                  label: LocaleKeys.tasks.tr(),
-                ),
-              ],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: NavigationBar(
+                selectedIndex: controller.selectedIndex,
+                onDestinationSelected: controller.onItemTapped,
+                backgroundColor: Colors.transparent,
+                elevation: 4,
+                indicatorColor: AppColors.primaryRed.withValues(alpha: 0.15),
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                maintainBottomViewPadding: true,
+
+                destinations: [
+                  NavigationDestination(
+                    icon: const Icon(Icons.dashboard, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.dashboard,
+                      color: AppColors.primaryRed,
+                    ),
+                    label: LocaleKeys.panel.tr(),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.apartment, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.apartment,
+                      color: AppColors.primaryRed,
+                    ),
+                    label: LocaleKeys.my_branches.tr(),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.alt_route, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.alt_route,
+                      color: AppColors.primaryRed,
+                    ),
+                    label: LocaleKeys.route.tr(),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.car_rental, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.car_rental,
+                      color: AppColors.primaryRed,
+                    ),
+                    label: LocaleKeys.fleet.tr(),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.task, color: Colors.white70),
+                    selectedIcon: Icon(Icons.task, color: AppColors.primaryRed),
+                    label: LocaleKeys.tasks.tr(),
+                  ),
+                ],
+              ),
             ),
+
+            // BottomNavigationBar(
+            //   currentIndex: controller.selectedIndex,
+            //   onTap: controller.onItemTapped,
+            //   backgroundColor: AppColors.primaryDark,
+            //   selectedItemColor: AppColors.primaryRed,
+            //   unselectedItemColor: Colors.white70,
+            //   type: BottomNavigationBarType.fixed,
+            //   items: [
+            //     BottomNavigationBarItem(
+            //       icon: const Icon(Icons.dashboard),
+            //       label: LocaleKeys.panel.tr(),
+            //     ),
+            //     BottomNavigationBarItem(
+            //       icon: const Icon(Icons.apartment),
+            //       label: LocaleKeys.my_branches.tr(),
+            //     ),
+            //     BottomNavigationBarItem(
+            //       icon: const Icon(Icons.alt_route),
+            //       label: LocaleKeys.route.tr(),
+            //     ),
+            //     BottomNavigationBarItem(
+            //       icon: const Icon(Icons.car_rental),
+            //       label: LocaleKeys.fleet.tr(),
+            //     ),
+            //     BottomNavigationBarItem(
+            //       icon: const Icon(Icons.task),
+            //       label: LocaleKeys.tasks.tr(),
+            //     ),
+            //   ],
+            // ),
           ),
         );
       },

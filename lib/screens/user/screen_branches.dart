@@ -754,7 +754,7 @@ class BranchDetailsSheet extends StatelessWidget {
               SizedBox(width: 10),
               Expanded(
                 child: AppButton(
-                  text: "Remove Route",
+                  text: "Manage Route",
                   onPressed: () => _showRouteManagementSheet(context, prod),
                   backgroundColor: AppColors.primaryRed,
                   textStyle: TextStyle(
@@ -773,7 +773,7 @@ class BranchDetailsSheet extends StatelessWidget {
         // Show Edit Route or Add to Route
         return AppButton(
           isLoading: prod.isLoading,
-          text: branch.stop != null ? "Edit Route" : "Add to Route",
+          text: branch.stop != null ? "Manage Route" : "Add to Route",
           onPressed: () async {
             if (branch.stop != null) {
               _showRouteManagementSheet(context, prod);
@@ -892,6 +892,61 @@ class RouteManagementSheet extends StatelessWidget {
             builder: (context, prod, child) {
               return Column(
                 children: [
+                  if (branch.stop != null &&
+                      branch.stop?.status != AppConstants.completed)
+                    AppButton(
+                      isLoading: provider.isLoading,
+                      text: "Update Schedule",
+                      onPressed: () async {
+                          // Parse existing timeSlot (e.g. "2025-10-23") to DateTime
+                        DateTime? initialDate;
+                        try {
+                          if (branch.stop?.timeSlot != null &&
+                              branch.stop!.timeSlot.isNotEmpty) {
+                            initialDate = DateTime.parse(branch.stop!.timeSlot);
+                          }
+                        } catch (_) {
+                          initialDate = DateTime.now();
+                        }
+
+                        final DateTime? pickedDate = await showDatePicker(
+                          locale: context.locale,
+                          context: context,
+                          initialDate: initialDate ?? DateTime.now(), 
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime.now().add(const Duration(days: 7)),
+                        );
+
+                        if (pickedDate != null) {
+                          final String newTimeSlot =
+                              "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+
+                          // Call your provider method to update the stop schedule
+                          final success = await provider
+                              .updateStopTimeSlotForMe(
+                                branchId: branch.stop!.branchId,
+                                context: context,
+                                newTimeSlot: newTimeSlot,
+                                order: branch.stop!.order,
+                              );
+
+                          if (success && context.mounted) {
+                            Navigator.pop(
+                              context,
+                            ); // Close route management sheet
+                            Navigator.pop(context); // Close stop details sheet
+                          }
+                        }
+                      },
+                      backgroundColor: AppColors.amber,
+                      textStyle: TextStyle(
+                        color: AppColors.primaryDark,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      borderRadius: 10,
+                    ),
                   SizedBox(height: 12),
                   AppButton(
                     isLoading: prod.isLoading,

@@ -234,7 +234,7 @@ class ProviderBranches extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      showSnakBarr(context, "Failed to assign branch: $e");
+      showCustomSnackBar(context, "Failed to assign branch: $e");
       return false;
     }
   }

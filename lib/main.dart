@@ -41,9 +41,7 @@ void main() async {
   // Initialize OneDrive
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
-      // statusBarColor: Colors.transparent, // Transparent status bar
-      // statusBarIconBrightness: Brightness.light, // Light icons
-      systemNavigationBarColor: AppColors.primaryDark, // 👈 Your desired color
+      systemNavigationBarColor: AppColors.primaryDark,
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );

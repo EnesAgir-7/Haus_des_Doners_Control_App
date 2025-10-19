@@ -767,10 +767,20 @@ class StopRouteManagementSheet extends StatelessWidget {
                       isLoading: provider.isLoading,
                       text: "Update Schedule",
                       onPressed: () async {
+                        // Parse existing timeSlot (e.g. "2025-10-23") to DateTime
+                        DateTime? initialDate;
+                        try {
+                          if (stop.timeSlot.isNotEmpty) {
+                            initialDate = DateTime.parse(stop.timeSlot);
+                          }
+                        } catch (_) {
+                          initialDate = DateTime.now();
+                        }
+
                         final DateTime? pickedDate = await showDatePicker(
                           locale: context.locale,
                           context: context,
-                          initialDate: DateTime.now(),
+                          initialDate: initialDate ?? DateTime.now(),
                           firstDate: DateTime.now(),
                           lastDate: DateTime.now().add(const Duration(days: 7)),
                         );

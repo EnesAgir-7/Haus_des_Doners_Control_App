@@ -175,29 +175,31 @@ class BranchService {
       final branchDocRef = _db.collection(_collectionBranches).doc(branchId);
 
       final now = DateTime.now();
-      final newStop = RouteStopModel(
-        branchTemplateId: branchTemplateId,
-        timeSlot: timeSlot,
-        branchId: branchId,
-        branchName: branchName,
-        branchAddress: branchAddress,
-        status: AppConstants.pending,
-        order: 1,
-        createdAt: now,
-      );
 
       final batch = _db.batch();
-
       final routeSnapshot = await routeDocRef.get();
 
+      RouteStopModel stopToSave;
+
       if (!routeSnapshot.exists) {
-        // New route for this inspector
+        // first stop → order 1
+        stopToSave = RouteStopModel(
+          branchTemplateId: branchTemplateId,
+          timeSlot: timeSlot,
+          branchId: branchId,
+          branchName: branchName,
+          branchAddress: branchAddress,
+          status: AppConstants.pending,
+          order: 1,
+          createdAt: now,
+        );
+
         final route = RouteModel(
           id: inspectorId,
           date: now,
           inspectorId: inspectorId,
           inspectorName: inspectorName,
-          stops: [newStop],
+          stops: [stopToSave],
           createdAt: now,
           updatedAt: now,
         );
@@ -210,13 +212,22 @@ class BranchService {
         final alreadyAssigned = stops.any((s) => s['branchId'] == branchId);
         if (alreadyAssigned) {
           throw Exception('Branch already assigned in route');
-          // return;
-          // console('⚠️ Branch already assigned in route, skipping duplicate.');
         }
 
-        // Update stop order dynamically
-        final updatedStop = newStop.copyWith(order: stops.length + 1);
-        final updatedStops = [...stops, updatedStop.toMap()];
+        final orderNumber = stops.length + 1;
+
+        stopToSave = RouteStopModel(
+          branchTemplateId: branchTemplateId,
+          timeSlot: timeSlot,
+          branchId: branchId,
+          branchName: branchName,
+          branchAddress: branchAddress,
+          status: AppConstants.pending,
+          order: orderNumber,
+          createdAt: now,
+        );
+
+        final updatedStops = [...stops, stopToSave.toMap()];
 
         batch.update(routeDocRef, {
           'stops': updatedStops,
@@ -224,9 +235,9 @@ class BranchService {
         });
       }
 
-      // Update branch assignment atomically
+      // ✅ Use the same stopToSave (with correct order)
       batch.update(branchDocRef, {
-        'stop': newStop.toMap(),
+        'stop': stopToSave.toMap(),
         'updatedAt': Timestamp.fromDate(now),
       });
 

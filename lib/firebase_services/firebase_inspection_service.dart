@@ -38,7 +38,7 @@ class InspectionService {
           .collection(_collection)
           .where('branchId', isEqualTo: branchId)
           .orderBy('scheduledTime', descending: true)
-          .limit(10) // ✅ Get only last 10 inspections
+          .limit(10) 
           .get();
 
       return snapshot.docs
