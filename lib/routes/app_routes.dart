@@ -4,7 +4,7 @@ import '../Modules/admin/screens/screen_admin_branches.dart';
 import '../Modules/admin/screens/screen_admin_vehicle.dart';
 import '../Modules/admin/screens/screen_admin_tasks.dart';
 import '../Modules/admin/screens/screen_admin_users.dart';
-import '../layouts/bottom_nav_bar.dart';
+import '../Modules/inspector/screens/bottom_nav_bar.dart';
 import '../Modules/inspector/screens/screen_auth.dart';
 import '../Modules/inspector/screens/screen_submit_report.dart';
 import '../Modules/inspector/screens/screen_vehicle.dart';

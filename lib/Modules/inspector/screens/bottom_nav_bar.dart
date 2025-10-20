@@ -4,10 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
-import '../core/constants/app_colors.dart';
-import '../Modules/inspector/providers/provider_bottom_nav_bar.dart';
-import '../translations/locale_keys.g.dart';
-import '../Modules/inspector/widgets/custom_toast.dart';
+import '../../../core/constants/app_colors.dart';
+import '../providers/provider_bottom_nav_bar.dart';
+import '../../../translations/locale_keys.g.dart';
+import '../widgets/custom_toast.dart';
 
 // ignore: must_be_immutable
 class ScreenBottomNavBar extends StatelessWidget {
