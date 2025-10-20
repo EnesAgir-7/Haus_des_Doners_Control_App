@@ -1305,7 +1305,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     }
 
     return Container(
-      color: Colors.black.withValues(alpha: 0.4),
+      color: Colors.black.withValues(alpha: 0.8),
       child: Center(
         child: Container(
           padding: const EdgeInsets.all(32),
