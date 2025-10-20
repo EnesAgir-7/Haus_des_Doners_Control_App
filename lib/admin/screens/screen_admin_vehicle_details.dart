@@ -114,7 +114,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
                   dropdown: !_isEditing
                       ? null
                       : DropdownButtonFormField<String>(
-                          value: widget.vehicle.status,
+                          initialValue: widget.vehicle.status,
                           items: const [
                             DropdownMenuItem(
                               value: 'active',
@@ -146,7 +146,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
                           builder: (context, provider, child) {
                             final inspectors = provider.inspectors;
                             return DropdownButtonFormField<String>(
-                              value: _selectedInspectorId,
+                              initialValue: _selectedInspectorId,
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                               ),

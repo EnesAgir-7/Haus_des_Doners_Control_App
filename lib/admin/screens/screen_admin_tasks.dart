@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -228,7 +230,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: _priority,
+                              initialValue: _priority,
                               items: const [
                                 DropdownMenuItem(
                                   value: 'low',
@@ -324,7 +326,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                         style: TextStyle(color: Colors.white70),
                       ),
                       DropdownButtonFormField<String>(
-                        value: _status,
+                        initialValue: _status,
                         items: const [
                           DropdownMenuItem(
                             value: 'pending',
@@ -515,7 +517,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                         children: [
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: _priority,
+                              initialValue: _priority,
                               items: const [
                                 DropdownMenuItem(
                                   value: 'low',

@@ -39,7 +39,7 @@ class _AssignInspectorDialogState extends State<AssignInspectorDialog> {
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<String>(
-            value: _selectedInspectorId,
+            initialValue: _selectedInspectorId,
             decoration: const InputDecoration(
               labelText: 'Inspector',
               border: OutlineInputBorder(),

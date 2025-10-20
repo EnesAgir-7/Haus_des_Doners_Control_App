@@ -212,7 +212,7 @@ class _ScreenAdminCreateUserState extends State<ScreenAdminCreateUser> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedRole,
+                initialValue: _selectedRole,
                 decoration: InputDecoration(
                   labelText: LocaleKeys.role.tr(),
                   border: const OutlineInputBorder(),
