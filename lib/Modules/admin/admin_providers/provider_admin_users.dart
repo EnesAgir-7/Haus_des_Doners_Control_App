@@ -34,7 +34,7 @@ class ProviderAdminUsers extends ChangeNotifier {
       .where(
         (inspector) =>
             inspector.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            inspector.email.toLowerCase().contains(_searchQuery.toLowerCase()),
+            inspector.serviceAccount.toLowerCase().contains(_searchQuery.toLowerCase()),
       )
       .toList();
 
@@ -211,7 +211,7 @@ class ProviderAdminUsers extends ChangeNotifier {
       final user = UserModel(
         id: userId,
         name: name,
-        email: email,
+        serviceAccount: email,
         role: role,
         active: true,
         region: region,

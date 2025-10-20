@@ -8,12 +8,11 @@ class InspectorVehicleService {
   final String _collectionVehicles = Collections.vehicles;
 
   // Get vehicle assigned to inspector
-  Future<VehicleModel?> getVehicleByInspector(String inspectorId) async {
+  Future<VehicleModel?> getVehiclesByInspector(String inspectorId) async {
     try {
       final snapshot = await _db
           .collection(_collectionVehicles)
-          .where('assignedInspectorId', isEqualTo: inspectorId)
-          .limit(1)
+          .where('assignedInspector.id', isEqualTo: inspectorId)
           .get();
 
       if (snapshot.docs.isEmpty) return null;

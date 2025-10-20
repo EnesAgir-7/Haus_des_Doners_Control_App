@@ -312,7 +312,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                                 style: const TextStyle(color: Colors.white),
                               ),
                               subtitle: Text(
-                                inspector.email,
+                                inspector.serviceAccount,
                                 style: TextStyle(color: Colors.white70),
                               ),
                               activeColor: AppColors.primaryRed,
@@ -598,7 +598,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                                 style: const TextStyle(color: Colors.white),
                               ),
                               subtitle: Text(
-                                inspector.email,
+                                inspector.serviceAccount,
                                 style: TextStyle(color: Colors.white70),
                               ),
                               activeColor: AppColors.primaryRed,

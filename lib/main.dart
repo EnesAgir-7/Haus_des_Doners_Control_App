@@ -10,7 +10,7 @@ import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_fl
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_stats.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_auth.dart';
-import 'package:haus_des_control/Modules/inspector/providers/provider_fleet.dart';
+import 'package:haus_des_control/Modules/inspector/providers/provider_vehicle.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_route.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderPanel()),
         ChangeNotifierProvider(create: (_) => ProviderBranches()),
         ChangeNotifierProvider(create: (_) => ProviderReportPhoto()),
-        ChangeNotifierProvider(create: (_) => ProviderFleet()),
+        ChangeNotifierProvider(create: (_) => ProviderVehicle()),
         ChangeNotifierProvider(create: (_) => ProviderTasks()),
         ChangeNotifierProvider(create: (_) => ProviderRoute()),
         ChangeNotifierProvider(create: (_) => ProviderControl()),

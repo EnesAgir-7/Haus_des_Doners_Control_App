@@ -35,7 +35,9 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.inspector.name);
-    _emailController = TextEditingController(text: widget.inspector.email);
+    _emailController = TextEditingController(
+      text: widget.inspector.serviceAccount,
+    );
     _regionController = TextEditingController(
       text: widget.inspector.region ?? '',
     );
@@ -73,7 +75,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
   void _toggleEdit() {
     if (_isEditing) {
       _nameController.text = widget.inspector.name;
-      _emailController.text = widget.inspector.email;
+      _emailController.text = widget.inspector.serviceAccount;
       _regionController.text = widget.inspector.region ?? '';
     }
     setState(() => _isEditing = !_isEditing);
@@ -284,7 +286,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
           ),
           const SizedBox(height: 4),
           Text(
-            widget.inspector.email,
+            widget.inspector.serviceAccount,
             style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
           const SizedBox(height: 12),
@@ -420,6 +422,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
           label: LocaleKeys.email.tr(),
           controller: _emailController,
           enabled: _isEditing,
+          readOnly: true,
           icon: Icons.email,
           keyboardType: TextInputType.emailAddress,
         ),
@@ -447,6 +450,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
     required bool enabled,
     required IconData icon,
     TextInputType? keyboardType,
+    bool readOnly = false,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -457,6 +461,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
         ),
       ),
       child: TextField(
+        readOnly: readOnly,
         controller: controller,
         enabled: enabled,
         keyboardType: keyboardType,
@@ -574,7 +579,6 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
               AppButton(
                 text: 'Assign Another Vehicle',
                 onPressed: _showAssignVehicleDialog,
-                backgroundColor: AppColors.amber,
                 textStyle: TextStyle(
                   color: AppColors.primaryDark,
                   fontSize: 14,
@@ -708,7 +712,6 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
               AppButton(
                 text: 'Assign Another Branch',
                 onPressed: _showAssignBranchDialog,
-                backgroundColor: AppColors.amber,
                 textStyle: TextStyle(
                   color: AppColors.primaryDark,
                   fontSize: 14,

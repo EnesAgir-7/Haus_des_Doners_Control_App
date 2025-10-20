@@ -3,23 +3,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UserModel {
   final String id;
   final String name;
-  final String email;
   final String role; // "admin" | "inspector"
   final bool active;
   final String? region;
   // final String? assignedVehicleId;
   final String createdAt;
   final String updatedAt;
-  final String? serviceAccount;
+  final String serviceAccount;
 
   UserModel({
     required this.id,
     required this.name,
-    required this.email,
     required this.role,
     required this.active,
     this.region,
-    this.serviceAccount,
+    required this.serviceAccount,
     // this.assignedVehicleId,
     required this.createdAt,
     required this.updatedAt,
@@ -31,7 +29,6 @@ class UserModel {
     return UserModel(
       id: doc.id,
       name: data['name'] ?? '',
-      email: data['email'] ?? '',
       role: data['role'] ?? 'inspector',
       active: data['active'] ?? true,
       region: data['region'],
@@ -47,7 +44,6 @@ class UserModel {
     return UserModel(
       id: map['id'] ?? '',
       name: map['name'] ?? '',
-      email: map['email'] ?? '',
       role: map['role'] ?? 'inspector',
       active: map['active'] ?? true,
       region: map['region'],
@@ -63,7 +59,6 @@ class UserModel {
     return {
       'id': id, // include id for local storage
       'name': name,
-      'email': email,
       'role': role,
       'active': active,
       'region': region,
@@ -90,7 +85,6 @@ class UserModel {
     return UserModel(
       id: id ?? this.id,
       name: name ?? this.name,
-      email: email ?? this.email,
       role: role ?? this.role,
       active: active ?? this.active,
       region: region ?? this.region,

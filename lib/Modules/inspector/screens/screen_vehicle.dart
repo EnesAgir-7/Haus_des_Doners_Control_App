@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../providers/provider_fleet.dart';
+import '../providers/provider_vehicle.dart';
 import '../../../translations/locale_keys.g.dart';
 
 class ScreenVehicle extends StatefulWidget {
@@ -33,7 +33,7 @@ class _ScreenVehicleState extends State<ScreenVehicle>
     _animController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderFleet>().initialize();
+      context.read<ProviderVehicle>().initialize();
     });
   }
 
@@ -60,7 +60,7 @@ class _ScreenVehicleState extends State<ScreenVehicle>
             stops: const [0.0, 0.25, 1.0],
           ),
         ),
-        child: Consumer<ProviderFleet>(
+        child: Consumer<ProviderVehicle>(
           builder: (context, provider, child) {
             if (provider.isLoading) {
               return Center(
@@ -321,25 +321,7 @@ class _EnhancedNoVehicleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(40),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.lightBlack,
-            AppColors.lightBlack.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+
       child: Center(
         child: Column(
           children: [
@@ -387,7 +369,7 @@ class _EnhancedNoVehicleCard extends StatelessWidget {
 }
 
 class _EnhancedVehicleDetailsCard extends StatelessWidget {
-  final ProviderFleet provider;
+  final ProviderVehicle provider;
   const _EnhancedVehicleDetailsCard({required this.provider});
 
   @override
@@ -634,7 +616,7 @@ class _EnhancedStatBox extends StatelessWidget {
 
 class _EnhancedRemainingKm extends StatelessWidget {
   final dynamic vehicle;
-  final ProviderFleet provider;
+  final ProviderVehicle provider;
   const _EnhancedRemainingKm({required this.vehicle, required this.provider});
 
   @override
@@ -938,7 +920,10 @@ class _EnhancedReturnDate extends StatelessWidget {
   }
 }
 
-void _showEnhancedUpdateKmDialog(BuildContext context, ProviderFleet provider) {
+void _showEnhancedUpdateKmDialog(
+  BuildContext context,
+  ProviderVehicle provider,
+) {
   showDialog(
     context: context,
     barrierColor: Colors.black.withValues(alpha: 0.7),

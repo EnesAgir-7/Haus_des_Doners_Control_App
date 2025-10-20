@@ -288,7 +288,7 @@ class _InspectorListItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    inspector.email,
+                    inspector.serviceAccount,
                     style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                   const SizedBox(height: 4),

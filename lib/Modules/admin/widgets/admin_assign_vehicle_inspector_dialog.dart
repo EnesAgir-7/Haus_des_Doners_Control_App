@@ -76,7 +76,7 @@ class _AssignVehicleInspectorDialogState
                 orElse: () => UserModel(
                   id: '',
                   name: '',
-                  email: '',
+                  serviceAccount: '',
                   role: '',
                   active: true,
                   region: '',

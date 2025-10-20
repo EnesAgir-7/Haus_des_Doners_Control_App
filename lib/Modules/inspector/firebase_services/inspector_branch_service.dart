@@ -83,7 +83,7 @@ class InspectorBranchService {
   Stream<List<BranchModel>> streamBranchesByInspector(String inspectorId) {
     return _db
         .collection(_collectionBranches)
-        .where('assignedInspectorId', isEqualTo: inspectorId)
+        .where('assignedInspector.id', isEqualTo: inspectorId)
         .where('status', isEqualTo: 'active')
         .orderBy(AppConstants.name)
         .snapshots()
