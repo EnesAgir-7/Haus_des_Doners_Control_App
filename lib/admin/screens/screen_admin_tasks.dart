@@ -5,9 +5,10 @@ import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/models/task_model.dart';
 import 'package:haus_des_control/providers/provider_tasks.dart';
 import 'package:provider/provider.dart';
-import '../../providers/provider_admin_users.dart';
 import '../../providers/provider_auth.dart';
 import 'package:intl/intl.dart';
+
+import '../admin_providers/provider_admin_users.dart';
 
 class ScreenAdminTasks extends StatefulWidget {
   const ScreenAdminTasks({super.key});
@@ -111,7 +112,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 6,
                         offset: const Offset(0, 3),
                       ),
@@ -297,6 +298,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                           children: inspectors.map((inspector) {
                             return RadioListTile<String>(
                               value: inspector.id,
+
                               groupValue: _selectedInspectorId,
                               onChanged: (v) {
                                 setState(() {
@@ -681,7 +683,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
       decoration: BoxDecoration(
         color: AppColors.lightBlack,
         border: Border(
-          bottom: BorderSide(color: Colors.white.withOpacity(0.1)),
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
       ),
       child: SingleChildScrollView(
@@ -714,17 +716,17 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
         }
       },
       backgroundColor: AppColors.lightBlack,
-      selectedColor: AppColors.primaryRed.withOpacity(0.2),
+      selectedColor: AppColors.primaryRed.withValues(alpha: 0.2),
       checkmarkColor: AppColors.primaryRed,
       labelStyle: TextStyle(
         color: isSelected
             ? AppColors.primaryRed
-            : Colors.white.withOpacity(0.7),
+            : Colors.white.withValues(alpha: 0.7),
       ),
       side: BorderSide(
         color: isSelected
             ? AppColors.primaryRed
-            : Colors.white.withOpacity(0.3),
+            : Colors.white.withValues(alpha: 0.3),
       ),
     );
   }
@@ -741,7 +743,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
         color: AppColors.lightBlack,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -779,9 +781,9 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
         padding: const EdgeInsets.all(8),
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Column(
           children: [
@@ -798,7 +800,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
             Text(
               label,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
+                color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 12,
               ),
               textAlign: TextAlign.center,
@@ -870,10 +872,13 @@ class TaskCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.lightBlack, AppColors.lightBlack.withOpacity(0.8)],
+          colors: [
+            AppColors.lightBlack,
+            AppColors.lightBlack.withValues(alpha: 0.8),
+          ],
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -903,9 +908,11 @@ class TaskCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.1),
+                        color: statusColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: statusColor.withOpacity(0.3)),
+                        border: Border.all(
+                          color: statusColor.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Text(
                         _getStatusText(),
@@ -922,7 +929,7 @@ class TaskCard extends StatelessWidget {
                 Text(
                   task.description,
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                   maxLines: 2,
@@ -934,14 +941,14 @@ class TaskCard extends StatelessWidget {
                     Icon(
                       Icons.person_outline,
                       size: 16,
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                     ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         task.assignedInspectorName,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 12,
                         ),
                       ),
@@ -952,10 +959,10 @@ class TaskCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: priorityColor.withOpacity(0.1),
+                        color: priorityColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: priorityColor.withOpacity(0.3),
+                          color: priorityColor.withValues(alpha: 0.3),
                         ),
                       ),
                       child: Row(
@@ -981,10 +988,10 @@ class TaskCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.purple.withOpacity(0.1),
+                          color: Colors.purple.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.purple.withOpacity(0.3),
+                            color: Colors.purple.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
