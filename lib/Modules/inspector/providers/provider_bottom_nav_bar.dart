@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/Modules/inspector/screens/screen_vehicle.dart';
 import 'package:haus_des_control/Modules/inspector/screens/screen_branches.dart';
 import 'package:haus_des_control/Modules/inspector/screens/screen_home.dart';
 import 'package:haus_des_control/Modules/inspector/screens/screen_routes.dart';
 import 'package:haus_des_control/Modules/inspector/screens/screen_tasks.dart';
+
+import '../screens/screen_vehicles_list.dart';
 
 class ProviderBottomNavBar extends ChangeNotifier {
   int _selectedIndex = 0;
@@ -13,7 +14,7 @@ class ProviderBottomNavBar extends ChangeNotifier {
     ScreenHome(),
     ScreenBranches(),
     ScreenRoutes(),
-    ScreenVehicle(),
+    ScreenVehiclesList(),
     ScreenTasks(),
   ];
 

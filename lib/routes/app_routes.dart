@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../Modules/admin/screens/screen_admin_branches.dart';
-import '../Modules/admin/screens/screen_admin_vehicle.dart';
 import '../Modules/admin/screens/screen_admin_tasks.dart';
 import '../Modules/admin/screens/screen_admin_users.dart';
+import '../Modules/admin/screens/screen_admin_vehicle.dart';
 import '../Modules/inspector/screens/bottom_nav_bar.dart';
 import '../Modules/inspector/screens/screen_auth.dart';
-import '../Modules/inspector/screens/screen_submit_report.dart';
-import '../Modules/inspector/screens/screen_vehicle.dart';
 import '../Modules/inspector/screens/screen_branches.dart';
 import '../Modules/inspector/screens/screen_home.dart';
 import '../Modules/inspector/screens/screen_routes.dart';
+import '../Modules/inspector/screens/screen_submit_report.dart';
 import '../Modules/inspector/screens/screen_tasks.dart';
 
 /// Contains all route names as constants
@@ -41,7 +40,6 @@ class AppRouter {
     RouteNames.subsidiaries: (context) => const ScreenBranches(),
     RouteNames.control: (context) => const ScreenSubmitReport(),
     RouteNames.route: (context) => const ScreenRoutes(),
-    RouteNames.fleet: (context) => const ScreenVehicle(),
     RouteNames.tasks: (context) => ScreenTasks(),
     RouteNames.auth: (context) => const ScreenAuth(),
     RouteNames.mainLayout: (context) => ScreenBottomNavBar(),

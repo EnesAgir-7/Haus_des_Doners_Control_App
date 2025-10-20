@@ -6,9 +6,8 @@ class VehicleModel {
   final String id;
   final String plate;
   final String model;
-
   final AssignedInspector? assignedInspector;
-  final int currentKm;
+   int currentKm;
   final int maxKm;
   final int remainingKm;
   final int usagePercent;
@@ -23,7 +22,6 @@ class VehicleModel {
     required this.plate,
     required this.model,
     required this.currentKm,
-
     this.assignedInspector,
     required this.maxKm,
     required this.remainingKm,
@@ -79,6 +77,39 @@ class VehicleModel {
     };
   }
 
+  /// ✅ Added copyWith method
+  VehicleModel copyWith({
+    String? id,
+    String? plate,
+    String? model,
+    AssignedInspector? assignedInspector,
+    int? currentKm,
+    int? maxKm,
+    int? remainingKm,
+    int? usagePercent,
+    DateTime? lastServiceDate,
+    DateTime? nextServiceDue,
+    String? status,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return VehicleModel(
+      id: id ?? this.id,
+      plate: plate ?? this.plate,
+      model: model ?? this.model,
+      assignedInspector: assignedInspector ?? this.assignedInspector,
+      currentKm: currentKm ?? this.currentKm,
+      maxKm: maxKm ?? this.maxKm,
+      remainingKm: remainingKm ?? this.remainingKm,
+      usagePercent: usagePercent ?? this.usagePercent,
+      lastServiceDate: lastServiceDate ?? this.lastServiceDate,
+      nextServiceDue: nextServiceDue ?? this.nextServiceDue,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   // Helper to check if service is due soon
   bool get isServiceDueSoon {
     final daysUntilService = nextServiceDue.difference(DateTime.now()).inDays;
@@ -101,3 +132,4 @@ class VehicleModel {
     return 'green';
   }
 }
+

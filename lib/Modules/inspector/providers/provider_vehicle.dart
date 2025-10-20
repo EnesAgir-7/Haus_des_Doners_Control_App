@@ -1,44 +1,52 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
-import '../firebase_services/inspector_vehicle_service.dart';
 import '../../../models/vehicle_model.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../firebase_services/inspector_vehicle_service.dart';
 
 class ProviderVehicle extends ChangeNotifier {
   final InspectorVehicleService _vehicleService = InspectorVehicleService();
 
-  VehicleModel? _assignedVehicle;
-  List<VehicleModel> _allVehicles = [];
+  VehicleModel? _assignedVehiclee;
+  List<VehicleModel> _vehicles = [];
   bool _isLoading = false;
   bool _isUpdating = false;
   String? _errorMessage;
   String? _successMessage;
+  // Getters for state
+  List<VehicleModel> get vehicles => _vehicles;
+  bool get isLoadingg => _isLoading;
+  int get vehicleCount => _vehicles.length;
 
   final TextEditingController kmController = TextEditingController();
 
-  VehicleModel? get assignedVehicle => _assignedVehicle;
-  List<VehicleModel> get allVehicles => _allVehicles;
-  bool get isLoading => _isLoading;
-  bool get isUpdating => _isUpdating;
-  String? get errorMessage => _errorMessage;
-  String? get successMessage => _successMessage;
+  VehicleModel? get assignedVehicle => _assignedVehiclee;
+  bool get isUpdatingg => _isUpdating;
+  String? get errorMessagee => _errorMessage;
+  String? get successMessagee => _successMessage;
 
-  bool get hasAssignedVehicle => _assignedVehicle != null;
-  String get vehiclePlate => _assignedVehicle?.plate ?? 'N/A';
-  String get vehicleModel => _assignedVehicle?.model ?? 'N/A';
-  int get currentKm => _assignedVehicle?.currentKm ?? 0;
-  int get maxKm => _assignedVehicle?.maxKm ?? 0;
-  int get remainingKm => _assignedVehicle?.remainingKm ?? 0;
-  int get usagePercent => _assignedVehicle?.usagePercent ?? 0;
-  bool get isServiceDueSoon => _assignedVehicle?.isServiceDueSoon ?? false;
-  String get serviceDueText => _assignedVehicle?.serviceDueText ?? '';
-  String get kmProgressColor => _assignedVehicle?.kmProgressColor ?? 'green';
+  bool get hasAssignedVehicle => _assignedVehiclee != null;
+  String get vehiclePlate => _assignedVehiclee?.plate ?? 'N/A';
+  String get vehicleModel => _assignedVehiclee?.model ?? 'N/A';
+  int get currentKm => _assignedVehiclee?.currentKm ?? 0;
+  int get maxKm => _assignedVehiclee?.maxKm ?? 0;
+  int get remainingKm => _assignedVehiclee?.remainingKm ?? 0;
+  int get usagePercent => _assignedVehiclee?.usagePercent ?? 0;
+  bool get isServiceDueSoon => _assignedVehiclee?.isServiceDueSoon ?? false;
+  String get serviceDueText => _assignedVehiclee?.serviceDueText ?? '';
+  String get kmProgressColor => _assignedVehiclee?.kmProgressColor ?? 'green';
 
   Future<void> initialize() async {
     await fetchInspectorVehicles();
+  }
+
+  setSelectedVehicle(VehicleModel vehicle) {
+    _assignedVehiclee = vehicle;
+    kmController.text = vehicle.currentKm.toString();
+    notifyListeners();
   }
 
   Future<void> fetchInspectorVehicles() async {
@@ -47,14 +55,9 @@ class ProviderVehicle extends ChangeNotifier {
       _errorMessage = null;
       notifyListeners();
 
-      _assignedVehicle = await _vehicleService.getVehiclesByInspector(
+      _vehicles = await _vehicleService.getVehiclesByInspector(
         loggedInUser!.id,
       );
-
-      if (_assignedVehicle != null) {
-        kmController.text = _assignedVehicle!.currentKm.toString();
-      }
-
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -66,61 +69,66 @@ class ProviderVehicle extends ChangeNotifier {
     }
   }
 
-  void initializeWithStreams() {
-    _vehicleService.streamVehicleByInspector(loggedInUser!.id).listen((
-      vehicle,
-    ) {
-      _assignedVehicle = vehicle;
-      if (vehicle != null) {
-        kmController.text = vehicle.currentKm.toString();
-      }
-      notifyListeners();
-    });
-  }
+  // void initializeWithStreams() {
+  //   _vehicleService.streamVehicleByInspector(loggedInUser!.id).listen((
+  //     vehicle,
+  //   ) {
+  //     _assignedVehicle = vehicle;
+  //     if (vehicle != null) {
+  //       kmController.text = vehicle.currentKm.toString();
+  //     }
+  //     notifyListeners();
+  //   });
+  // }
 
   Future<bool> updateVehicleKm(int newKm, BuildContext context) async {
-    if (_assignedVehicle == null) {
-      _errorMessage = LocaleKeys.no_vehicle_assigned.tr();
+    if (_assignedVehiclee == null) {
+      showSnakBarr(context, LocaleKeys.no_vehicle_assigned.tr());
       notifyListeners();
       return false;
     }
 
-    if (newKm < _assignedVehicle!.currentKm) {
-      _errorMessage = LocaleKeys.km_less_than_current.tr();
+    if (newKm < _assignedVehiclee!.currentKm) {
       showSnakBarr(context, LocaleKeys.km_less_than_current.tr());
       return false;
     }
 
-    if (newKm > _assignedVehicle!.maxKm) {
+    if (newKm > _assignedVehiclee!.maxKm) {
       showSnakBarr(context, LocaleKeys.km_exceeds_limit.tr());
       return false;
     }
 
     try {
       _isUpdating = true;
-      _errorMessage = null;
-      _successMessage = null;
       notifyListeners();
 
-      await _vehicleService.updateVehicleKm(_assignedVehicle!.id, newKm);
+      await _vehicleService.updateVehicleKm(_assignedVehiclee!.id, newKm);
 
-      _successMessage = LocaleKeys.km_update_success.tr();
+      final updatedRemainingKm = _assignedVehiclee!.maxKm - newKm;
+      final updatedUsagePercent = ((newKm / _assignedVehiclee!.maxKm) * 100)
+          .clamp(0, 100)
+          .round();
+
+      _assignedVehiclee = _assignedVehiclee!.copyWith(
+        currentKm: newKm,
+        remainingKm: updatedRemainingKm,
+        usagePercent: updatedUsagePercent,
+      );
+
       _isUpdating = false;
-      if (_successMessage != null)
-        showSnakBarr(context, _successMessage.toString());
-      notifyListeners();
+      showSnakBarr(context, LocaleKeys.km_update_success.tr());
 
+      notifyListeners();
       await fetchInspectorVehicles();
-
-      _successMessage = null;
-      notifyListeners();
 
       return true;
     } catch (e) {
-      _errorMessage = '${LocaleKeys.km_update_error.tr(args: [e.toString()])}';
+      showSnakBarr(
+        context,
+        '${LocaleKeys.km_update_error.tr(args: [e.toString()])}',
+      );
       _isUpdating = false;
       notifyListeners();
-      print(_errorMessage);
       return false;
     }
   }
@@ -139,7 +147,8 @@ class ProviderVehicle extends ChangeNotifier {
     }
 
     if (context.mounted) Navigator.pop(context);
-    await updateVehicleKm(newKm, context);
+    final done = await updateVehicleKm(newKm, context);
+    if (done) {}
   }
 
   Future<VehicleModel?> getVehicleById(String vehicleId) async {

@@ -1,13 +1,16 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:haus_des_control/models/vehicle_model.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../providers/provider_vehicle.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../providers/provider_vehicle.dart';
 
 class ScreenVehicle extends StatefulWidget {
-  const ScreenVehicle({super.key});
+  final VehicleModel vehicle;
+  const ScreenVehicle({super.key, required this.vehicle});
 
   @override
   State<ScreenVehicle> createState() => _ScreenVehicleState();
@@ -33,7 +36,7 @@ class _ScreenVehicleState extends State<ScreenVehicle>
     _animController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderVehicle>().initialize();
+      context.read<ProviderVehicle>().setSelectedVehicle(widget.vehicle);
     });
   }
 
@@ -46,6 +49,7 @@ class _ScreenVehicleState extends State<ScreenVehicle>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: CustomAppBar(showLang: false, showLogout: false),
       backgroundColor: AppColors.primaryDark,
       body: Container(
         decoration: BoxDecoration(
@@ -62,213 +66,57 @@ class _ScreenVehicleState extends State<ScreenVehicle>
         ),
         child: Consumer<ProviderVehicle>(
           builder: (context, provider, child) {
-            if (provider.isLoading) {
-              return Center(
+            return FadeTransition(
+              opacity: _fadeAnimation,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(12),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.lightBlack,
-                            AppColors.lightBlack.withValues(alpha: 0.8),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: AppColors.primaryRed.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: CircularProgressIndicator(
-                        color: AppColors.primaryRed,
-                        strokeWidth: 3,
-                      ),
+                    // const SizedBox(height: 12),
+                    _EnhancedSectionTitle(
+                      icon: Icons.local_shipping_outlined,
+                      title: LocaleKeys.fleet_management.tr(),
                     ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Loading Vehicle data...',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
 
-            if (provider.errorMessage != null) {
-              return Center(
-                child: Container(
-                  margin: const EdgeInsets.all(32),
-                  padding: const EdgeInsets.all(32),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.lightBlack,
-                        AppColors.lightBlack.withValues(alpha: 0.8),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Colors.red.withValues(alpha: 0.3),
-                      width: 2,
-                    ),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.error_outline,
-                          size: 48,
-                          color: Colors.red,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        LocaleKeys.error_loading_fleet.tr(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        provider.errorMessage!,
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 14,
-                        ),
-                        textAlign: TextAlign.center,
+                    const SizedBox(height: 16),
+                    if (provider.hasAssignedVehicle) ...[
+                      // TweenAnimationBuilder<double>(
+                      //   duration: const Duration(milliseconds: 400),
+                      //   tween: Tween(begin: 0.0, end: 1.0),
+                      //   curve: Curves.easeOutCubic,
+                      //   builder: (context, value, child) {
+                      //     return Opacity(
+                      //       opacity: value,
+                      //       child: Transform.translate(
+                      //         offset: Offset(0, 20 * (1 - value)),
+                      //         child: child,
+                      //       ),
+                      //     );
+                      //   },
+                      //   child: _EnhancedCurrentVehicleCard(
+                      //     provider: provider,
+                      //   ),
+                      // ),
+                      // const SizedBox(height: 20),
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 500),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, child) {
+                          return Opacity(
+                            opacity: value,
+                            child: Transform.translate(
+                              offset: Offset(0, 20 * (1 - value)),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: _EnhancedVehicleDetailsCard(provider: provider),
                       ),
                       const SizedBox(height: 24),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Colors.red, Color(0xFFD32F2F)],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.red.withValues(alpha: 0.4),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: ElevatedButton.icon(
-                          onPressed: () => provider.refresh(),
-                          icon: const Icon(Icons.refresh, size: 18),
-                          label: Text(LocaleKeys.retry.tr()),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 14,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
-                      ),
                     ],
-                  ),
-                ),
-              );
-            }
-
-            return RefreshIndicator(
-              onRefresh: provider.refresh,
-              color: AppColors.primaryRed,
-              backgroundColor: AppColors.lightBlack,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: BouncingScrollPhysics(),
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // const SizedBox(height: 12),
-                      _EnhancedSectionTitle(
-                        icon: Icons.local_shipping_outlined,
-                        title: LocaleKeys.fleet_management.tr(),
-                      ),
-
-                      const SizedBox(height: 16),
-                      if (provider.hasAssignedVehicle) ...[
-                        // TweenAnimationBuilder<double>(
-                        //   duration: const Duration(milliseconds: 400),
-                        //   tween: Tween(begin: 0.0, end: 1.0),
-                        //   curve: Curves.easeOutCubic,
-                        //   builder: (context, value, child) {
-                        //     return Opacity(
-                        //       opacity: value,
-                        //       child: Transform.translate(
-                        //         offset: Offset(0, 20 * (1 - value)),
-                        //         child: child,
-                        //       ),
-                        //     );
-                        //   },
-                        //   child: _EnhancedCurrentVehicleCard(
-                        //     provider: provider,
-                        //   ),
-                        // ),
-                        // const SizedBox(height: 20),
-                        TweenAnimationBuilder<double>(
-                          duration: const Duration(milliseconds: 500),
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          curve: Curves.easeOutCubic,
-                          builder: (context, value, child) {
-                            return Opacity(
-                              opacity: value,
-                              child: Transform.translate(
-                                offset: Offset(0, 20 * (1 - value)),
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: _EnhancedVehicleDetailsCard(
-                            provider: provider,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ] else ...[
-                        TweenAnimationBuilder<double>(
-                          duration: const Duration(milliseconds: 400),
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          curve: Curves.easeOutCubic,
-                          builder: (context, value, child) {
-                            return Opacity(
-                              opacity: value,
-                              child: Transform.translate(
-                                offset: Offset(0, 20 * (1 - value)),
-                                child: child,
-                              ),
-                            );
-                          },
-                          child: _EnhancedNoVehicleCard(),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                    ],
-                  ),
+                  ],
                 ),
               ),
             );
@@ -312,58 +160,6 @@ class _EnhancedSectionTitle extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _EnhancedNoVehicleCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(40),
-
-      child: Center(
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withValues(alpha: 0.08),
-                    Colors.white.withValues(alpha: 0.03),
-                  ],
-                ),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.directions_car_outlined,
-                size: 56,
-                color: Colors.white.withValues(alpha: 0.3),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              LocaleKeys.no_vehicle_assigned.tr(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                letterSpacing: -0.3,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              LocaleKeys.please_contact_admin_for_vehicle_assignment.tr(),
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.6),
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -1176,40 +972,6 @@ void _showEnhancedUpdateKmDialog(
                       ),
                     ),
                   ),
-
-                  if (provider.errorMessage != null) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.red.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Colors.red.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            color: Colors.red,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              provider.errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),

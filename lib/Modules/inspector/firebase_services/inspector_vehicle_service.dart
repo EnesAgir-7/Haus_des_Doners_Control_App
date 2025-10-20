@@ -8,20 +8,24 @@ class InspectorVehicleService {
   final String _collectionVehicles = Collections.vehicles;
 
   // Get vehicle assigned to inspector
-  Future<VehicleModel?> getVehiclesByInspector(String inspectorId) async {
+Future<List<VehicleModel>> getVehiclesByInspector(String inspectorId) async {
     try {
       final snapshot = await _db
           .collection(_collectionVehicles)
           .where('assignedInspector.id', isEqualTo: inspectorId)
           .get();
 
-      if (snapshot.docs.isEmpty) return null;
-      return VehicleModel.fromFirestore(snapshot.docs.first);
+      if (snapshot.docs.isEmpty) return [];
+
+      return snapshot.docs
+          .map((doc) => VehicleModel.fromFirestore(doc))
+          .toList();
     } catch (e) {
-      print('Error getting vehicle by inspector: $e');
-      return null;
+      print('Error getting vehicles by inspector: $e');
+      return [];
     }
   }
+
 
   // Stream vehicle by inspector (real-time)
   Stream<VehicleModel?> streamVehicleByInspector(String inspectorId) {
