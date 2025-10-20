@@ -32,10 +32,7 @@ class ProviderAdminStats extends ChangeNotifier {
       _totalBranches = branchesSnapshot.size;
 
       // Get total non-admin users count
-      final usersSnapshot = await _firestore
-          .collection('users')
-          .where('role', isNotEqualTo: 'admin')
-          .get();
+      final usersSnapshot = await _firestore.collection('inspectors').get();
       _totalUsers = usersSnapshot.size;
 
       // Get total vehicles count

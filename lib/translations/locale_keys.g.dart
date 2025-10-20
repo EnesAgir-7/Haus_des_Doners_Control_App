@@ -4,6 +4,12 @@
 
 abstract class  LocaleKeys {
   static const panel = 'panel';
+  static const admin_name = 'admin_name';
+  static const admin_panel = 'admin_panel';
+  static const total_branches = 'total_branches';
+  static const total_users = 'total_users';
+  static const total_tasks = 'total_tasks';
+  static const total_fleet = 'total_fleet';
   static const subsidiaries = 'subsidiaries';
   static const fleet = 'fleet';
   static const route = 'route';
@@ -240,5 +246,10 @@ abstract class  LocaleKeys {
   static const passwords_not_match = 'passwords_not_match';
   static const show_password = 'show_password';
   static const hide_password = 'hide_password';
+  static const create_vehicle = 'create_vehicle';
+  static const plate_required = 'plate_required';
+  static const model_required = 'model_required';
+  static const km_required = 'km_required';
+  static const max_km_must_be_greater = 'max_km_must_be_greater';
 
 }
