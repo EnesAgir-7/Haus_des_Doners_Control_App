@@ -5,10 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:haus_des_control/admin/layouts/admin_bottom_nav_bar.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/firebase_options.dart';
-import 'package:haus_des_control/providers/provider_admin_branches.dart';
-import 'package:haus_des_control/providers/provider_admin_fleet.dart';
-import 'package:haus_des_control/providers/provider_admin_stats.dart';
-import 'package:haus_des_control/providers/provider_admin_users.dart';
+import 'package:haus_des_control/admin/admin_providers/provider_admin_branches.dart';
+import 'package:haus_des_control/admin/admin_providers/provider_admin_fleet.dart';
+import 'package:haus_des_control/admin/admin_providers/provider_admin_stats.dart';
+import 'package:haus_des_control/admin/admin_providers/provider_admin_users.dart';
 import 'package:haus_des_control/providers/provider_auth.dart';
 import 'package:haus_des_control/providers/provider_fleet.dart';
 import 'package:haus_des_control/providers/provider_route.dart';
@@ -16,6 +16,7 @@ import 'package:haus_des_control/providers/provider_tasks.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 
+import 'admin/admin_providers/provider_admin_bottombar.dart';
 import 'core/constants/app_colors.dart';
 import 'core/global_focus_manager.dart';
 import 'core/theme/app_theme.dart';
@@ -87,6 +88,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderAdminUsers()),
         ChangeNotifierProvider(create: (_) => ProviderBottomNavBar()),
         ChangeNotifierProvider(create: (_) => ProviderInspection()),
+        ChangeNotifierProvider(create: (_) => AdminBottomNavProvider()),
       ],
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
@@ -156,7 +158,7 @@ class AuthWrapper extends StatelessWidget {
         final user = providerAuth.userModel!;
         loggedInUser = user; // keep global in sync
 
-        return user.isAdmin ? const AdminBottomNavBar() : ScreenBottomNavBar();
+        return user.isAdmin ? AdminBottomNavBar() : ScreenBottomNavBar();
       },
     );
   }

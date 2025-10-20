@@ -3,20 +3,20 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/vehicle_model.dart';
-import '../../providers/provider_admin_fleet.dart';
+import '../admin_providers/provider_admin_fleet.dart';
 import '../../translations/locale_keys.g.dart';
-import '../../providers/provider_admin_users.dart';
+import '../admin_providers/provider_admin_users.dart';
 
-class AdminVehicleDetailsScreen extends StatefulWidget {
+class ScreenAdminVehicleDetails extends StatefulWidget {
   final VehicleModel vehicle;
-  const AdminVehicleDetailsScreen({super.key, required this.vehicle});
+  const ScreenAdminVehicleDetails({super.key, required this.vehicle});
 
   @override
-  State<AdminVehicleDetailsScreen> createState() =>
-      _AdminVehicleDetailsScreenState();
+  State<ScreenAdminVehicleDetails> createState() =>
+      _ScreenAdminVehicleDetailsState();
 }
 
-class _AdminVehicleDetailsScreenState extends State<AdminVehicleDetailsScreen> {
+class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
   final _kmController = TextEditingController();
   bool _isEditing = false;
 

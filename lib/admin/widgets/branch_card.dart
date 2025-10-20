@@ -18,7 +18,7 @@ class BranchCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AdminBranchDetailsScreen(branch: branch),
+              builder: (context) => ScreenAdminBranchDetails(branch: branch),
             ),
           );
         },

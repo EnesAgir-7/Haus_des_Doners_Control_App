@@ -4,17 +4,17 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/firebase_constants.dart';
-import '../../providers/provider_admin_stats.dart';
+import '../admin_providers/provider_admin_stats.dart';
 import '../../generated/locale_keys.g.dart';
 
-class AdminDashboard extends StatefulWidget {
-  const AdminDashboard({super.key});
+class ScreenAdminHome extends StatefulWidget {
+  const ScreenAdminHome({super.key});
 
   @override
-  State<AdminDashboard> createState() => _AdminDashboardState();
+  State<ScreenAdminHome> createState() => _ScreenAdminHomeState();
 }
 
-class _AdminDashboardState extends State<AdminDashboard>
+class _ScreenAdminHomeState extends State<ScreenAdminHome>
     with TickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;

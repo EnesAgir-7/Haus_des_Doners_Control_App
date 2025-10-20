@@ -3,7 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/branch_model.dart';
 import '../../models/user_model.dart';
-import '../../providers/provider_admin_users.dart';
+import '../admin_providers/provider_admin_users.dart';
 import '../../translations/locale_keys.g.dart';
 import 'package:provider/provider.dart';
 

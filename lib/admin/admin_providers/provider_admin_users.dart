@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../firebase_services/firebase_user_service.dart';
-import '../firebase_services/firebase_branch_service.dart';
-import '../firebase_services/firebase_auth_service.dart';
-import '../models/user_model.dart';
-import '../models/branch_model.dart';
+import '../../firebase_services/firebase_user_service.dart';
+import '../../firebase_services/firebase_branch_service.dart';
+import '../../firebase_services/firebase_auth_service.dart';
+import '../../models/user_model.dart';
+import '../../models/branch_model.dart';
 
 class ProviderAdminUsers extends ChangeNotifier {
   final UserService _userService = UserService();

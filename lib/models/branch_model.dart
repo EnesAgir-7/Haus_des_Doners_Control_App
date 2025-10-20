@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'route_model.dart';
 
@@ -11,7 +12,7 @@ class BranchModel {
   final GeoPoint gps;
   final String contactName;
   final String contactPhone;
-  final RouteStopModel? stop; 
+  final RouteStopModel? stop;
   final AssignedInspector? assignedInspector;
   final DateTime? lastInspectionDate;
   final double? lastInspectionScore;
@@ -38,7 +39,7 @@ class BranchModel {
     required this.status,
     required this.createdAt,
     required this.updatedAt,
-    this.stop, 
+    this.stop,
   });
 
   factory BranchModel.fromFirestore(DocumentSnapshot doc) {
@@ -94,7 +95,7 @@ class BranchModel {
     String? status,
     DateTime? createdAt,
     DateTime? updatedAt,
-    RouteStopModel? stop, 
+    RouteStopModel? stop,
   }) {
     return BranchModel(
       id: id ?? this.id,
@@ -170,6 +171,12 @@ class BranchModel {
     if (days < 7) return '$days gün önce';
     if (days < 30) return '${(days / 7).floor()} hafta önce';
     return '${(days / 30).floor()} ay önce';
+  }
+
+  bool get isNextInspectionToday {
+    return stop?.timeSlot != null &&
+        stop!.timeSlot.isNotEmpty &&
+        stop?.timeSlot == DateFormat('yyyy-MM-dd').format(DateTime.now());
   }
 }
 

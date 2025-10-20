@@ -247,6 +247,7 @@ class _ScreenBranchesState extends State<ScreenBranches> {
       color: AppColors.primaryRed,
       backgroundColor: AppColors.lightBlack,
       child: ListView.builder(
+        padding: EdgeInsets.only(bottom: 50),
         key: const PageStorageKey('branchesList'),
         physics: AlwaysScrollableScrollPhysics(),
         itemCount: provider.branches.length,
@@ -356,13 +357,6 @@ class BranchDetailsSheet extends StatelessWidget {
 
   const BranchDetailsSheet({required this.branch, required this.provider});
 
-  bool get isNextInspectionToday {
-    if (branch.stop?.timeSlot == null || branch.stop!.timeSlot.isEmpty)
-      return false;
-
-    return branch.stop?.timeSlot ==
-        DateFormat('yyyy-MM-dd').format(DateTime.now());
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -567,7 +561,7 @@ class BranchDetailsSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              isNextInspectionToday
+             branch. isNextInspectionToday
                   ? "Today"
                   : formatTimeSlot(branch.stop!.timeSlot.toString()),
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -723,7 +717,7 @@ class BranchDetailsSheet extends StatelessWidget {
     return Consumer<ProviderBranches>(
       builder: (context, prod, child) {
         // Show Start Inspection if assigned and today is inspection day
-        if (branch.stop != null && isNextInspectionToday) {
+        if (branch.stop != null && branch.isNextInspectionToday) {
           return Row(
             children: [
               Expanded(

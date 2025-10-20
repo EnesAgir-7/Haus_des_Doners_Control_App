@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../widgets/branch_card.dart';
-import '../../providers/provider_admin_branches.dart';
+import '../admin_providers/provider_admin_branches.dart';
 import '../../translations/locale_keys.g.dart';
 
-class AdminBranchesScreen extends StatefulWidget {
-  const AdminBranchesScreen({super.key});
+class ScreenAdminBranches extends StatefulWidget {
+  const ScreenAdminBranches({super.key});
 
   @override
-  State<AdminBranchesScreen> createState() => _AdminBranchesScreenState();
+  State<ScreenAdminBranches> createState() => _ScreenAdminBranchesState();
 }
 
-class _AdminBranchesScreenState extends State<AdminBranchesScreen> {
+class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
   final _searchController = TextEditingController();
 
   @override

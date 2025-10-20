@@ -18,7 +18,7 @@ class VehicleCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AdminVehicleDetailsScreen(vehicle: vehicle),
+              builder: (context) => ScreenAdminVehicleDetails(vehicle: vehicle),
             ),
           );
         },

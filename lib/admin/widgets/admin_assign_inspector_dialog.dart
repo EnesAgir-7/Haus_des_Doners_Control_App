@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/branch_model.dart';
-import '../../providers/provider_admin_branches.dart';
+import '../admin_providers/provider_admin_branches.dart';
 
 class AssignInspectorDialog extends StatefulWidget {
   final BranchModel branch;

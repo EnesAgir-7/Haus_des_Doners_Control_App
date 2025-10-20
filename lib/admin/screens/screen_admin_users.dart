@@ -4,20 +4,20 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../models/user_model.dart';
-import '../../providers/provider_admin_users.dart';
+import '../admin_providers/provider_admin_users.dart';
 import '../../providers/provider_auth.dart';
 import '../../translations/locale_keys.g.dart';
 import 'screen_admin_user_details.dart';
-import 'screen_create_user.dart';
+import 'screen_admin_create_user.dart';
 
-class AdminUsersScreen extends StatefulWidget {
-  const AdminUsersScreen({super.key});
+class ScreenAdminUsers extends StatefulWidget {
+  const ScreenAdminUsers({super.key});
 
   @override
-  State<AdminUsersScreen> createState() => _AdminUsersScreenState();
+  State<ScreenAdminUsers> createState() => _ScreenAdminUsersState();
 }
 
-class _AdminUsersScreenState extends State<AdminUsersScreen> {
+class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
   final _searchController = TextEditingController();
 
   @override
@@ -66,7 +66,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const CreateUserScreen(),
+                      builder: (context) => const ScreenAdminCreateUser(),
                     ),
                   );
                 },
@@ -147,7 +147,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 class _UserListItem extends StatefulWidget {
   final UserModel user;
 
-  const _UserListItem({super.key, required this.user});
+  const _UserListItem({required this.user});
 
   @override
   State<_UserListItem> createState() => _UserListItemState();
@@ -182,7 +182,7 @@ class _UserListItemState extends State<_UserListItem> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AdminUserDetailsScreen(
+              builder: (context) => ScreenAdminUserDetails(
                 initialUser: user,
                 onUserUpdated: _handleUserUpdated,
               ),

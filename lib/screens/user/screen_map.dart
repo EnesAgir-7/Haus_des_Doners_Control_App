@@ -106,11 +106,6 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
   Widget _branchCard(BranchModel branch) {
     return Consumer<ProviderBranches>(
       builder: (context, brrl, child) {
-        final isNextInspectionToday =
-            branch.stop?.timeSlot != null &&
-            branch.stop!.timeSlot.isNotEmpty &&
-            branch.stop?.timeSlot ==
-                DateFormat('yyyy-MM-dd').format(DateTime.now());
         return Padding(
           padding: const EdgeInsets.all(10),
           child: Container(
@@ -167,7 +162,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                             ),
                             if (branch.stop?.timeSlot != null)
                               Text(
-                                "Next Inspection: ${isNextInspectionToday ? "Today" : branch.stop?.timeSlot.toString()} (${branch.daysUntilNextInspection} days left)",
+                                "Next Inspection: ${branch.isNextInspectionToday ? "Today" : branch.stop?.timeSlot.toString()} (${branch.daysUntilNextInspection} days left)",
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 11,
@@ -288,7 +283,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                         ),
                         const SizedBox(width: 10),
                         if (branch.stop != null &&
-                            isNextInspectionToday &&
+                             branch.isNextInspectionToday &&
                             branch.stop?.timeSlot != null)
                           Expanded(
                             child: AppButton(

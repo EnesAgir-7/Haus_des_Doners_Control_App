@@ -14,8 +14,6 @@ class InspectorBranchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isNextInspectionToday = _isNextInspectionToday();
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -42,10 +40,8 @@ class InspectorBranchCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (branch.totalInspections > 0)
-                  _buildTotalInspections(isNextInspectionToday),
-                if (branch.stop != null)
-                  _buildNextInspectionInfo(isNextInspectionToday),
+                if (branch.totalInspections > 0) _buildTotalInspections(),
+                if (branch.stop != null) _buildNextInspectionInfo(),
               ],
             ),
           ],
@@ -55,12 +51,6 @@ class InspectorBranchCard extends StatelessWidget {
   }
 
   /// Checks if the next inspection is scheduled for today.
-  bool _isNextInspectionToday() {
-    return branch.stop?.timeSlot != null &&
-        branch.stop!.timeSlot.isNotEmpty &&
-        branch.stop?.timeSlot ==
-            DateFormat('yyyy-MM-dd').format(DateTime.now());
-  }
 
   /// Builds the header section with branch name, address, and status badge.
   Widget _buildHeader() {
@@ -167,7 +157,7 @@ class InspectorBranchCard extends StatelessWidget {
   }
 
   /// Builds the section showing the total number of inspections.
-  Widget _buildTotalInspections(bool isNextInspectionToday) {
+  Widget _buildTotalInspections() {
     return Row(
       children: [
         Icon(
@@ -189,13 +179,13 @@ class InspectorBranchCard extends StatelessWidget {
   }
 
   /// Builds the section showing the next inspection details.
-  Widget _buildNextInspectionInfo(bool isNextInspectionToday) {
+  Widget _buildNextInspectionInfo() {
     return Row(
       children: [
         Icon(Icons.next_plan, size: 14.0, color: Colors.green),
         const SizedBox(width: 6.0),
         Text(
-          isNextInspectionToday
+          branch.isNextInspectionToday
               ? "Today"
               : branch.daysUntilNextInspection == 0
               ? "Tomorrow"

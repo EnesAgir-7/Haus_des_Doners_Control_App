@@ -3,20 +3,20 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/branch_model.dart';
-import '../../providers/provider_admin_branches.dart';
+import '../admin_providers/provider_admin_branches.dart';
 import '../../translations/locale_keys.g.dart';
 
-class AdminBranchDetailsScreen extends StatefulWidget {
+class ScreenAdminBranchDetails extends StatefulWidget {
   final BranchModel branch;
 
-  const AdminBranchDetailsScreen({super.key, required this.branch});
+  const ScreenAdminBranchDetails({super.key, required this.branch});
 
   @override
-  State<AdminBranchDetailsScreen> createState() =>
-      _AdminBranchDetailsScreenState();
+  State<ScreenAdminBranchDetails> createState() =>
+      _ScreenAdminBranchDetailsState();
 }
 
-class _AdminBranchDetailsScreenState extends State<AdminBranchDetailsScreen> {
+class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   bool _isEditing = false;
   late TextEditingController _nameController;
   late TextEditingController _addressController;

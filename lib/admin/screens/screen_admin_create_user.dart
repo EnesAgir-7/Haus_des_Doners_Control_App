@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
-import '../../providers/provider_admin_users.dart';
+import '../admin_providers/provider_admin_users.dart';
 import '../../translations/locale_keys.g.dart';
 
-class CreateUserScreen extends StatefulWidget {
-  const CreateUserScreen({super.key});
+class ScreenAdminCreateUser extends StatefulWidget {
+  const ScreenAdminCreateUser({super.key});
 
   @override
-  State<CreateUserScreen> createState() => _CreateUserScreenState();
+  State<ScreenAdminCreateUser> createState() => _ScreenAdminCreateUserState();
 }
 
-class _CreateUserScreenState extends State<CreateUserScreen> {
+class _ScreenAdminCreateUserState extends State<ScreenAdminCreateUser> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();

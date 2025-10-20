@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../widgets/vehicle_card.dart';
-import '../../providers/provider_admin_fleet.dart';
+import '../widgets/admin_vehicle_card.dart';
+import '../admin_providers/provider_admin_fleet.dart';
 import '../../translations/locale_keys.g.dart';
 import '../../core/constants/app_colors.dart';
-import 'screen_create_vehicle.dart';
+import 'screen_admin_create_vehicle.dart';
 
-class AdminFleetScreen extends StatefulWidget {
-  const AdminFleetScreen({super.key});
+class ScreenAdminVehicle extends StatefulWidget {
+  const ScreenAdminVehicle({super.key});
 
   @override
-  State<AdminFleetScreen> createState() => _AdminFleetScreenState();
+  State<ScreenAdminVehicle> createState() => _ScreenAdminVehicleState();
 }
 
-class _AdminFleetScreenState extends State<AdminFleetScreen> {
+class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
   final _searchController = TextEditingController();
 
   @override
@@ -64,7 +64,7 @@ class _AdminFleetScreenState extends State<AdminFleetScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const CreateVehicleScreen(),
+                      builder: (context) => const ScreenAdminCreateVehicle(),
                     ),
                   );
                 },

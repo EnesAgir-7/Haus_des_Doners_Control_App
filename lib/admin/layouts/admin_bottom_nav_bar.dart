@@ -1,75 +1,120 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import '../widgets/admin_app_bar.dart';
+import 'package:flutter/services.dart';
+import 'package:haus_des_control/admin/widgets/admin_app_bar.dart';
+import 'package:haus_des_control/widgets/custom_toast.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../routes/app_routes.dart';
 import '../../translations/locale_keys.g.dart';
+import '../admin_providers/provider_admin_bottombar.dart';
 
-class AdminBottomNavBar extends StatefulWidget {
-  const AdminBottomNavBar({super.key});
+// ignore: must_be_immutable
+class AdminBottomNavBar extends StatelessWidget {
+  AdminBottomNavBar({super.key});
 
-  @override
-  State<AdminBottomNavBar> createState() => _AdminBottomNavBarState();
-}
-
-class _AdminBottomNavBarState extends State<AdminBottomNavBar> {
-  int _selectedIndex = 0;
-
-  late final List<Widget> _screens;
-
-  @override
-  void initState() {
-    super.initState();
-    // build all screens once so their state is preserved
-    _screens = [
-      AppRouter.routes[RouteNames.admin]!(context),
-      AppRouter.routes[RouteNames.adminUsers]!(context),
-      AppRouter.routes[RouteNames.adminBranches]!(context),
-      AppRouter.routes[RouteNames.adminFleet]!(context),
-      AppRouter.routes[RouteNames.adminTasks]!(context),
-    ];
-  }
-
-  void _onItemTapped(int index) {
-    setState(() => _selectedIndex = index);
-  }
-
+  DateTime? lastBackPressed;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const AdminAppBar(),
-      body: IndexedStack(index: _selectedIndex, children: _screens),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        backgroundColor: AppColors.primaryDark,
-        selectedItemColor: AppColors.primaryRed,
-        unselectedItemColor: Colors.white70,
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.dashboard),
-            label: LocaleKeys.panel.tr(),
+    return Consumer<AdminBottomNavProvider>(
+      builder: (context, provider, child) {
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) async {
+            if (provider.selectedIndex != 0) {
+              provider.onItemTapped(0);
+            } else {
+              final now = DateTime.now();
+              if (lastBackPressed == null ||
+                  now.difference(lastBackPressed!) >
+                      const Duration(seconds: 2)) {
+                lastBackPressed = now;
+                showSnakBarr(context, "Click again to exit");
+              } else {
+                SystemNavigator.pop();
+              }
+            }
+          },
+          child: Scaffold(
+            appBar: const AdminAppBar(),
+            body: IndexedStack(
+              key: Key("admin_stack_${context.locale.languageCode}"),
+              index: provider.selectedIndex,
+              children: provider.screens,
+            ),
+            bottomNavigationBar: Container(
+              decoration: BoxDecoration(
+                color: AppColors.primaryDark,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+                border: Border(
+                  top: BorderSide(
+                    color: AppColors.white.withValues(alpha: 0.2),
+                    width: 2,
+                  ),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: NavigationBar(
+                selectedIndex: provider.selectedIndex,
+                onDestinationSelected: provider.onItemTapped,
+                backgroundColor: Colors.transparent,
+                elevation: 4,
+                indicatorColor: AppColors.primaryRed.withValues(alpha: 0.15),
+                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                maintainBottomViewPadding: true,
+                destinations: [
+                  NavigationDestination(
+                    icon: const Icon(Icons.dashboard, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.dashboard,
+                      color: AppColors.primaryRed,
+                    ),
+                    label: LocaleKeys.panel.tr(),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.people, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.people,
+                      color: AppColors.primaryRed,
+                    ),
+                    label: "Users",
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.apartment, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.apartment,
+                      color: AppColors.primaryRed,
+                    ),
+                    label: LocaleKeys.my_branches.tr(),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.car_rental, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.car_rental,
+                      color: AppColors.primaryRed,
+                    ),
+                    label: LocaleKeys.fleet.tr(),
+                  ),
+                  NavigationDestination(
+                    icon: const Icon(Icons.task, color: Colors.white70),
+                    selectedIcon: Icon(Icons.task, color: AppColors.primaryRed),
+                    label: LocaleKeys.tasks.tr(),
+                  ),
+                ],
+              ),
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.people),
-            label: 'Users',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.apartment),
-            label: LocaleKeys.my_branches.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.car_rental),
-            label: LocaleKeys.fleet.tr(),
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.task),
-            label: LocaleKeys.tasks.tr(),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
-import '../../providers/provider_admin_fleet.dart';
+import '../admin_providers/provider_admin_fleet.dart';
 import '../../translations/locale_keys.g.dart';
 
-class CreateVehicleScreen extends StatefulWidget {
-  const CreateVehicleScreen({super.key});
+class ScreenAdminCreateVehicle extends StatefulWidget {
+  const ScreenAdminCreateVehicle({super.key});
 
   @override
-  State<CreateVehicleScreen> createState() => _CreateVehicleScreenState();
+  State<ScreenAdminCreateVehicle> createState() =>
+      _ScreenAdminCreateVehicleState();
 }
 
-class _CreateVehicleScreenState extends State<CreateVehicleScreen> {
+class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
   final _formKey = GlobalKey<FormState>();
   final _plateController = TextEditingController();
   final _modelController = TextEditingController();

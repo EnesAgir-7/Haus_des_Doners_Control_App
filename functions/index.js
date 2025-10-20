@@ -40,20 +40,22 @@ function parseExpiry(expiry) {
  * Scheduled function that removes expired stops from each route doc.
  * Runs at 8:00 AM Asia/Karachi time every day.
  */
+
 exports.cleanupExpiredStops = onSchedule(
     {
-      schedule: "0 8 * * *",
+      schedule: "*/5 * * * *", // for testing: runs every 5 mins
       timeZone: "Asia/Karachi",
-      // timeZone: "Europe/Berlin"
-      // schedule: "*/3 * * * *",
     },
     async (event) => {
       const now = new Date();
+      console.log("🕐 cleanupExpiredStops started at:", now);
 
       try {
         const routesSnap = await db.collection("routes").get();
+        console.log(`📦 Found ${routesSnap.size} route docs`);
 
-        // Collect updates to apply
+        let totalStopsChecked = 0;
+        let totalStopsRemoved = 0;
         const updates = [];
 
         for (const doc of routesSnap.docs) {
@@ -62,8 +64,19 @@ exports.cleanupExpiredStops = onSchedule(
 
           const filteredStops = stops.filter((stop) => {
             const expiryDate = parseExpiry(stop.expiryDate);
-            // Keep the stop if no expiry or expiry is in the future
-            return expiryDate === null || expiryDate.getTime() > now.getTime();
+            totalStopsChecked++;
+
+            if (expiryDate === null) return true;
+            const expired = expiryDate.getTime() <= now.getTime();
+
+            if (expired) {
+              totalStopsRemoved++;
+              console.log(
+                  `🧹 Removing expired stop from route ${doc.id} with expiry:`,
+                  expiryDate.toISOString(),
+              );
+            }
+            return !expired;
           });
 
           if (filteredStops.length !== stops.length) {
@@ -77,7 +90,6 @@ exports.cleanupExpiredStops = onSchedule(
           }
         }
 
-        // Commit updates in batches of up to 500
         while (updates.length) {
           const batch = db.batch();
           const chunk = updates.splice(0, 500);
@@ -85,11 +97,68 @@ exports.cleanupExpiredStops = onSchedule(
           await batch.commit();
         }
 
-        console.log("cleanupExpiredStops completed.");
+        console.log(
+            `✅ Chckd ${totalStopsChecked} stops, removed ${totalStopsRemoved}`,
+        );
         return null;
       } catch (err) {
-        console.error("Error in cleanupExpiredStops:", err);
+        console.error("❌ Error in cleanupExpiredStops:", err);
         throw err;
       }
     },
 );
+
+
+// exports.cleanupExpiredStops = onSchedule(
+//     {
+//       schedule: "0 8 * * *",
+//       timeZone: "Asia/Karachi",
+//       // timeZone: "Europe/Berlin"
+//       // schedule: "*/3 * * * *",
+//     },
+//     async (event) => {
+//       const now = new Date();
+
+//       try {
+//         const routesSnap = await db.collection("routes").get();
+
+//         // Collect updates to apply
+//         const updates = [];
+
+//         for (const doc of routesSnap.docs) {
+//           const data = doc.data() || {};
+//           const stops = Array.isArray(data.stops) ? data.stops : [];
+
+//           const filteredStops = stops.filter((stop) => {
+//             const expiryDate = parseExpiry(stop.expiryDate);
+//             // Keep the stop if no expiry or expiry is in the future
+//           return expiryDate === null || expiryDate.getTime() > now.getTime();
+//           });
+
+//           if (filteredStops.length !== stops.length) {
+//             updates.push({
+//               ref: doc.ref,
+//               data: {
+//                 stops: filteredStops,
+//                 updatedAt: FieldValue.serverTimestamp(),
+//               },
+//             });
+//           }
+//         }
+
+//         // Commit updates in batches of up to 500
+//         while (updates.length) {
+//           const batch = db.batch();
+//           const chunk = updates.splice(0, 500);
+//           chunk.forEach((u) => batch.update(u.ref, u.data));
+//           await batch.commit();
+//         }
+
+//         console.log("cleanupExpiredStops completed.");
+//         return null;
+//       } catch (err) {
+//         console.error("Error in cleanupExpiredStops:", err);
+//         throw err;
+//       }
+//     },
+// );

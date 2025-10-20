@@ -3,25 +3,25 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/user_model.dart';
-import '../../providers/provider_admin_users.dart';
+import '../admin_providers/provider_admin_users.dart';
 import '../../translations/locale_keys.g.dart';
-import '../widgets/assign_branch_dialog.dart';
+import '../widgets/admin_assign_branch_dialog.dart';
 
-class AdminUserDetailsScreen extends StatefulWidget {
+class ScreenAdminUserDetails extends StatefulWidget {
   final UserModel initialUser;
   final void Function(UserModel) onUserUpdated;
 
-  const AdminUserDetailsScreen({
+  const ScreenAdminUserDetails({
     super.key,
     required this.initialUser,
     required this.onUserUpdated,
   });
 
   @override
-  State<AdminUserDetailsScreen> createState() => _AdminUserDetailsScreenState();
+  State<ScreenAdminUserDetails> createState() => _ScreenAdminUserDetailsState();
 }
 
-class _AdminUserDetailsScreenState extends State<AdminUserDetailsScreen> {
+class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
   late UserModel user;
   late TextEditingController _nameController;
   late TextEditingController _emailController;

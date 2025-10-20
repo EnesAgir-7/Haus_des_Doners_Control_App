@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../firebase_services/firebase_vehicle_service.dart';
-import '../models/vehicle_model.dart';
+import '../../firebase_services/firebase_vehicle_service.dart';
+import '../../models/vehicle_model.dart';
 
 class ProviderAdminFleet extends ChangeNotifier {
   final VehicleService _vehicleService = VehicleService();
