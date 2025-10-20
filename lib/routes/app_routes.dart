@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
-import '../admin/screens/screen_admin_branches.dart';
-import '../admin/screens/screen_admin_vehicle.dart';
-import '../admin/screens/screen_admin_tasks.dart';
-import '../admin/screens/screen_admin_users.dart';
+import '../Modules/admin/screens/screen_admin_branches.dart';
+import '../Modules/admin/screens/screen_admin_vehicle.dart';
+import '../Modules/admin/screens/screen_admin_tasks.dart';
+import '../Modules/admin/screens/screen_admin_users.dart';
 import '../layouts/bottom_nav_bar.dart';
-import '../screens/screen_auth.dart';
-import '../screens/user/screen_submit_report.dart';
-import '../screens/user/screen_vehicle.dart';
-import '../screens/user/screen_branches.dart';
-import '../screens/user/screen_home.dart';
-import '../screens/user/screen_routes.dart';
-import '../screens/user/screen_tasks.dart';
+import '../Modules/inspector/screens/screen_auth.dart';
+import '../Modules/inspector/screens/screen_submit_report.dart';
+import '../Modules/inspector/screens/screen_vehicle.dart';
+import '../Modules/inspector/screens/screen_branches.dart';
+import '../Modules/inspector/screens/screen_home.dart';
+import '../Modules/inspector/screens/screen_routes.dart';
+import '../Modules/inspector/screens/screen_tasks.dart';
 
 /// Contains all route names as constants
 class RouteNames {

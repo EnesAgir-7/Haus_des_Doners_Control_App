@@ -1,28 +1,28 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:haus_des_control/Modules/admin/widgets/admin_app_bar.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:provider/provider.dart';
 
-import '../core/constants/app_colors.dart';
-import '../Modules/inspector/providers/provider_bottom_nav_bar.dart';
-import '../translations/locale_keys.g.dart';
-import '../Modules/inspector/widgets/custom_toast.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../translations/locale_keys.g.dart';
+import '../admin_providers/provider_admin_bottombar.dart';
 
 // ignore: must_be_immutable
-class ScreenBottomNavBar extends StatelessWidget {
-  ScreenBottomNavBar({super.key});
-  DateTime? lastBackPressed;
+class AdminBottomNavBar extends StatelessWidget {
+  AdminBottomNavBar({super.key});
 
+  DateTime? lastBackPressed;
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProviderBottomNavBar>(
-      builder: (context, controller, _) {
+    return Consumer<AdminBottomNavProvider>(
+      builder: (context, provider, child) {
         return PopScope(
           canPop: false,
           onPopInvokedWithResult: (didPop, _) async {
-            if (controller.selectedIndex != 0) {
-              controller.onItemTapped(0);
+            if (provider.selectedIndex != 0) {
+              provider.onItemTapped(0);
             } else {
               final now = DateTime.now();
               if (lastBackPressed == null ||
@@ -36,16 +36,16 @@ class ScreenBottomNavBar extends StatelessWidget {
             }
           },
           child: Scaffold(
-            appBar: CustomAppBar(),
+            appBar: const AdminAppBar(),
             body: IndexedStack(
-              key: Key("stack${context.locale.languageCode}"),
-              index: controller.selectedIndex,
-              children: controller.screens,
+              key: Key("admin_stack_${context.locale.languageCode}"),
+              index: provider.selectedIndex,
+              children: provider.screens,
             ),
             bottomNavigationBar: Container(
               decoration: BoxDecoration(
                 color: AppColors.primaryDark,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
@@ -64,14 +64,13 @@ class ScreenBottomNavBar extends StatelessWidget {
                 ],
               ),
               child: NavigationBar(
-                selectedIndex: controller.selectedIndex,
-                onDestinationSelected: controller.onItemTapped,
+                selectedIndex: provider.selectedIndex,
+                onDestinationSelected: provider.onItemTapped,
                 backgroundColor: Colors.transparent,
                 elevation: 4,
                 indicatorColor: AppColors.primaryRed.withValues(alpha: 0.15),
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
                 maintainBottomViewPadding: true,
-
                 destinations: [
                   NavigationDestination(
                     icon: const Icon(Icons.dashboard, color: Colors.white70),
@@ -82,20 +81,20 @@ class ScreenBottomNavBar extends StatelessWidget {
                     label: LocaleKeys.panel.tr(),
                   ),
                   NavigationDestination(
+                    icon: const Icon(Icons.people, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.people,
+                      color: AppColors.primaryRed,
+                    ),
+                    label: "Users",
+                  ),
+                  NavigationDestination(
                     icon: const Icon(Icons.apartment, color: Colors.white70),
                     selectedIcon: Icon(
                       Icons.apartment,
                       color: AppColors.primaryRed,
                     ),
                     label: LocaleKeys.my_branches.tr(),
-                  ),
-                  NavigationDestination(
-                    icon: const Icon(Icons.alt_route, color: Colors.white70),
-                    selectedIcon: Icon(
-                      Icons.alt_route,
-                      color: AppColors.primaryRed,
-                    ),
-                    label: LocaleKeys.route.tr(),
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.car_rental, color: Colors.white70),
@@ -113,37 +112,6 @@ class ScreenBottomNavBar extends StatelessWidget {
                 ],
               ),
             ),
-
-            // BottomNavigationBar(
-            //   currentIndex: controller.selectedIndex,
-            //   onTap: controller.onItemTapped,
-            //   backgroundColor: AppColors.primaryDark,
-            //   selectedItemColor: AppColors.primaryRed,
-            //   unselectedItemColor: Colors.white70,
-            //   type: BottomNavigationBarType.fixed,
-            //   items: [
-            //     BottomNavigationBarItem(
-            //       icon: const Icon(Icons.dashboard),
-            //       label: LocaleKeys.panel.tr(),
-            //     ),
-            //     BottomNavigationBarItem(
-            //       icon: const Icon(Icons.apartment),
-            //       label: LocaleKeys.my_branches.tr(),
-            //     ),
-            //     BottomNavigationBarItem(
-            //       icon: const Icon(Icons.alt_route),
-            //       label: LocaleKeys.route.tr(),
-            //     ),
-            //     BottomNavigationBarItem(
-            //       icon: const Icon(Icons.car_rental),
-            //       label: LocaleKeys.fleet.tr(),
-            //     ),
-            //     BottomNavigationBarItem(
-            //       icon: const Icon(Icons.task),
-            //       label: LocaleKeys.tasks.tr(),
-            //     ),
-            //   ],
-            // ),
           ),
         );
       },
