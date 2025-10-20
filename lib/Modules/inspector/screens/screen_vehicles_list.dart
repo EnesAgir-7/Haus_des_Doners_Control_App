@@ -269,7 +269,7 @@ class VehicleListCard extends StatelessWidget {
   Widget _buildStatusBadge() {
     Color badgeColor;
     switch (vehicle.status.toLowerCase()) {
-      case 'in_use':
+      case 'assigned':
         badgeColor = Colors.orange;
         break;
       case 'maintenance':
