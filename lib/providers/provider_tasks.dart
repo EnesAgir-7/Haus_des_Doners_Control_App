@@ -246,6 +246,33 @@ class ProviderTasks extends ChangeNotifier {
     }
   }
 
+  /// Generic update for a task. `data` should contain the fields to update.
+  Future<bool> updateTask(String taskId, Map<String, dynamic> data) async {
+    try {
+      _isUpdating = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      await _taskService.updateTask(taskId, data);
+
+      // Refresh lists/streams after update
+      if (loggedInUser?.isAdmin == true) {
+        await loadAllTasks();
+      } else {
+        initializeTasksStream();
+      }
+
+      _isUpdating = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Error updating task: $e';
+      _isUpdating = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   // Add comment photos
   void addCommentPhoto(File photo) {
     if (_commentPhotos.length < 4) {
@@ -352,6 +379,60 @@ class ProviderTasks extends ChangeNotifier {
 
   Future<void> refresh() async {
     initializeTasksStream();
+  }
+
+  /// Create a new task and refresh lists/streams accordingly
+  Future<bool> createTask({
+    required String title,
+    required String description,
+    required String assignedInspectorId,
+    required String assignedInspectorName,
+    String? relatedBranchId,
+    String? relatedInspectionId,
+    String status = 'pending',
+    String priority = 'medium',
+    DateTime? dueDate,
+  }) async {
+    try {
+      _isUpdating = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      final now = DateTime.now();
+      final task = TaskModel(
+        id: '',
+        title: title,
+        description: description,
+        assignedInspectorId: assignedInspectorId,
+        assignedInspectorName: assignedInspectorName,
+        relatedBranchId: relatedBranchId,
+        relatedInspectionId: relatedInspectionId,
+        status: status,
+        priority: priority,
+        dueDate: dueDate,
+        comments: [],
+        createdAt: now,
+        updatedAt: now,
+      );
+
+      await _taskService.createTask(task);
+
+      // Refresh according to current user role
+      if (loggedInUser?.isAdmin == true) {
+        await loadAllTasks();
+      } else {
+        initializeTasksStream();
+      }
+
+      _isUpdating = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Error creating task: $e';
+      _isUpdating = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   void clearError() {
