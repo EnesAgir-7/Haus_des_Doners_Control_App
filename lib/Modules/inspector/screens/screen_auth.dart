@@ -26,8 +26,8 @@ class _ScreenAuthState extends State<ScreenAuth> {
   @override
   void initState() {
     super.initState();
-    _emailController = TextEditingController(text: "salam@test.com");
-    _passwordController = TextEditingController(text: "112233");
+    _emailController = TextEditingController(text: "salam2@test.com");
+    _passwordController = TextEditingController(text: "11223344");
   }
 
   @override

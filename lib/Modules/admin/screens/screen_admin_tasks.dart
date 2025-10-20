@@ -1,14 +1,13 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/models/task_model.dart';
-import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
-import 'package:provider/provider.dart';
-import '../../inspector/providers/provider_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../admin_providers/provider_admin_users.dart';
 
@@ -157,12 +156,12 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
     String? _selectedInspectorName = task.assignedInspectorName;
     String _status = task.status;
 
-    // Ensure inspectors loaded
-    final adminUsersProvider = context.read<ProviderAdminUsers>();
-    if (!adminUsersProvider.isLoading && adminUsersProvider.users.isEmpty) {
-      final currentUserId = context.read<ProviderAuth>().currentUser?.uid ?? '';
-      adminUsersProvider.loadUsers(currentUserId);
-    }
+    // // Ensure inspectors loaded
+    // final adminUsersProvider = context.read<ProviderAdminUsers>();
+    // if (!adminUsersProvider.isLoading && adminUsersProvider.users.isEmpty) {
+    //   final currentUserId = context.read<ProviderAuth>().currentUser?.uid ?? '';
+    //   adminUsersProvider.loadUsers(currentUserId);
+    // }
 
     return StatefulBuilder(
       builder: (context, setState) {
@@ -442,13 +441,13 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
     String? _selectedInspectorId;
     String? _selectedInspectorName;
 
-    // Load inspectors list from ProviderAdminUsers
-    final adminUsersProvider = context.read<ProviderAdminUsers>();
-    if (!adminUsersProvider.isLoading && adminUsersProvider.users.isEmpty) {
-      // attempt to load users if not loaded yet
-      final currentUserId = context.read<ProviderAuth>().currentUser?.uid ?? '';
-      adminUsersProvider.loadUsers(currentUserId);
-    }
+    // // Load inspectors list from ProviderAdminUsers
+    // final adminUsersProvider = context.read<ProviderAdminUsers>();
+    // if (!adminUsersProvider.isLoading && adminUsersProvider.users.isEmpty) {
+    //   // attempt to load users if not loaded yet
+    //   final currentUserId = context.read<ProviderAuth>().currentUser?.uid ?? '';
+    //   adminUsersProvider.loadUsers(currentUserId);
+    // }
 
     return StatefulBuilder(
       builder: (context, setState) {

@@ -20,7 +20,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
     super.initState();
     // Load branches and inspectors when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderAdminBranches>().loadData();
+      context.read<ProviderAdminBranches>().loadBranchStream();
     });
   }
 
@@ -72,7 +72,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: () => provider.loadData(),
+                        onPressed: () => provider.loadBranchStream(),
                         child: Text(LocaleKeys.retry.tr()),
                       ),
                     ],
@@ -90,15 +90,12 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
                 );
               }
 
-              return RefreshIndicator(
-                onRefresh: () => provider.loadData(),
-                child: ListView.builder(
-                  itemCount: branches.length,
-                  itemBuilder: (context, index) {
-                    final branch = branches[index];
-                    return BranchCard(branch: branch);
-                  },
-                ),
+              return ListView.builder(
+                itemCount: branches.length,
+                itemBuilder: (context, index) {
+                  final branch = branches[index];
+                  return BranchCard(branch: branch);
+                },
               );
             },
           ),

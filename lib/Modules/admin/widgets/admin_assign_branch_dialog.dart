@@ -77,7 +77,7 @@ class _AssignBranchDialogState extends State<AssignBranchDialog> {
   Future<void> _assignBranch(BranchModel branch) async {
     final provider = context.read<ProviderAdminUsers>();
     try {
-      await provider.assignBranchToUser(widget.user.id, branch.id);
+      await provider.assignBranchToInspector(widget.user.id, branch.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(LocaleKeys.branch_assigned_successfully.tr())),

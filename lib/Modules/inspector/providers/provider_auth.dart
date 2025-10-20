@@ -80,11 +80,21 @@ class ProviderAuth extends ChangeNotifier {
       }
     }
 
-    // Fetch from Firestore safely
     final fetchedUser = await FirebaseSafeRunner.run<UserModel?>(() async {
       if (_user == null) return null;
 
-      final doc = await _firestore.collection('users').doc(_user!.uid).get();
+      var doc = await _firestore
+          .collection(Collections.inspectors)
+          .doc(_user!.uid)
+          .get();
+
+      if (!doc.exists) {
+        doc = await _firestore
+            .collection(Collections.admins)
+            .doc(_user!.uid)
+            .get();
+      }
+
       if (!doc.exists) return null;
 
       return UserModel.fromFirestore(doc);
@@ -109,10 +119,18 @@ class ProviderAuth extends ChangeNotifier {
     try {
       final user = await _authHelper.signIn(email: email, password: password);
       if (user != null) {
-        await fetchUserModel(); // fetch immediately after login
+        await fetchUserModel();
+
+        if (userModel == null) {
+          _error = "User profile not found. Please contact support.";
+          await _authHelper.signOut();
+          return false;
+        }
+
         loggedInUser = userModel;
+        return true;
       }
-      return user != null;
+      return false;
     } catch (e) {
       _error = e.toString();
       return false;

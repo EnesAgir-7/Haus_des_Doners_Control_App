@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'branch_model.dart';
+
 class VehicleModel {
   final String id;
   final String plate;
   final String model;
-  final String? assignedInspectorId;
-  final String? assignedInspectorName;
+
+  final AssignedInspector? assignedInspector;
   final int currentKm;
   final int maxKm;
   final int remainingKm;
@@ -20,9 +22,9 @@ class VehicleModel {
     required this.id,
     required this.plate,
     required this.model,
-    this.assignedInspectorId,
-    this.assignedInspectorName,
     required this.currentKm,
+
+    this.assignedInspector,
     required this.maxKm,
     required this.remainingKm,
     required this.usagePercent,
@@ -39,8 +41,12 @@ class VehicleModel {
       id: doc.id,
       plate: data['plate'] ?? '',
       model: data['model'] ?? '',
-      assignedInspectorId: data['assignedInspectorId'],
-      assignedInspectorName: data['assignedInspectorName'],
+      assignedInspector: data['assignedInspector'] != null
+          ? AssignedInspector(
+              id: data['assignedInspector']['id'] ?? '',
+              name: data['assignedInspector']['name'] ?? '',
+            )
+          : null,
       currentKm: data['currentKm'] ?? 0,
       maxKm: data['maxKm'] ?? 0,
       remainingKm: data['remainingKm'] ?? 0,
@@ -57,8 +63,10 @@ class VehicleModel {
     return {
       'plate': plate,
       'model': model,
-      'assignedInspectorId': assignedInspectorId,
-      'assignedInspectorName': assignedInspectorName,
+      'assignedInspector': {
+        'id': assignedInspector?.id,
+        'name': assignedInspector?.name,
+      },
       'currentKm': currentKm,
       'maxKm': maxKm,
       'remainingKm': remainingKm,

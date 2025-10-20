@@ -1,32 +1,42 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../common_services/firebase_auth_service.dart';
 import '../../../models/branch_model.dart';
 import '../../../models/user_model.dart';
+import '../../../models/vehicle_model.dart';
 import '../admin_firebase_services/admin_branch_service.dart';
 import '../admin_firebase_services/admin_user_service.dart';
+import '../admin_firebase_services/admin_vehicle_service.dart';
 
 class ProviderAdminUsers extends ChangeNotifier {
   final AdminUserService _userService = AdminUserService();
   final AdminBranchService _branchService = AdminBranchService();
+  final AdminVehicleService _vehicleService = AdminVehicleService();
   final FirebaseAuthHelper _authHelper = FirebaseAuthHelper();
-  List<UserModel> _users = [];
-  Map<String, List<BranchModel>> _userBranches = {};
-  List<BranchModel>? _allBranches;
+
+  StreamSubscription<List<UserModel>>? _inspectorsSubscription;
+
+  List<UserModel> _inspectors = [];
+  List<BranchModel> _unAssignedBranches = [];
+  List<VehicleModel> _allVehicles = [];
+  String? _currentUserId;
+
   String? _error;
   bool _isLoading = false;
   String _searchQuery = '';
 
-  List<UserModel> get users => _users
+  List<BranchModel> get unassignedBranches => _unAssignedBranches;
+  // Getters
+  List<UserModel> get inspectors => _inspectors
       .where(
-        (user) =>
-            user.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            user.email.toLowerCase().contains(_searchQuery.toLowerCase()),
+        (inspector) =>
+            inspector.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            inspector.email.toLowerCase().contains(_searchQuery.toLowerCase()),
       )
       .toList();
-
-  List<UserModel> get inspectors =>
-      _users.where((user) => user.role.toLowerCase() == 'inspector').toList();
 
   bool get isLoading => _isLoading;
   String? get error => _error;
@@ -36,99 +46,81 @@ class ProviderAdminUsers extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadUsers(String currentUserId) async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  streamAllInspectors() {
+    if (_currentUserId == loggedInUser?.id && _inspectorsSubscription != null) {
+      print("Streams already initialized for this user");
+      return;
+    }
 
+    _currentUserId = loggedInUser?.id;
+
+    _inspectorsSubscription?.cancel();
+
+    _inspectorsSubscription = _userService.streamAllInspectors().listen(
+      (inspectorList) {
+        _inspectors = inspectorList;
+        notifyListeners();
+      },
+      onError: (error) {
+        _error = 'Inspectors stream error: $error';
+        notifyListeners();
+      },
+    );
+  }
+
+  // Get inspector details with branches and vehicle
+  Future<Map<String, dynamic>> getInspectorDetails(String inspectorId) async {
     try {
-      final allUsers = await _userService.getAllUsers();
-      print('Fetched ${allUsers.length} users from Firebase');
-      _users = allUsers.where((user) => user.id != currentUserId).toList();
-      print('Filtered to ${_users.length} users (excluding current user)');
+      final branches = await _branchService.getInspectorBranches(inspectorId);
+      final List<VehicleModel> vehicles = await _userService
+          .getInspectorVehicle(inspectorId);
 
-      // Load branches for inspectors
-      for (var user in _users.where((u) => u.isInspector)) {
-        final branches = await _branchService.getInspectorBranches(user.id);
-        _userBranches[user.id] = branches;
-      }
-
-      _error = null;
+      return {'branches': branches, 'vehicles': vehicles};
     } catch (e) {
-      _error = e.toString();
-    } finally {
+      rethrow;
+    }
+  }
+
+  // Update inspector
+  Future updateInspector(String inspectorId, Map<String, dynamic> data) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _userService.updateInspector(inspectorId, data);
       _isLoading = false;
       notifyListeners();
-    }
-  }
-
-  List<BranchModel> getUserBranches(String userId) {
-    return _userBranches[userId] ?? [];
-  }
-
-  Future<UserModel> updateUser(String userId, Map<String, dynamic> data) async {
-    try {
-      await _userService.updateUser(userId, data);
-      final updatedUser = await _userService.getUserById(userId);
-      if (updatedUser != null) {
-        final index = _users.indexWhere((u) => u.id == userId);
-        if (index != -1) {
-          _users[index] = updatedUser;
-          notifyListeners();
-          return updatedUser;
-        }
-      }
-      throw Exception('User not found');
     } catch (e) {
+      _isLoading = true;
+      notifyListeners();
       rethrow;
     }
   }
 
+  // Get unassigned branches
   Future<List<BranchModel>> getUnassignedBranches() async {
     try {
-      if (_allBranches == null) {
-        final snapshot = await _branchService.getAllBranches();
-        _allBranches = snapshot;
+      if (_unAssignedBranches.isEmpty) {
+        _unAssignedBranches = await _branchService.getUnassignedBranches();
       }
-      return _allBranches!.where((branch) => branch.stop == null).toList();
+      return _unAssignedBranches;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> assignBranchToUser(String userId, String branchId) async {
+  // Assign branch to inspector
+  Future<void> assignBranchToInspector(
+    String inspectorId,
+    String branchId,
+  ) async {
     try {
-      // Get the user and branch
-      final user = _users.firstWhere((u) => u.id == userId);
-      final branch = _allBranches?.firstWhere((b) => b.id == branchId);
+      final inspector = _inspectors.firstWhere((i) => i.id == inspectorId);
 
-      if (branch == null) throw Exception('Branch not found');
-
-      // Update branch in Firestore with assignedInspector map
-      await _branchService.updateBranch(
-        branch.copyWith(
-          assignedInspector: AssignedInspector(id: user.id, name: user.name),
-        ),
-      );
-
-      // Update assignedInspector field directly in Firestore
+      // Update branch with assigned inspector
       await _branchService.updateBranchAssignedInspector(branchId, {
-        'id': user.id,
-        'name': user.name,
+        'id': inspector.id,
+        'name': inspector.name,
       });
-
-      // Update local state
-      final index = _allBranches?.indexWhere((b) => b.id == branchId) ?? -1;
-      if (index != -1) {
-        _allBranches![index] = _allBranches![index].copyWith(
-          assignedInspector: AssignedInspector(id: user.id, name: user.name),
-        );
-      }
-
-      // Update user branches
-      final userBranches = _userBranches[userId] ?? [];
-      userBranches.add(branch);
-      _userBranches[userId] = userBranches;
 
       notifyListeners();
     } catch (e) {
@@ -136,6 +128,71 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
+  // Unassign branch from inspector
+  Future<void> unassignBranchFromInspector(String branchId) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+      await _branchService.removeBranchFromInspector(branchId: branchId);
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  // Get unassigned vehicles
+  Future<List<VehicleModel>> getUnassignedVehicles() async {
+    try {
+      if (_allVehicles.isEmpty) {
+        _allVehicles = await _vehicleService.getAllVehicles();
+      }
+      return _allVehicles
+          .where((vehicle) => vehicle.assignedInspector == null)
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Assign vehicle to inspector
+  Future<void> assignVehicleToInspector(
+    String inspectorId,
+    String vehicleId,
+  ) async {
+    try {
+      final inspector = _inspectors.firstWhere((i) => i.id == inspectorId);
+
+      // Update vehicle with assigned inspector
+      await _vehicleService.updateVehicleAssignedInspector(vehicleId, {
+        'id': inspector.id,
+        'name': inspector.name,
+      });
+
+      // Refresh vehicles list
+      _allVehicles = await _vehicleService.getAllVehicles();
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Unassign vehicle from inspector
+  Future<void> unassignVehicleFromInspector(String vehicleId) async {
+    try {
+      await _vehicleService.updateVehicleAssignedInspector(vehicleId, null);
+
+      // Refresh vehicles list
+      _allVehicles = await _vehicleService.getAllVehicles();
+      notifyListeners();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Create new user (inspector or admin)
   Future<void> createUser({
     required String email,
     required String password,
@@ -150,7 +207,7 @@ class ProviderAdminUsers extends ChangeNotifier {
         password: password,
       );
 
-      // 2. Create user in Firestore
+      // 2. Create user model
       final user = UserModel(
         id: userId,
         name: name,
@@ -162,27 +219,23 @@ class ProviderAdminUsers extends ChangeNotifier {
         updatedAt: DateTime.now().toIso8601String(),
       );
 
+      // 3. Save to appropriate collection
       await _userService.createUser(userId, user);
 
-      // 3. Add user to local state
-      _users.add(user);
-      notifyListeners();
+      // 4. Add to local state if inspector
+      if (role.toLowerCase() == 'inspector') {
+        _inspectors.add(user);
+        notifyListeners();
+      }
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> toggleUserActive(String userId, bool active) async {
+  // Toggle inspector active status
+  Future<void> toggleInspectorActive(String inspectorId, bool active) async {
     try {
-      await _userService.updateUser(userId, {'active': active});
-      final userIndex = _users.indexWhere((user) => user.id == userId);
-      if (userIndex != -1) {
-        final updatedUser = await _userService.getUserById(userId);
-        if (updatedUser != null) {
-          _users[userIndex] = updatedUser;
-          notifyListeners();
-        }
-      }
+      await _userService.updateInspector(inspectorId, {'active': active});
     } catch (e) {
       _error = e.toString();
       notifyListeners();

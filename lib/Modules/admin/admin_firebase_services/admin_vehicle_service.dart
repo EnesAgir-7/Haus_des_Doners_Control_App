@@ -97,6 +97,21 @@ class AdminVehicleService {
     }
   }
 
+    // Get vehicle by ID
+  Future<VehicleModel?> getVehicleById(String vehicleId) async {
+    try {
+      final doc = await _db
+          .collection(Collections.vehicles)
+          .doc(vehicleId)
+          .get();
+      if (!doc.exists) return null;
+      return VehicleModel.fromFirestore(doc);
+    } catch (e) {
+      print('Error getting vehicle: $e');
+      return null;
+    }
+  }
+
   // Assign vehicle to inspector
   Future<void> assignVehicleToInspector(
     String vehicleId,
@@ -192,6 +207,21 @@ class AdminVehicleService {
       });
     } catch (e) {
       print('Error updating vehicle status: $e');
+      rethrow;
+    }
+  }
+
+    Future<void> updateVehicleAssignedInspector(
+    String vehicleId,
+    Map<String, dynamic>? inspectorData,
+  ) async {
+    try {
+      await _db.collection(Collections.vehicles).doc(vehicleId).update({
+        'assignedInspector': inspectorData,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error updating vehicle assigned inspector: $e');
       rethrow;
     }
   }

@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/user_model.dart';
 import '../admin_providers/provider_admin_users.dart';
-import '../../inspector/providers/provider_auth.dart';
 import '../../../translations/locale_keys.g.dart';
 import 'screen_admin_user_details.dart';
 import 'screen_admin_create_user.dart';
@@ -24,13 +23,8 @@ class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadUsers();
+      context.read<ProviderAdminUsers>().streamAllInspectors();
     });
-  }
-
-  void _loadUsers() {
-    final currentUserId = context.read<ProviderAuth>().currentUser?.uid ?? '';
-    context.read<ProviderAdminUsers>().loadUsers(currentUserId);
   }
 
   @override
@@ -41,184 +35,314 @@ class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
+    return Container(
+      decoration: BoxDecoration(
+        // Apply the same gradient background as ScreenBranches
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            AppColors.primaryRed.withValues(alpha: 0.08),
+            AppColors.primaryDark,
+            AppColors.primaryDark,
+          ],
+          stops: const [0.0, 0.25, 1.0],
+        ),
+      ),
+      child: SafeArea(
+        child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _buildHeader(context),
+              const SizedBox(height: 12),
+              _buildSearchBar(context),
+              const SizedBox(height: 12),
+              Container(height: 1, color: Colors.white24),
+              const SizedBox(height: 12),
               Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: LocaleKeys.search.tr(),
-                    prefixIcon: const Icon(Icons.search),
-                    border: const OutlineInputBorder(),
-                  ),
-                  onChanged: (value) {
-                    context.read<ProviderAdminUsers>().setSearchQuery(value);
+                child: Consumer<ProviderAdminUsers>(
+                  builder: (context, provider, child) {
+                    if (provider.isLoading) {
+                      return Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryRed,
+                        ),
+                      );
+                    }
+
+                    if (provider.error != null) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              LocaleKeys.error_occurred.tr(),
+                              style: TextStyle(
+                                color: AppColors.primaryRed,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Error: ${provider.error}',
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: () => provider.streamAllInspectors(),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryRed,
+                              ),
+                              child: Text(LocaleKeys.retry.tr()),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    final inspectors = provider.inspectors;
+                    if (inspectors.isEmpty) {
+                      final text = _searchController.text.isNotEmpty
+                          ? LocaleKeys.no_users_found.tr()
+                          : 'No users available';
+                      return Center(
+                        child: Text(
+                          text,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      itemCount: inspectors.length,
+                      itemBuilder: (context, index) {
+                        final inspector = inspectors[index];
+                        return _InspectorListItem(inspector: inspector);
+                      },
+                    );
                   },
-                ),
-              ),
-              const SizedBox(width: 16),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ScreenAdminCreateUser(),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: Text(LocaleKeys.create_user.tr()),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryRed,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 19,
-                  ),
                 ),
               ),
             ],
           ),
         ),
-        Expanded(
-          child: Consumer<ProviderAdminUsers>(
-            builder: (context, provider, child) {
-              if (provider.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+      ),
+    );
+  }
 
-              if (provider.error != null) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Error: ${provider.error}',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          final currentUserId =
-                              context.read<ProviderAuth>().currentUser?.uid ??
-                              '';
-                          provider.loadUsers(currentUserId);
-                        },
-                        child: Text(LocaleKeys.retry.tr()),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              final users = provider.users;
-              if (users.isEmpty) {
-                if (_searchController.text.isNotEmpty) {
-                  return Center(child: Text(LocaleKeys.no_users_found.tr()));
-                }
-                return Center(child: Text(LocaleKeys.no_users_available.tr()));
-              }
-
-              return RefreshIndicator(
-                onRefresh: () {
-                  final currentUserId =
-                      context.read<ProviderAuth>().currentUser?.uid ?? '';
-                  return provider.loadUsers(currentUserId);
-                },
-                child: ListView.builder(
-                  itemCount: users.length,
-                  itemBuilder: (context, index) {
-                    final user = users[index];
-                    return _UserListItem(user: user);
-                  },
-                ),
-              );
-            },
+  Widget _buildHeader(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.people, color: Colors.lightBlueAccent),
+        const SizedBox(width: 6),
+        Text(
+          'Inspectors',
+          style: TextStyle(
+            color: AppColors.primaryRed,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        const Spacer(),
+        // Create User Button
+        ElevatedButton.icon(
+          onPressed: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ScreenAdminCreateUser(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.add, size: 20),
+          label: Text(LocaleKeys.create_user.tr()),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryRed,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
     );
   }
-}
 
-class _UserListItem extends StatefulWidget {
-  final UserModel user;
-
-  const _UserListItem({required this.user});
-
-  @override
-  State<_UserListItem> createState() => _UserListItemState();
-}
-
-class _UserListItemState extends State<_UserListItem> {
-  late UserModel user;
-
-  @override
-  void initState() {
-    super.initState();
-    user = widget.user;
-  }
-
-  void _handleUserUpdated(UserModel updatedUser) {
-    setState(() {
-      user = updatedUser;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: AppColors.lightBlack,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: BorderSide(color: AppColors.primaryRed),
-      ),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ScreenAdminUserDetails(
-                initialUser: user,
-                onUserUpdated: _handleUserUpdated,
-              ),
-            ),
-          );
-        },
-        child: ListTile(
-          leading: CircleAvatar(child: Text(user.name[0].toUpperCase())),
-          title: Text(user.name),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(user.email),
-              Text(
-                '${LocaleKeys.role.tr()}: ${user.role.toUpperCase()}',
-                style: TextStyle(
-                  color: user.isAdmin ? Colors.red : Colors.blue,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (user.region != null)
-                Text('${LocaleKeys.region.tr()}: ${user.region}'),
-            ],
-          ),
-          trailing: Switch(
-            value: user.active,
-            onChanged: (value) {
-              context.read<ProviderAdminUsers>().toggleUserActive(
-                user.id,
-                value,
-              );
-            },
-          ),
-          isThreeLine: true,
+  Widget _buildSearchBar(BuildContext context) {
+    final provider = context.read<ProviderAdminUsers>();
+    return TextField(
+      controller: _searchController,
+      onChanged: (value) => provider.setSearchQuery(value),
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: LocaleKeys.search.tr(),
+        hintStyle: const TextStyle(color: Colors.white54),
+        prefixIcon: const Icon(Icons.search, color: Colors.white54),
+        suffixIcon: _searchController.text.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear, color: Colors.white54),
+                onPressed: () {
+                  _searchController.clear();
+                  provider.setSearchQuery('');
+                },
+              )
+            : null,
+        filled: true,
+        fillColor: AppColors.lightBlack, // Use lightBlack for the fill color
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.white24),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.white24),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: AppColors.primaryRed,
+          ), // PrimaryRed focus color
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 12,
+          horizontal: 16,
         ),
       ),
     );
   }
 }
+
+// ---
+// The _InspectorListItem has been refactored to use the BranchCard style
+// ---
+
+class _InspectorListItem extends StatelessWidget {
+  final UserModel inspector;
+
+  const _InspectorListItem({required this.inspector});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ScreenAdminUserDetails(inspector: inspector),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.lightBlack, // Darker background for card
+          borderRadius: BorderRadius.circular(12),
+
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Leading Circle Avatar
+            CircleAvatar(
+              backgroundColor: AppColors.primaryRed,
+              child: Text(
+                inspector.name[0].toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // User Details (Title/Subtitle)
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    inspector.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    inspector.email,
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        '${LocaleKeys.role.tr()}: ',
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 12,
+                        ),
+                      ),
+                      Text(
+                        inspector.role.toUpperCase(),
+                        style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (inspector.region != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        '${LocaleKeys.region.tr()}: ${inspector.region}',
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            // Trailing Switch for Active Status
+            Switch(
+              value: inspector.active,
+              onChanged: (value) async {
+                await context.read<ProviderAdminUsers>().toggleInspectorActive(
+                  inspector.id,
+                  value,
+                );
+              },
+              activeThumbColor: Colors.greenAccent,
+              inactiveThumbColor: Colors.redAccent,
+              inactiveTrackColor: Colors.redAccent.withValues(alpha: 0.5),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Ensure you have AppColors, UserModel, ProviderAdminUsers, and translation keys imported correctly.

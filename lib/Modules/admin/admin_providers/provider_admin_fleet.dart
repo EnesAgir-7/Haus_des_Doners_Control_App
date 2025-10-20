@@ -27,7 +27,7 @@ class ProviderAdminFleet extends ChangeNotifier {
     return _vehicles.where((vehicle) {
       return vehicle.plate.toLowerCase().contains(_searchQuery) ||
           vehicle.model.toLowerCase().contains(_searchQuery) ||
-          vehicle.assignedInspectorName?.toLowerCase().contains(_searchQuery) ==
+          vehicle.assignedInspector?.name.toLowerCase().contains(_searchQuery) ==
               true;
     }).toList();
   }

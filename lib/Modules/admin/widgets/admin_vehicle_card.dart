@@ -82,7 +82,7 @@ class VehicleCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              if (vehicle.assignedInspectorName != null) ...[
+              if (vehicle.assignedInspector?.name != null) ...[
                 const Divider(),
                 const SizedBox(height: 8),
                 Row(
@@ -90,7 +90,7 @@ class VehicleCard extends StatelessWidget {
                     const Icon(Icons.person, size: 20, color: Colors.grey),
                     const SizedBox(width: 8),
                     Text(
-                      vehicle.assignedInspectorName!,
+                      vehicle.assignedInspector?.name ?? "Unknown",
                       style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                   ],

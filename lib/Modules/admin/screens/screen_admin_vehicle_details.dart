@@ -26,9 +26,9 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
   void initState() {
     super.initState();
     _kmController.text = widget.vehicle.currentKm.toString();
-    _selectedInspectorId = widget.vehicle.assignedInspectorId;
+    _selectedInspectorId = widget.vehicle.assignedInspector?.id;
     Future.microtask(() {
-      context.read<ProviderAdminUsers>().loadUsers('');
+      context.read<ProviderAdminUsers>().streamAllInspectors();
     });
   }
 
@@ -139,7 +139,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
                 ),
                 _buildInfoRow(
                   'Assigned Inspector',
-                  widget.vehicle.assignedInspectorName ?? 'Unassigned',
+                  widget.vehicle.assignedInspector?.name ?? 'Unassigned',
                   dropdown: !_isEditing
                       ? null
                       : Consumer<ProviderAdminUsers>(

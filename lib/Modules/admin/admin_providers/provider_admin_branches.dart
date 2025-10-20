@@ -1,19 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../models/branch_model.dart';
 import '../../../models/user_model.dart';
 import '../admin_firebase_services/admin_branch_service.dart';
-import '../admin_firebase_services/admin_user_service.dart';
 
 class ProviderAdminBranches with ChangeNotifier {
   final AdminBranchService _branchService = AdminBranchService();
-  final AdminUserService _userService = AdminUserService();
 
   List<BranchModel> _branches = [];
   List<UserModel> _inspectors = [];
   bool _isLoading = false;
   String _searchQuery = '';
   String? _error;
+
+   StreamSubscription<List<BranchModel>>? _branchesSubscription;
 
   // Getters
   List<BranchModel> get branches => _filterBranches();
@@ -37,33 +39,41 @@ class ProviderAdminBranches with ChangeNotifier {
     notifyListeners();
   }
 
-  // Load all branches and inspectors
-  Future<void> loadData() async {
+// 🔹 Stream all branches in real-time (avoid redundant listeners)
+  void loadBranchStream() {
+    if (_branchesSubscription != null) {
+      print("✅ Branch stream already active — skipping reinitialization");
+      return;
+    }
+
+    print("📡 Initializing branch stream...");
+
     _setLoading(true);
     _error = null;
 
-    try {
-      // Load branches and inspectors in parallel
-      final results = await Future.wait([
-        _branchService.streamAllBranches().first,
-        _userService.getActiveInspectors(),
-      ]);
-
-      _branches = results[0] as List<BranchModel>;
-      _inspectors = results[1] as List<UserModel>;
-    } catch (e) {
-      _error = 'Error loading data: $e';
-    } finally {
-      _setLoading(false);
-    }
+    _branchesSubscription = _branchService.streamAllBranches().listen(
+      (branchList) {
+        _branches = branchList;
+        _error = null;
+        _setLoading(false);
+        notifyListeners();
+      },
+      onError: (error) {
+        _error = 'Branches stream error: $error';
+        _setLoading(false);
+        notifyListeners();
+      },
+    );
   }
 
-  // Stream branches and inspectors
-  Stream<void> streamData() {
-    return Stream.periodic(
-      const Duration(seconds: 30),
-    ).asyncMap((_) => loadData());
+  // 🔹 Cancel branch stream when not needed
+  Future<void> cancelBranchStream() async {
+    await _branchesSubscription?.cancel();
+    _branchesSubscription = null;
+    print("🛑 Branch stream cancelled");
   }
+
+
 
   // Assign inspector to branch
   Future<void> updateBranch(BranchModel branch) async {
@@ -72,7 +82,6 @@ class ProviderAdminBranches with ChangeNotifier {
 
     try {
       await _branchService.updateBranch(branch);
-      await loadData(); // Reload data to get updated branch
     } catch (e) {
       _error = 'Error updating branch: $e';
     } finally {
@@ -89,24 +98,15 @@ class ProviderAdminBranches with ChangeNotifier {
 
     try {
       if (inspectorId.isEmpty) {
-        await _branchService.removeBranchAssignment(
-          inspectorId: inspectorId,
-          branchId: branchId,
-        );
+        await _branchService.removeBranchFromInspector(branchId: branchId);
       } else {
-        final branch = _branches.firstWhere((b) => b.id == branchId);
         final inspector = _inspectors.firstWhere((i) => i.id == inspectorId);
-        await _branchService.assignBranchToHimself(
-          branchAddress: branch.address,
-          branchTemplateId: branch.templateId,
+        await _branchService.assignBranchToInspector(
           inspectorId: inspectorId,
           inspectorName: inspector.name,
           branchId: branchId,
-          branchName: branch.name,
-          timeSlot: DateTime.now().hour.toString().padLeft(2, '0') + ':00',
         );
       }
-      await loadData(); // Reload data to get updated assignments
     } catch (e) {
       _error = 'Error assigning inspector: $e';
     } finally {
@@ -117,5 +117,12 @@ class ProviderAdminBranches with ChangeNotifier {
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
+  }
+
+    // 🔹 Dispose stream safely when provider is destroyed
+  @override
+  void dispose() {
+    _branchesSubscription?.cancel();
+    super.dispose();
   }
 }

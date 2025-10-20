@@ -189,4 +189,8 @@ class AssignedInspector {
   factory AssignedInspector.fromMap(Map<String, dynamic> map) {
     return AssignedInspector(id: map['id'] ?? '', name: map['name'] ?? '');
   }
+
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'name': name};
+  }
 }

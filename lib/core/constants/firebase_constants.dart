@@ -9,10 +9,13 @@ class Collections {
   static const String tasks = 'tasks';
   static const String users = 'users';
   static const String vehicles = 'vehicles';
+  static const String inspectors = 'inspectors';
+  static const String admins = 'admins';
 }
 
 class AppConstants {
   static const inspector = "inspector";
+  static const admin = "admin";
   static const pending = "pending";
   static const completed = "completed";
   static const current = "current";

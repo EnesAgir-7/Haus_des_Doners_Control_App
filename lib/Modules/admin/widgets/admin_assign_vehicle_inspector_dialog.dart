@@ -21,7 +21,7 @@ class _AssignVehicleInspectorDialogState
   @override
   void initState() {
     super.initState();
-    _selectedInspectorId = widget.vehicle.assignedInspectorId;
+    _selectedInspectorId = widget.vehicle.assignedInspector?.id;
   }
 
   @override
@@ -70,7 +70,7 @@ class _AssignVehicleInspectorDialogState
         ),
         ElevatedButton(
           onPressed: () {
-            if (_selectedInspectorId != widget.vehicle.assignedInspectorId) {
+            if (_selectedInspectorId != widget.vehicle.assignedInspector?.id) {
               final selectedInspector = inspectors.firstWhere(
                 (inspector) => inspector.id == _selectedInspectorId,
                 orElse: () => UserModel(
