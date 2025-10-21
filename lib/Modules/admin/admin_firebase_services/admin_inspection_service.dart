@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../models/inspection_model.dart';
 import '../../../models/inspection_template_model.dart';
 import '../../../models/route_model.dart';

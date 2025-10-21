@@ -8,6 +8,7 @@ import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 
 import '../../../core/console.dart';
+import '../../../core/constants/app_constants.dart';
 import '../firebase_services/inspector_branch_service.dart';
 import '../firebase_services/inspector_inspection_service.dart';
 import '../../../models/branch_model.dart';

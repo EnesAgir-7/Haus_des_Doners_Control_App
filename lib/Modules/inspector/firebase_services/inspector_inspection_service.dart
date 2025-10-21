@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../models/inspection_model.dart';
 import '../../../models/inspection_template_model.dart';
 import '../../../models/route_model.dart';
@@ -176,6 +177,13 @@ class InspectorInspectionService {
         score: inspection.score,
       );
 
+      // Update inspector history
+      await _prepareInspectorHistoryBatch(
+        batch: batch,
+        inspectorId: inspection.inspectorId,
+        inspectionScore: inspection.score,
+      );
+
       await batch.commit();
 
       return docRef.id;
@@ -210,6 +218,60 @@ class InspectorInspectionService {
       'lastInspectionScore': inspectionScore,
       'updatedAt': FieldValue.serverTimestamp(),
     });
+  }
+
+  Future<void> _prepareInspectorHistoryBatch({
+    required WriteBatch batch,
+    required String inspectorId,
+    required double inspectionScore,
+  }) async {
+    final inspectorRef = _db
+        .collection(Collections.inspectorStats)
+        .doc(inspectorId);
+
+    final inspectorDoc = await inspectorRef.get();
+
+    if (inspectorDoc.exists) {
+      final data = inspectorDoc.data()!;
+      final currentTotal = data['totalInspections'] ?? 0;
+      final currentAvg = (data['avgScore'] ?? 0.0).toDouble();
+      final newTotal = currentTotal + 1;
+      final newAvg = ((currentAvg * currentTotal) + inspectionScore) / newTotal;
+
+      // Get current recentScores and append new score
+      final recentScores = data['recentScores'] != null
+          ? List<double>.from(
+              (data['recentScores'] as List<dynamic>).map((e) => e.toDouble()),
+            )
+          : <double>[];
+
+      recentScores.add(inspectionScore);
+
+      // Keep only the last 10 scores
+      if (recentScores.length > 10) {
+        recentScores.removeRange(0, recentScores.length - 10);
+      }
+
+      batch.update(inspectorRef, {
+        'totalInspections': newTotal,
+        'avgScore': newAvg,
+        'recentScores': recentScores,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      });
+    } else {
+      // Create new inspector history doc if it does not exist
+      batch.set(inspectorRef, {
+        'inspectorId': inspectorId,
+        'totalInspections': 1,
+        'avgScore': inspectionScore,
+        'tasksTotal': 0,
+        'tasksCompleted': 0,
+        'recentScores': [inspectionScore],
+        'vehicleIds': [],
+        'branchesIds': [],
+        'lastUpdated': FieldValue.serverTimestamp(),
+      });
+    }
   }
 
   // Helper: adds route stop update to batch

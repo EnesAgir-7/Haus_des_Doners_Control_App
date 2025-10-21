@@ -1,14 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/models/branch_model.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../helpers/app_helpers.dart';
-import '../providers/provider_branches.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../providers/provider_branches.dart';
 import '../widgets/app_button.dart';
 import '../widgets/inspector_branch_card.dart';
 import 'common_methods.dart';

@@ -12,29 +12,131 @@ class Collections {
   static const String admins = 'admins';
   static const String inspectorStats = 'inspector_stats';
 }
-
-class AppConstants {
-  static const inspector = "inspector";
-  static const admin = "admin";
-  static const pending = "pending";
-  static const completed = "completed";
-  static const current = "current";
-  static const inProgress = "in_progress";
-  static const count = "{count}";
-  static const high = "high";
-  static const medium = "medium";
-  static const low = "low";
-  static const all = "all";
-  static const name = "name";
-  static const score = "score";
-  static const lastInspection = "lastInspection";
-  static const dueDate = "dueDate";
-  static const priority = "priority";
-  static const createdAt = "createdAt";
-  static const details = "details";
-  static const nextInspection = "nextInspection";
-  static const assigned = "assigned";
-  static const available = "available";
+class VehicleFields {
+  static const String plate = 'plate';
+  static const String model = 'model';
+  static const String assignedInspector = 'assignedInspector';
+  static const String assignedInspectorId = 'assignedInspector.id';
+  static const String assignedInspectorName = 'assignedInspector.name';
+  static const String currentKm = 'currentKm';
+  static const String maxKm = 'maxKm';
+  static const String remainingKm = 'remainingKm';
+  static const String usagePercent = 'usagePercent';
+  static const String lastServiceDate = 'lastServiceDate';
+  static const String nextServiceDue = 'nextServiceDue';
+  static const String status = 'status';
+  static const String createdAt = 'createdAt';
+  static const String updatedAt = 'updatedAt';
 }
+
+class BranchFields {
+  static const String name = 'name';
+  static const String address = 'address';
+  static const String region = 'region';
+  static const String gps = 'gps';
+  static const String contactName = 'contactName';
+  static const String contactPhone = 'contactPhone';
+  static const String templateId = 'templateId';
+  static const String assignedInspector = 'assignedInspector';
+  static const String assignedInspectorId = 'assignedInspector.id';
+  static const String assignedInspectorName = 'assignedInspector.name';
+  static const String lastInspectionDate = 'lastInspectionDate';
+  static const String lastInspectionScore = 'lastInspectionScore';
+  static const String last12MonthsScores = 'last12MonthsScores';
+  static const String totalInspections = 'totalInspections';
+  static const String averageScore = 'averageScore';
+  static const String status = 'status';
+  static const String createdAt = 'createdAt';
+  static const String updatedAt = 'updatedAt';
+  static const String stop = 'stop'; // nested object
+}
+
+class InspectionFields {
+  static const String branchId = 'branchId';
+  static const String branchName = 'branchName';
+  static const String inspectorId = 'inspectorId';
+  static const String inspectorName = 'inspectorName';
+  static const String scheduledTime = 'scheduledTime';
+  static const String completedTime = 'completedTime';
+  static const String status = 'status';
+  static const String score = 'score';
+  static const String categories = 'categories'; // nested map
+  static const String pdfReportUrl = 'pdfReportUrl';
+  static const String overallNotes = 'overallNotes';
+  static const String createdAt = 'createdAt';
+  static const String updatedAt = 'updatedAt';
+}
+
+class InspectorHistoryFields {
+  static const String inspectorId = 'inspectorId';
+  static const String totalInspections = 'totalInspections';
+  static const String avgScore = 'avgScore';
+  static const String tasksTotal = 'tasksTotal';
+  static const String tasksCompleted = 'tasksCompleted';
+  static const String recentScores = 'recentScores';
+  static const String vehicleIds = 'vehicleIds';
+  static const String branchesIds = 'branchesIds';
+  static const String lastUpdated = 'lastUpdated';
+}
+
+class RouteFields {
+  // RouteModel fields
+  static const String id = 'id';
+  static const String date = 'date';
+  static const String inspectorId = 'inspectorId';
+  static const String inspectorName = 'inspectorName';
+  static const String stops = 'stops';
+  static const String createdAt = 'createdAt';
+  static const String updatedAt = 'updatedAt';
+}
+
+class RouteStopFields {
+  static const String timeSlot = 'timeSlot';
+  static const String branchId = 'branchId';
+  static const String branchName = 'branchName';
+  static const String branchTemplateId = 'branchTemplateId';
+  static const String status = 'status';
+  static const String order = 'order';
+  static const String createdAt = 'createdAt';
+  static const String completedAt = 'completedAt';
+  static const String expiryDate = 'expiryDate';
+  static const String inspectionScore = 'inspectionScore';
+  static const String branchAddress = 'branchAddress';
+}
+
+class TaskFields {
+  static const String title = 'title';
+  static const String description = 'description';
+  static const String assignedInspectorId = 'assignedInspectorId';
+  static const String assignedInspectorName = 'assignedInspectorName';
+  static const String relatedBranchId = 'relatedBranchId';
+  static const String relatedInspectionId = 'relatedInspectionId';
+  static const String status = 'status';
+  static const String priority = 'priority';
+  static const String dueDate = 'dueDate';
+  static const String comments = 'comments';
+  static const String createdAt = 'createdAt';
+  static const String updatedAt = 'updatedAt';
+}
+
+class TaskCommentFields {
+  static const String userId = 'userId';
+  static const String userName = 'userName';
+  static const String text = 'text';
+  static const String timestamp = 'timestamp';
+  static const String photos = 'photos';
+}
+
+class UserFields {
+  static const String id = 'id'; // optional for local storage
+  static const String name = 'name';
+  static const String role = 'role'; // "admin" | "inspector"
+  static const String active = 'active';
+  static const String region = 'region';
+  static const String serviceAccount = 'serviceAccount';
+  static const String createdAt = 'createdAt';
+  static const String updatedAt = 'updatedAt';
+}
+
 
 UserModel? loggedInUser;

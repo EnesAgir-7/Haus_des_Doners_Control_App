@@ -10,7 +10,6 @@ Future<void> addDummyInspectorStats() async {
     inspectorId: "lPHguCQTrBQr56aZCnjBfBgGVbk1",
     totalInspections: 25,
     avgScore: 8.4,
-    branchesVisited: 12,
     tasksTotal: 15,
     tasksCompleted: 10,
     recentScores: [6, 7, 8, 9, 10],

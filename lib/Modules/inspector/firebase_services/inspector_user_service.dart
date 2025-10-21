@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../models/user_model.dart';
 
 class InspectorUserService {

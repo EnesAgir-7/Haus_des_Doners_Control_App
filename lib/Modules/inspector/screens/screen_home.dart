@@ -7,6 +7,7 @@ import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/enums.dart';
 import '../../../models/route_model.dart';
 import '../providers/provider_panel.dart';

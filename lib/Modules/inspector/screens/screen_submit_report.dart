@@ -4,12 +4,12 @@ import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
-import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:signature/signature.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../models/branch_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../providers/provider_control.dart';

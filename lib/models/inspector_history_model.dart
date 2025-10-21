@@ -4,7 +4,6 @@ class InspectorHistoryModel {
   final String inspectorId;
   final int totalInspections;
   final double avgScore;
-  final int branchesVisited;
   final int tasksTotal;
   final int tasksCompleted;
   final List<double> recentScores;
@@ -16,7 +15,6 @@ class InspectorHistoryModel {
     required this.inspectorId,
     required this.totalInspections,
     required this.avgScore,
-    required this.branchesVisited,
     required this.tasksTotal,
     required this.tasksCompleted,
     required this.recentScores,
@@ -30,7 +28,6 @@ class InspectorHistoryModel {
       inspectorId: data['inspectorId'] ?? '',
       totalInspections: data['totalInspections'] ?? 0,
       avgScore: (data['avgScore']?.toDouble() ?? 0.0),
-      branchesVisited: data['branchesVisited'] ?? 0,
       tasksTotal: data['tasksTotal'] ?? 0,
       tasksCompleted: data['tasksCompleted'] ?? 0,
       recentScores: data['recentScores'] != null
@@ -63,7 +60,6 @@ class InspectorHistoryModel {
       inspectorId: data['inspectorId'] ?? '',
       totalInspections: data['totalInspections'] ?? 0,
       avgScore: (data['avgScore']?.toDouble() ?? 0.0),
-      branchesVisited: data['branchesVisited'] ?? 0,
       tasksTotal: data['tasksTotal'] ?? 0,
       tasksCompleted: data['tasksCompleted'] ?? 0,
       recentScores: data['recentScores'] != null
@@ -92,7 +88,6 @@ class InspectorHistoryModel {
       'inspectorId': inspectorId,
       'totalInspections': totalInspections,
       'avgScore': avgScore,
-      'branchesVisited': branchesVisited,
       'tasksTotal': tasksTotal,
       'tasksCompleted': tasksCompleted,
       'recentScores': recentScores,
