@@ -56,7 +56,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final controlProvider = context.read<ProviderControl>();
-      controlProvider.loadSavedSignature();
+
       controlProvider.initialize(
         widget.selectedBranch,
         widget.branchId!,

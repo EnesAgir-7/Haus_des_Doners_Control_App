@@ -388,7 +388,7 @@ class InspectorBranchService {
 
       await batch.commit();
 
-      console('✅ Branch unassigned successfully from inspector $inspectorId');
+      console('✅ This route is removed');
     } catch (e, st) {
       print("❌ Error removing branch assignment: $e\n$st");
       rethrow;
