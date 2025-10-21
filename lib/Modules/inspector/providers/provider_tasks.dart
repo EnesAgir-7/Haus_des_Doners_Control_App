@@ -435,6 +435,32 @@ class ProviderTasks extends ChangeNotifier {
     }
   }
 
+  Future<bool> deleteTask(String taskId) async {
+    try {
+      _isUpdating = true;
+      _errorMessage = null;
+      notifyListeners();
+
+      await _taskService.deleteTask(taskId);
+
+      // Refresh according to current user role
+      if (loggedInUser?.isAdmin == true) {
+        await loadAllTasks();
+      } else {
+        initializeTasksStream();
+      }
+
+      _isUpdating = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _errorMessage = 'Error deleting task: $e';
+      _isUpdating = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
   void clearError() {
     _errorMessage = null;
     notifyListeners();

@@ -417,6 +417,65 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                             ),
                             child: const Text('Update'),
                           ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            onPressed: () async {
+                              final tasksProvider = context
+                                  .read<ProviderTasks>();
+                              final confirm = await showDialog<bool>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Delete Task'),
+                                  content: const Text(
+                                    'Are you sure you want to delete this task?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(ctx).pop(false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.of(ctx).pop(true),
+                                      child: const Text(
+                                        'Delete',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (confirm == true) {
+                                try {
+                                  final success = await tasksProvider
+                                      .deleteTask(task.id);
+                                  if (success) {
+                                    Navigator.pop(context); // Close modal
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text('Task deleted'),
+                                      ),
+                                    );
+                                  } else {
+                                    throw Exception('Failed to delete task');
+                                  }
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Failed to delete task: $e',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: const Text('Delete'),
+                          ),
                         ],
                       ),
                     ],
