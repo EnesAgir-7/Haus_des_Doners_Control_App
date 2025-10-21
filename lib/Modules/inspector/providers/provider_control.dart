@@ -14,11 +14,13 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../../../core/console.dart';
+import '../../../core/constants/app_colors.dart';
 import '../firebase_services/inspector_inspection_service.dart';
 import '../firebase_services/inspector_onedrive_service.dart';
 import '../../../models/branch_model.dart';
 import '../../../models/inspection_model.dart';
 import '../../../models/inspection_template_model.dart';
+import '../firebase_services/inspector_signature_service.dart';
 import '../screens/pdf_preview.dart';
 import '../widgets/custom_toast.dart';
 
@@ -31,9 +33,18 @@ class ProviderControl extends ChangeNotifier {
       InspectorInspectionService();
   final InspectorBranchService _branchService = InspectorBranchService();
   final InspectorOneDriveService _oneDriveService = InspectorOneDriveService();
+  final SignatureStorageService _signatureStorage = SignatureStorageService();
 
+  bool _isLoadingSignature = false;
+  bool get isLoadingSignature => _isLoadingSignature;
+
+  Uint8List? inspectorSignature;
+  Uint8List? branchSignature;
   UploadStage? _currentUploadStage;
   UploadStage? get currentUploadStage => _currentUploadStage;
+  bool _isSignatureFromStorage = false;
+
+  bool get isSignatureFromStorage => _isSignatureFromStorage;
 
   // State
   BranchModel? _selectedBranch;
@@ -42,9 +53,6 @@ class ProviderControl extends ChangeNotifier {
   Map<String, int> _scores = {};
   Map<String, String> _notes = {};
   Map<String, List<File>> _photos = {};
-
-  Uint8List? inspectorSignature;
-  Uint8List? branchSignature;
 
   // Overall notes
   String _overallNotes = '';
@@ -68,6 +76,27 @@ class ProviderControl extends ChangeNotifier {
   double get uploadProgress => _uploadProgress;
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
+
+  // Load signature on initialization
+  Future<void> loadSavedSignature() async {
+    _isLoadingSignature = true;
+    notifyListeners();
+
+    try {
+      final hasSignature = await _signatureStorage.hasSignature();
+
+      if (hasSignature) {
+        inspectorSignature = await _signatureStorage.loadSignature();
+        _isSignatureFromStorage = true; // ✅ Mark as loaded from storage
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error loading saved signature: $e');
+    } finally {
+      _isLoadingSignature = false;
+      notifyListeners();
+    }
+  }
 
   void setTemplate(InspectionTemplate newTemplate) {
     selectedTemplate = newTemplate;
@@ -134,6 +163,7 @@ class ProviderControl extends ChangeNotifier {
 
   void setInspectorSignature(Uint8List? signature) {
     inspectorSignature = signature;
+    _isSignatureFromStorage = false; // ✅ Mark as new signature
     notifyListeners();
   }
 
@@ -213,13 +243,17 @@ class ProviderControl extends ChangeNotifier {
   bool get isSubmittingOrUploading => _isSubmitting || _isUploading;
 
   // Update submitInspection method:
-  Future<bool> submitInspection() async {
+  Future<bool> submitInspection(BuildContext context) async {
     if (selectedTemplate == null) {
       _errorMessage = 'No template selected.';
       notifyListeners();
       return false;
     }
 
+    // ✅ NEW: Ask to save signature before submitting
+    if (inspectorSignature != null) {
+      await _askToSaveSignature(context);
+    }
     _isSubmitting = true;
     _isUploading = true;
     _uploadProgress = 0.0;
@@ -1057,162 +1091,173 @@ class ProviderControl extends ChangeNotifier {
         return PdfColors.grey600;
     }
   }
+
+  // Show dialog to ask if user wants to save signature
+  Future<void> _askToSaveSignature(BuildContext context) async {
+    if (inspectorSignature == null) return;
+
+    // Check if signature already saved
+    final alreadySaved = await _signatureStorage.hasSignature();
+    if (alreadySaved) return; // Don't ask again if already saved
+
+    final shouldSave = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.lightBlack,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.draw, color: AppColors.primaryRed),
+            SizedBox(width: 12),
+            Text('Save Signature?', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Would you like to save this signature for future inspections?',
+              style: TextStyle(color: Colors.white70),
+            ),
+            SizedBox(height: 16),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.lightRed,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.white24),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'You can change or remove it later from settings.',
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Not Now', style: TextStyle(color: Colors.white70)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryRed,
+            ),
+            child: Text('Yes, Save It', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldSave == true) {
+      final success = await _signatureStorage.saveSignature(
+        inspectorSignature!,
+      );
+
+      if (success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Signature saved successfully!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  // ✅ NEW: Delete saved signature permanently
+  Future<void> deleteSavedSignaturePermanently(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.lightBlack,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber, color: Colors.orange),
+            SizedBox(width: 12),
+            Text(
+              'Delete Saved Signature?',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'This will permanently delete your saved signature. You\'ll need to sign again in future inspections.',
+              style: TextStyle(color: Colors.white70),
+            ),
+            SizedBox(height: 16),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'This action cannot be undone.',
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel', style: TextStyle(color: Colors.white70)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            child: Text(
+              'Delete Permanently',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final success = await _signatureStorage.deleteSignature();
+
+      if (success) {
+        inspectorSignature = null;
+        _isSignatureFromStorage = false;
+        notifyListeners();
+
+        if (context.mounted) {
+          showSnakBarr(context, "Saved signature deleted permanently");
+         
+        }
+      }
+    }
+  }
 }
-
-
-
-
-
-
-/////////////
-///Future<bool> submitInspection() async {
-  //   if (selectedTemplate == null) {
-  //     _errorMessage = 'No template selected.';
-  //     notifyListeners();
-  //     return false;
-  //   }
-
-  //   bool allScored = selectedTemplate!.categories.every(
-  //     (cat) => _scores[cat.categoryId] != null,
-  //   );
-  //   if (!allScored) {
-  //     _errorMessage = 'Please rate all categories before submitting.';
-  //     notifyListeners();
-  //     return false;
-  //   }
-
-  //   try {
-  //     _isSubmitting = true;
-  //     _isUploading = true;
-  //     _uploadProgress = 0.0;
-  //     _errorMessage = null;
-  //     _successMessage = null;
-  //     notifyListeners();
-  //     // Generate unique inspection ID
-  //     final inspectionId = DateTime.now().millisecondsSinceEpoch.toString();
-  //     final now = DateTime.now();
-
-  //     // 🔹 Upload images to both OneDrive and Firebase concurrently
-  //     final categoryUploadFutures = selectedTemplate!.categories.map((
-  //       category,
-  //     ) async {
-  //       final files = _photos[category.categoryId] ?? [];
-
-  //       if (files.isEmpty) {
-  //         return MapEntry(category.categoryId, <String>[]);
-  //       }
-
-  //       // Upload to both services concurrently
-  //       final results = await Future.wait([
-  //         // OneDrive upload (no need to store URLs)
-  //         _oneDriveService.uploadImages(
-  //           images: files,
-  //           branchName: _selectedBranch!.name,
-  //           inspectionId: inspectionId,
-  //           timestamp: now,
-  //           onProgress: (a, b) {},
-  //         ),
-  //         // Firebase upload (store these URLs)
-  //         _uploadCategoryPhotos(
-  //           files,
-  //           _selectedBranch!.name,
-  //           category.categoryId,
-  //           inspectionId,
-  //           now,
-  //         ),
-  //       ]);
-
-  //       // Return Firebase URLs (results[1])
-  //       return MapEntry(category.categoryId, results[1] as List<String>);
-  //     }).toList();
-
-  //     // Wait for all category uploads to complete
-  //     final uploadedUrls = Map.fromEntries(
-  //       await Future.wait(categoryUploadFutures),
-  //     );
-
-  //     _uploadProgress = 0.8; // 80% for images
-  //     notifyListeners();
-
-  //     // 🔹 Generate PDF report
-  //     final pdfFile = await generatePDFReport(inspectionId);
-
-  //     // 🔹 Upload PDF to both OneDrive and Firebase concurrently
-  //     final pdfUploads = await Future.wait([
-  //       // OneDrive PDF upload
-  //       _oneDriveService.uploadPDFReport(
-  //         pdfFile: pdfFile,
-  //         branchName: _selectedBranch!.name,
-  //         inspectionId: inspectionId,
-  //         timestamp: now,
-  //         onProgress: (v) {},
-  //       ),
-  //       // Firebase PDF upload
-  //       _uploadPDFToFirebase(pdfFile, _selectedBranch!.name, inspectionId, now),
-  //     ]);
-
-  //     final firebasePdfUrl = pdfUploads[1] as String;
-
-  //     _uploadProgress = 1.0;
-  //     _isUploading = false;
-  //     notifyListeners();
-
-  //     // 🔹 Build inspection object with Firebase URLs
-  //     final inspection = InspectionModel(
-  //       id: inspectionId,
-  //       branchId: _selectedBranch!.id,
-  //       branchName: _selectedBranch!.name,
-  //       inspectorId: loggedInUser!.id,
-  //       inspectorName: loggedInUser!.name,
-  //       scheduledTime: _selectedBranch!.stop!.timeSlot.toString(),
-  //       completedTime: now,
-  //       status: AppConstants.completed,
-  //       score: totalScore,
-  //       categories: Map.fromEntries(
-  //         selectedTemplate!.categories.map((cat) {
-  //           final score = _scores[cat.categoryId] ?? 0;
-  //           final notes = _notes[cat.categoryId] ?? '';
-  //           final photos = uploadedUrls[cat.categoryId] ?? [];
-
-  //           return MapEntry(
-  //             cat.title,
-  //             InspectionCategoryModel(
-  //               score: score,
-  //               photos: photos,
-  //               notes: notes,
-  //             ),
-  //           );
-  //         }),
-  //       ),
-  //       overallNotes: _overallNotes,
-  //       pdfReportUrl: firebasePdfUrl,
-  //       createdAt: now,
-  //       updatedAt: now,
-  //     );
-
-  //     // 🔹 Save to Firestore
-  //     await _inspectionService.createInspection(inspection);
-
-  //     // Delete local PDF file
-  //     if (await pdfFile.exists()) {
-  //       await pdfFile.delete();
-  //     }
-
-  //     _successMessage =
-  //         'Inspection saved successfully to OneDrive, Firebase, and Firestore.';
-  //     _isSubmitting = false;
-  //     notifyListeners();
-
-  //     resetForm();
-
-  //     return true;
-  //   } catch (e, st) {
-  //     _errorMessage =
-  //         'An error occurred while saving inspection: ${e.toString()}';
-  //     _isSubmitting = false;
-  //     _isUploading = false;
-  //     notifyListeners();
-  //     console('Submit error: $e\n$st');
-  //     return false;
-  //   }
-  // }

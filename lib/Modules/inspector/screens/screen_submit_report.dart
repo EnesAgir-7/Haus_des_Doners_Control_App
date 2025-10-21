@@ -3,16 +3,16 @@ import 'dart:typed_data';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:signature/signature.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../models/branch_model.dart';
-import '../providers/provider_control.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../providers/provider_control.dart';
 import '../widgets/app_button.dart';
 
 class ScreenSubmitReport extends StatefulWidget {
@@ -56,6 +56,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final controlProvider = context.read<ProviderControl>();
+      controlProvider.loadSavedSignature();
       controlProvider.initialize(
         widget.selectedBranch,
         widget.branchId!,
@@ -997,7 +998,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             title: LocaleKeys.inspector_signature.tr(),
             subtitle: LocaleKeys.your_signature.tr(),
             signature: provider.inspectorSignature,
+            isSignatureFromStorage: provider.isSignatureFromStorage,
             icon: Icons.person_outline,
+            onDeleteSignature: () {
+              provider.deleteSavedSignaturePermanently(context);
+            },
             onTap: () => _showEnhancedSignatureDialog(
               context,
               title: LocaleKeys.inspector_signature.tr(),
@@ -1037,10 +1042,13 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     required IconData icon,
     required VoidCallback onTap,
     required VoidCallback onClear,
+    VoidCallback? onDeleteSignature,
+    bool isSignatureFromStorage = false,
   }) {
     final bool hasSigned = signature != null;
 
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
@@ -1076,126 +1084,221 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                 ]
               : null,
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                gradient: hasSigned
-                    ? LinearGradient(
-                        colors: [
-                          AppColors.primaryRed,
-                          AppColors.primaryRed.withValues(alpha: 0.8),
-                        ],
-                      )
-                    : LinearGradient(
-                        colors: [
-                          Colors.white.withValues(alpha: 0.1),
-                          Colors.white.withValues(alpha: 0.05),
-                        ],
-                      ),
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: hasSigned
-                    ? [
-                        BoxShadow(
-                          color: AppColors.primaryRed.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Icon(
-                icon,
-                size: 24,
-                color: hasSigned ? Colors.white : Colors.white54,
-              ),
-            ),
-            const SizedBox(width: 16),
-
-            // Text & Signature Preview
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  if (hasSigned)
-                    Container(
-                      height: 50,
-                      margin: const EdgeInsets.only(top: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.grey.shade200),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+            // Header Row
+            Row(
+              children: [
+                // Icon
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: hasSigned
+                        ? LinearGradient(
+                            colors: [
+                              AppColors.primaryRed,
+                              AppColors.primaryRed.withValues(alpha: 0.8),
+                            ],
+                          )
+                        : LinearGradient(
+                            colors: [
+                              Colors.white.withValues(alpha: 0.1),
+                              Colors.white.withValues(alpha: 0.05),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.memory(signature, fit: BoxFit.contain),
-                      ),
-                    )
-                  else
-                    Row(
-                      children: [
-                        Icon(Icons.gesture, color: Colors.white38, size: 16),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            subtitle,
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.5),
-                              fontSize: 12,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: hasSigned
+                        ? [
+                            BoxShadow(
+                              color: AppColors.primaryRed.withValues(
+                                alpha: 0.3,
+                              ),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
                             ),
+                          ]
+                        : null,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 20,
+                    color: hasSigned ? Colors.white : Colors.white54,
+                  ),
+                ),
+                const SizedBox(width: 12),
+
+                // Title & Badge
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (!hasSigned) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.gesture,
+                              color: Colors.white38,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                subtitle,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.5),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Saved Badge (compact)
+                if (hasSigned && isSignatureFromStorage)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: Colors.green.withValues(alpha: 0.4),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.cloud_done,
+                          size: 10,
+                          color: Colors.green.shade300,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          'Saved',
+                          style: TextStyle(
+                            color: Colors.green.shade300,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
+                  ),
 
-            // Action Button
-            if (hasSigned)
+                const SizedBox(width: 8),
+
+                // Action Button
+                if (hasSigned)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isSignatureFromStorage && onDeleteSignature != null)
+                        Container(
+                          width: 32,
+                          height: 32,
+                          margin: const EdgeInsets.only(right: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.orange.withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: onDeleteSignature,
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.orange,
+                              size: 16,
+                            ),
+                            tooltip: "Delete Saved",
+                          ),
+                        ),
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.red.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: onClear,
+                          icon: const Icon(
+                            Icons.close,
+                            color: Colors.red,
+                            size: 16,
+                          ),
+                          tooltip: "Clear",
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.edit_outlined,
+                      color: Colors.white38,
+                      size: 16,
+                    ),
+                  ),
+              ],
+            ),
+
+            // Signature Preview (if signed)
+            if (hasSigned) ...[
+              const SizedBox(height: 12),
               Container(
+                height: 60,
+                width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey.shade200),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: IconButton(
-                  onPressed: onClear,
-                  icon: const Icon(Icons.close, color: Colors.red, size: 20),
-                  tooltip: "Clear",
-                ),
-              )
-            else
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  Icons.edit_outlined,
-                  color: Colors.white38,
-                  size: 20,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.memory(signature, fit: BoxFit.contain),
+                  ),
                 ),
               ),
+            ],
           ],
         ),
       ),
@@ -1552,7 +1655,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     // ✅ Check if widget is still mounted before async operation
     if (!mounted) return;
 
-    final success = await provider.submitInspection();
+    final success = await provider.submitInspection(context);
 
     // ✅ Check mounted after async operation
     if (!mounted) return;
