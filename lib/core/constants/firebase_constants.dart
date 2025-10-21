@@ -4,13 +4,13 @@ class Collections {
   static const String branches = 'branches';
   static const String inspectionTemplates = 'inspectionTemplates';
   static const String inspections = 'inspections';
-  static const String inspectorStats = 'inspectorStats';
   static const String routes = 'routes';
   static const String tasks = 'tasks';
   static const String users = 'users';
   static const String vehicles = 'vehicles';
   static const String inspectors = 'inspectors';
   static const String admins = 'admins';
+  static const String inspectorStats = 'inspector_stats';
 }
 
 class AppConstants {

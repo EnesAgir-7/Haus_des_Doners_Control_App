@@ -4,10 +4,10 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../models/user_model.dart';
-import '../admin_providers/provider_admin_users.dart';
 import '../../../translations/locale_keys.g.dart';
-import 'screen_admin_user_details.dart';
+import '../admin_providers/provider_admin_users.dart';
 import 'screen_admin_create_user.dart';
+import 'screen_admin_inspector_details.dart';
 
 class ScreenAdminUsers extends StatefulWidget {
   const ScreenAdminUsers({super.key});
@@ -223,10 +223,6 @@ class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
   }
 }
 
-// ---
-// The _InspectorListItem has been refactored to use the BranchCard style
-// ---
-
 class _InspectorListItem extends StatelessWidget {
   final UserModel inspector;
 
@@ -239,7 +235,8 @@ class _InspectorListItem extends StatelessWidget {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ScreenAdminUserDetails(inspector: inspector),
+            // builder: (context) => ScreenAdminUserDetails(inspector: inspector),
+            builder: (context) => ScreenInspectorDetails(inspector: inspector),
           ),
         );
       },

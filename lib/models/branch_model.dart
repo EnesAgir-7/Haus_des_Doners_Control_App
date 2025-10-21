@@ -19,6 +19,8 @@ class BranchModel {
   final int totalInspections;
   final double averageScore;
   final String status;
+  final List<double>? last12MonthsScores;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -32,6 +34,7 @@ class BranchModel {
     required this.contactName,
     required this.contactPhone,
     this.assignedInspector,
+    this.last12MonthsScores, // ✅ new field
     this.lastInspectionDate,
     this.lastInspectionScore,
     required this.totalInspections,
@@ -75,6 +78,13 @@ class BranchModel {
       stop: data['stop'] != null
           ? RouteStopModel.fromMap(Map<String, dynamic>.from(data['stop']))
           : null,
+      last12MonthsScores: data['last12MonthsScores'] != null
+          ? List<double>.from(
+              (data['last12MonthsScores'] as List<dynamic>).map(
+                (e) => e?.toDouble() ?? 0.0,
+              ),
+            )
+          : List.filled(12, 0.0),
     );
   }
 
@@ -94,6 +104,8 @@ class BranchModel {
     double? averageScore,
     String? status,
     DateTime? createdAt,
+    List<double>? last12MonthsScores, // ✅ new field
+
     DateTime? updatedAt,
     RouteStopModel? stop,
   }) {
@@ -112,6 +124,9 @@ class BranchModel {
       totalInspections: totalInspections ?? this.totalInspections,
       averageScore: averageScore ?? this.averageScore,
       status: status ?? this.status,
+      last12MonthsScores:
+          last12MonthsScores ??
+          this.last12MonthsScores, // ✅ preserve or override
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       stop: stop ?? this.stop, // ✅ Preserve or override
@@ -135,6 +150,7 @@ class BranchModel {
           ? Timestamp.fromDate(lastInspectionDate!)
           : null,
       'lastInspectionScore': lastInspectionScore,
+      'last12MonthsScores': last12MonthsScores,
       'totalInspections': totalInspections,
       'averageScore': averageScore,
       'status': status,

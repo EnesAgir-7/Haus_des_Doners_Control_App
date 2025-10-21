@@ -5,6 +5,7 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../common_services/firebase_auth_service.dart';
 import '../../../models/branch_model.dart';
+import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
 import '../../../models/vehicle_model.dart';
 import '../admin_firebase_services/admin_branch_service.dart';
@@ -23,6 +24,8 @@ class ProviderAdminUsers extends ChangeNotifier {
   List<BranchModel> _unAssignedBranches = [];
   List<VehicleModel> _allVehicles = [];
   String? _currentUserId;
+  InspectorHistoryModel? _inspectorStats;
+  InspectorHistoryModel? get inspectorStats => _inspectorStats;
 
   String? _error;
   bool _isLoading = false;
@@ -34,7 +37,9 @@ class ProviderAdminUsers extends ChangeNotifier {
       .where(
         (inspector) =>
             inspector.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-            inspector.serviceAccount.toLowerCase().contains(_searchQuery.toLowerCase()),
+            inspector.serviceAccount.toLowerCase().contains(
+              _searchQuery.toLowerCase(),
+            ),
       )
       .toList();
 
@@ -78,6 +83,23 @@ class ProviderAdminUsers extends ChangeNotifier {
       return {'branches': branches, 'vehicles': vehicles};
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Future getInspectorStatistics(String userId) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      _inspectorStats = await _userService.getInspectorStats(userId);
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
     }
   }
 

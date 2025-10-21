@@ -6,7 +6,6 @@ class UserModel {
   final String role; // "admin" | "inspector"
   final bool active;
   final String? region;
-  // final String? assignedVehicleId;
   final String createdAt;
   final String updatedAt;
   final String serviceAccount;
@@ -18,7 +17,6 @@ class UserModel {
     required this.active,
     this.region,
     required this.serviceAccount,
-    // this.assignedVehicleId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -33,7 +31,6 @@ class UserModel {
       active: data['active'] ?? true,
       region: data['region'],
       serviceAccount: data['serviceAccount'],
-      // assignedVehicleId: data['assignedVehicleId'],
       createdAt: data['createdAt'].toString(),
       updatedAt: data['updatedAt'].toString(),
     );
@@ -47,7 +44,6 @@ class UserModel {
       role: map['role'] ?? 'inspector',
       active: map['active'] ?? true,
       region: map['region'],
-      // assignedVehicleId: map['assignedVehicleId'],
       serviceAccount: map['serviceAccount'],
       createdAt: map['createdAt'],
       updatedAt: map['updatedAt'],
@@ -62,7 +58,6 @@ class UserModel {
       'role': role,
       'active': active,
       'region': region,
-      // 'assignedVehicleId': assignedVehicleId,
       "serviceAccount": serviceAccount,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
@@ -88,7 +83,6 @@ class UserModel {
       role: role ?? this.role,
       active: active ?? this.active,
       region: region ?? this.region,
-      // assignedVehicleId: assignedVehicleId ?? this.assignedVehicleId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       serviceAccount: serviceAccount ?? this.serviceAccount,

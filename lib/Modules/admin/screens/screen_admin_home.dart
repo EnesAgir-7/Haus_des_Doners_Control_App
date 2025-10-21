@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/firebase_constants.dart';
-import '../admin_providers/provider_admin_stats.dart';
 import '../../../generated/locale_keys.g.dart';
+import '../admin_providers/provider_admin_stats.dart';
 
 class ScreenAdminHome extends StatefulWidget {
   const ScreenAdminHome({super.key});

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/models/vehicle_model.dart';
 
+import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
 
 class AdminUserService {
@@ -21,6 +22,26 @@ class AdminUserService {
       print('Error streaming all inspectors: $e');
       // Return an empty stream in case of error
       return Stream.value([]);
+    }
+  }
+
+  Future<InspectorHistoryModel?> getInspectorStats(String userId) async {
+    try {
+      // 1. Reference the specific document using the collection path and the userId as the document ID
+      final docRef = _db.collection(Collections.inspectorStats).doc(userId);
+
+      final docSnapshot = await docRef.get();
+
+      if (docSnapshot.exists) {
+        final stats = InspectorHistoryModel.fromFirestore(docSnapshot);
+        return stats;
+      } else {
+        print('⚠️ Inspector stats document not found for ID: $userId');
+        return null;
+      }
+    } catch (e) {
+      print('❌ Error fetching inspector stats for ID $userId: $e');
+      rethrow;
     }
   }
 

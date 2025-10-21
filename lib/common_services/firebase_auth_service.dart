@@ -43,3 +43,5 @@ class FirebaseAuthHelper {
   // Get current user
   User? get currentUser => _auth.currentUser;
 }
+
+

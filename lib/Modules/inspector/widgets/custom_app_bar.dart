@@ -13,8 +13,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   const CustomAppBar({
     super.key,
-    this.showLogout = true,
-    this.showLang = true,
+    this.showLogout = false,
+    this.showLang = false,
     this.title,
   });
 
