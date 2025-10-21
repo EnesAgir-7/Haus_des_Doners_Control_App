@@ -89,7 +89,8 @@ Future<void> showAskToSaveSignatureDialog({
 Future<void> showDeleteSavedSignatureDialog({
   required BuildContext context,
   required SignatureStorageService signatureStorage,
-  required VoidCallback onSignatureDeleted, // callback to clear local vars or update UI
+  required VoidCallback
+  onSignatureDeleted, // callback to clear local vars or update UI
 }) async {
   final confirmed = await showDialog<bool>(
     context: context,
@@ -118,9 +119,9 @@ Future<void> showDeleteSavedSignatureDialog({
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
+              color: Colors.orange.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: const [
@@ -149,7 +150,10 @@ Future<void> showDeleteSavedSignatureDialog({
         ElevatedButton(
           onPressed: () => Navigator.pop(context, true),
           style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-          child: const Text('Delete Permanently', style: TextStyle(color: Colors.white)),
+          child: const Text(
+            'Delete Permanently',
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ],
     ),

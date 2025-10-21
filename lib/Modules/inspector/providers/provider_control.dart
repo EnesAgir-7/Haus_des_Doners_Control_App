@@ -73,6 +73,25 @@ class ProviderControl extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
 
+
+  void initialize(
+    BranchModel? branch,
+    String branchId,
+    String templateId,
+  ) async {
+    resetForm();
+    loadSavedSignature();
+    if (branch != null) {
+      _selectedBranch = branch;
+      await fetchTemplateByID(branch.templateId);
+    } else {
+      await Future.wait([
+        getBranchById(branchId),
+        fetchTemplateByID(templateId),
+      ]);
+    }
+  }
+
   // Load signature on initialization
   Future<void> loadSavedSignature() async {
     _isLoadingSignature = true;
@@ -172,23 +191,7 @@ class ProviderControl extends ChangeNotifier {
   double get totalScore => _scores.values.fold(0, (a, b) => a + b);
 
   // Initialize with branch and user
-  void initialize(
-    BranchModel? branch,
-    String branchId,
-    String templateId,
-  ) async {
-    resetForm();
-    loadSavedSignature();
-    if (branch != null) {
-      _selectedBranch = branch;
-      await fetchTemplateByID(branch.templateId);
-    } else {
-      await Future.wait([
-        getBranchById(branchId),
-        fetchTemplateByID(templateId),
-      ]);
-    }
-  }
+  
 
   void setOverallNotes(String notes) {
     _overallNotes = notes;
