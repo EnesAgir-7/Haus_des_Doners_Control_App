@@ -151,27 +151,6 @@ class ProviderVehicle extends ChangeNotifier {
     if (done) {}
   }
 
-  Future<VehicleModel?> getVehicleById(String vehicleId) async {
-    try {
-      final allVehicles = await _vehicleService.getAllVehicles();
-      return allVehicles.firstWhere(
-        (v) => v.id == vehicleId,
-        orElse: () => throw Exception(LocaleKeys.vehicle_not_found.tr()),
-      );
-    } catch (e) {
-      print('Error getting vehicle by ID: $e');
-      return null;
-    }
-  }
-
-  // List<VehicleModel> get vehiclesNeedingService {
-  //   return _allVehicles.where((v) => v.isServiceDueSoon).toList();
-  // }
-
-  // List<VehicleModel> getVehiclesByStatus(String status) {
-  //   return _allVehicles.where((v) => v.status == status).toList();
-  // }
-
   Future<void> refresh() async {
     await fetchInspectorVehicles();
   }
