@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/constants/app_colors.dart';
-import '../admin_providers/provider_admin_fleet.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../admin_providers/provider_admin_fleet.dart';
 
 class ScreenAdminCreateVehicle extends StatefulWidget {
   const ScreenAdminCreateVehicle({super.key});
@@ -21,7 +22,6 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
   final _maxKmController = TextEditingController();
   DateTime _lastServiceDate = DateTime.now();
   DateTime _nextServiceDue = DateTime.now().add(const Duration(days: 30));
-  String _status = 'active';
 
   @override
   void dispose() {
@@ -133,25 +133,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                initialValue: _status,
-                decoration: const InputDecoration(
-                  labelText: 'Status',
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'active', child: Text('Active')),
-                  DropdownMenuItem(value: 'passive', child: Text('Passive')),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _status = value;
-                    });
-                  }
-                },
-              ),
+
               const SizedBox(height: 16),
               ListTile(
                 title: const Text('Last Service'),
@@ -200,7 +182,6 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
     final maxKm = int.parse(_maxKmController.text);
     final remainingKm = maxKm - currentKm;
     final usagePercent = ((currentKm / maxKm) * 100).round();
-    final status = _status;
 
     try {
       await context.read<ProviderAdminFleet>().createVehicle(
@@ -212,7 +193,6 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
         usagePercent: usagePercent,
         lastServiceDate: _lastServiceDate,
         nextServiceDue: _nextServiceDue,
-        status: status,
       );
 
       if (!mounted) return;

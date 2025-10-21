@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
-import 'package:haus_des_control/models/vehicle_model.dart';
 
 import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
@@ -27,7 +26,6 @@ class AdminUserService {
 
   Future<InspectorHistoryModel?> getInspectorStats(String userId) async {
     try {
-      // 1. Reference the specific document using the collection path and the userId as the document ID
       final docRef = _db.collection(Collections.inspectorStats).doc(userId);
 
       final docSnapshot = await docRef.get();
@@ -78,21 +76,5 @@ class AdminUserService {
     }
   }
 
-  Future<List<VehicleModel>> getInspectorVehicle(String inspectorId) async {
-    try {
-      final snapshot = await _db
-          .collection(Collections.vehicles)
-          .where('assignedInspector.id', isEqualTo: inspectorId)
-          .get();
 
-      if (snapshot.docs.isEmpty) return [];
-
-      return snapshot.docs
-          .map((doc) => VehicleModel.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      print('Error getting inspector vehicles: $e');
-      return [];
-    }
-  }
 }

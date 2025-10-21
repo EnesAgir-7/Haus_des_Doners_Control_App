@@ -27,7 +27,9 @@ class ProviderAdminFleet extends ChangeNotifier {
     return _vehicles.where((vehicle) {
       return vehicle.plate.toLowerCase().contains(_searchQuery) ||
           vehicle.model.toLowerCase().contains(_searchQuery) ||
-          vehicle.assignedInspector?.name.toLowerCase().contains(_searchQuery) ==
+          vehicle.assignedInspector?.name.toLowerCase().contains(
+                _searchQuery,
+              ) ==
               true;
     }).toList();
   }
@@ -95,7 +97,6 @@ class ProviderAdminFleet extends ChangeNotifier {
     required int usagePercent,
     required DateTime lastServiceDate,
     required DateTime nextServiceDue,
-    required String status,
   }) async {
     try {
       await _vehicleService.createVehicle(
@@ -107,20 +108,8 @@ class ProviderAdminFleet extends ChangeNotifier {
         usagePercent: usagePercent,
         lastServiceDate: lastServiceDate,
         nextServiceDue: nextServiceDue,
-        status: status,
       );
       await loadData(); // Refresh data after creation
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-      throw e; // Re-throw to show error in UI
-    }
-  }
-
-  Future<void> updateVehicleStatus(String vehicleId, String status) async {
-    try {
-      await _vehicleService.updateVehicleStatus(vehicleId, status);
-      await loadData(); // Refresh data after update
     } catch (e) {
       _error = e.toString();
       notifyListeners();

@@ -33,6 +33,8 @@ class AppConstants {
   static const createdAt = "createdAt";
   static const details = "details";
   static const nextInspection = "nextInspection";
+  static const assigned = "assigned";
+  static const available = "available";
 }
 
 UserModel? loggedInUser;

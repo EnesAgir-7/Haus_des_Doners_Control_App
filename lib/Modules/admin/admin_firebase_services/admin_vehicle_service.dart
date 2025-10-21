@@ -7,43 +7,24 @@ class AdminVehicleService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collectionVehicles = Collections.vehicles;
 
-  // Get vehicle assigned to inspector
-  Future<VehicleModel?> getVehicleByInspector(String inspectorId) async {
-    try {
-      final snapshot = await _db
-          .collection(_collectionVehicles)
-          .where('assignedInspectorId', isEqualTo: inspectorId)
-          .limit(1)
-          .get();
-
-      if (snapshot.docs.isEmpty) return null;
-      return VehicleModel.fromFirestore(snapshot.docs.first);
-    } catch (e) {
-      print('Error getting vehicle by inspector: $e');
-      return null;
-    }
-  }
-
   // Stream vehicle by inspector (real-time)
-  Stream<VehicleModel?> streamVehicleByInspector(String inspectorId) {
+  Stream<List<VehicleModel>?> streamVehicleByInspector(String inspectorId) {
     return _db
         .collection(_collectionVehicles)
-        .where('assignedInspectorId', isEqualTo: inspectorId)
-        .limit(1)
+        .where('assignedInspector.id', isEqualTo: inspectorId)
         .snapshots()
         .map((snapshot) {
           if (snapshot.docs.isEmpty) return null;
-          return VehicleModel.fromFirestore(snapshot.docs.first);
+          return snapshot.docs
+              .map((doc) => VehicleModel.fromFirestore(doc))
+              .toList();
         });
   }
 
   // Get all vehicles (admin)
   Future<List<VehicleModel>> getAllVehicles() async {
     try {
-      final snapshot = await _db
-          .collection(_collectionVehicles)
-          .orderBy('plate')
-          .get();
+      final snapshot = await _db.collection(_collectionVehicles).get();
 
       return snapshot.docs
           .map((doc) => VehicleModel.fromFirestore(doc))
@@ -97,7 +78,7 @@ class AdminVehicleService {
     }
   }
 
-    // Get vehicle by ID
+  // Get vehicle by ID
   Future<VehicleModel?> getVehicleById(String vehicleId) async {
     try {
       final doc = await _db
@@ -119,30 +100,10 @@ class AdminVehicleService {
     String inspectorName,
   ) async {
     try {
-      // First, find if inspector has any assigned vehicle
-      final currentVehicle = await _db
-          .collection(_collectionVehicles)
-          .where('assignedInspectorId', isEqualTo: inspectorId)
-          .get();
-
-      // If inspector has a vehicle, unassign it
-      if (currentVehicle.docs.isNotEmpty) {
-        await _db
-            .collection(_collectionVehicles)
-            .doc(currentVehicle.docs.first.id)
-            .update({
-              'assignedInspectorId': null,
-              'assignedInspectorName': null,
-              'status': 'available',
-              'updatedAt': FieldValue.serverTimestamp(),
-            });
-      }
-
-      // Assign new vehicle to inspector
       await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        'assignedInspectorId': inspectorId,
-        'assignedInspectorName': inspectorName,
-        'status': 'assigned',
+        'assignedInspector.id': inspectorId,
+        'assignedInspector.name': inspectorName,
+        'status': AppConstants.assigned,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
@@ -151,13 +112,12 @@ class AdminVehicleService {
     }
   }
 
-  // Unassign vehicle
   Future<void> unassignVehicle(String vehicleId) async {
     try {
       await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        'assignedInspectorId': null,
-        'assignedInspectorName': null,
-        'status': 'available',
+        'assignedInspector.id': null,
+        'assignedInspector.name': null,
+        'status': AppConstants.available,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
@@ -175,7 +135,6 @@ class AdminVehicleService {
     required int usagePercent,
     required DateTime lastServiceDate,
     required DateTime nextServiceDue,
-    required String status,
   }) async {
     try {
       await _db.collection(_collectionVehicles).add({
@@ -187,9 +146,8 @@ class AdminVehicleService {
         'usagePercent': usagePercent,
         'lastServiceDate': Timestamp.fromDate(lastServiceDate),
         'nextServiceDue': Timestamp.fromDate(nextServiceDue),
-        'status': status,
-        'assignedInspectorId': null,
-        'assignedInspectorName': null,
+        'status': AppConstants.available,
+        'assignedInspector': {'id': null, 'name': null},
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -199,7 +157,7 @@ class AdminVehicleService {
     }
   }
 
-  Future<void> updateVehicleStatus(String vehicleId, String status) async {
+  Future<void> updatedVehicleStatus(String vehicleId, String status) async {
     try {
       await _db.collection(_collectionVehicles).doc(vehicleId).update({
         'status': status,
@@ -211,18 +169,20 @@ class AdminVehicleService {
     }
   }
 
-    Future<void> updateVehicleAssignedInspector(
-    String vehicleId,
-    Map<String, dynamic>? inspectorData,
-  ) async {
+  Future<List<VehicleModel>> getVehicleByInspector(String inspectorId) async {
     try {
-      await _db.collection(Collections.vehicles).doc(vehicleId).update({
-        'assignedInspector': inspectorData,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      final snapshot = await _db
+          .collection(Collections.vehicles)
+          .where('assignedInspector.id', isEqualTo: inspectorId)
+          .get();
+      if (snapshot.docs.isEmpty) return [];
+
+      return snapshot.docs
+          .map((doc) => VehicleModel.fromFirestore(doc))
+          .toList();
     } catch (e) {
-      print('Error updating vehicle assigned inspector: $e');
-      rethrow;
+      print('Error getting inspector vehicles: $e');
+      return [];
     }
   }
 }

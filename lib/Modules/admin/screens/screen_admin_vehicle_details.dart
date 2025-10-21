@@ -109,35 +109,6 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
               title: LocaleKeys.inspection_details.tr(),
               children: [
                 _buildInfoRow(
-                  'Status',
-                  widget.vehicle.status,
-                  dropdown: !_isEditing
-                      ? null
-                      : DropdownButtonFormField<String>(
-                          initialValue: widget.vehicle.status,
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'active',
-                              child: Text('Active'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'passive',
-                              child: Text('Passive'),
-                            ),
-                          ],
-                          onChanged: (value) async {
-                            if (value != null) {
-                              await context
-                                  .read<ProviderAdminFleet>()
-                                  .updateVehicleStatus(
-                                    widget.vehicle.id,
-                                    value,
-                                  );
-                            }
-                          },
-                        ),
-                ),
-                _buildInfoRow(
                   'Assigned Inspector',
                   widget.vehicle.assignedInspector?.name ?? 'Unassigned',
                   dropdown: !_isEditing

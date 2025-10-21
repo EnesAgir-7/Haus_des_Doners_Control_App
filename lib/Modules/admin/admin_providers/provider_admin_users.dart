@@ -77,8 +77,8 @@ class ProviderAdminUsers extends ChangeNotifier {
   Future<Map<String, dynamic>> getInspectorDetails(String inspectorId) async {
     try {
       final branches = await _branchService.getInspectorBranches(inspectorId);
-      final List<VehicleModel> vehicles = await _userService
-          .getInspectorVehicle(inspectorId);
+      final List<VehicleModel> vehicles = await _vehicleService
+          .getVehicleByInspector(inspectorId);
 
       return {'branches': branches, 'vehicles': vehicles};
     } catch (e) {
@@ -187,13 +187,12 @@ class ProviderAdminUsers extends ChangeNotifier {
     try {
       final inspector = _inspectors.firstWhere((i) => i.id == inspectorId);
 
-      // Update vehicle with assigned inspector
-      await _vehicleService.updateVehicleAssignedInspector(vehicleId, {
-        'id': inspector.id,
-        'name': inspector.name,
-      });
+      await _vehicleService.assignVehicleToInspector(
+        vehicleId,
+        inspector.id,
+        inspector.name,
+      );
 
-      // Refresh vehicles list
       _allVehicles = await _vehicleService.getAllVehicles();
       notifyListeners();
     } catch (e) {
@@ -204,7 +203,7 @@ class ProviderAdminUsers extends ChangeNotifier {
   // Unassign vehicle from inspector
   Future<void> unassignVehicleFromInspector(String vehicleId) async {
     try {
-      await _vehicleService.updateVehicleAssignedInspector(vehicleId, null);
+      await _vehicleService.unassignVehicle(vehicleId);
 
       // Refresh vehicles list
       _allVehicles = await _vehicleService.getAllVehicles();
