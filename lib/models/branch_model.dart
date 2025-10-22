@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 
+import '../core/constants/firebase_constants.dart';
 import 'route_model.dart';
 
 class BranchModel {
@@ -34,7 +36,7 @@ class BranchModel {
     required this.contactName,
     required this.contactPhone,
     this.assignedInspector,
-    this.last12MonthsScores, // ✅ new field
+    this.last12MonthsScores,
     this.lastInspectionDate,
     this.lastInspectionScore,
     required this.totalInspections,
@@ -49,38 +51,44 @@ class BranchModel {
     final data = doc.data() as Map<String, dynamic>;
     return BranchModel(
       id: doc.id,
-      name: data['name'] ?? '',
-      address: data['address'] ?? '',
-      templateId: data['templateId'] ?? '',
-      region: data['region'],
-      gps: data['gps'] as GeoPoint,
-      contactName: data['contactName'] ?? '',
-      contactPhone: data['contactPhone'] ?? '',
-      assignedInspector: data['assignedInspector'] != null
+      name: data[BranchFields.name] ?? '',
+      address: data[BranchFields.address] ?? '',
+      templateId: data[BranchFields.templateId] ?? '',
+      region: data[BranchFields.region],
+      gps: data[BranchFields.gps] as GeoPoint,
+      contactName: data[BranchFields.contactName] ?? '',
+      contactPhone: data[BranchFields.contactPhone] ?? '',
+      assignedInspector: data[BranchFields.assignedInspector] != null
           ? AssignedInspector(
-              id: data['assignedInspector']['id'] ?? '',
-              name: data['assignedInspector']['name'] ?? '',
+              id:
+                  data[BranchFields.assignedInspector][InspectorFields.id] ??
+                  '',
+              name:
+                  data[BranchFields.assignedInspector][InspectorFields.name] ??
+                  '',
             )
           : null,
-      lastInspectionDate: data['lastInspectionDate'] != null
-          ? (data['lastInspectionDate'] as Timestamp).toDate()
+      lastInspectionDate: data[BranchFields.lastInspectionDate] != null
+          ? (data[BranchFields.lastInspectionDate] as Timestamp).toDate()
           : null,
-      lastInspectionScore: data['lastInspectionScore']?.toDouble(),
-      totalInspections: data['totalInspections'] ?? 0,
-      averageScore: (data['averageScore'] ?? 0.0).toDouble(),
-      status: data['status'] ?? 'active',
-      createdAt: data["createdAt"] != null
-          ? (data['createdAt'] as Timestamp).toDate()
+      lastInspectionScore: data[BranchFields.lastInspectionScore]?.toDouble(),
+      totalInspections: data[BranchFields.totalInspections] ?? 0,
+      averageScore: (data[BranchFields.averageScore] ?? 0.0).toDouble(),
+      status: data[BranchFields.status] ?? AppConstants.active,
+      createdAt: data[BranchFields.createdAt] != null
+          ? (data[BranchFields.createdAt] as Timestamp).toDate()
           : DateTime.now(),
-      updatedAt: data["updatedAt"] != null
-          ? (data['updatedAt'] as Timestamp).toDate()
+      updatedAt: data[BranchFields.updatedAt] != null
+          ? (data[BranchFields.updatedAt] as Timestamp).toDate()
           : DateTime.now(),
-      stop: data['stop'] != null
-          ? RouteStopModel.fromMap(Map<String, dynamic>.from(data['stop']))
+      stop: data[BranchFields.stop] != null
+          ? RouteStopModel.fromMap(
+              Map<String, dynamic>.from(data[BranchFields.stop]),
+            )
           : null,
-      last12MonthsScores: data['last12MonthsScores'] != null
+      last12MonthsScores: data[BranchFields.last12MonthsScores] != null
           ? List<double>.from(
-              (data['last12MonthsScores'] as List<dynamic>).map(
+              (data[BranchFields.last12MonthsScores] as List<dynamic>).map(
                 (e) => e?.toDouble() ?? 0.0,
               ),
             )
@@ -104,7 +112,7 @@ class BranchModel {
     double? averageScore,
     String? status,
     DateTime? createdAt,
-    List<double>? last12MonthsScores, // ✅ new field
+    List<double>? last12MonthsScores,
 
     DateTime? updatedAt,
     RouteStopModel? stop,
@@ -124,39 +132,37 @@ class BranchModel {
       totalInspections: totalInspections ?? this.totalInspections,
       averageScore: averageScore ?? this.averageScore,
       status: status ?? this.status,
-      last12MonthsScores:
-          last12MonthsScores ??
-          this.last12MonthsScores, // ✅ preserve or override
+      last12MonthsScores: last12MonthsScores ?? this.last12MonthsScores,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      stop: stop ?? this.stop, // ✅ Preserve or override
+      stop: stop ?? this.stop,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'name': name,
-      'address': address,
-      'region': region,
-      'gps': gps,
-      'contactName': contactName,
-      'contactPhone': contactPhone,
-      'templateId': templateId,
-      'assignedInspector': {
-        'id': assignedInspector?.id,
-        'name': assignedInspector?.name,
+      BranchFields.name: name,
+      BranchFields.address: address,
+      BranchFields.region: region,
+      BranchFields.gps: gps,
+      BranchFields.contactName: contactName,
+      BranchFields.contactPhone: contactPhone,
+      BranchFields.templateId: templateId,
+      BranchFields.assignedInspector: {
+        InspectorFields.id: assignedInspector?.id,
+        InspectorFields.name: assignedInspector?.name,
       },
-      'lastInspectionDate': lastInspectionDate != null
+      BranchFields.lastInspectionDate: lastInspectionDate != null
           ? Timestamp.fromDate(lastInspectionDate!)
           : null,
-      'lastInspectionScore': lastInspectionScore,
-      'last12MonthsScores': last12MonthsScores,
-      'totalInspections': totalInspections,
-      'averageScore': averageScore,
-      'status': status,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
-      'stop': stop?.toMap(), // ✅ Serialize stop object if present
+      BranchFields.lastInspectionScore: lastInspectionScore,
+      BranchFields.last12MonthsScores: last12MonthsScores,
+      BranchFields.totalInspections: totalInspections,
+      BranchFields.averageScore: averageScore,
+      BranchFields.status: status,
+      BranchFields.createdAt: Timestamp.fromDate(createdAt),
+      BranchFields.updatedAt: Timestamp.fromDate(updatedAt),
+      BranchFields.stop: stop?.toMap(),
     };
   }
 
@@ -203,10 +209,13 @@ class AssignedInspector {
   AssignedInspector({required this.id, required this.name});
 
   factory AssignedInspector.fromMap(Map<String, dynamic> map) {
-    return AssignedInspector(id: map['id'] ?? '', name: map['name'] ?? '');
+    return AssignedInspector(
+      id: map[InspectorFields.id] ?? '',
+      name: map[InspectorFields.name] ?? '',
+    );
   }
 
   Map<String, dynamic> toJson() {
-    return {'id': id, 'name': name};
+    return {InspectorFields.id: id, InspectorFields.name: name};
   }
 }

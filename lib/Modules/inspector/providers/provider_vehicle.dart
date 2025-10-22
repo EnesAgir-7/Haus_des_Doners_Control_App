@@ -69,17 +69,6 @@ class ProviderVehicle extends ChangeNotifier {
     }
   }
 
-  // void initializeWithStreams() {
-  //   _vehicleService.streamVehicleByInspector(loggedInUser!.id).listen((
-  //     vehicle,
-  //   ) {
-  //     _assignedVehicle = vehicle;
-  //     if (vehicle != null) {
-  //       kmController.text = vehicle.currentKm.toString();
-  //     }
-  //     notifyListeners();
-  //   });
-  // }
 
   Future<bool> updateVehicleKm(int newKm, BuildContext context) async {
     if (_assignedVehiclee == null) {

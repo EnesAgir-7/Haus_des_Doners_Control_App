@@ -7,6 +7,7 @@ class AppConstants {
   static const inProgress = "in_progress";
   static const count = "{count}";
   static const high = "high";
+  static const date = "date";
   static const medium = "medium";
   static const low = "low";
   static const all = "all";
@@ -20,4 +21,5 @@ class AppConstants {
   static const nextInspection = "nextInspection";
   static const assigned = "assigned";
   static const available = "available";
+  static const active = "active";
 }

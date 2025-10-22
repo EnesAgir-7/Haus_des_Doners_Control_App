@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
+
+import '../core/constants/firebase_constants.dart';
 
 class TaskModel {
   final String id;
@@ -33,51 +36,51 @@ class TaskModel {
 
   factory TaskModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    final commentsData = data['comments'] as List<dynamic>?;
+    final commentsData = data[TaskFields.comments] as List<dynamic>?;
 
     return TaskModel(
       id: doc.id,
-      title: data['title'] ?? '',
-      description: data['description'] ?? '',
-      assignedInspectorId: data['assignedInspectorId'] ?? '',
-      assignedInspectorName: data['assignedInspectorName'] ?? '',
-      relatedBranchId: data['relatedBranchId'],
-      relatedInspectionId: data['relatedInspectionId'],
-      status: data['status'] ?? 'pending',
-      priority: data['priority'] ?? 'medium',
-      dueDate: data['dueDate'] != null
-          ? (data['dueDate'] as Timestamp).toDate()
+      title: data[TaskFields.title] ?? '',
+      description: data[TaskFields.description] ?? '',
+      assignedInspectorId: data[TaskFields.assignedInspectorId] ?? '',
+      assignedInspectorName: data[TaskFields.assignedInspectorName] ?? '',
+      relatedBranchId: data[TaskFields.relatedBranchId],
+      relatedInspectionId: data[TaskFields.relatedInspectionId],
+      status: data[TaskFields.status] ?? AppConstants.pending,
+      priority: data[TaskFields.priority] ?? AppConstants.medium,
+      dueDate: data[TaskFields.dueDate] != null
+          ? (data[TaskFields.dueDate] as Timestamp).toDate()
           : null,
       comments:
           commentsData
               ?.map((c) => TaskCommentModel.fromMap(c as Map<String, dynamic>))
               .toList() ??
           [],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: (data[TaskFields.createdAt] as Timestamp).toDate(),
+      updatedAt: (data[TaskFields.updatedAt] as Timestamp).toDate(),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'title': title,
-      'description': description,
-      'assignedInspectorId': assignedInspectorId,
-      'assignedInspectorName': assignedInspectorName,
-      'relatedBranchId': relatedBranchId,
-      'relatedInspectionId': relatedInspectionId,
-      'status': status,
-      'priority': priority,
-      'dueDate': dueDate != null ? Timestamp.fromDate(dueDate!) : null,
-      'comments': comments.map((c) => c.toMap()).toList(),
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
+      TaskFields.title: title,
+      TaskFields.description: description,
+      TaskFields.assignedInspectorId: assignedInspectorId,
+      TaskFields.assignedInspectorName: assignedInspectorName,
+      TaskFields.relatedBranchId: relatedBranchId,
+      TaskFields.relatedInspectionId: relatedInspectionId,
+      TaskFields.status: status,
+      TaskFields.priority: priority,
+      TaskFields.dueDate: dueDate != null ? Timestamp.fromDate(dueDate!) : null,
+      TaskFields.comments: comments.map((c) => c.toMap()).toList(),
+      TaskFields.createdAt: Timestamp.fromDate(createdAt),
+      TaskFields.updatedAt: Timestamp.fromDate(updatedAt),
     };
   }
 
-  bool get isPending => status == 'pending';
-  bool get isInProgress => status == 'in_progress';
-  bool get isCompleted => status == 'completed';
+  bool get isPending => status == AppConstants.pending;
+  bool get isInProgress => status == AppConstants.inProgress;
+  bool get isCompleted => status == AppConstants.completed;
 
   bool get isOverdue {
     if (dueDate == null || isCompleted) return false;
@@ -89,7 +92,6 @@ class TaskModel {
     return dueDate!.difference(DateTime.now()).inDays;
   }
 }
-
 
 class TaskCommentModel {
   final String userId;
@@ -108,21 +110,21 @@ class TaskCommentModel {
 
   factory TaskCommentModel.fromMap(Map<String, dynamic> data) {
     return TaskCommentModel(
-      userId: data['userId'] ?? '',
-      userName: data['userName'] ?? '',
-      text: data['text'] ?? '',
-      timestamp: (data['timestamp'] as Timestamp).toDate(),
-      photos: List<String>.from(data['photos'] ?? []),
+      userId: data[TaskCommentFields.userId] ?? '',
+      userName: data[TaskCommentFields.userName] ?? '',
+      text: data[TaskCommentFields.text] ?? '',
+      timestamp: (data[TaskCommentFields.timestamp] as Timestamp).toDate(),
+      photos: List<String>.from(data[TaskCommentFields.photos] ?? []),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'userId': userId,
-      'userName': userName,
-      'text': text,
-      'timestamp': Timestamp.fromDate(timestamp),
-      'photos': photos,
+      TaskCommentFields.userId: userId,
+      TaskCommentFields.userName: userName,
+      TaskCommentFields.text: text,
+      TaskCommentFields.timestamp: Timestamp.fromDate(timestamp),
+      TaskCommentFields.photos: photos,
     };
   }
 }

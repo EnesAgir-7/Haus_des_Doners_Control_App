@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../core/constants/firebase_constants.dart';
 
 class InspectorStatsModel {
   final String id;
@@ -24,33 +25,39 @@ class InspectorStatsModel {
   });
 
   factory InspectorStatsModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>? ?? {};
     return InspectorStatsModel(
       id: doc.id,
-      inspectorId: data['inspectorId'] ?? '',
-      month: data['month'] ?? 1,
-      year: data['year'] ?? 2025,
-      totalBranches: data['totalBranches'] ?? 0,
-      completedInspections: data['completedInspections'] ?? 0,
-      pendingInspections: data['pendingInspections'] ?? 0,
-      averageScore: (data['averageScore'] ?? 0.0).toDouble(),
-      lastUpdated: (data['lastUpdated'] as Timestamp).toDate(),
+      inspectorId: data[InspectorStatsFields.inspectorId] ?? '',
+      month: data[InspectorStatsFields.month] ?? 1,
+      year: data[InspectorStatsFields.year] ?? DateTime.now().year,
+      totalBranches: data[InspectorStatsFields.totalBranches] ?? 0,
+      completedInspections:
+          data[InspectorStatsFields.completedInspections] ?? 0,
+      pendingInspections: data[InspectorStatsFields.pendingInspections] ?? 0,
+      averageScore:
+          (data[InspectorStatsFields.averageScore]?.toDouble() ?? 0.0),
+      lastUpdated: data[InspectorStatsFields.lastUpdated] != null
+          ? (data[InspectorStatsFields.lastUpdated] as Timestamp).toDate()
+          : DateTime.now(),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'inspectorId': inspectorId,
-      'month': month,
-      'year': year,
-      'totalBranches': totalBranches,
-      'completedInspections': completedInspections,
-      'pendingInspections': pendingInspections,
-      'averageScore': averageScore,
-      'lastUpdated': Timestamp.fromDate(lastUpdated),
+      InspectorStatsFields.inspectorId: inspectorId,
+      InspectorStatsFields.month: month,
+      InspectorStatsFields.year: year,
+      InspectorStatsFields.totalBranches: totalBranches,
+      InspectorStatsFields.completedInspections: completedInspections,
+      InspectorStatsFields.pendingInspections: pendingInspections,
+      InspectorStatsFields.averageScore: averageScore,
+      InspectorStatsFields.lastUpdated: Timestamp.fromDate(lastUpdated),
+      
     };
   }
 
+  /// Computed fields for progress metrics
   int get remainingInspections =>
       totalBranches - completedInspections - pendingInspections;
 

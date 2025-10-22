@@ -12,6 +12,7 @@ class Collections {
   static const String admins = 'admins';
   static const String inspectorStats = 'inspector_stats';
 }
+
 class VehicleFields {
   static const String plate = 'plate';
   static const String model = 'model';
@@ -45,6 +46,7 @@ class BranchFields {
   static const String last12MonthsScores = 'last12MonthsScores';
   static const String totalInspections = 'totalInspections';
   static const String averageScore = 'averageScore';
+  static const String averageRating = 'averageRating';
   static const String status = 'status';
   static const String createdAt = 'createdAt';
   static const String updatedAt = 'updatedAt';
@@ -63,6 +65,8 @@ class InspectionFields {
   static const String categories = 'categories'; // nested map
   static const String pdfReportUrl = 'pdfReportUrl';
   static const String overallNotes = 'overallNotes';
+  static const String photos = 'photos';
+  static const String notes = 'notes';
   static const String createdAt = 'createdAt';
   static const String updatedAt = 'updatedAt';
 }
@@ -80,7 +84,6 @@ class InspectorHistoryFields {
 }
 
 class RouteFields {
-  // RouteModel fields
   static const String id = 'id';
   static const String date = 'date';
   static const String inspectorId = 'inspectorId';
@@ -138,5 +141,32 @@ class UserFields {
   static const String updatedAt = 'updatedAt';
 }
 
+class InspectorStatsFields {
+  static const String inspectorId = 'inspectorId';
+  static const String month = 'month';
+  static const String year = 'year';
+  static const String totalBranches = 'totalBranches';
+  static const String totalInspections = 'totalInspections';
+  static const String completedInspections = 'completedInspections';
+  static const String pendingInspections = 'pendingInspections';
+  static const String averageScore = 'averageScore';
+  static const String lastUpdated = 'lastUpdated';
+}
+
+class InspectionTemplateFields {
+  static const String name = 'name';
+  static const String categories = 'categories';
+}
+
+class InspectionCategoryFields {
+  static const String categoryId = 'categoryId';
+  static const String title = 'title';
+  static const String maxScore = 'maxScore';
+}
+
+class InspectorFields {
+  static const String id = 'id';
+  static const String name = 'name';
+}
 
 UserModel? loggedInUser;

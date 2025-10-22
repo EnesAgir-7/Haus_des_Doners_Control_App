@@ -56,7 +56,3 @@ class ProviderInspection extends ChangeNotifier {
     return Colors.red;
   }
 }
-
-// NOTE: You must ensure FirebaseInspectionService is defined in 
-// 'package:haus_des_control/firebase_services/firebase_inspection_service.dart'
-// and contains the 'getInspectionById' method as you described.

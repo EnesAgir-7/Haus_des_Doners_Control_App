@@ -251,45 +251,4 @@ class ProviderRoute extends ChangeNotifier {
     _routeSubscription?.cancel();
     super.dispose();
   }
-
-  // 🔹 Fetch route by specific date (non-stream)
-  // Future<void> fetchRouteByDate(DateTime date) async {
-  //   try {
-  //     _isLoading = true;
-  //     _selectedDate = date;
-  //     _errorMessage = null;
-  //     notifyListeners();
-
-  //     _allRoute = await _routeService.getRouteByDate(loggedInUser!.id, date);
-  //     calculateTodaysData();
-
-  //     _isLoading = false;
-  //     notifyListeners();
-  //   } catch (e) {
-  //     _errorMessage = 'Error loading route: ${e.toString()}';
-  //     _isLoading = false;
-  //     notifyListeners();
-  //     console(_errorMessage);
-  //   }
-  // }
-
-  // 🔹 Fetch today's route (one-time)
-  // Future<void> fetchAllRoutes() async {
-  //   try {
-  //     _isLoading = true;
-  //     _errorMessage = null;
-  //     notifyListeners();
-
-  //     _allRoute = await _routeService.getAllRoutes(loggedInUser!.id);
-  //     calculateTodaysData();
-
-  //     _isLoading = false;
-  //     notifyListeners();
-  //   } catch (e) {
-  //     _errorMessage = 'Error loading route: ${e.toString()}';
-  //     _isLoading = false;
-  //     notifyListeners();
-  //     console(_errorMessage);
-  //   }
-  // }
 }

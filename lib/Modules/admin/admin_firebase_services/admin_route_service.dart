@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 
 import '../../../core/console.dart';
 import '../../../core/constants/firebase_constants.dart';
@@ -7,22 +8,6 @@ import '../../../models/route_model.dart';
 class AdminRouteService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collection = Collections.routes;
-
-  // Future<RouteModel?> getAllRoutes(String userId) async {
-  //   try {
-  //     final docSnap = await _db.collection(_collection).doc(userId).get();
-
-  //     if (!docSnap.exists) {
-  //       print("No route found for user $userId.");
-  //       return null;
-  //     }
-
-  //     return RouteModel.fromFirestore(docSnap);
-  //   } catch (e) {
-  //     print("Error fetching today's route for user $userId: $e");
-  //     return null;
-  //   }
-  // }
 
   Stream<RouteModel?> getAllRoutesStream(String userId) {
     return _db.collection(_collection).doc(userId).snapshots().map((docSnap) {
@@ -41,8 +26,8 @@ class AdminRouteService {
 
       final snapshot = await _db
           .collection(_collection)
-          .where('inspectorId', isEqualTo: inspectorId)
-          .where('date', isEqualTo: startOfDay)
+          .where(RouteFields.inspectorId, isEqualTo: inspectorId)
+          .where(AppConstants.date, isEqualTo: startOfDay)
           .limit(1)
           .get();
 
@@ -63,16 +48,21 @@ class AdminRouteService {
     try {
       Query query = _db
           .collection(_collection)
-          .where('inspectorId', isEqualTo: inspectorId);
+          .where(RouteFields.inspectorId, isEqualTo: inspectorId);
 
       if (startDate != null) {
-        query = query.where('date', isGreaterThanOrEqualTo: startDate);
+        query = query.where(
+          AppConstants.date,
+          isGreaterThanOrEqualTo: startDate,
+        );
       }
       if (endDate != null) {
-        query = query.where('date', isLessThanOrEqualTo: endDate);
+        query = query.where(AppConstants.date, isLessThanOrEqualTo: endDate);
       }
 
-      final snapshot = await query.orderBy('date', descending: true).get();
+      final snapshot = await query
+          .orderBy(AppConstants.date, descending: true)
+          .get();
 
       return snapshot.docs.map((doc) => RouteModel.fromFirestore(doc)).toList();
     } catch (e) {
@@ -95,7 +85,7 @@ class AdminRouteService {
   // Update route
   Future<void> updateRoute(String routeId, Map<String, dynamic> data) async {
     try {
-      data['updatedAt'] = FieldValue.serverTimestamp();
+      data[RouteFields.updatedAt] = FieldValue.serverTimestamp();
       await _db.collection(_collection).doc(routeId).update(data);
     } catch (e) {
       console('Error updating route: $e');
@@ -128,10 +118,9 @@ class AdminRouteService {
       );
 
       await _db.collection(_collection).doc(routeId).update({
-        'stops': route.stops.map((s) => s.toMap()).toList(),
-        'updatedAt': FieldValue.serverTimestamp(),
+        RouteFields.stops: route.stops.map((s) => s.toMap()).toList(),
+        RouteFields.updatedAt: FieldValue.serverTimestamp(),
       });
-      
     } catch (e) {
       console('Error updating stop status: $e');
       rethrow;

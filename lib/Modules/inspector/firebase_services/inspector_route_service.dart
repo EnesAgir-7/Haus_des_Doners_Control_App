@@ -8,22 +8,6 @@ class InspectorRouteService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collection = Collections.routes;
 
-  // Future<RouteModel?> getAllRoutes(String userId) async {
-  //   try {
-  //     final docSnap = await _db.collection(_collection).doc(userId).get();
-
-  //     if (!docSnap.exists) {
-  //       print("No route found for user $userId.");
-  //       return null;
-  //     }
-
-  //     return RouteModel.fromFirestore(docSnap);
-  //   } catch (e) {
-  //     print("Error fetching today's route for user $userId: $e");
-  //     return null;
-  //   }
-  // }
-
   Stream<RouteModel?> getAllRoutesStream(String userId) {
     return _db.collection(_collection).doc(userId).snapshots().map((docSnap) {
       if (!docSnap.exists) {
@@ -41,8 +25,8 @@ class InspectorRouteService {
 
       final snapshot = await _db
           .collection(_collection)
-          .where('inspectorId', isEqualTo: inspectorId)
-          .where('date', isEqualTo: startOfDay)
+          .where(RouteFields.inspectorId, isEqualTo: inspectorId)
+          .where(RouteFields.date, isEqualTo: startOfDay)
           .limit(1)
           .get();
 
@@ -63,16 +47,21 @@ class InspectorRouteService {
     try {
       Query query = _db
           .collection(_collection)
-          .where('inspectorId', isEqualTo: inspectorId);
+          .where(RouteFields.inspectorId, isEqualTo: inspectorId);
 
       if (startDate != null) {
-        query = query.where('date', isGreaterThanOrEqualTo: startDate);
+        query = query.where(
+          RouteFields.date,
+          isGreaterThanOrEqualTo: startDate,
+        );
       }
       if (endDate != null) {
-        query = query.where('date', isLessThanOrEqualTo: endDate);
+        query = query.where(RouteFields.date, isLessThanOrEqualTo: endDate);
       }
 
-      final snapshot = await query.orderBy('date', descending: true).get();
+      final snapshot = await query
+          .orderBy(RouteFields.date, descending: true)
+          .get();
 
       return snapshot.docs.map((doc) => RouteModel.fromFirestore(doc)).toList();
     } catch (e) {
@@ -95,7 +84,7 @@ class InspectorRouteService {
   // Update route
   Future<void> updateRoute(String routeId, Map<String, dynamic> data) async {
     try {
-      data['updatedAt'] = FieldValue.serverTimestamp();
+      data[RouteFields.updatedAt] = FieldValue.serverTimestamp();
       await _db.collection(_collection).doc(routeId).update(data);
     } catch (e) {
       console('Error updating route: $e');
@@ -128,8 +117,8 @@ class InspectorRouteService {
       );
 
       await _db.collection(_collection).doc(routeId).update({
-        'stops': route.stops.map((s) => s.toMap()).toList(),
-        'updatedAt': FieldValue.serverTimestamp(),
+        RouteFields.stops: route.stops.map((s) => s.toMap()).toList(),
+        RouteFields.updatedAt: FieldValue.serverTimestamp(),
       });
     } catch (e) {
       console('Error updating stop status: $e');

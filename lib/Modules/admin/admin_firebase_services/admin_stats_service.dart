@@ -18,16 +18,12 @@ class AdminStatsService {
     final startDate = _getStartDate(now, range);
 
     final results = await Future.wait([
-      // _getAssignedBranchesCount(userId),
-      // _getPendingTasksCount(userId),
       _getInspectionsInRange(userId, startDate),
     ]);
 
     final inspections = results[0];
 
     return DashboardStats(
-      // assignedBranches: results[0] as int,
-      // pendingTasks: results[0] as int,
       inspectionsCount: inspections.length,
       averageScore: _calculateAverage(inspections),
       timeRange: range,
@@ -45,32 +41,19 @@ class AdminStatsService {
     }
   }
 
-  // Future<int> _getPendingTasksCount(String userId) async {
-  //   final snapshot = await _db
-  //       .collection(Collections.tasks)
-  //       .where('assignedInspectorId', isEqualTo: userId)
-  //       .where(
-  //         'status',
-  //         whereIn: [AppConstants.pending, AppConstants.inProgress],
-  //       )
-  //       .count()
-  //       .get();
-  //   return snapshot.count ?? 0;
-  // }
-
   Future<List<double>> _getInspectionsInRange(
     String userId,
     DateTime startDate,
   ) async {
     final snapshot = await _db
         .collection(Collections.inspections)
-        .where('inspectorId', isEqualTo: userId)
-        .where('completedTime', isGreaterThanOrEqualTo: startDate)
-        .where('status', isEqualTo: AppConstants.completed)
+        .where(InspectionFields.inspectorId, isEqualTo: userId)
+        .where(InspectionFields.completedTime, isGreaterThanOrEqualTo: startDate)
+        .where(InspectionFields.status, isEqualTo: AppConstants.completed)
         .get();
 
     return snapshot.docs
-        .map((doc) => (doc.data()['score'] as num).toDouble())
+        .map((doc) => (doc.data()[InspectionFields.score] as num).toDouble())
         .toList();
   }
 
@@ -132,9 +115,9 @@ class AdminStatsService {
     try {
       final snapshot = await _db
           .collection(_collection)
-          .where('inspectorId', isEqualTo: inspectorId)
-          .orderBy('year', descending: true)
-          .orderBy('month', descending: true)
+          .where(InspectorStatsFields.inspectorId, isEqualTo: inspectorId)
+          .orderBy(InspectorStatsFields.year, descending: true)
+          .orderBy(InspectorStatsFields.month, descending: true)
           .limit(monthsBack)
           .get();
 
@@ -167,8 +150,8 @@ class AdminStatsService {
       final now = DateTime.now();
       final snapshot = await _db
           .collection(_collection)
-          .where('month', isEqualTo: now.month)
-          .where('year', isEqualTo: now.year)
+          .where(InspectorStatsFields.month, isEqualTo: now.month)
+          .where(InspectorStatsFields.year, isEqualTo: now.year)
           .get();
 
       return snapshot.docs

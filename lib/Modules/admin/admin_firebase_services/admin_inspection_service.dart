@@ -18,8 +18,8 @@ class AdminInspectionService {
     try {
       final snapshot = await _db
           .collection(_collection)
-          .where('branchId', isEqualTo: branchId)
-          .orderBy('scheduledTime', descending: true)
+          .where(InspectionFields.branchId, isEqualTo: branchId)
+          .orderBy(InspectionFields.scheduledTime, descending: true)
           .get();
 
       return snapshot.docs
@@ -37,9 +37,9 @@ class AdminInspectionService {
     try {
       final snapshot = await _db
           .collection(_collection)
-          .where('branchId', isEqualTo: branchId)
-          .orderBy('scheduledTime', descending: true)
-          .limit(10) 
+          .where(InspectionFields.branchId, isEqualTo: branchId)
+          .orderBy(InspectionFields.scheduledTime, descending: true)
+          .limit(10)
           .get();
 
       return snapshot.docs
@@ -55,8 +55,8 @@ class AdminInspectionService {
   Stream<List<InspectionModel>> streamInspectionsByBranch(String branchId) {
     return _db
         .collection(_collection)
-        .where('branchId', isEqualTo: branchId)
-        .orderBy('scheduledTime', descending: true)
+        .where(InspectionFields.branchId, isEqualTo: branchId)
+        .orderBy(InspectionFields.scheduledTime, descending: true)
         .limit(10)
         .snapshots()
         .map(
@@ -73,8 +73,8 @@ class AdminInspectionService {
     try {
       final snapshot = await _db
           .collection(_collection)
-          .where('inspectorId', isEqualTo: inspectorId)
-          .orderBy('scheduledTime', descending: true)
+          .where(InspectionFields.inspectorId, isEqualTo: inspectorId)
+          .orderBy(InspectionFields.scheduledTime, descending: true)
           .limit(50)
           .get();
 
@@ -96,10 +96,10 @@ class AdminInspectionService {
 
       final snapshot = await _db
           .collection(_collection)
-          .where('inspectorId', isEqualTo: inspectorId)
-          .where('scheduledTime', isGreaterThanOrEqualTo: startOfDay)
-          .where('scheduledTime', isLessThan: endOfDay)
-          .orderBy('scheduledTime')
+          .where(InspectionFields.inspectorId, isEqualTo: inspectorId)
+          .where(InspectionFields.scheduledTime, isGreaterThanOrEqualTo: startOfDay)
+          .where(InspectionFields.scheduledTime, isLessThan: endOfDay)
+          .orderBy(InspectionFields.scheduledTime)
           .get();
 
       return snapshot.docs
@@ -121,14 +121,16 @@ class AdminInspectionService {
       Query query = _db.collection(_collection);
 
       if (startDate != null) {
-        query = query.where('scheduledTime', isGreaterThanOrEqualTo: startDate);
+        query = query.where(
+          InspectionFields.scheduledTime, isGreaterThanOrEqualTo: startDate);
       }
       if (endDate != null) {
-        query = query.where('scheduledTime', isLessThanOrEqualTo: endDate);
+        query = query.where(
+          InspectionFields.scheduledTime, isLessThanOrEqualTo: endDate);
       }
 
       final snapshot = await query
-          .orderBy('scheduledTime', descending: true)
+          .orderBy(InspectionFields.scheduledTime, descending: true)
           .limit(limit)
           .get();
 
@@ -197,19 +199,19 @@ class AdminInspectionService {
     if (!branchDoc.exists) throw Exception('Branch not found');
 
     final data = branchDoc.data()!;
-    final currentTotal = data['totalInspections'] ?? 0;
-    final currentAverage = (data['averageRating'] ?? 0.0).toDouble();
+    final currentTotal = data[BranchFields.totalInspections] ?? 0;
+    final currentAverage = (data[BranchFields.averageRating] ?? 0.0).toDouble();
     final newTotal = currentTotal + 1;
     final newAverage =
         ((currentAverage * currentTotal) + inspectionScore) / newTotal;
 
     batch.update(branchRef, {
-      'totalInspections': newTotal,
-      'lastInspectionDate': FieldValue.serverTimestamp(),
-      'averageRating': newAverage,
-      'stop': null,
-      'lastInspectionScore': inspectionScore,
-      'updatedAt': FieldValue.serverTimestamp(),
+      BranchFields.totalInspections: newTotal,
+      BranchFields.lastInspectionDate: FieldValue.serverTimestamp(),
+      BranchFields.averageRating: newAverage,
+      BranchFields.stop: null,
+      BranchFields.lastInspectionScore: inspectionScore,
+      BranchFields.updatedAt: FieldValue.serverTimestamp(),
     });
   }
 
@@ -242,125 +244,10 @@ class AdminInspectionService {
     }).toList();
 
     batch.update(routeRef, {
-      'stops': updatedStops.map((s) => s.toMap()).toList(),
-      'updatedAt': Timestamp.fromDate(DateTime.now()),
+      RouteFields.stops: updatedStops.map((s) => s.toMap()).toList(),
+      RouteFields.updatedAt: Timestamp.fromDate(DateTime.now()),
     });
   }
-
-  // // Create inspection
-  // Future<String> createInspection(InspectionModel inspection) async {
-  //   console('Creating inspection...');
-  //   try {
-  //     final docRef = await _db.collection(_collection).add(inspection.toMap());
-  //     // Update branch statistics
-  //     Future.wait([
-  //       updateBranchStatistics(
-  //         branchId: inspection.branchId,
-  //         inspectionScore: inspection.score,
-  //       ),
-
-  //       // 2. Update the route stop to mark as completed
-  //       completeStopInspection(
-  //         inspectorId: inspection.inspectorId,
-  //         branchId: inspection.branchId,
-  //         inspectionId: docRef.id,
-  //         status: AppConstants.completed,
-  //         score: inspection.score,
-  //       ),
-  //     ]);
-
-  //     return docRef.id;
-  //   } catch (e) {
-  //     print('Error creating inspection: $e');
-  //     rethrow;
-  //   }
-  // }
-
-  // Future<void> completeStopInspection({
-  //   required String inspectorId,
-  //   required String branchId,
-  //   required String inspectionId,
-  //   required double score,
-  //   String status = AppConstants.completed,
-  // }) async {
-  //   try {
-  //     final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
-  //     final docSnap = await routeDocRef.get();
-
-  //     if (!docSnap.exists) {
-  //       print("No route found for inspector $inspectorId");
-  //       return;
-  //     }
-
-  //     final route = RouteModel.fromFirestore(docSnap);
-
-  //     // Find the stop that matches the branch
-  //     final updatedStops = route.stops.map((stop) {
-  //       if (stop.branchId == branchId) {
-  //         return stop.copyWith(
-  //           status: status,
-  //           inspectionId: inspectionId,
-  //           createdAt: DateTime.now(),
-  //           completedAt: DateTime.now(),
-  //           inspectionScore: score,
-  //           expiryDate: Timestamp.fromDate(
-  //             DateTime.now().add(Duration(days: 1)),
-  //           ),
-  //         );
-  //       }
-  //       return stop;
-  //     }).toList();
-
-  //     await routeDocRef.update({
-  //       'stops': updatedStops.map((s) => s.toMap()).toList(),
-  //       'updatedAt': Timestamp.fromDate(DateTime.now()),
-  //     });
-
-  //     print('Route stop updated successfully for branch $branchId');
-  //   } catch (e) {
-  //     print('Error updating route stop status: $e');
-  //   }
-  // }
-
-  // Future<void> updateBranchStatistics({
-  //   required String branchId,
-  //   required double inspectionScore,
-  // }) async {
-  //   try {
-  //     final branchRef = _db.collection(_collectionBranches).doc(branchId);
-
-  //     // Get current branch data
-  //     final branchDoc = await branchRef.get();
-
-  //     if (!branchDoc.exists) {
-  //       throw Exception('Branch not found');
-  //     }
-
-  //     final currentData = branchDoc.data()!;
-  //     final currentTotal = currentData['totalInspections'] ?? 0;
-  //     final currentAverage = (currentData['averageRating'] ?? 0.0).toDouble();
-
-  //     // Calculate new average
-  //     final newTotal = currentTotal + 1;
-  //     final newAverage =
-  //         ((currentAverage * currentTotal) + inspectionScore) / newTotal;
-
-  //     // Update branch document
-  //     await branchRef.update({
-  //       'totalInspections': newTotal,
-  //       'lastInspectionDate': FieldValue.serverTimestamp(),
-  //       'averageRating': newAverage,
-  //       'nextInspectionDate': null,
-  //       'lastInspectionScore': inspectionScore,
-  //       'updatedAt': FieldValue.serverTimestamp(),
-  //     });
-
-  //     print('Branch statistics updated: Total=$newTotal, Avg=$newAverage');
-  //   } catch (e) {
-  //     print('Error updating branch statistics: $e');
-  //     rethrow;
-  //   }
-  // }
 
   // Delete inspection
   Future<void> deleteInspection(String inspectionId) async {
@@ -376,7 +263,7 @@ class AdminInspectionService {
   Future<InspectionTemplate?> getTemplateById(String templateId) async {
     try {
       final doc = await _db
-          .collection('inspectionTemplates')
+          .collection(Collections.inspectionTemplates)
           .doc(templateId)
           .get();
       if (!doc.exists) {

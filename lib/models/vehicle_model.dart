@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../core/constants/app_constants.dart';
+import '../core/constants/firebase_constants.dart';
 import 'branch_model.dart';
 
 class VehicleModel {
@@ -7,7 +9,7 @@ class VehicleModel {
   final String plate;
   final String model;
   final AssignedInspector? assignedInspector;
-   int currentKm;
+  int currentKm;
   final int maxKm;
   final int remainingKm;
   final int usagePercent;
@@ -37,47 +39,52 @@ class VehicleModel {
     final data = doc.data() as Map<String, dynamic>;
     return VehicleModel(
       id: doc.id,
-      plate: data['plate'] ?? '',
-      model: data['model'] ?? '',
-      assignedInspector: data['assignedInspector'] != null
+      plate: data[VehicleFields.plate] ?? '',
+      model: data[VehicleFields.model] ?? '',
+      assignedInspector: data[VehicleFields.assignedInspector] != null
           ? AssignedInspector(
-              id: data['assignedInspector']['id'] ?? '',
-              name: data['assignedInspector']['name'] ?? '',
+              id:
+                  data[VehicleFields.assignedInspector][InspectorFields.id] ??
+                  '',
+              name:
+                  data[VehicleFields.assignedInspector][InspectorFields.name] ??
+                  '',
             )
           : null,
-      currentKm: data['currentKm'] ?? 0,
-      maxKm: data['maxKm'] ?? 0,
-      remainingKm: data['remainingKm'] ?? 0,
-      usagePercent: data['usagePercent'] ?? 0,
-      lastServiceDate: (data['lastServiceDate'] as Timestamp).toDate(),
-      nextServiceDue: (data['nextServiceDue'] as Timestamp).toDate(),
-      status: data['status'] ?? 'available',
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      currentKm: data[VehicleFields.currentKm] ?? 0,
+      maxKm: data[VehicleFields.maxKm] ?? 0,
+      remainingKm: data[VehicleFields.remainingKm] ?? 0,
+      usagePercent: data[VehicleFields.usagePercent] ?? 0,
+      lastServiceDate: (data[VehicleFields.lastServiceDate] as Timestamp)
+          .toDate(),
+      nextServiceDue: (data[VehicleFields.nextServiceDue] as Timestamp)
+          .toDate(),
+      status: data[VehicleFields.status] ?? AppConstants.available,
+      createdAt: (data[VehicleFields.createdAt] as Timestamp).toDate(),
+      updatedAt: (data[VehicleFields.updatedAt] as Timestamp).toDate(),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'plate': plate,
-      'model': model,
-      'assignedInspector': {
-        'id': assignedInspector?.id,
-        'name': assignedInspector?.name,
+      VehicleFields.plate: plate,
+      VehicleFields.model: model,
+      VehicleFields.assignedInspector: {
+        InspectorFields.id: assignedInspector?.id,
+        InspectorFields.name: assignedInspector?.name,
       },
-      'currentKm': currentKm,
-      'maxKm': maxKm,
-      'remainingKm': remainingKm,
-      'usagePercent': usagePercent,
-      'lastServiceDate': Timestamp.fromDate(lastServiceDate),
-      'nextServiceDue': Timestamp.fromDate(nextServiceDue),
-      'status': status,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
+      VehicleFields.currentKm: currentKm,
+      VehicleFields.maxKm: maxKm,
+      VehicleFields.remainingKm: remainingKm,
+      VehicleFields.usagePercent: usagePercent,
+      VehicleFields.lastServiceDate: Timestamp.fromDate(lastServiceDate),
+      VehicleFields.nextServiceDue: Timestamp.fromDate(nextServiceDue),
+      VehicleFields.status: status,
+      VehicleFields.createdAt: Timestamp.fromDate(createdAt),
+      VehicleFields.updatedAt: Timestamp.fromDate(updatedAt),
     };
   }
 
-  /// ✅ Added copyWith method
   VehicleModel copyWith({
     String? id,
     String? plate,
@@ -116,13 +123,13 @@ class VehicleModel {
     return daysUntilService <= 5;
   }
 
-  // Helper to get service due status
+  // Helper to get service due status in English
   String get serviceDueText {
     final daysUntilService = nextServiceDue.difference(DateTime.now()).inDays;
-    if (daysUntilService < 0) return '${daysUntilService.abs()} gün gecikmiş';
-    if (daysUntilService == 0) return 'Bugün';
-    if (daysUntilService <= 5) return '$daysUntilService gün kaldı';
-    return '${(daysUntilService / 7).floor()} hafta';
+    if (daysUntilService < 0) return '${daysUntilService.abs()} days overdue';
+    if (daysUntilService == 0) return 'Due today';
+    if (daysUntilService <= 5) return '$daysUntilService days remaining';
+    return '${(daysUntilService / 7).floor()} weeks remaining';
   }
 
   // Helper for KM progress color
@@ -132,4 +139,3 @@ class VehicleModel {
     return 'green';
   }
 }
-

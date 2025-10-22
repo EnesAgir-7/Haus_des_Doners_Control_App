@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../core/constants/app_constants.dart';
+import '../core/constants/firebase_constants.dart';
 
 class InspectionModel {
   final String id;
@@ -14,7 +15,7 @@ class InspectionModel {
   final double score;
   final Map<String, InspectionCategoryModel> categories;
   final String overallNotes;
-  final String? pdfReportUrl; // Firebase Storage URL only
+  final String? pdfReportUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -39,9 +40,9 @@ class InspectionModel {
   factory InspectionModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
-    final rawCategories = data['categories'] as Map<String, dynamic>? ?? {};
+    final rawCategories =
+        data[InspectionFields.categories] as Map<String, dynamic>? ?? {};
 
-    // Convert categories map into Map<String, InspectionCategoryModel>
     final parsedCategories = rawCategories.map(
       (key, value) =>
           MapEntry(key, InspectionCategoryModel.fromMap(value ?? {})),
@@ -49,44 +50,42 @@ class InspectionModel {
 
     return InspectionModel(
       id: doc.id,
-      branchId: data['branchId'] ?? '',
-      branchName: data['branchName'] ?? '',
-      inspectorId: data['inspectorId'] ?? '',
-      inspectorName: data['inspectorName'],
-      scheduledTime: data['scheduledTime'],
-      completedTime: data['completedTime'] != null
-          ? (data['completedTime'] as Timestamp).toDate()
+      branchId: data[InspectionFields.branchId] ?? '',
+      branchName: data[InspectionFields.branchName] ?? '',
+      inspectorId: data[InspectionFields.inspectorId] ?? '',
+      inspectorName: data[InspectionFields.inspectorName],
+      scheduledTime: data[InspectionFields.scheduledTime],
+      completedTime: data[InspectionFields.completedTime] != null
+          ? (data[InspectionFields.completedTime] as Timestamp).toDate()
           : null,
-      status: data['status'] ?? 'pending',
-      score: (data['score'] ?? 0.0).toDouble(),
+      status: data[InspectionFields.status] ?? AppConstants.pending,
+      score: (data[InspectionFields.score] ?? 0.0).toDouble(),
       categories: parsedCategories,
-      overallNotes: data['overallNotes'] ?? '',
-      pdfReportUrl: data['pdfReportUrl'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      overallNotes: data[InspectionFields.overallNotes] ?? '',
+      pdfReportUrl: data[InspectionFields.pdfReportUrl],
+      createdAt: (data[InspectionFields.createdAt] as Timestamp).toDate(),
+      updatedAt: (data[InspectionFields.updatedAt] as Timestamp).toDate(),
     );
   }
-
-  /// Convert to Firestore map
   Map<String, dynamic> toMap() {
     return {
-      'branchId': branchId,
-      'branchName': branchName,
-      'inspectorId': inspectorId,
-      'inspectorName': inspectorName,
-      'scheduledTime': scheduledTime,
-      'completedTime': completedTime != null
+      InspectionFields.branchId: branchId,
+      InspectionFields.branchName: branchName,
+      InspectionFields.inspectorId: inspectorId,
+      InspectionFields.inspectorName: inspectorName,
+      InspectionFields.scheduledTime: scheduledTime,
+      InspectionFields.completedTime: completedTime != null
           ? Timestamp.fromDate(completedTime!)
           : null,
-      'status': status,
-      'score': score,
-      'categories': categories.map(
+      InspectionFields.status: status,
+      InspectionFields.score: score,
+      InspectionFields.categories: categories.map(
         (key, value) => MapEntry(key, value.toMap()),
       ),
-      'pdfReportUrl': pdfReportUrl,
-      'overallNotes': overallNotes,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
+      InspectionFields.pdfReportUrl: pdfReportUrl,
+      InspectionFields.overallNotes: overallNotes,
+      InspectionFields.createdAt: Timestamp.fromDate(createdAt),
+      InspectionFields.updatedAt: Timestamp.fromDate(updatedAt),
     };
   }
 
@@ -96,8 +95,8 @@ class InspectionModel {
 }
 
 class InspectionCategoryModel {
-  final int score; // 1-4 rating
-  final List<String> photos; // URLs after upload
+  final int score;
+  final List<String> photos;
   final String notes;
 
   InspectionCategoryModel({
@@ -108,13 +107,17 @@ class InspectionCategoryModel {
 
   factory InspectionCategoryModel.fromMap(Map<String, dynamic> data) {
     return InspectionCategoryModel(
-      score: data['score'] ?? 0,
-      photos: List<String>.from(data['photos'] ?? []),
-      notes: data['notes'] ?? '',
+      score: data[InspectionFields.score] ?? 0,
+      photos: List<String>.from(data[InspectionFields.photos] ?? []),
+      notes: data[InspectionFields.notes] ?? '',
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {'score': score, 'photos': photos, 'notes': notes};
+    return {
+      InspectionFields.score: score,
+      InspectionFields.photos: photos,
+      InspectionFields.notes: notes,
+    };
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 class ProviderAdminStats extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -28,19 +29,19 @@ class ProviderAdminStats extends ChangeNotifier {
 
     try {
       // Get total branches count
-      final branchesSnapshot = await _firestore.collection('branches').get();
+      final branchesSnapshot = await _firestore.collection(Collections.branches).get();
       _totalBranches = branchesSnapshot.size;
 
       // Get total non-admin users count
-      final usersSnapshot = await _firestore.collection('inspectors').get();
+      final usersSnapshot = await _firestore.collection(Collections.inspectors).get();
       _totalUsers = usersSnapshot.size;
 
       // Get total vehicles count
-      final vehiclesSnapshot = await _firestore.collection('vehicles').get();
+      final vehiclesSnapshot = await _firestore.collection(Collections.vehicles).get();
       _totalFleet = vehiclesSnapshot.size;
 
       // Get total tasks count
-      final tasksSnapshot = await _firestore.collection('tasks').get();
+      final tasksSnapshot = await _firestore.collection(Collections.tasks).get();
       _totalTasks = tasksSnapshot.size;
 
       _isLoading = false;

@@ -357,13 +357,13 @@ class ProviderTasks extends ChangeNotifier {
 
   // Helper methods for status
   Future<bool> markAsPending(String taskId) async =>
-      await updateTaskStatus(taskId, 'pending');
+      await updateTaskStatus(taskId, AppConstants.pending);
 
   Future<bool> markAsInProgress(String taskId) async =>
-      await updateTaskStatus(taskId, 'in_progress');
+      await updateTaskStatus(taskId, AppConstants.inProgress);
 
   Future<bool> markAsCompleted(String taskId) async =>
-      await updateTaskStatus(taskId, 'completed');
+      await updateTaskStatus(taskId, AppConstants.completed);
 
   // Utility methods
   TaskModel? getTaskById(String taskId) {

@@ -140,8 +140,8 @@ class ProviderAdminUsers extends ChangeNotifier {
 
       // Update branch with assigned inspector
       await _branchService.updateBranchAssignedInspector(branchId, {
-        'id': inspector.id,
-        'name': inspector.name,
+        InspectorFields.id: inspector.id,
+        InspectorFields.name: inspector.name,
       });
 
       notifyListeners();

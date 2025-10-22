@@ -74,7 +74,6 @@ class ProviderControl extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   String? get successMessage => _successMessage;
 
-
   void initialize(
     BranchModel? branch,
     String branchId,
@@ -174,12 +173,14 @@ class ProviderControl extends ChangeNotifier {
     );
   }
 
+  bool get isSubmittingOrUploading => _isSubmitting || _isUploading;
+
   bool get hasAllSignatures =>
       inspectorSignature != null && branchSignature != null;
 
   void setInspectorSignature(Uint8List? signature) {
     inspectorSignature = signature;
-    _isSignatureFromStorage = false; // ✅ Mark as new signature
+    _isSignatureFromStorage = false;
     notifyListeners();
   }
 
@@ -188,11 +189,7 @@ class ProviderControl extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Computed: Overall score (average of categories)
   double get totalScore => _scores.values.fold(0, (a, b) => a + b);
-
-  // Initialize with branch and user
-  
 
   void setOverallNotes(String notes) {
     _overallNotes = notes;
@@ -240,8 +237,6 @@ class ProviderControl extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  bool get isSubmittingOrUploading => _isSubmitting || _isUploading;
 
   // Update submitInspection method:
   Future<bool> submitInspection(BuildContext context) async {

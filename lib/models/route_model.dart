@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../core/constants/app_constants.dart';
+import '../core/constants/firebase_constants.dart';
 
+/// 🔹 Main Route Model (represents an inspector’s route for the day)
 class RouteModel {
   final String id;
   final DateTime date;
@@ -23,35 +25,36 @@ class RouteModel {
 
   factory RouteModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    final stopsData = data['stops'] as List<dynamic>;
+    final stopsData = data[RouteFields.stops] as List<dynamic>? ?? [];
 
     return RouteModel(
       id: doc.id,
-      date: (data['date'] as Timestamp).toDate(),
-      inspectorId: data['inspectorId'] ?? '',
-      inspectorName: data['inspectorName'] ?? '',
+      date: (data[RouteFields.date] as Timestamp).toDate(),
+      inspectorId: data[RouteFields.inspectorId] ?? '',
+      inspectorName: data[RouteFields.inspectorName] ?? '',
       stops: stopsData
           .map((stop) => RouteStopModel.fromMap(stop as Map<String, dynamic>))
           .toList(),
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      createdAt: (data[RouteFields.createdAt] as Timestamp).toDate(),
+      updatedAt: (data[RouteFields.updatedAt] as Timestamp).toDate(),
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'date': Timestamp.fromDate(date),
-      'inspectorId': inspectorId,
-      'inspectorName': inspectorName,
-      'stops': stops.map((stop) => stop.toMap()).toList(),
-      'createdAt': Timestamp.fromDate(createdAt),
-      'updatedAt': Timestamp.fromDate(updatedAt),
+      RouteFields.id: id,
+      RouteFields.date: Timestamp.fromDate(date),
+      RouteFields.inspectorId: inspectorId,
+      RouteFields.inspectorName: inspectorName,
+      RouteFields.stops: stops.map((stop) => stop.toMap()).toList(),
+      RouteFields.createdAt: Timestamp.fromDate(createdAt),
+      RouteFields.updatedAt: Timestamp.fromDate(updatedAt),
     };
   }
 
   int get completedStopsCount => stops.where((s) => s.isCompleted).length;
   int get totalStops => stops.length;
+
   double get completionPercent =>
       totalStops > 0 ? (completedStopsCount / totalStops) * 100 : 0;
 }
@@ -64,10 +67,10 @@ class RouteStopModel {
   final String status; // "completed" | "pending" | "current"
   final DateTime? createdAt;
   final DateTime? completedAt;
-  final Timestamp? expiryDate; //
+  final Timestamp? expiryDate;
   final int order;
-  final double? inspectionScore; //
-  final String? branchAddress; // added
+  final double? inspectionScore;
+  final String? branchAddress;
 
   RouteStopModel({
     required this.timeSlot,
@@ -78,9 +81,9 @@ class RouteStopModel {
     required this.order,
     this.createdAt,
     this.completedAt,
-    this.expiryDate, //
-    this.inspectionScore, //
-    this.branchAddress, // added
+    this.expiryDate,
+    this.inspectionScore,
+    this.branchAddress,
   });
 
   factory RouteStopModel.fromMap(Map<String, dynamic> data) {
@@ -91,35 +94,35 @@ class RouteStopModel {
     }
 
     return RouteStopModel(
-      timeSlot: data['timeSlot'] ?? '',
-      branchId: data['branchId'] ?? '',
-      branchName: data['branchName'] ?? '',
-      branchTemplateId: data["branchTemplateId"] ?? '',
-      status: data['status'] ?? 'pending',
-      order: data['order'] ?? 0,
-      createdAt: parseDate(data["createdAt"]),
-      completedAt: parseDate(data["completedAt"]),
-      expiryDate: data["expiryDate"], //
-      inspectionScore: data['inspectionScore'] != null
-          ? double.tryParse(data['inspectionScore'].toString())
-          : null, //
-      branchAddress: data['branchAddress'], // added
+      timeSlot: data[RouteStopFields.timeSlot] ?? '',
+      branchId: data[RouteStopFields.branchId] ?? '',
+      branchName: data[RouteStopFields.branchName] ?? '',
+      branchTemplateId: data[RouteStopFields.branchTemplateId] ?? '',
+      status: data[RouteStopFields.status] ?? AppConstants.pending,
+      order: data[RouteStopFields.order] ?? 0,
+      createdAt: parseDate(data[RouteStopFields.createdAt]),
+      completedAt: parseDate(data[RouteStopFields.completedAt]),
+      expiryDate: data[RouteStopFields.expiryDate],
+      inspectionScore: data[RouteStopFields.inspectionScore] != null
+          ? double.tryParse(data[RouteStopFields.inspectionScore].toString())
+          : null,
+      branchAddress: data[RouteStopFields.branchAddress],
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'timeSlot': timeSlot,
-      'branchId': branchId,
-      'branchName': branchName,
-      'branchTemplateId': branchTemplateId,
-      'status': status,
-      'order': order,
-      'createdAt': createdAt?.toIso8601String(),
-      'completedAt': completedAt?.toIso8601String(),
-      'expiryDate': expiryDate, //
-      'inspectionScore': inspectionScore?.toDouble(), //
-      'branchAddress': branchAddress, // added
+      RouteStopFields.timeSlot: timeSlot,
+      RouteStopFields.branchId: branchId,
+      RouteStopFields.branchName: branchName,
+      RouteStopFields.branchTemplateId: branchTemplateId,
+      RouteStopFields.status: status,
+      RouteStopFields.order: order,
+      RouteStopFields.createdAt: createdAt?.toIso8601String(),
+      RouteStopFields.completedAt: completedAt?.toIso8601String(),
+      RouteStopFields.expiryDate: expiryDate,
+      RouteStopFields.inspectionScore: inspectionScore?.toDouble(),
+      RouteStopFields.branchAddress: branchAddress,
     };
   }
 
@@ -133,9 +136,9 @@ class RouteStopModel {
     int? order,
     DateTime? createdAt,
     DateTime? completedAt,
-    Timestamp? expiryDate, //
-    double? inspectionScore, //
-    String? branchAddress, // added
+    Timestamp? expiryDate,
+    double? inspectionScore,
+    String? branchAddress,
   }) {
     return RouteStopModel(
       timeSlot: timeSlot ?? this.timeSlot,
@@ -146,17 +149,17 @@ class RouteStopModel {
       order: order ?? this.order,
       createdAt: createdAt ?? this.createdAt,
       completedAt: completedAt ?? this.completedAt,
-      expiryDate: expiryDate ?? this.expiryDate, //
-      inspectionScore: inspectionScore ?? this.inspectionScore, //
-      branchAddress: branchAddress ?? this.branchAddress, // added
+      expiryDate: expiryDate ?? this.expiryDate,
+      inspectionScore: inspectionScore ?? this.inspectionScore,
+      branchAddress: branchAddress ?? this.branchAddress,
     );
   }
 
+  /// 🔹 Helper Computed Getters
   bool get isCompleted => status == AppConstants.completed;
   bool get isPending => status == AppConstants.pending;
   bool get isCurrent => status == AppConstants.current;
 
-  /// Helper: check if stop is expired
   bool get isExpired =>
       expiryDate != null && DateTime.now().isAfter(expiryDate!.toDate());
 }

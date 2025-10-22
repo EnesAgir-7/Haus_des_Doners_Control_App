@@ -13,7 +13,6 @@ class AdminUserService {
   Stream<List<UserModel>> streamAllInspectors() {
     try {
       return _db.collection(Collections.inspectors).snapshots().map((snapshot) {
-        print('Firebase stream update: ${snapshot.docs.length} inspectors');
         return snapshot.docs
             .map((doc) => UserModel.fromFirestore(doc))
             .toList();
@@ -47,7 +46,7 @@ class AdminUserService {
   // Update inspector
   Future<void> updateInspector(String userId, Map<String, dynamic> data) async {
     try {
-      data['updatedAt'] = FieldValue.serverTimestamp();
+      data[UserFields.updatedAt] = FieldValue.serverTimestamp();
       await _db.collection(Collections.inspectors).doc(userId).update(data);
     } catch (e) {
       print('Error updating inspector: $e');

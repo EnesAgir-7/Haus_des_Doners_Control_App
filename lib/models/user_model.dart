@@ -1,4 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
+
+import '../core/constants/firebase_constants.dart';
 
 class UserModel {
   final String id;
@@ -26,41 +29,40 @@ class UserModel {
     final data = doc.data() as Map<String, dynamic>;
     return UserModel(
       id: doc.id,
-      name: data['name'] ?? '',
-      role: data['role'] ?? 'inspector',
-      active: data['active'] ?? true,
-      region: data['region'],
-      serviceAccount: data['serviceAccount'],
-      createdAt: data['createdAt'].toString(),
-      updatedAt: data['updatedAt'].toString(),
+      name: data[UserFields.name] ?? '',
+      role: data[UserFields.role] ?? AppConstants.inspector,
+      active: data[UserFields.active] ?? true,
+      region: data[UserFields.region],
+      serviceAccount: data[UserFields.serviceAccount],
+      createdAt: data[UserFields.createdAt].toString(),
+      updatedAt: data[UserFields.updatedAt].toString(),
     );
   }
 
-  /// Factory to create from local JSON/Map
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id'] ?? '',
-      name: map['name'] ?? '',
-      role: map['role'] ?? 'inspector',
-      active: map['active'] ?? true,
-      region: map['region'],
-      serviceAccount: map['serviceAccount'],
-      createdAt: map['createdAt'],
-      updatedAt: map['updatedAt'],
+      id: map[UserFields.id] ?? '',
+      name: map[UserFields.name] ?? '',
+      role: map[UserFields.role] ?? AppConstants.inspector,
+      active: map[UserFields.active] ?? true,
+      region: map[UserFields.region],
+      serviceAccount: map[UserFields.serviceAccount],
+      createdAt: map[UserFields.createdAt],
+      updatedAt: map[UserFields.updatedAt],
     );
   }
 
   /// Convert to Map (for Firestore or local storage)
   Map<String, dynamic> toMap() {
     return {
-      'id': id, // include id for local storage
-      'name': name,
-      'role': role,
-      'active': active,
-      'region': region,
-      "serviceAccount": serviceAccount,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
+      UserFields.id: id, // include id for local storage
+      UserFields.name: name,
+      UserFields.role: role,
+      UserFields.active: active,
+      UserFields.region: region,
+      UserFields.serviceAccount: serviceAccount,
+      UserFields.createdAt: createdAt,
+      UserFields.updatedAt: updatedAt,
     };
   }
 
@@ -90,6 +92,6 @@ class UserModel {
   }
 
   /// Convenience getters
-  bool get isAdmin => role == 'admin';
-  bool get isInspector => role == 'inspector';
+  bool get isAdmin => role == AppConstants.admin;
+  bool get isInspector => role == AppConstants.inspector;
 }

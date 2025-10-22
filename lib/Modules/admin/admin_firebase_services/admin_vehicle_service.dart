@@ -12,7 +12,7 @@ class AdminVehicleService {
   Stream<List<VehicleModel>?> streamVehicleByInspector(String inspectorId) {
     return _db
         .collection(_collectionVehicles)
-        .where('assignedInspector.id', isEqualTo: inspectorId)
+        .where(VehicleFields.assignedInspectorId, isEqualTo: inspectorId)
         .snapshots()
         .map((snapshot) {
           if (snapshot.docs.isEmpty) return null;
@@ -41,7 +41,7 @@ class AdminVehicleService {
     try {
       final snapshot = await _db
           .collection(_collectionVehicles)
-          .where('status', isEqualTo: status)
+          .where(VehicleFields.status, isEqualTo: status)
           .get();
 
       return snapshot.docs
@@ -68,10 +68,10 @@ class AdminVehicleService {
       final usagePercent = ((newKm / maxKm) * 100).round();
 
       await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        'currentKm': newKm,
-        'remainingKm': remainingKm,
-        'usagePercent': usagePercent,
-        'updatedAt': FieldValue.serverTimestamp(),
+        VehicleFields.currentKm: newKm,
+        VehicleFields.remainingKm: remainingKm,
+        VehicleFields.usagePercent: usagePercent,
+        VehicleFields.updatedAt: FieldValue.serverTimestamp(),
       });
     } catch (e) {
       print('Error updating vehicle KM: $e');
@@ -102,10 +102,10 @@ class AdminVehicleService {
   ) async {
     try {
       await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        'assignedInspector.id': inspectorId,
-        'assignedInspector.name': inspectorName,
-        'status': AppConstants.assigned,
-        'updatedAt': FieldValue.serverTimestamp(),
+        VehicleFields.assignedInspectorId: inspectorId,
+        VehicleFields.assignedInspectorName: inspectorName,
+        VehicleFields.status: AppConstants.assigned,
+        VehicleFields.updatedAt: FieldValue.serverTimestamp(),
       });
     } catch (e) {
       print('Error assigning vehicle: $e');
@@ -116,10 +116,10 @@ class AdminVehicleService {
   Future<void> unassignVehicle(String vehicleId) async {
     try {
       await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        'assignedInspector.id': null,
-        'assignedInspector.name': null,
-        'status': AppConstants.available,
-        'updatedAt': FieldValue.serverTimestamp(),
+        VehicleFields.assignedInspectorId: null,
+        VehicleFields.assignedInspectorName: null,
+        VehicleFields.status: AppConstants.available,
+        VehicleFields.updatedAt: FieldValue.serverTimestamp(),
       });
     } catch (e) {
       print('Error unassigning vehicle: $e');
@@ -139,18 +139,18 @@ class AdminVehicleService {
   }) async {
     try {
       await _db.collection(_collectionVehicles).add({
-        'plate': plate,
-        'model': model,
-        'currentKm': currentKm,
-        'maxKm': maxKm,
-        'remainingKm': remainingKm,
-        'usagePercent': usagePercent,
-        'lastServiceDate': Timestamp.fromDate(lastServiceDate),
-        'nextServiceDue': Timestamp.fromDate(nextServiceDue),
-        'status': AppConstants.available,
-        'assignedInspector': {'id': null, 'name': null},
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
+        VehicleFields.plate: plate,
+        VehicleFields.model: model,
+        VehicleFields.currentKm: currentKm,
+        VehicleFields.maxKm: maxKm,
+        VehicleFields.remainingKm: remainingKm,
+        VehicleFields.usagePercent: usagePercent,
+        VehicleFields.lastServiceDate: Timestamp.fromDate(lastServiceDate),
+        VehicleFields.nextServiceDue: Timestamp.fromDate(nextServiceDue),
+        VehicleFields.status: AppConstants.available,
+        VehicleFields.assignedInspector: {InspectorFields.id: null, InspectorFields.name: null},
+        VehicleFields.createdAt: FieldValue.serverTimestamp(),
+        VehicleFields.updatedAt: FieldValue.serverTimestamp(),
       });
     } catch (e) {
       print('Error creating vehicle: $e');
@@ -161,8 +161,8 @@ class AdminVehicleService {
   Future<void> updatedVehicleStatus(String vehicleId, String status) async {
     try {
       await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        'status': status,
-        'updatedAt': FieldValue.serverTimestamp(),
+        VehicleFields.status: status,
+        VehicleFields.updatedAt: FieldValue.serverTimestamp(),
       });
     } catch (e) {
       print('Error updating vehicle status: $e');
@@ -174,7 +174,7 @@ class AdminVehicleService {
     try {
       final snapshot = await _db
           .collection(Collections.vehicles)
-          .where('assignedInspector.id', isEqualTo: inspectorId)
+          .where(VehicleFields.assignedInspectorId, isEqualTo: inspectorId)
           .get();
       if (snapshot.docs.isEmpty) return [];
 

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 class InspectorHistoryModel {
   final String inspectorId;
@@ -7,8 +8,8 @@ class InspectorHistoryModel {
   final int tasksTotal;
   final int tasksCompleted;
   final List<double> recentScores;
-  final List<String> vehicleIds; // Added field
-  final List<String> branchesIds; // Added field
+  final List<String> vehicleIds;
+  final List<String> branchesIds;
   final DateTime lastUpdated;
 
   InspectorHistoryModel({
@@ -18,82 +19,58 @@ class InspectorHistoryModel {
     required this.tasksTotal,
     required this.tasksCompleted,
     required this.recentScores,
-    required this.vehicleIds, // Added to constructor
-    required this.branchesIds, // Added to constructor
+    required this.vehicleIds,
+    required this.branchesIds,
     required this.lastUpdated,
   });
 
   factory InspectorHistoryModel.fromMap(Map<String, dynamic> data) {
     return InspectorHistoryModel(
-      inspectorId: data['inspectorId'] ?? '',
-      totalInspections: data['totalInspections'] ?? 0,
-      avgScore: (data['avgScore']?.toDouble() ?? 0.0),
-      tasksTotal: data['tasksTotal'] ?? 0,
-      tasksCompleted: data['tasksCompleted'] ?? 0,
-      recentScores: data['recentScores'] != null
+      inspectorId: data[InspectorHistoryFields.inspectorId] ?? '',
+      totalInspections: data[InspectorHistoryFields.totalInspections] ?? 0,
+      avgScore: (data[InspectorHistoryFields.avgScore]?.toDouble() ?? 0.0),
+      tasksTotal: data[InspectorHistoryFields.tasksTotal] ?? 0,
+      tasksCompleted: data[InspectorHistoryFields.tasksCompleted] ?? 0,
+      recentScores: data[InspectorHistoryFields.recentScores] != null
           ? List<double>.from(
-              (data['recentScores'] as List<dynamic>).map((e) => e.toDouble()),
+              (data[InspectorHistoryFields.recentScores] as List<dynamic>).map(
+                (e) => e.toDouble(),
+              ),
             )
           : [],
-      vehicleIds:
-          data['vehicleIds'] !=
-              null // Added fromMap parsing
-          ? List<String>.from(data['vehicleIds'] as List<dynamic>)
+      vehicleIds: data[InspectorHistoryFields.vehicleIds] != null
+          ? List<String>.from(data[InspectorHistoryFields.vehicleIds] as List)
           : [],
-      branchesIds:
-          data['branchesIds'] !=
-              null // Added fromMap parsing
-          ? List<String>.from(data['branchesIds'] as List<dynamic>)
+      branchesIds: data[InspectorHistoryFields.branchesIds] != null
+          ? List<String>.from(data[InspectorHistoryFields.branchesIds] as List)
           : [],
-      lastUpdated: data['lastUpdated'] != null
-          ? (data['lastUpdated'] is Timestamp
-                ? (data['lastUpdated'] as Timestamp).toDate()
-                : DateTime.parse(data['lastUpdated'].toString()))
+      lastUpdated: data[InspectorHistoryFields.lastUpdated] != null
+          ? (data[InspectorHistoryFields.lastUpdated] is Timestamp
+                ? (data[InspectorHistoryFields.lastUpdated] as Timestamp)
+                      .toDate()
+                : DateTime.parse(
+                    data[InspectorHistoryFields.lastUpdated].toString(),
+                  ))
           : DateTime.now(),
     );
   }
 
   factory InspectorHistoryModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
-
-    return InspectorHistoryModel(
-      inspectorId: data['inspectorId'] ?? '',
-      totalInspections: data['totalInspections'] ?? 0,
-      avgScore: (data['avgScore']?.toDouble() ?? 0.0),
-      tasksTotal: data['tasksTotal'] ?? 0,
-      tasksCompleted: data['tasksCompleted'] ?? 0,
-      recentScores: data['recentScores'] != null
-          ? List<double>.from(
-              (data['recentScores'] as List<dynamic>).map((e) => e.toDouble()),
-            )
-          : [],
-      vehicleIds:
-          data['vehicleIds'] !=
-              null // Added fromFirestore parsing
-          ? List<String>.from(data['vehicleIds'] as List<dynamic>)
-          : [],
-      branchesIds:
-          data['branchesIds'] !=
-              null // Added fromFirestore parsing
-          ? List<String>.from(data['branchesIds'] as List<dynamic>)
-          : [],
-      lastUpdated: data['lastUpdated'] != null
-          ? (data['lastUpdated'] as Timestamp).toDate()
-          : DateTime.now(),
-    );
+    return InspectorHistoryModel.fromMap(data);
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'inspectorId': inspectorId,
-      'totalInspections': totalInspections,
-      'avgScore': avgScore,
-      'tasksTotal': tasksTotal,
-      'tasksCompleted': tasksCompleted,
-      'recentScores': recentScores,
-      'vehicleIds': vehicleIds, // Added toMap serialization
-      'branchesIds': branchesIds, // Added toMap serialization
-      'lastUpdated': Timestamp.fromDate(lastUpdated),
+      InspectorHistoryFields.inspectorId: inspectorId,
+      InspectorHistoryFields.totalInspections: totalInspections,
+      InspectorHistoryFields.avgScore: avgScore,
+      InspectorHistoryFields.tasksTotal: tasksTotal,
+      InspectorHistoryFields.tasksCompleted: tasksCompleted,
+      InspectorHistoryFields.recentScores: recentScores,
+      InspectorHistoryFields.vehicleIds: vehicleIds,
+      InspectorHistoryFields.branchesIds: branchesIds,
+      InspectorHistoryFields.lastUpdated: Timestamp.fromDate(lastUpdated),
     };
   }
 }

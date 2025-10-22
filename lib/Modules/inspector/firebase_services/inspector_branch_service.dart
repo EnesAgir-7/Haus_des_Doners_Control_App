@@ -29,7 +29,7 @@ class InspectorBranchService {
     try {
       final snapshot = await _db
           .collection(_collectionBranches)
-          .where('assignedInspectorId', isEqualTo: inspectorId)
+          .where(BranchFields.assignedInspectorId, isEqualTo: inspectorId)
           .get();
 
       return snapshot.docs
@@ -66,9 +66,9 @@ class InspectorBranchService {
     try {
       final snapshot = await _db
           .collection(_collectionBranches)
-          .where('assignedInspectorId', isEqualTo: inspectorId)
-          .where('status', isEqualTo: 'active')
-          .orderBy('name')
+          .where(BranchFields.assignedInspectorId, isEqualTo: inspectorId)
+          .where(BranchFields.status, isEqualTo: AppConstants.active)
+          .orderBy(AppConstants.name)
           .get();
 
       return snapshot.docs
@@ -84,8 +84,8 @@ class InspectorBranchService {
   Stream<List<BranchModel>> streamBranchesByInspector(String inspectorId) {
     return _db
         .collection(_collectionBranches)
-        .where('assignedInspector.id', isEqualTo: inspectorId)
-        .where('status', isEqualTo: 'active')
+        .where(BranchFields.assignedInspectorId, isEqualTo: inspectorId)
+        .where(BranchFields.status, isEqualTo: AppConstants.active)
         .orderBy(AppConstants.name)
         .snapshots()
         .map(
@@ -142,14 +142,14 @@ class InspectorBranchService {
 
       // Update route doc
       batch.update(routeDocRef, {
-        'stops': updatedStops.map((s) => s.toMap()).toList(),
-        'updatedAt': Timestamp.fromDate(now),
+        RouteFields.stops: updatedStops.map((s) => s.toMap()).toList(),
+        RouteFields.updatedAt: Timestamp.fromDate(now),
       });
 
       // Update branch doc
       batch.update(branchDocRef, {
-        'stop': updatedStop.toMap(),
-        'updatedAt': Timestamp.fromDate(now),
+        BranchFields.stop: updatedStop.toMap(),
+        BranchFields.createdAt: Timestamp.fromDate(now),
       });
 
       // Commit the batch
@@ -208,9 +208,11 @@ class InspectorBranchService {
         batch.set(routeDocRef, route.toMap());
       } else {
         final data = routeSnapshot.data() as Map<String, dynamic>;
-        final stops = (data['stops'] as List?) ?? [];
+        final stops = (data[RouteFields.stops] as List?) ?? [];
 
-        final alreadyAssigned = stops.any((s) => s['branchId'] == branchId);
+        final alreadyAssigned = stops.any(
+          (s) => s[RouteStopFields.branchId] == branchId,
+        );
         if (alreadyAssigned) {
           throw Exception('Branch already assigned in route');
         }
@@ -231,15 +233,15 @@ class InspectorBranchService {
         final updatedStops = [...stops, stopToSave.toMap()];
 
         batch.update(routeDocRef, {
-          'stops': updatedStops,
-          'updatedAt': Timestamp.fromDate(now),
+          RouteFields.stops: updatedStops,
+          RouteFields.updatedAt: Timestamp.fromDate(now),
         });
       }
 
       // ✅ Use the same stopToSave (with correct order)
       batch.update(branchDocRef, {
-        'stop': stopToSave.toMap(),
-        'updatedAt': Timestamp.fromDate(now),
+        BranchFields.stop: stopToSave.toMap(),
+        RouteFields.updatedAt: Timestamp.fromDate(now),
       });
 
       await batch.commit();
@@ -251,104 +253,14 @@ class InspectorBranchService {
     }
   }
 
-  // Future<void> assignBranchToHimself({
-  //   required String inspectorId,
-  //   required String inspectorName,
-  //   required String branchId,
-  //   required String branchName,
-  //   required String branchAddress,
-  //   required String timeSlot,
-  //   required String branchTemplateId,
-  // }) async {
-  //   try {
-  //     final routeDocRef = _db.collection(_collectionRoutes).doc(inspectorId);
-
-  //     // 1. Check if a route document already exists for this inspector
-  //     final docSnap = await routeDocRef.get();
-
-  //     if (!docSnap.exists) {
-  //       // 2. Create a new route document directly under inspectorId
-  //       final route = RouteModel(
-  //         id: inspectorId,
-  //         date: DateTime.now(),
-  //         inspectorId: inspectorId,
-  //         inspectorName: inspectorName,
-  //         stops: [
-  //           RouteStopModel(
-  //             branchTemplateId: branchTemplateId,
-  //             timeSlot: timeSlot,
-  //             branchId: branchId,
-  //             branchName: branchName,
-  //             branchAddress: branchAddress,
-  //             status: AppConstants.pending,
-  //             order: 1,
-  //             inspectionId: inspectorId,
-  //             createdAt: DateTime.now(),
-  //           ),
-  //         ],
-  //         createdAt: DateTime.now(),
-  //         updatedAt: DateTime.now(),
-  //       );
-  //       await routeDocRef.set(route.toMap());
-  //     } else {
-  //       // 3. Append stop to existing route
-  //       final route = RouteModel.fromFirestore(docSnap);
-  //       final newStop = RouteStopModel(
-  //         timeSlot: timeSlot,
-  //         branchTemplateId: branchTemplateId,
-  //         branchId: branchId,
-  //         branchName: branchName,
-  //         branchAddress: branchAddress,
-  //         status: AppConstants.pending,
-  //         order: route.stops.length + 1,
-  //         createdAt: DateTime.now(),
-  //       );
-
-  //       // Append only the new stop safely
-  //       await routeDocRef.update({
-  //         'stops': FieldValue.arrayUnion([newStop.toMap()]),
-  //         'updatedAt': Timestamp.fromDate(DateTime.now()),
-  //       });
-  //     }
-
-  //     // 4. Update branch to mark as assigned
-  //     await _db.collection(_collectionBranches).doc(branchId).update({
-  //       'isAssigned': true,
-  //       'nextInspectionDate': timeSlot,
-  //       'updatedAt': Timestamp.fromDate(DateTime.now()),
-  //     });
-
-  //     console('Branch assigned successfully');
-  //   } catch (e) {
-  //     print("Error assigning branch: $e");
-  //     rethrow;
-  //   }
-  // }
-
-  Future<void> updateBranch(BranchModel branch) async {
-    try {
-      await _db.collection(_collectionBranches).doc(branch.id).update({
-        'name': branch.name,
-        'address': branch.address,
-        'contactName': branch.contactName,
-        'contactPhone': branch.contactPhone,
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
-      });
-      console('Branch updated successfully');
-    } catch (e) {
-      print("Error updating branch: $e");
-      rethrow;
-    }
-  }
-
   Future<void> updateBranchAssignedInspector(
     String branchId,
     Map<String, String> inspectorData,
   ) async {
     try {
       await _db.collection(_collectionBranches).doc(branchId).update({
-        'assignedInspector': inspectorData,
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
+        BranchFields.assignedInspector: inspectorData,
+        BranchFields.updatedAt: Timestamp.fromDate(DateTime.now()),
       });
       console('Branch assigned inspector updated successfully');
     } catch (e) {
@@ -377,14 +289,14 @@ class InspectorBranchService {
 
       // Update route stops
       batch.update(routeDocRef, {
-        'stops': updatedStops.map((s) => s.toMap()).toList(),
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
+        RouteFields.stops: updatedStops.map((s) => s.toMap()).toList(),
+        RouteFields.updatedAt: Timestamp.fromDate(DateTime.now()),
       });
 
       // Remove branch assignment
       batch.update(branchDocRef, {
-        'stop': null,
-        'updatedAt': Timestamp.fromDate(DateTime.now()),
+        BranchFields.assignedInspector: null,
+        BranchFields.updatedAt: Timestamp.fromDate(DateTime.now()),
       });
 
       await batch.commit();
