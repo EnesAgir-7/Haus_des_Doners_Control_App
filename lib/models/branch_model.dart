@@ -190,13 +190,13 @@ class BranchModel {
 
   // Helper: Last inspection text (Turkish)
   String get lastInspectionText {
-    if (lastInspectionDate == null) return 'Henüz kontrol edilmedi';
+    if (lastInspectionDate == null) return 'Not inspected yet';
     final days = daysSinceLastInspection!;
-    if (days == 0) return 'Bugün kontrol edildi';
-    if (days == 1) return 'Dün kontrol edildi';
-    if (days < 7) return '$days gün önce';
-    if (days < 30) return '${(days / 7).floor()} hafta önce';
-    return '${(days / 30).floor()} ay önce';
+    if (days == 0) return 'Inspected today';
+    if (days == 1) return 'Inspected yesterday';
+    if (days < 7) return '$days days ago';
+    if (days < 30) return '${(days / 7).floor()} weeks ago';
+    return '${(days / 30).floor()} months ago';
   }
 
   bool get isNextInspectionToday {

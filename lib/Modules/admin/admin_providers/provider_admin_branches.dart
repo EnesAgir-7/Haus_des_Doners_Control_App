@@ -15,7 +15,7 @@ class ProviderAdminBranches with ChangeNotifier {
   String _searchQuery = '';
   String? _error;
 
-   StreamSubscription<List<BranchModel>>? _branchesSubscription;
+  StreamSubscription<List<BranchModel>>? _branchesSubscription;
 
   // Getters
   List<BranchModel> get branches => _filterBranches();
@@ -39,7 +39,7 @@ class ProviderAdminBranches with ChangeNotifier {
     notifyListeners();
   }
 
-// 🔹 Stream all branches in real-time (avoid redundant listeners)
+  // 🔹 Stream all branches in real-time (avoid redundant listeners)
   void loadBranchStream() {
     if (_branchesSubscription != null) {
       print("✅ Branch stream already active — skipping reinitialization");
@@ -72,8 +72,6 @@ class ProviderAdminBranches with ChangeNotifier {
     _branchesSubscription = null;
     print("🛑 Branch stream cancelled");
   }
-
-
 
   // Assign inspector to branch
   Future<void> updateBranch(BranchModel branch) async {
@@ -119,7 +117,7 @@ class ProviderAdminBranches with ChangeNotifier {
     notifyListeners();
   }
 
-    // 🔹 Dispose stream safely when provider is destroyed
+  // 🔹 Dispose stream safely when provider is destroyed
   @override
   void dispose() {
     _branchesSubscription?.cancel();
