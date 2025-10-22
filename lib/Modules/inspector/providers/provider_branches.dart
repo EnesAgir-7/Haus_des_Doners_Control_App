@@ -241,7 +241,7 @@ class ProviderBranches extends ChangeNotifier {
     }
   }
 
-  Future<bool> unAssignBranchToMe({
+  Future<bool> unAssignMyRoute({
     required String branchId,
     required BuildContext context,
   }) async {
@@ -249,7 +249,7 @@ class ProviderBranches extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      await _branchService.removeBranchAssignment(
+      await _branchService.unAssignRouteAndFreeTheBranch(
         inspectorId: loggedInUser!.id,
         branchId: branchId,
       );

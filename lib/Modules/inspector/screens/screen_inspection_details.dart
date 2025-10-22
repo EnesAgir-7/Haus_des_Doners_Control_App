@@ -160,7 +160,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
                     Icon(Icons.star, size: 18, color: scoreColor),
                     const SizedBox(width: 4),
                     Text(
-                      inspection.score.toStringAsFixed(1),
+                      inspection.score,
                       style: TextStyle(
                         color: scoreColor,
                         fontWeight: FontWeight.bold,
@@ -333,7 +333,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
     InspectionCategoryModel data,
     String path,
   ) {
-    final scoreColor = provider.getScoreColor(data.score.toDouble());
+    final scoreColor = provider.getScoreColor(data.score);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

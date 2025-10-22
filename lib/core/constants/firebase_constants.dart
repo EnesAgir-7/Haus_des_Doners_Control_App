@@ -71,7 +71,7 @@ class InspectionFields {
   static const String updatedAt = 'updatedAt';
 }
 
-class InspectorHistoryFields {
+class IHF {
   static const String inspectorId = 'inspectorId';
   static const String totalInspections = 'totalInspections';
   static const String avgScore = 'avgScore';

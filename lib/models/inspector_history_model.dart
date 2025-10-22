@@ -7,7 +7,7 @@ class InspectorHistoryModel {
   final double avgScore;
   final int tasksTotal;
   final int tasksCompleted;
-  final List<double> recentScores;
+  final List<String> recentScores;
   final List<String> vehicleIds;
   final List<String> branchesIds;
   final DateTime lastUpdated;
@@ -26,31 +26,26 @@ class InspectorHistoryModel {
 
   factory InspectorHistoryModel.fromMap(Map<String, dynamic> data) {
     return InspectorHistoryModel(
-      inspectorId: data[InspectorHistoryFields.inspectorId] ?? '',
-      totalInspections: data[InspectorHistoryFields.totalInspections] ?? 0,
-      avgScore: (data[InspectorHistoryFields.avgScore]?.toDouble() ?? 0.0),
-      tasksTotal: data[InspectorHistoryFields.tasksTotal] ?? 0,
-      tasksCompleted: data[InspectorHistoryFields.tasksCompleted] ?? 0,
-      recentScores: data[InspectorHistoryFields.recentScores] != null
-          ? List<double>.from(
-              (data[InspectorHistoryFields.recentScores] as List<dynamic>).map(
-                (e) => e.toDouble(),
-              ),
-            )
+      inspectorId: data[IHF.inspectorId] ?? '',
+      totalInspections: data[IHF.totalInspections] ?? 0,
+      avgScore: (data[IHF.avgScore]?.toDouble() ?? 0.0),
+      tasksTotal: data[IHF.tasksTotal] ?? 0,
+      tasksCompleted: data[IHF.tasksCompleted] ?? 0,
+recentScores: data[IHF.recentScores] != null
+          ? (data[IHF.recentScores] as List<dynamic>)
+                .map<String>((e) => e.toString()) // ensure all are strings
+                .toList()
           : [],
-      vehicleIds: data[InspectorHistoryFields.vehicleIds] != null
-          ? List<String>.from(data[InspectorHistoryFields.vehicleIds] as List)
+      vehicleIds: data[IHF.vehicleIds] != null
+          ? List<String>.from(data[IHF.vehicleIds] as List)
           : [],
-      branchesIds: data[InspectorHistoryFields.branchesIds] != null
-          ? List<String>.from(data[InspectorHistoryFields.branchesIds] as List)
+      branchesIds: data[IHF.branchesIds] != null
+          ? List<String>.from(data[IHF.branchesIds] as List)
           : [],
-      lastUpdated: data[InspectorHistoryFields.lastUpdated] != null
-          ? (data[InspectorHistoryFields.lastUpdated] is Timestamp
-                ? (data[InspectorHistoryFields.lastUpdated] as Timestamp)
-                      .toDate()
-                : DateTime.parse(
-                    data[InspectorHistoryFields.lastUpdated].toString(),
-                  ))
+      lastUpdated: data[IHF.lastUpdated] != null
+          ? (data[IHF.lastUpdated] is Timestamp
+                ? (data[IHF.lastUpdated] as Timestamp).toDate()
+                : DateTime.parse(data[IHF.lastUpdated].toString()))
           : DateTime.now(),
     );
   }
@@ -62,15 +57,15 @@ class InspectorHistoryModel {
 
   Map<String, dynamic> toMap() {
     return {
-      InspectorHistoryFields.inspectorId: inspectorId,
-      InspectorHistoryFields.totalInspections: totalInspections,
-      InspectorHistoryFields.avgScore: avgScore,
-      InspectorHistoryFields.tasksTotal: tasksTotal,
-      InspectorHistoryFields.tasksCompleted: tasksCompleted,
-      InspectorHistoryFields.recentScores: recentScores,
-      InspectorHistoryFields.vehicleIds: vehicleIds,
-      InspectorHistoryFields.branchesIds: branchesIds,
-      InspectorHistoryFields.lastUpdated: Timestamp.fromDate(lastUpdated),
+      IHF.inspectorId: inspectorId,
+      IHF.totalInspections: totalInspections,
+      IHF.avgScore: avgScore,
+      IHF.tasksTotal: tasksTotal,
+      IHF.tasksCompleted: tasksCompleted,
+      IHF.recentScores: recentScores,
+      IHF.vehicleIds: vehicleIds,
+      IHF.branchesIds: branchesIds,
+      IHF.lastUpdated: Timestamp.fromDate(lastUpdated),
     };
   }
 }

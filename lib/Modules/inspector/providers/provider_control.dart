@@ -190,6 +190,15 @@ class ProviderControl extends ChangeNotifier {
   }
 
   double get totalScore => _scores.values.fold(0, (a, b) => a + b);
+  String get scoreDisplay => '$totalScore/$maxPossibleScore';
+
+  int get maxPossibleScore {
+    if (selectedTemplate == null) return 0;
+    return selectedTemplate!.categories.fold(
+      0,
+      (sum, category) => sum + category.maxScore,
+    );
+  }
 
   void setOverallNotes(String notes) {
     _overallNotes = notes;
@@ -349,6 +358,11 @@ class ProviderControl extends ChangeNotifier {
       _uploadProgress = hasPhotos ? 0.8 : 0.5;
       notifyListeners();
 
+      // ✅ Calculate total possible score from template
+      final maxScore = maxPossibleScore;
+      final currentScore = totalScore;
+      final scoreString = '$currentScore/$maxScore'; // e.g., "3/12"
+
       // 🔹 Only after all uploads succeeded, create inspection object
       final inspection = InspectionModel(
         id: inspectionId,
@@ -359,16 +373,16 @@ class ProviderControl extends ChangeNotifier {
         scheduledTime: _selectedBranch!.stop!.timeSlot.toString(),
         completedTime: now,
         status: AppConstants.completed,
-        score: totalScore,
+        score: scoreString,
         categories: Map.fromEntries(
           selectedTemplate!.categories.map((cat) {
-            final score = _scores[cat.categoryId] ?? 0;
+            final score = _scores[cat.categoryId] ?? "";
             final notes = _notes[cat.categoryId] ?? '';
             final photos = uploadedUrls[cat.categoryId] ?? [];
             return MapEntry(
               cat.title,
               InspectionCategoryModel(
-                score: score,
+                score: score.toString(),
                 photos: photos,
                 notes: notes,
               ),
@@ -510,6 +524,7 @@ class ProviderControl extends ChangeNotifier {
       final List<CategoryScore> categoryScores = selectedTemplate!.categories
           .map(
             (category) => CategoryScore(
+              maxScore: category.maxScore,
               categoryId: category.categoryId,
               title: category.title,
               score: _scores[category.categoryId] ?? 0,
@@ -521,6 +536,7 @@ class ProviderControl extends ChangeNotifier {
 
       // Create PDF generator
       final pdfGenerator = InspectionPDFGenerator(
+        maxPossibleScore: double.parse(maxPossibleScore.toString()),
         inspectionId: 'preview_${DateTime.now().millisecondsSinceEpoch}',
         branchName: _selectedBranch!.name,
         branchAddress: _selectedBranch!.address,
@@ -560,6 +576,7 @@ class ProviderControl extends ChangeNotifier {
       final List<CategoryScore> categoryScores = selectedTemplate!.categories
           .map(
             (category) => CategoryScore(
+              maxScore: category.maxScore,
               categoryId: category.categoryId,
               title: category.title,
               score: _scores[category.categoryId] ?? 0,
@@ -571,6 +588,7 @@ class ProviderControl extends ChangeNotifier {
 
       // Create PDF generator
       final pdfGenerator = InspectionPDFGenerator(
+        maxPossibleScore: double.parse(maxPossibleScore.toString()),
         inspectionId: inspectionId,
         branchName: _selectedBranch!.name,
         branchAddress: _selectedBranch!.address,

@@ -203,7 +203,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                   if (updatedBranch.stop != null) {
                                     // Unassign
                                     final success = await branchContr
-                                        .unAssignBranchToMe(
+                                        .unAssignMyRoute(
                                           branchId: updatedBranch.id,
                                           context: context,
                                         );
@@ -283,7 +283,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                         ),
                         const SizedBox(width: 10),
                         if (branch.stop != null &&
-                             branch.isNextInspectionToday &&
+                            branch.isNextInspectionToday &&
                             branch.stop?.timeSlot != null)
                           Expanded(
                             child: AppButton(

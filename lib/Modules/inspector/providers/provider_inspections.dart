@@ -50,9 +50,15 @@ class ProviderInspection extends ChangeNotifier {
   }
 
   // Helper to determine score color, based on the previous screen logic
-  Color getScoreColor(double score) {
+Color getScoreColor(String scoreString) {
+    // Extract the first part before '/'
+    final parts = scoreString.split('/');
+    final score = double.tryParse(parts.first) ?? 0.0;
+
+    // Lower score = better (green), higher = worse (red)
     if (score <= 3.0) return Colors.green;
-    if (score <= 7.0) return Colors.amber;
+    if (score <= 6.0) return Colors.amber;
     return Colors.red;
   }
+
 }

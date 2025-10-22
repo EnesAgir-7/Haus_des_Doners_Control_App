@@ -69,7 +69,7 @@ class RouteStopModel {
   final DateTime? completedAt;
   final Timestamp? expiryDate;
   final int order;
-  final double? inspectionScore;
+  final String? inspectionScore;
   final String? branchAddress;
 
   RouteStopModel({
@@ -104,7 +104,7 @@ class RouteStopModel {
       completedAt: parseDate(data[RouteStopFields.completedAt]),
       expiryDate: data[RouteStopFields.expiryDate],
       inspectionScore: data[RouteStopFields.inspectionScore] != null
-          ? double.tryParse(data[RouteStopFields.inspectionScore].toString())
+          ? data[RouteStopFields.inspectionScore].toString()
           : null,
       branchAddress: data[RouteStopFields.branchAddress],
     );
@@ -121,7 +121,7 @@ class RouteStopModel {
       RouteStopFields.createdAt: createdAt?.toIso8601String(),
       RouteStopFields.completedAt: completedAt?.toIso8601String(),
       RouteStopFields.expiryDate: expiryDate,
-      RouteStopFields.inspectionScore: inspectionScore?.toDouble(),
+      RouteStopFields.inspectionScore: inspectionScore,
       RouteStopFields.branchAddress: branchAddress,
     };
   }
@@ -137,7 +137,7 @@ class RouteStopModel {
     DateTime? createdAt,
     DateTime? completedAt,
     Timestamp? expiryDate,
-    double? inspectionScore,
+    String? inspectionScore,
     String? branchAddress,
   }) {
     return RouteStopModel(

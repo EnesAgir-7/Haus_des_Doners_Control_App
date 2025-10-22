@@ -854,7 +854,7 @@ class StopRouteManagementSheet extends StatelessWidget {
 
                       if (confirm == true) {
                         // Call your provider method to remove the stop
-                        final success = await provider.unAssignBranchToMe(
+                        final success = await provider.unAssignMyRoute(
                           branchId: stop.branchId,
                           context: context,
                         );

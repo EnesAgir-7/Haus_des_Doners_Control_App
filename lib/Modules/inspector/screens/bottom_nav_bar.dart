@@ -36,7 +36,7 @@ class ScreenBottomNavBar extends StatelessWidget {
             }
           },
           child: Scaffold(
-            appBar: CustomAppBar(),
+            appBar: CustomAppBar(showLang: true, showLogout: true),
             body: IndexedStack(
               key: Key("stack${context.locale.languageCode}"),
               index: controller.selectedIndex,

@@ -443,75 +443,151 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
       return const SizedBox.shrink();
     }
 
-    // Get max score for scaling
-    final maxScore = 10.0;
-    final scores = stats.recentScores.take(10).toList();
+    // Parse scores from "score/maxScore" format
+    final parsedScores = <ParsedScore>[];
+    double globalMaxScore = 0;
+
+    for (final scoreStr in stats.recentScores.take(10)) {
+      try {
+        final parts = scoreStr.split('/');
+        if (parts.length == 2) {
+          final score = double.parse(parts[0].trim());
+          final maxScore = double.parse(parts[1].trim());
+          parsedScores.add(ParsedScore(score: score, maxScore: maxScore));
+
+          // Track the highest maxScore
+          if (maxScore > globalMaxScore) {
+            globalMaxScore = maxScore;
+          }
+        }
+      } catch (e) {
+        print('Error parsing score: $scoreStr');
+      }
+    }
+
+    if (parsedScores.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(Icons.show_chart, color: Colors.white70, size: 18),
+            Icon(Icons.show_chart, color: AppColors.primaryRed, size: 20),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               "Recent Performance",
               style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+                color: AppColors.primaryRed,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Container(
-          height: 180,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.03),
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
           ),
           child: Column(
             children: [
-              Expanded(
+              // Legend
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildLegendItem(Colors.green, 'Excellent (0-3)'),
+                  const SizedBox(width: 12),
+                  _buildLegendItem(AppColors.amber, 'Good (4-6)'),
+                  const SizedBox(width: 12),
+                  _buildLegendItem(AppColors.primaryRed, 'Poor (7+)'),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 180,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(scores.length, (index) {
-                    final score = scores[index];
-                    final height = (score / maxScore);
-                    final color = _getScoreColor(score);
+                  children: List.generate(parsedScores.length, (index) {
+                    final parsedScore = parsedScores[index];
+                    final score = parsedScore.score;
+                    final maxScore = parsedScore.maxScore;
+
+                    // REVERSE: Calculate height - lower score = taller bar
+                    // Invert the score: (globalMaxScore - score)
+                    final invertedScore = globalMaxScore - score;
+                    final heightRatio = (invertedScore / globalMaxScore).clamp(
+                      0.05,
+                      1.0,
+                    );
+                    final barHeight = heightRatio * 120; // Max height of 120
+
+                    // Reverse color logic: lower score = better (green)
+                    final color = _getScoreColorReversed(score);
 
                     return Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 3),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            // Score value on top
-                            Text(
-                              score.toStringAsFixed(1),
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
+                            // Score display
+                            Container(
+                              padding: const EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.2),
+                                // borderRadius: BorderRadius.circular(100),
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: color.withValues(alpha: 0.5),
+                                ),
+                              ),
+                              child: FittedBox(
+                                child: Text(
+                                  '${score.toInt()}',
+                                  style: TextStyle(
+                                    color: color,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            // Bar
+                            const SizedBox(height: 6),
+                            // Bar with dynamic height (REVERSED)
                             Container(
-                              height: height * 100,
+                              width: double.infinity,
+                              height: barHeight,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   begin: Alignment.bottomCenter,
                                   end: Alignment.topCenter,
-                                  colors: [
-                                    color.withValues(alpha: 0.8),
-                                    color.withValues(alpha: 0.4),
-                                  ],
+                                  colors: [color, color.withValues(alpha: 0.6)],
                                 ),
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(6),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: color.withValues(alpha: 0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Max score label
+                            Text(
+                              '/${maxScore.toInt()}',
+                              style: TextStyle(
+                                color: Colors.white38,
+                                fontSize: 9,
                               ),
                             ),
                           ],
@@ -521,15 +597,19 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   }),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               // X-axis labels
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(scores.length, (index) {
+                children: List.generate(parsedScores.length, (index) {
                   return Expanded(
                     child: Text(
-                      '${scores.length - index}',
-                      style: TextStyle(color: Colors.white38, fontSize: 9),
+                      '#${parsedScores.length - index}',
+                      style: TextStyle(
+                        color: Colors.white54,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   );
@@ -541,12 +621,41 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
         const SizedBox(height: 8),
         Center(
           child: Text(
-            'Last ${scores.length} inspections',
-            style: TextStyle(color: Colors.white38, fontSize: 11),
+            'Last ${parsedScores.length} inspection${parsedScores.length > 1 ? 's' : ''}',
+            style: TextStyle(
+              color: Colors.white54,
+              fontSize: 11,
+              fontStyle: FontStyle.italic,
+            ),
           ),
         ),
       ],
     );
+  }
+
+  Widget _buildLegendItem(Color color, String label) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(label, style: TextStyle(color: Colors.white54, fontSize: 10)),
+      ],
+    );
+  }
+
+  // Reversed color logic: Lower score = Better (Green)
+  Color _getScoreColorReversed(double score) {
+    if (score <= 3) return Colors.green; // Excellent
+    if (score <= 6) return AppColors.amber; // Good
+    return AppColors.primaryRed; // Poor
   }
 
   Widget _buildLastUpdatedRow(InspectorHistoryModel stats) {
@@ -579,4 +688,12 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
   String _formatDate(DateTime date) {
     return DateFormat('MMM dd, yyyy HH:mm').format(date);
   }
+}
+
+// Helper class to store parsed scores
+class ParsedScore {
+  final double score;
+  final double maxScore;
+
+  ParsedScore({required this.score, required this.maxScore});
 }

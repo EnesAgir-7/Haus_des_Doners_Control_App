@@ -192,7 +192,7 @@ class AdminInspectionService {
   Future<void> _prepareBranchStatisticsBatch({
     required WriteBatch batch,
     required String branchId,
-    required double inspectionScore,
+    required String inspectionScore,
   }) async {
     final branchRef = _db.collection(_collectionBranches).doc(branchId);
     final branchDoc = await branchRef.get();
@@ -221,7 +221,7 @@ class AdminInspectionService {
     required String inspectorId,
     required String branchId,
     required String inspectionId,
-    required double score,
+    required String score,
     String status = AppConstants.completed,
   }) async {
     final routeRef = _db.collection(_collectionRoutes).doc(inspectorId);

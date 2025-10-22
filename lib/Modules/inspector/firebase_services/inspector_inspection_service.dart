@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../core/constants/app_constants.dart';
@@ -163,7 +162,6 @@ class InspectorInspectionService {
   }
 
   Future<String> createInspection(InspectionModel inspection) async {
-    console('Creating inspection...');
     final batch = _db.batch();
     try {
       // Pre-generate docRef for the inspection
@@ -206,7 +204,7 @@ class InspectorInspectionService {
   Future<void> _prepareBranchStatisticsBatch({
     required WriteBatch batch,
     required String branchId,
-    required double inspectionScore,
+    required String inspectionScore,
   }) async {
     final branchRef = _db.collection(_collectionBranches).doc(branchId);
     final branchDoc = await branchRef.get();
@@ -216,8 +214,14 @@ class InspectorInspectionService {
     final currentTotal = data[BranchFields.totalInspections] ?? 0;
     final currentAverage = (data[BranchFields.averageRating] ?? 0.0).toDouble();
     final newTotal = currentTotal + 1;
+
+    // Extract numeric part from "3/12"
+    final inspectionParts = inspectionScore.split('/');
+    final numericScore = double.tryParse(inspectionParts.first) ?? 0.0;
+
+    // Calculate new average
     final newAverage =
-        ((currentAverage * currentTotal) + inspectionScore) / newTotal;
+        ((currentAverage * currentTotal) + numericScore) / newTotal;
 
     batch.update(branchRef, {
       BranchFields.totalInspections: newTotal,
@@ -232,7 +236,7 @@ class InspectorInspectionService {
   Future<void> _prepareInspectorHistoryBatch({
     required WriteBatch batch,
     required String inspectorId,
-    required double inspectionScore,
+    required String inspectionScore,
   }) async {
     final inspectorRef = _db
         .collection(Collections.inspectorStats)
@@ -242,20 +246,25 @@ class InspectorInspectionService {
 
     if (inspectorDoc.exists) {
       final data = inspectorDoc.data()!;
-      final currentTotal = data[InspectorHistoryFields.totalInspections] ?? 0;
-      final currentAvg = (data[InspectorHistoryFields.avgScore] ?? 0.0)
-          .toDouble();
+      final currentTotal = data[IHF.totalInspections] ?? 0;
+      final currentAvg = (data[IHF.avgScore] ?? 0.0).toDouble();
       final newTotal = currentTotal + 1;
-      final newAvg = ((currentAvg * currentTotal) + inspectionScore) / newTotal;
+
+      // Extract the numeric part from "3/12"
+      final inspectionParts = inspectionScore.split('/');
+      final numericScore = double.tryParse(inspectionParts.first) ?? 0.0;
+
+      // Calculate new average
+      final newAvg = ((currentAvg * currentTotal) + numericScore) / newTotal;
 
       // Get current recentScores and append new score
-      final recentScores = data[InspectorHistoryFields.recentScores] != null
-          ? List<double>.from(
-              (data[InspectorHistoryFields.recentScores] as List<dynamic>).map(
-                (e) => e.toDouble(),
+      final recentScores = data[IHF.recentScores] != null
+          ? List<String>.from(
+              (data[IHF.recentScores] as List<dynamic>).map(
+                (e) => e.toString(),
               ),
             )
-          : <double>[];
+          : <String>[];
 
       recentScores.add(inspectionScore);
 
@@ -265,23 +274,23 @@ class InspectorInspectionService {
       }
 
       batch.update(inspectorRef, {
-        InspectorHistoryFields.totalInspections: newTotal,
-        InspectorHistoryFields.avgScore: newAvg,
-        InspectorHistoryFields.recentScores: recentScores,
-        InspectorHistoryFields.lastUpdated: FieldValue.serverTimestamp(),
+        IHF.totalInspections: newTotal,
+        IHF.avgScore: newAvg,
+        IHF.recentScores: recentScores,
+        IHF.lastUpdated: FieldValue.serverTimestamp(),
       });
     } else {
       // Create new inspector history doc if it does not exist
       batch.set(inspectorRef, {
-        InspectorHistoryFields.inspectorId: inspectorId,
-        InspectorHistoryFields.totalInspections: 1,
-        InspectorHistoryFields.avgScore: inspectionScore,
-        InspectorHistoryFields.tasksTotal: 0,
-        InspectorHistoryFields.tasksCompleted: 0,
-        InspectorHistoryFields.recentScores: [inspectionScore],
-        InspectorHistoryFields.vehicleIds: [],
-        InspectorHistoryFields.branchesIds: [],
-        InspectorHistoryFields.lastUpdated: FieldValue.serverTimestamp(),
+        IHF.inspectorId: inspectorId,
+        IHF.totalInspections: 1,
+        IHF.avgScore: inspectionScore,
+        IHF.tasksTotal: 0,
+        IHF.tasksCompleted: 0,
+        IHF.recentScores: [inspectionScore],
+        IHF.vehicleIds: [],
+        IHF.branchesIds: [],
+        IHF.lastUpdated: FieldValue.serverTimestamp(),
       });
     }
   }
@@ -292,7 +301,7 @@ class InspectorInspectionService {
     required String inspectorId,
     required String branchId,
     required String inspectionId,
-    required double score,
+    required String score,
     String status = AppConstants.completed,
   }) async {
     final routeRef = _db.collection(_collectionRoutes).doc(inspectorId);
@@ -320,7 +329,6 @@ class InspectorInspectionService {
     });
   }
 
-  // Fetches the single template document by its ID
   Future<InspectionTemplate?> getTemplateById(String templateId) async {
     try {
       final doc = await _db

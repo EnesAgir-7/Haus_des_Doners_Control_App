@@ -12,7 +12,7 @@ class InspectionModel {
   final String scheduledTime;
   final DateTime? completedTime;
   final String status; // "scheduled" | "completed" | "pending" | "current"
-  final double score;
+  final String score;
   final Map<String, InspectionCategoryModel> categories;
   final String overallNotes;
   final String? pdfReportUrl;
@@ -59,7 +59,7 @@ class InspectionModel {
           ? (data[InspectionFields.completedTime] as Timestamp).toDate()
           : null,
       status: data[InspectionFields.status] ?? AppConstants.pending,
-      score: (data[InspectionFields.score] ?? 0.0).toDouble(),
+      score: (data[InspectionFields.score] ?? "0/0").toString(),
       categories: parsedCategories,
       overallNotes: data[InspectionFields.overallNotes] ?? '',
       pdfReportUrl: data[InspectionFields.pdfReportUrl],
@@ -95,7 +95,7 @@ class InspectionModel {
 }
 
 class InspectionCategoryModel {
-  final int score;
+  final String score;
   final List<String> photos;
   final String notes;
 
@@ -107,7 +107,7 @@ class InspectionCategoryModel {
 
   factory InspectionCategoryModel.fromMap(Map<String, dynamic> data) {
     return InspectionCategoryModel(
-      score: data[InspectionFields.score] ?? 0,
+      score: data[InspectionFields.score] ?? "0/0",
       photos: List<String>.from(data[InspectionFields.photos] ?? []),
       notes: data[InspectionFields.notes] ?? '',
     );

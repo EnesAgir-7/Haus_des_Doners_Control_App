@@ -269,7 +269,7 @@ class InspectorBranchService {
     }
   }
 
-  Future<void> removeBranchAssignment({
+  Future<void> unAssignRouteAndFreeTheBranch({
     required String inspectorId,
     required String branchId,
   }) async {
@@ -295,7 +295,7 @@ class InspectorBranchService {
 
       // Remove branch assignment
       batch.update(branchDocRef, {
-        BranchFields.assignedInspector: null,
+        BranchFields.stop: null,
         BranchFields.updatedAt: Timestamp.fromDate(DateTime.now()),
       });
 

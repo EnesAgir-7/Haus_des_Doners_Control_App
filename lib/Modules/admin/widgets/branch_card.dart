@@ -139,7 +139,7 @@ class BranchCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              '${branch.lastInspectionScore!.toStringAsFixed(1)}',
+              '${branch.lastInspectionScore!}',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -152,9 +152,14 @@ class BranchCard extends StatelessWidget {
     );
   }
 
-  Color _getScoreColor(double score) {
-    if (score >= 9.0) return Colors.green;
-    if (score >= 7.0) return Colors.orange;
+  Color _getScoreColor(String scoreString) {
+    // Extract the first part before '/'
+    final parts = scoreString.split('/');
+    final score = double.tryParse(parts.first) ?? 0.0;
+
+    // Lower score = better (green), higher = worse (red)
+    if (score <= 3.0) return Colors.green;
+    if (score <= 6.0) return Colors.amber;
     return Colors.red;
   }
 }

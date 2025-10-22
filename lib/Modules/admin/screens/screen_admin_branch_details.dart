@@ -146,7 +146,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                   ),
                   _buildInfoRow(
                     LocaleKeys.score.tr(),
-                    widget.branch.lastInspectionScore?.toStringAsFixed(1) ??
+                    widget.branch.lastInspectionScore ??
                         '-',
                   ),
                 ],

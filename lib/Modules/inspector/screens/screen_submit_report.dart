@@ -237,6 +237,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                                   );
                                 },
                                 child: _buildEnhancedQuestionCard(
+                                  maxScore: entry.value.maxScore,
                                   title: entry.value.title,
                                   category: entry.value.categoryId,
                                   score: provider.getCategoryScore(
@@ -366,18 +367,34 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     required String title,
     required String category,
     required int score,
+    required int maxScore, // Add this parameter
     required List<File> photos,
     required String notes,
     required Function(int) onScoreChanged,
     required Function(String) onNotesChanged,
     required Function(File) onPhotoRemoved,
   }) {
-    final List<Map<String, dynamic>> ratings = [
-      {'emoji': '😃', 'label': 'Excellent', 'color': Colors.green},
+    final List<Map<String, dynamic>> allRatings = [
+      {
+        'emoji': '😃',
+        'label': 'Excellent',
+        'color': Colors.green,
+      }, // lowest score
       {'emoji': '🙂', 'label': 'Good', 'color': Colors.lightGreen},
       {'emoji': '😐', 'label': 'Fair', 'color': Colors.orange},
+      {'emoji': '😕', 'label': 'Below Average', 'color': Colors.deepOrange},
       {'emoji': '😞', 'label': 'Poor', 'color': Colors.red},
+      {
+        'emoji': '😢',
+        'label': 'Very Poor',
+        'color': Colors.red.shade900,
+      }, // highest score
     ];
+
+    // Get only the ratings needed based on maxScore
+    final List<Map<String, dynamic>> ratings = allRatings
+        .take(maxScore)
+        .toList();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -393,14 +410,16 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: score > 0
-              ? AppColors.primaryRed.withValues(alpha: 0.5)
+              ? (ratings[score - 1]['color'] as Color).withValues(alpha: 0.5)
               : Colors.white.withValues(alpha: 0.1),
           width: score > 0 ? 2 : 1,
         ),
         boxShadow: score > 0
             ? [
                 BoxShadow(
-                  color: AppColors.primaryRed.withValues(alpha: 0.15),
+                  color: (ratings[score - 1]['color'] as Color).withValues(
+                    alpha: 0.15,
+                  ),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
@@ -416,7 +435,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
               gradient: score > 0
                   ? LinearGradient(
                       colors: [
-                        AppColors.primaryRed.withValues(alpha: 0.15),
+                        (ratings[score - 1]['color'] as Color).withValues(
+                          alpha: 0.15,
+                        ),
                         Colors.transparent,
                       ],
                     )
@@ -432,13 +453,17 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: score > 0
-                        ? AppColors.primaryRed.withValues(alpha: 0.2)
+                        ? (ratings[score - 1]['color'] as Color).withValues(
+                            alpha: 0.2,
+                          )
                         : Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
                     Icons.checklist_rounded,
-                    color: score > 0 ? AppColors.primaryRed : Colors.white54,
+                    color: score > 0
+                        ? ratings[score - 1]['color'] as Color
+                        : Colors.white54,
                     size: 20,
                   ),
                 ),
@@ -455,73 +480,90 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                   ),
                 ),
                 if (score > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryRed,
-                          AppColors.primaryRed.withValues(alpha: 0.8),
-                        ],
+                  Row(
+                    children: [
+                      Text(
+                        '${allRatings[score - 1]['emoji']}',
+                        style: TextStyle(fontSize: 30),
                       ),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryRed.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                      SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.star, color: Colors.white, size: 14),
-                        const SizedBox(width: 4),
-                        Text(
-                          '$score/4',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              ratings[score - 1]['color'] as Color,
+                              (ratings[score - 1]['color'] as Color).withValues(
+                                alpha: 0.8,
+                              ),
+                            ],
                           ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (ratings[score - 1]['color'] as Color)
+                                  .withValues(alpha: 0.3),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.star,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$score/$maxScore',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
               ],
             ),
           ),
 
-          // Rating Buttons
+          // Rating Buttons - Dynamic based on maxScore
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
             child: Row(
-              children: List.generate(4, (index) {
+              children: List.generate(maxScore, (index) {
                 final rating = index + 1;
                 final isSelected = score == rating;
                 final ratingData = ratings[index];
+                final ratingColor = ratingData['color'] as Color;
 
                 return Expanded(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: GestureDetector(
                       onTap: () => onScoreChanged(rating),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         curve: Curves.easeOutCubic,
-                        height: isSelected ? 100 : 80,
+                        height: 70,
                         decoration: BoxDecoration(
                           gradient: isSelected
                               ? LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    AppColors.primaryRed,
-                                    AppColors.primaryRed.withValues(alpha: 0.8),
+                                    ratingColor,
+                                    ratingColor.withValues(alpha: 0.8),
                                   ],
                                 )
                               : LinearGradient(
@@ -533,18 +575,16 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: isSelected
-                                ? AppColors.primaryRed
+                                ? ratingColor
                                 : Colors.white.withValues(alpha: 0.1),
                             width: isSelected ? 2 : 1,
                           ),
                           boxShadow: isSelected
                               ? [
                                   BoxShadow(
-                                    color: AppColors.primaryRed.withValues(
-                                      alpha: 0.4,
-                                    ),
+                                    color: ratingColor.withValues(alpha: 0.4),
                                     blurRadius: 12,
-                                    offset: const Offset(0, 4),
+                                    offset: const Offset(0, 3),
                                   ),
                                 ]
                               : null,
@@ -553,16 +593,12 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              ratingData['emoji'],
-                              style: TextStyle(fontSize: isSelected ? 28 : 24),
-                            ),
-                            Text(
                               rating.toString(),
                               style: TextStyle(
-                                fontSize: isSelected ? 20 : 16,
+                                fontSize: isSelected ? 23 : 20,
                                 fontWeight: isSelected
                                     ? FontWeight.bold
-                                    : FontWeight.w600,
+                                    : FontWeight.normal,
                                 color: isSelected
                                     ? Colors.white
                                     : Colors.white70,
@@ -576,6 +612,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                                   color: Colors.white70,
                                   fontWeight: FontWeight.w500,
                                 ),
+                                textAlign: TextAlign.center,
                               ),
                             ],
                           ],
@@ -626,7 +663,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
-                      color: AppColors.primaryRed,
+                      color: score > 0
+                          ? ratings[score - 1]['color'] as Color
+                          : AppColors.primaryRed,
                       width: 2,
                     ),
                   ),
@@ -636,7 +675,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             ),
           ),
 
-          // Photos Section
+          // Photos Section (unchanged)
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(

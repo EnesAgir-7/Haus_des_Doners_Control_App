@@ -53,9 +53,10 @@ class InspectorStatsService {
         .where(InspectionFields.status, isEqualTo: AppConstants.completed)
         .get();
 
-    return snapshot.docs
-        .map((doc) => (doc.data()[InspectionFields.score] as num).toDouble())
-        .toList();
+    return snapshot.docs.map((doc) {
+      final score = doc.data()[InspectionFields.score]?.toString() ?? "0";
+      return double.tryParse(score.split('/').first) ?? 0.0;
+    }).toList();
   }
 
   double _calculateAverage(List<double> scores) {

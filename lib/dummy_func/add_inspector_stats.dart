@@ -12,7 +12,7 @@ Future<void> addDummyInspectorStats() async {
     avgScore: 8.4,
     tasksTotal: 15,
     tasksCompleted: 10,
-    recentScores: [6, 7, 8, 9, 10],
+    recentScores: ["6/20", "7/18", "8/12", "9/14", "8/12"],
     vehicleIds: [
       "1RqB9QmbXzIL2lj4FtTK",
       "Jfp245f0LcSVaiSLrgvc",

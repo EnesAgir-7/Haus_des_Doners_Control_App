@@ -357,7 +357,6 @@ class BranchDetailsSheet extends StatelessWidget {
 
   const BranchDetailsSheet({required this.branch, required this.provider});
 
-
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
@@ -561,7 +560,7 @@ class BranchDetailsSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-             branch. isNextInspectionToday
+              branch.isNextInspectionToday
                   ? "Today"
                   : formatTimeSlot(branch.stop!.timeSlot.toString()),
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -682,7 +681,7 @@ class BranchDetailsSheet extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            inspection.score.toStringAsFixed(1),
+                            inspection.score,
                             style: TextStyle(
                               color: _getScoreColor(inspection.score),
                               fontWeight: FontWeight.bold,
@@ -834,9 +833,14 @@ class BranchDetailsSheet extends StatelessWidget {
     );
   }
 
-  Color _getScoreColor(double score) {
+  Color _getScoreColor(String scoreString) {
+    // Extract the first part before '/'
+    final parts = scoreString.split('/');
+    final score = double.tryParse(parts.first) ?? 0.0;
+
+    // Lower score = better (green), higher = worse (red)
     if (score <= 3.0) return Colors.green;
-    if (score <= 7.0) return Colors.amber;
+    if (score <= 6.0) return Colors.amber;
     return Colors.red;
   }
 }
@@ -946,7 +950,7 @@ class RouteManagementSheet extends StatelessWidget {
                     isLoading: prod.isLoading,
                     text: "Remove from Route",
                     onPressed: () async {
-                      final success = await prod.unAssignBranchToMe(
+                      final success = await prod.unAssignMyRoute(
                         branchId: branch.id,
                         context: context,
                       );

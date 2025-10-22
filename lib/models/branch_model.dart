@@ -17,7 +17,7 @@ class BranchModel {
   final RouteStopModel? stop;
   final AssignedInspector? assignedInspector;
   final DateTime? lastInspectionDate;
-  final double? lastInspectionScore;
+  final String? lastInspectionScore;
   final int totalInspections;
   final double averageScore;
   final String status;
@@ -71,7 +71,7 @@ class BranchModel {
       lastInspectionDate: data[BranchFields.lastInspectionDate] != null
           ? (data[BranchFields.lastInspectionDate] as Timestamp).toDate()
           : null,
-      lastInspectionScore: data[BranchFields.lastInspectionScore]?.toDouble(),
+      lastInspectionScore: data[BranchFields.lastInspectionScore],
       totalInspections: data[BranchFields.totalInspections] ?? 0,
       averageScore: (data[BranchFields.averageScore] ?? 0.0).toDouble(),
       status: data[BranchFields.status] ?? AppConstants.active,
@@ -88,9 +88,13 @@ class BranchModel {
           : null,
       last12MonthsScores: data[BranchFields.last12MonthsScores] != null
           ? List<double>.from(
-              (data[BranchFields.last12MonthsScores] as List<dynamic>).map(
-                (e) => e?.toDouble() ?? 0.0,
-              ),
+              (data[BranchFields.last12MonthsScores] as List<dynamic>).map((e) {
+                if (e is String && e.contains('/')) {
+                  final parts = e.split('/');
+                  return double.tryParse(parts.first) ?? 0.0;
+                }
+                return double.tryParse(e.toString()) ?? 0.0;
+              }),
             )
           : List.filled(12, 0.0),
     );
@@ -107,7 +111,7 @@ class BranchModel {
     String? contactPhone,
     AssignedInspector? assignedInspector,
     DateTime? lastInspectionDate,
-    double? lastInspectionScore,
+    String? lastInspectionScore,
     int? totalInspections,
     double? averageScore,
     String? status,
