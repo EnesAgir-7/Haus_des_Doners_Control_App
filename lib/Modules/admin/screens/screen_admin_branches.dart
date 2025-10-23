@@ -92,7 +92,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
 
               return ListView.separated(
                 padding: EdgeInsets.only(right: 10, left: 10, bottom: 10),
-                separatorBuilder: (context, index) => SizedBox(height: 7),
+                separatorBuilder: (context, index) => SizedBox(height: 8),
                 itemCount: branches.length,
                 itemBuilder: (context, index) {
                   final branch = branches[index];
