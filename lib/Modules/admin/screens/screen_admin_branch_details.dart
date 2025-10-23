@@ -200,25 +200,22 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeaderSection(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   _buildStatsCards(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   _buildBasicInfoSection(),
-                  const SizedBox(height: 24),
-                  Container(height: 1, color: Colors.white24),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildContactInfoSection(),
-                  const SizedBox(height: 24),
-                  Container(height: 1, color: Colors.white24),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildInspectionHistorySection(),
-                  const SizedBox(height: 24),
-                  Container(height: 1, color: Colors.white24),
-                  const SizedBox(height: 24),
-                  _buildPerformanceChart(),
-                  const SizedBox(height: 24),
-                  Container(height: 1, color: Colors.white24),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  const SizedBox(height: 16),
+                  if (!widget.branch.haveNoScores) ...[
+                    _buildPerformanceChart(),
+                    const SizedBox(height: 16),
+                  ],
                   _buildAssignedInspectorSection(),
                   const SizedBox(height: 80),
                 ],
@@ -267,52 +264,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     );
   }
 
-  // Widget _buildAppBar() {
-  //   return SliverAppBar(
-  //     expandedHeight: 0,
-  //     floating: true,
-  //     pinned: false,
-  //     backgroundColor: Colors.transparent,
-  //     elevation: 0,
-  //     leading: IconButton(
-  //       icon: const Icon(Icons.arrow_back, color: Colors.white),
-  //       onPressed: () => Navigator.pop(context),
-  //     ),
-  //     actions: [
-  //       IconButton(
-  //         icon: Icon(
-  //           _isEditing ? Icons.close : Icons.edit,
-  //           color: Colors.white,
-  //         ),
-  //         onPressed: _toggleEdit,
-  //       ),
-  //       if (_isEditing)
-  //         Consumer<ProviderAdminBranches>(
-  //           builder: (context, provider, _) {
-  //             return IconButton(
-  //               icon: provider.isLoading
-  //                   ? const SizedBox(
-  //                       width: 20,
-  //                       height: 20,
-  //                       child: CircularProgressIndicator(
-  //                         strokeWidth: 2,
-  //                         color: Colors.white,
-  //                       ),
-  //                     )
-  //                   : const Icon(Icons.save, color: Colors.white),
-  //               onPressed: provider.isLoading ? null : _saveChanges,
-  //             );
-  //           },
-  //         ),
-  //     ],
-  //   );
-  // }
-
   Widget _buildHeaderSection() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.lightBlack.withValues(alpha:  0.3),
+        color: AppColors.lightBlack.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -676,28 +632,6 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   }
 
   Widget _buildPerformanceChart() {
-    if (widget.branch.last12MonthsScores == null ||
-        widget.branch.last12MonthsScores!.every((score) => score == '0')) {
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: AppColors.lightBlack,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white24),
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.bar_chart, size: 48, color: Colors.white24),
-            const SizedBox(height: 12),
-            Text(
-              'No performance data yet',
-              style: TextStyle(color: Colors.white54, fontSize: 14),
-            ),
-          ],
-        ),
-      );
-    }
-
     // Parse scores and extract actual values
     final List<Map<String, dynamic>> parsedScores = [];
     double maxActualScore = 0;

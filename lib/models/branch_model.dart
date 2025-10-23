@@ -86,14 +86,13 @@ class BranchModel {
               Map<String, dynamic>.from(data[BranchFields.stop]),
             )
           : null,
-last12MonthsScores: data[BranchFields.last12MonthsScores] != null
+      last12MonthsScores: data[BranchFields.last12MonthsScores] != null
           ? List<String>.from(
               (data[BranchFields.last12MonthsScores] as List<dynamic>).map(
                 (e) => e.toString(),
               ),
             )
           : List.filled(12, '0'),
-
     );
   }
 
@@ -200,6 +199,11 @@ last12MonthsScores: data[BranchFields.last12MonthsScores] != null
     return stop?.timeSlot != null &&
         stop!.timeSlot.isNotEmpty &&
         stop?.timeSlot == DateFormat('yyyy-MM-dd').format(DateTime.now());
+  }
+
+  bool get haveNoScores {
+    return last12MonthsScores == null ||
+        last12MonthsScores!.every((score) => score == '0');
   }
 }
 
