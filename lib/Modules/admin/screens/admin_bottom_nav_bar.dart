@@ -109,6 +109,12 @@ class AdminBottomNavBar extends StatelessWidget {
                     selectedIcon: Icon(Icons.task, color: AppColors.primaryRed),
                     label: LocaleKeys.tasks.tr(),
                   ),
+
+                  NavigationDestination(
+                    icon: const Icon(Icons.settings, color: Colors.white70),
+                    selectedIcon: Icon(Icons.settings, color: AppColors.primaryRed),
+                    label: "Settings",
+                  )
                 ],
               ),
             ),

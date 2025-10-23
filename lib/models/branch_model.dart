@@ -9,7 +9,7 @@ class BranchModel {
   final String id;
   final String name;
   final String address;
-  final String templateId;
+  String templateId;
   final String? region;
   final GeoPoint gps;
   final String contactName;

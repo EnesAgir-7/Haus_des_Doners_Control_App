@@ -5,6 +5,7 @@ import 'package:haus_des_control/Modules/admin/screens/screen_admin_tasks.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admin_users.dart';
 
 import '../screens/screen_admin_home.dart';
+import '../screens/screen_admin_settings.dart';
 
 class AdminBottomNavProvider extends ChangeNotifier {
   int _selectedIndex = 0;
@@ -16,6 +17,7 @@ class AdminBottomNavProvider extends ChangeNotifier {
     ScreenAdminBranches(),
     ScreenAdminVehicle(),
     ScreenAdminTasks(),
+    ScreenAdminSettings(),
   ];
 
   void onItemTapped(int index) {

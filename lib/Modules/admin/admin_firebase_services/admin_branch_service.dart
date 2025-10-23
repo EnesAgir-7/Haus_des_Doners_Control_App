@@ -74,6 +74,26 @@ class AdminBranchService {
     }
   }
 
+  Future<void> updateBranchTemplate({
+    required String branchId,
+    required String templateId,
+    required String templateName,
+  }) async {
+    try {
+      // You should have defined BranchFields as constants for safety
+      await _db.collection(_collectionBranches).doc(branchId).update({
+        BranchFields.templateId: templateId,
+        BranchFields.updatedAt: Timestamp.fromDate(DateTime.now()),
+      });
+      console(
+        'Branch $branchId template updated to: $templateName ($templateId)',
+      );
+    } catch (e) {
+      print("Error updating branch template: $e");
+      rethrow;
+    }
+  }
+
   Future<void> updateBranchAssignedInspector(
     String branchId,
     Map<String, String> inspectorData,

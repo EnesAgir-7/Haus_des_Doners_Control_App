@@ -88,6 +88,27 @@ class ProviderAdminBranches with ChangeNotifier {
     }
   }
 
+
+Future<bool> updateBrachTemplate({
+    required String branchId,
+    required String templateId,
+    required String templateName,
+  }) async {
+    try {
+      console('Updating branch template...');
+      await  _branchService.updateBranchTemplate(
+        branchId: branchId,
+        templateId: templateId,
+        templateName: templateName,
+      );
+      return true;
+    } catch (e) {
+      console('❌ Error updating template: $e');
+      return false; 
+    } finally {
+    }
+  }
+
 Future<bool> assignInspectorToBranch({
     required String branchId,
     required String inspectorId,

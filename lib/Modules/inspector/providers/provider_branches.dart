@@ -178,6 +178,8 @@ class ProviderBranches extends ChangeNotifier {
     return filtered;
   }
 
+
+
   Future<bool> updateStopTimeSlotForMe({
     required String branchId,
     required String newTimeSlot,
