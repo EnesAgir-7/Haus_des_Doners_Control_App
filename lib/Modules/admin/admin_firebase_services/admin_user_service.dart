@@ -77,4 +77,41 @@ class AdminUserService {
   }
 
 
+
+/// 🔹 Updates any field(s) in the inspector history using a batch.
+  /// Pass a map of values to update, e.g. {IHF.totalInspections: 5}.
+  /// If the doc doesn't exist, it will create a new one with default values plus the provided updates.
+  Future<void> updateInspectorHistoryBatch({
+    required WriteBatch batch,
+    required String inspectorId,
+    required Map<String, dynamic> updates,
+  }) async {
+    final inspectorRef = FirebaseFirestore.instance
+        .collection(Collections.inspectorStats)
+        .doc(inspectorId);
+
+    final inspectorDoc = await inspectorRef.get();
+
+    if (inspectorDoc.exists) {
+      batch.update(inspectorRef, {
+        ...updates,
+        IHF.lastUpdated: FieldValue.serverTimestamp(),
+      });
+    } else {
+      batch.set(inspectorRef, {
+        IHF.inspectorId: inspectorId,
+        IHF.totalInspections: "0",
+        IHF.avgScore: "0.0",
+        IHF.tasksTotal: "0",
+        IHF.tasksCompleted: "0",
+        IHF.recentScores: [],
+        IHF.vehicleIds: [],
+        IHF.branchesIds: [],
+        IHF.lastUpdated: FieldValue.serverTimestamp(),
+        ...updates, // apply the provided updates
+      });
+    }
+  }
+
+
 }

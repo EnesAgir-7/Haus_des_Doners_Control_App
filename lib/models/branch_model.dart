@@ -15,13 +15,13 @@ class BranchModel {
   final String contactName;
   final String contactPhone;
   final RouteStopModel? stop;
-  final AssignedInspector? assignedInspector;
+  AssignedInspector? assignedInspector;
   final DateTime? lastInspectionDate;
   final String? lastInspectionScore;
   final int totalInspections;
   final double averageScore;
   final String status;
-  final List<double>? last12MonthsScores;
+  final List<String>? last12MonthsScores;
 
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -86,17 +86,14 @@ class BranchModel {
               Map<String, dynamic>.from(data[BranchFields.stop]),
             )
           : null,
-      last12MonthsScores: data[BranchFields.last12MonthsScores] != null
-          ? List<double>.from(
-              (data[BranchFields.last12MonthsScores] as List<dynamic>).map((e) {
-                if (e is String && e.contains('/')) {
-                  final parts = e.split('/');
-                  return double.tryParse(parts.first) ?? 0.0;
-                }
-                return double.tryParse(e.toString()) ?? 0.0;
-              }),
+last12MonthsScores: data[BranchFields.last12MonthsScores] != null
+          ? List<String>.from(
+              (data[BranchFields.last12MonthsScores] as List<dynamic>).map(
+                (e) => e.toString(),
+              ),
             )
-          : List.filled(12, 0.0),
+          : List.filled(12, '0'),
+
     );
   }
 
@@ -116,7 +113,7 @@ class BranchModel {
     double? averageScore,
     String? status,
     DateTime? createdAt,
-    List<double>? last12MonthsScores,
+    List<String>? last12MonthsScores,
 
     DateTime? updatedAt,
     RouteStopModel? stop,

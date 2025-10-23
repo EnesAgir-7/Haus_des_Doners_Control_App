@@ -10,10 +10,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showLogout;
   final bool showLang;
   final String? title;
+  final List<Widget>? actions;
 
   const CustomAppBar({
     super.key,
     this.showLogout = false,
+    this.actions, 
     this.showLang = false,
     this.title,
   });
@@ -83,7 +85,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               )
             : null,
-        actions: [
+        actions:actions?? [
           if (showLang) const LanguageButton(),
           if (showLogout)
             Container(

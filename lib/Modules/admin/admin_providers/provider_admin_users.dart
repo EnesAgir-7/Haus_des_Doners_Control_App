@@ -137,8 +137,6 @@ class ProviderAdminUsers extends ChangeNotifier {
   ) async {
     try {
       final inspector = _inspectors.firstWhere((i) => i.id == inspectorId);
-
-      // Update branch with assigned inspector
       await _branchService.updateBranchAssignedInspector(branchId, {
         InspectorFields.id: inspector.id,
         InspectorFields.name: inspector.name,
@@ -151,11 +149,17 @@ class ProviderAdminUsers extends ChangeNotifier {
   }
 
   // Unassign branch from inspector
-  Future<void> unassignBranchFromInspector(String branchId) async {
+  Future<void> unassignBranchFromInspector(
+    String branchId,
+    String inspectionId,
+  ) async {
     try {
       _isLoading = true;
       notifyListeners();
-      await _branchService.removeBranchFromInspector(branchId: branchId);
+      await _branchService.removeBranchFromInspector(
+        branchId: branchId,
+        inspectorId: inspectionId,
+      );
       _isLoading = false;
       notifyListeners();
     } catch (e) {

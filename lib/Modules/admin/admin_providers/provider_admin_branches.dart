@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/console.dart';
 
 import '../../../models/branch_model.dart';
 import '../../../models/user_model.dart';
@@ -87,30 +88,48 @@ class ProviderAdminBranches with ChangeNotifier {
     }
   }
 
-  Future<void> assignInspectorToBranch(
-    String branchId,
-    String inspectorId,
-  ) async {
+Future<bool> assignInspectorToBranch({
+    required String branchId,
+    required String inspectorId,
+    required String inspectorName,
+  }) async {
     _setLoading(true);
-    _error = null;
-
     try {
-      if (inspectorId.isEmpty) {
-        await _branchService.removeBranchFromInspector(branchId: branchId);
-      } else {
-        final inspector = _inspectors.firstWhere((i) => i.id == inspectorId);
-        await _branchService.assignBranchToInspector(
-          inspectorId: inspectorId,
-          inspectorName: inspector.name,
-          branchId: branchId,
-        );
-      }
+      console('Assigning branch to inspector...');
+      await _branchService.assignBranchToInspector(
+        inspectorId: inspectorId,
+        inspectorName: inspectorName,
+        branchId: branchId,
+      );
+      return true; // ✅ Success
     } catch (e) {
-      _error = 'Error assigning inspector: $e';
+      console('❌ Error assigning branch: $e');
+      return false; // ❌ Failure
     } finally {
       _setLoading(false);
     }
   }
+
+  Future<bool> unassignInspectorFromBranch({
+    required String branchId,
+    required String inspectorId,
+  }) async {
+    _setLoading(true);
+    try {
+      console('Unassigning branch from inspector...');
+      await _branchService.removeBranchFromInspector(
+        branchId: branchId,
+        inspectorId: inspectorId,
+      );
+      return true; // ✅ Success
+    } catch (e) {
+      console('❌ Error unassigning branch: $e');
+      return false; // ❌ Failure
+    } finally {
+      _setLoading(false);
+    }
+  }
+
 
   void _setLoading(bool value) {
     _isLoading = value;

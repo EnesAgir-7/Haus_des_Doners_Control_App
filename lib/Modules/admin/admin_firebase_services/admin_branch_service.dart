@@ -1,13 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
 import 'package:haus_des_control/core/console.dart';
 
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_model.dart';
 
-
 class AdminBranchService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collectionBranches = Collections.branches;
+  final AdminUserService _userService = AdminUserService();
 
   // Get all unassigned branches
   Future<List<BranchModel>> getUnassignedBranches() async {
@@ -30,10 +31,7 @@ class AdminBranchService {
     try {
       final snapshot = await _db
           .collection(_collectionBranches)
-          .where(
-            '${BranchFields.assignedInspectorId}',
-            isEqualTo: inspectorId,
-          )
+          .where('${BranchFields.assignedInspectorId}', isEqualTo: inspectorId)
           .get();
 
       if (snapshot.docs.isEmpty) return [];
@@ -58,31 +56,6 @@ class AdminBranchService {
               .map((doc) => BranchModel.fromFirestore(doc))
               .toList(),
         );
-  }
-
-  Future<void> assignBranchToInspector({
-    required String inspectorId,
-    required String inspectorName,
-    required String branchId,
-  }) async {
-    try {
-      final branchDocRef = _db.collection(_collectionBranches).doc(branchId);
-
-      await branchDocRef.update({
-        BranchFields.assignedInspector: {
-          InspectorFields.id: inspectorId,
-          InspectorFields.name: inspectorName,
-        },
-        BranchFields.updatedAt: Timestamp.fromDate(DateTime.now()),
-      });
-
-      console(
-        '✅ Branch $branchId assigned successfully to inspector $inspectorName',
-      );
-    } catch (e, st) {
-      print("❌ Error assigning branch: $e\n$st");
-      rethrow;
-    }
   }
 
   Future<void> updateBranch(BranchModel branch) async {
@@ -117,20 +90,77 @@ class AdminBranchService {
     }
   }
 
-  Future<void> removeBranchFromInspector({required String branchId}) async {
-    try {
-      final branchDocRef = _db.collection(_collectionBranches).doc(branchId);
+  Future<void> removeBranchFromInspector({
+    required String inspectorId,
+    required String branchId,
+  }) async {
+    final batch = FirebaseFirestore.instance.batch();
+    final branchRef = FirebaseFirestore.instance
+        .collection(_collectionBranches)
+        .doc(branchId);
 
-      await branchDocRef.update({
+    try {
+      // 1️⃣ Unassign branch document
+      batch.update(branchRef, {
         BranchFields.assignedInspector: null,
-        BranchFields.updatedAt: Timestamp.fromDate(DateTime.now()),
+        BranchFields.updatedAt: Timestamp.now(),
       });
 
-      console('✅ Branch $branchId unassigned successfully');
+      // 2️⃣ Update inspector history
+      await _userService.updateInspectorHistoryBatch(
+        batch: batch,
+        inspectorId: inspectorId,
+        updates: {
+          IHF.branchesIds: FieldValue.arrayRemove([branchId]),
+        },
+      );
+
+      // 3️⃣ Commit batch
+      await batch.commit();
+
+      console('✅ Branch $branchId unassigned successfully and history updated');
     } catch (e, st) {
       print("❌ Error unassigning branch: $e\n$st");
       rethrow;
     }
   }
-}
 
+  Future<void> assignBranchToInspector({
+    required String inspectorId,
+    required String inspectorName,
+    required String branchId,
+  }) async {
+    final batch = FirebaseFirestore.instance.batch();
+    final branchRef = FirebaseFirestore.instance
+        .collection(_collectionBranches)
+        .doc(branchId);
+
+    try {
+      // 1️⃣ Update branch document
+      batch.update(branchRef, {
+        BranchFields.assignedInspector: {
+          InspectorFields.id: inspectorId,
+          InspectorFields.name: inspectorName,
+        },
+        BranchFields.updatedAt: Timestamp.now(),
+      });
+
+      // 2️⃣ Update inspector history
+      await _userService.updateInspectorHistoryBatch(
+        batch: batch,
+        inspectorId: inspectorId,
+        updates: {
+          IHF.branchesIds: FieldValue.arrayUnion([branchId]),
+        },
+      );
+
+      // 3️⃣ Commit batch
+      await batch.commit();
+
+      console('✅ Branch $branchId assigned successfully to $inspectorName');
+    } catch (e, st) {
+      print("❌ Error assigning branch: $e\n$st");
+      rethrow;
+    }
+  }
+}
