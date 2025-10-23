@@ -38,6 +38,7 @@ class BranchFields {
   static const String contactName = 'contactName';
   static const String contactPhone = 'contactPhone';
   static const String templateId = 'templateId';
+  static const String templateName = 'templateName';
   static const String assignedInspector = 'assignedInspector';
   static const String assignedInspectorId = 'assignedInspector.id';
   static const String assignedInspectorName = 'assignedInspector.name';

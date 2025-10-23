@@ -10,6 +10,7 @@ class BranchModel {
   final String name;
   final String address;
   String templateId;
+  String templateName;
   final String? region;
   final GeoPoint gps;
   final String contactName;
@@ -29,6 +30,7 @@ class BranchModel {
   BranchModel({
     required this.id,
     required this.templateId,
+    required this.templateName,
     required this.name,
     required this.address,
     this.region,
@@ -54,6 +56,7 @@ class BranchModel {
       name: data[BranchFields.name] ?? '',
       address: data[BranchFields.address] ?? '',
       templateId: data[BranchFields.templateId] ?? '',
+      templateName: data[BranchFields.templateName] ?? '',
       region: data[BranchFields.region],
       gps: data[BranchFields.gps] as GeoPoint,
       contactName: data[BranchFields.contactName] ?? '',
@@ -101,6 +104,7 @@ class BranchModel {
     String? name,
     String? address,
     String? templateId,
+    String? templateName,
     String? region,
     GeoPoint? gps,
     String? contactName,
@@ -122,6 +126,7 @@ class BranchModel {
       name: name ?? this.name,
       address: address ?? this.address,
       templateId: templateId ?? this.templateId,
+      templateName: templateName ?? this.templateName,
       region: region ?? this.region,
       gps: gps ?? this.gps,
       contactName: contactName ?? this.contactName,
@@ -148,6 +153,7 @@ class BranchModel {
       BranchFields.contactName: contactName,
       BranchFields.contactPhone: contactPhone,
       BranchFields.templateId: templateId,
+      BranchFields.templateName: templateName,
       BranchFields.assignedInspector: {
         InspectorFields.id: assignedInspector?.id,
         InspectorFields.name: assignedInspector?.name,

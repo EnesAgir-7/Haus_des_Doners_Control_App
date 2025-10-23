@@ -83,6 +83,7 @@ class AdminBranchService {
       // You should have defined BranchFields as constants for safety
       await _db.collection(_collectionBranches).doc(branchId).update({
         BranchFields.templateId: templateId,
+        BranchFields.templateName: templateName,
         BranchFields.updatedAt: Timestamp.fromDate(DateTime.now()),
       });
       console(
