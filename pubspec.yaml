@@ -61,6 +61,7 @@ dependencies:
   url_launcher: ^6.3.2
   photo_view: ^0.15.0
   syncfusion_flutter_pdfviewer: ^31.2.2
+  tuple: ^2.0.2
   
 
 dev_dependencies:

@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../models/inspector_history_model.dart';
 import '../../../models/route_model.dart';
 import '../../inspector/widgets/app_button.dart';
 
@@ -263,6 +264,15 @@ class AdminStopInfoSheet extends StatelessWidget {
   }
 }
 
+
+
+class ParsedScore {
+  final double score;
+  final double maxScore;
+
+  ParsedScore({required this.score, required this.maxScore});
+}
+
 class _StopStatusInfo {
   final String label;
   final IconData icon;
@@ -275,4 +285,212 @@ class _StopStatusInfo {
     required this.color,
     required this.gradientColors,
   });
+}
+
+Widget buildScoresChart(InspectorHistoryModel stats) {
+  if (stats.recentScores.isEmpty) {
+    return const SizedBox.shrink();
+  }
+
+  final parsedScores = <ParsedScore>[];
+  double globalMaxScore = 0;
+
+  for (final scoreStr in stats.recentScores.take(10)) {
+    try {
+      final parts = scoreStr.split('/');
+      if (parts.length == 2) {
+        final score = double.parse(parts[0].trim());
+        final maxScore = double.parse(parts[1].trim());
+        parsedScores.add(ParsedScore(score: score, maxScore: maxScore));
+
+        if (maxScore > globalMaxScore) {
+          globalMaxScore = maxScore;
+        }
+      }
+    } catch (e) {
+      print('Error parsing score: $scoreStr');
+    }
+  }
+
+  if (parsedScores.isEmpty) {
+    return const SizedBox.shrink();
+  }
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Row(
+        children: [
+          Icon(Icons.show_chart, color: AppColors.primaryRed, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            "Recent Performance",
+            style: TextStyle(
+              color: AppColors.primaryRed,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildLegendItem(Colors.green, 'Excellent (0-3)'),
+                const SizedBox(width: 12),
+                _buildLegendItem(AppColors.amber, 'Good (4-6)'),
+                const SizedBox(width: 12),
+                _buildLegendItem(AppColors.primaryRed, 'Poor (7+)'),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 180,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(parsedScores.length, (index) {
+                  final parsedScore = parsedScores[index];
+                  final score = parsedScore.score;
+                  final maxScore = parsedScore.maxScore;
+
+                  final invertedScore = globalMaxScore - score;
+                  final heightRatio = (invertedScore / globalMaxScore).clamp(
+                    0.05,
+                    1.0,
+                  );
+                  final barHeight = heightRatio * 120;
+
+                  final color = _getScoreColorReversed(score);
+
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: color.withValues(alpha: 0.5),
+                              ),
+                            ),
+                            child: FittedBox(
+                              child: Text(
+                                '${score.toInt()}',
+                                style: TextStyle(
+                                  color: color,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            width: double.infinity,
+                            height: barHeight,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [color, color.withValues(alpha: 0.6)],
+                              ),
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(6),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: color.withValues(alpha: 0.3),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '/${maxScore.toInt()}',
+                            style: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 9,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(parsedScores.length, (index) {
+                return Expanded(
+                  child: Text(
+                    '#${parsedScores.length - index}',
+                    style: TextStyle(
+                      color: Colors.white54,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }),
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 8),
+      Center(
+        child: Text(
+          'Last ${parsedScores.length} inspection${parsedScores.length > 1 ? 's' : ''}',
+          style: TextStyle(
+            color: Colors.white54,
+            fontSize: 11,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      ),
+    ],
+  );
+}
+Widget _buildLegendItem(Color color, String label) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 12,
+        height: 12,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+      const SizedBox(width: 4),
+      Text(label, style: TextStyle(color: Colors.white54, fontSize: 10)),
+    ],
+  );
+}
+
+// Reversed color logic: Lower score = Better (Green)
+Color _getScoreColorReversed(double score) {
+  if (score <= 3) return Colors.green; // Excellent
+  if (score <= 6) return AppColors.amber; // Good
+  return AppColors.primaryRed; // Poor
 }

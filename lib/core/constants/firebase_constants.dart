@@ -10,7 +10,7 @@ class Collections {
   static const String vehicles = 'vehicles';
   static const String inspectors = 'inspectors';
   static const String admins = 'admins';
-  static const String inspectorStats = 'inspector_stats';
+  static const String inspectorStats = 'inspector_history';
 }
 
 class VehicleFields {
@@ -74,6 +74,8 @@ class InspectionFields {
 
 class IHF {
   static const String inspectorId = 'inspectorId';
+  static const String year = 'year';
+  static const String month = 'month';
   static const String totalInspections = 'totalInspections';
   static const String avgScore = 'avgScore';
   static const String tasksTotal = 'tasksTotal';

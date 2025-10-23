@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../core/constants/app_constants.dart';
@@ -184,12 +185,21 @@ class InspectorInspectionService {
         score: inspection.score,
       );
 
-      // Update inspector history
-      await _prepareInspectorHistoryBatch(
+      await AdminUserService().updateInspectorHistoryBatch(
         batch: batch,
         inspectorId: inspection.inspectorId,
-        inspectionScore: inspection.score,
+        updates: {
+          IHF.totalInspections: FieldValue.increment(1),
+          IHF.recentScores: [inspection.score.toString()],
+        },
       );
+
+      // // Update inspector history
+      // await _prepareInspectorHistoryBatch(
+      //   batch: batch,
+      //   inspectorId: inspection.inspectorId,
+      //   inspectionScore: inspection.score,
+      // );
 
       await batch.commit();
 
@@ -233,67 +243,67 @@ class InspectorInspectionService {
     });
   }
 
-  Future<void> _prepareInspectorHistoryBatch({
-    required WriteBatch batch,
-    required String inspectorId,
-    required String inspectionScore,
-  }) async {
-    final inspectorRef = _db
-        .collection(Collections.inspectorStats)
-        .doc(inspectorId);
+  // Future<void> _prepareInspectorHistoryBatch({
+  //   required WriteBatch batch,
+  //   required String inspectorId,
+  //   required String inspectionScore,
+  // }) async {
+  //   final inspectorRef = _db
+  //       .collection(Collections.inspectorStats)
+  //       .doc(inspectorId);
 
-    final inspectorDoc = await inspectorRef.get();
+  //   final inspectorDoc = await inspectorRef.get();
 
-    if (inspectorDoc.exists) {
-      final data = inspectorDoc.data()!;
-      final currentTotal = data[IHF.totalInspections] ?? 0;
-      final currentAvg = (data[IHF.avgScore] ?? 0.0).toDouble();
-      final newTotal = currentTotal + 1;
+  //   if (inspectorDoc.exists) {
+  //     final data = inspectorDoc.data()!;
+  //     final currentTotal = data[IHF.totalInspections] ?? 0;
+  //     final currentAvg = (data[IHF.avgScore] ?? 0.0).toDouble();
+  //     final newTotal = currentTotal + 1;
 
-      // Extract the numeric part from "3/12"
-      final inspectionParts = inspectionScore.split('/');
-      final numericScore = double.tryParse(inspectionParts.first) ?? 0.0;
+  //     // Extract the numeric part from "3/12"
+  //     final inspectionParts = inspectionScore.split('/');
+  //     final numericScore = double.tryParse(inspectionParts.first) ?? 0.0;
 
-      // Calculate new average
-      final newAvg = ((currentAvg * currentTotal) + numericScore) / newTotal;
+  //     // Calculate new average
+  //     final newAvg = ((currentAvg * currentTotal) + numericScore) / newTotal;
 
-      // Get current recentScores and append new score
-      final recentScores = data[IHF.recentScores] != null
-          ? List<String>.from(
-              (data[IHF.recentScores] as List<dynamic>).map(
-                (e) => e.toString(),
-              ),
-            )
-          : <String>[];
+  //     // Get current recentScores and append new score
+  //     final recentScores = data[IHF.recentScores] != null
+  //         ? List<String>.from(
+  //             (data[IHF.recentScores] as List<dynamic>).map(
+  //               (e) => e.toString(),
+  //             ),
+  //           )
+  //         : <String>[];
 
-      recentScores.add(inspectionScore);
+  //     recentScores.add(inspectionScore);
 
-      // Keep only the last 10 scores
-      if (recentScores.length > 10) {
-        recentScores.removeRange(0, recentScores.length - 10);
-      }
+  //     // Keep only the last 10 scores
+  //     if (recentScores.length > 10) {
+  //       recentScores.removeRange(0, recentScores.length - 10);
+  //     }
 
-      batch.update(inspectorRef, {
-        IHF.totalInspections: newTotal,
-        IHF.avgScore: newAvg,
-        IHF.recentScores: recentScores,
-        IHF.lastUpdated: FieldValue.serverTimestamp(),
-      });
-    } else {
-      // Create new inspector history doc if it does not exist
-      batch.set(inspectorRef, {
-        IHF.inspectorId: inspectorId,
-        IHF.totalInspections: 1,
-        IHF.avgScore: inspectionScore,
-        IHF.tasksTotal: 0,
-        IHF.tasksCompleted: 0,
-        IHF.recentScores: [inspectionScore],
-        IHF.vehicleIds: [],
-        IHF.branchesIds: [],
-        IHF.lastUpdated: FieldValue.serverTimestamp(),
-      });
-    }
-  }
+  //     batch.update(inspectorRef, {
+  //       IHF.totalInspections: newTotal,
+  //       IHF.avgScore: newAvg,
+  //       IHF.recentScores: recentScores,
+  //       IHF.lastUpdated: FieldValue.serverTimestamp(),
+  //     });
+  //   } else {
+  //     // Create new inspector history doc if it does not exist
+  //     batch.set(inspectorRef, {
+  //       IHF.inspectorId: inspectorId,
+  //       IHF.totalInspections: 1,
+  //       IHF.avgScore: inspectionScore,
+  //       IHF.tasksTotal: 0,
+  //       IHF.tasksCompleted: 0,
+  //       IHF.recentScores: [inspectionScore],
+  //       IHF.vehicleIds: [],
+  //       IHF.branchesIds: [],
+  //       IHF.lastUpdated: FieldValue.serverTimestamp(),
+  //     });
+  //   }
+  // }
 
   // Helper: adds route stop update to batch
   Future<void> _prepareStopCompletionBatch({

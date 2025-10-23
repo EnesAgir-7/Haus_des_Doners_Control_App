@@ -19,13 +19,15 @@ class ProviderAdminUsers extends ChangeNotifier {
   final FirebaseAuthHelper _authHelper = FirebaseAuthHelper();
 
   StreamSubscription<List<UserModel>>? _inspectorsSubscription;
+  InspectorAllMonthsData? _inspectorAllData;
+  InspectorHistoryModel? _currentMonthStats;
 
   List<UserModel> _inspectors = [];
   List<BranchModel> _unAssignedBranches = [];
   List<VehicleModel> _allVehicles = [];
   String? _currentUserId;
-  InspectorHistoryModel? _inspectorStats;
-  InspectorHistoryModel? get inspectorStats => _inspectorStats;
+  InspectorHistoryModel? get currentMonthStats => _currentMonthStats;
+  InspectorAllMonthsData? get inspectorAllData => _inspectorAllData;
 
   String? _error;
   bool _isLoading = false;
@@ -92,13 +94,27 @@ class ProviderAdminUsers extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      _inspectorStats = await _userService.getInspectorStats(userId);
+      _inspectorAllData = await _userService.getInspectorStats(userId);
+
+      // Set current month as default
+      if (_inspectorAllData != null) {
+        final now = DateTime.now();
+        _currentMonthStats = _inspectorAllData!.getMonth(now.year, now.month);
+      }
 
       _isLoading = false;
       notifyListeners();
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Switch month without API call
+  void switchMonth(int year, int month) {
+    if (_inspectorAllData != null) {
+      _currentMonthStats = _inspectorAllData!.getMonth(year, month);
       notifyListeners();
     }
   }

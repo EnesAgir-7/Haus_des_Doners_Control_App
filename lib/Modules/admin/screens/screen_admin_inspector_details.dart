@@ -8,6 +8,7 @@ import '../../../generated/lib/translations/locale_keys.g.dart';
 import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
+import '../widgets/widgets_admin_branch_details.dart';
 
 class ScreenInspectorDetails extends StatefulWidget {
   final UserModel inspector;
@@ -19,14 +20,55 @@ class ScreenInspectorDetails extends StatefulWidget {
 }
 
 class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
+  late int selectedYear;
+  late int selectedMonth;
+
   @override
   void initState() {
     super.initState();
+    final now = DateTime.now();
+    selectedYear = now.year;
+    selectedMonth = now.month;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProviderAdminUsers>().getInspectorStatistics(
         widget.inspector.id,
       );
     });
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return months[month - 1];
+  }
+
+  void _changeMonth(int delta) {
+    setState(() {
+      selectedMonth += delta;
+      if (selectedMonth > 12) {
+        selectedMonth = 1;
+        selectedYear++;
+      } else if (selectedMonth < 1) {
+        selectedMonth = 12;
+        selectedYear--;
+      }
+    });
+
+    // Switch month without API call
+    context.read<ProviderAdminUsers>().switchMonth(selectedYear, selectedMonth);
   }
 
   @override
@@ -113,24 +155,41 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             }
 
             // No Data State
-            if (provider.inspectorStats == null) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.inbox_outlined, size: 64, color: Colors.white38),
-                    const SizedBox(height: 16),
-                    Text(
-                      'No statistics available',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+            if (provider.currentMonthStats == null) {
+              return Column(
+                children: [
+                  // _buildProfileHeader(),
+                  SizedBox(height: 16),
+                  _buildMonthSelector(provider),
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.inbox_outlined,
+                            size: 64,
+                            color: Colors.white38,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No statistics available for\n${_getMonthName(selectedMonth)} $selectedYear',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               );
             }
 
             // Success State
-            final stats = provider.inspectorStats!;
+            final stats = provider.currentMonthStats!;
             return RefreshIndicator(
               onRefresh: () async {
                 await provider.getInspectorStatistics(widget.inspector.id);
@@ -140,7 +199,10 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
-                    _buildProfileHeader(),
+                    // _buildProfileHeader(),
+                    SizedBox(height: 16),
+                    _buildMonthSelector(provider),
+                    SizedBox(height: 10),
                     _buildStatsGrid(stats),
                     _buildDetailedSection(stats),
                   ],
@@ -153,96 +215,150 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildMonthSelector(ProviderAdminUsers provider) {
+    final now = DateTime.now();
+    final isCurrentMonth =
+        selectedMonth == now.month && selectedYear == now.year;
+
+    // Check if selected month has data
+    final hasData =
+        provider.inspectorAllData?.getMonth(selectedYear, selectedMonth) !=
+        null;
+
+    bool canGoBack =
+        selectedYear > now.year - 1 ||
+        (selectedYear == now.year - 1 && selectedMonth > now.month);
+
+    // Determine if we can go forward (not beyond current month)
+    bool canGoForward =
+        !(selectedYear == now.year && selectedMonth == now.month);
+
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8), // Reduced bottom margin
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 8,
+      ), // Reduced padding
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.primaryRed,
-            AppColors.primaryRed.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryRed.withValues(alpha: 0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(8), // Slightly smaller radius
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          CircleAvatar(
-            radius: 32,
-            backgroundColor: Colors.white.withValues(alpha: 0.2),
-            child: Text(
-              widget.inspector.name[0].toUpperCase(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+          IconButton(
+            onPressed: canGoBack ? () => _changeMonth(-1) : null,
+            icon: Icon(Icons.chevron_left, color: Colors.white70, size: 24),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
+              minimumSize: Size.zero, // Shrink button size
+              padding: EdgeInsets.all(6), // Reduced padding
             ),
           ),
-          const SizedBox(width: 16),
           Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min, // Important for shrinking
               children: [
-                Text(
-                  widget.inspector.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    widget.inspector.role.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-                if (widget.inspector.region != null) ...[
-                  const SizedBox(height: 6),
-                  Row(
+                // Combined Month and Year on one line
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
                     children: [
-                      Icon(
-                        Icons.location_on,
-                        size: 14,
-                        color: Colors.white.withValues(alpha: 0.9),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        widget.inspector.region!,
+                      TextSpan(
+                        text: _getMonthName(selectedMonth),
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.9),
-                          fontSize: 12,
+                          color: Colors.white,
+                          fontSize: 16, // Reduced size
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text:
+                            ' ${selectedYear.toString()}', // Space added for separation
+                        style: TextStyle(
+                          color: Colors.white60,
+                          fontSize: 14, // Reduced size
                         ),
                       ),
                     ],
                   ),
-                ],
+                ),
+                const SizedBox(height: 4), // Small separator
+                // Status Tags Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isCurrentMonth) ...[
+                      // Current Tag
+                      _StatusTag(
+                        text: 'Current',
+                        color: AppColors.primaryRed,
+                        backgroundColor: AppColors.green,
+                        fontSize: 9,
+                      ),
+                      const SizedBox(width: 4), // Reduced spacing
+                    ],
+                    // Data Status Tag
+                    _StatusTag(
+                      text: hasData ? 'Data Available' : 'No Data',
+                      icon: hasData ? Icons.check_circle : Icons.info_outline,
+                      color: hasData ? Colors.green : Colors.grey,
+                      backgroundColor: hasData
+                          ? Colors.green.withValues(alpha: 0.2)
+                          : Colors.grey.withValues(alpha: 0.2),
+                      fontSize: 9,
+                    ),
+                  ],
+                ),
               ],
+            ),
+          ),
+          IconButton(
+            onPressed: canGoForward ? () => _changeMonth(1) : null,
+            icon: Icon(Icons.chevron_right, color: Colors.white70, size: 24),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
+              minimumSize: Size.zero, // Shrink button size
+              padding: EdgeInsets.all(6), // Reduced padding
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // You'll need this helper widget (_StatusTag) if you want to use the streamlined approach above
+
+  Widget _StatusTag({
+    required String text,
+    IconData? icon,
+    required Color color,
+    required Color backgroundColor,
+    required double fontSize,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 6,
+        vertical: 1, // Reduced vertical padding
+      ),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: fontSize + 1, color: color),
+            const SizedBox(width: 3), // Reduced spacing
+          ],
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: fontSize,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -263,7 +379,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             children: [
               Expanded(
                 child: _buildCompactStatCard(
-                  label: LocaleKeys.total_inspections.tr(),
+                  label: "Branches Visited & Reported",
                   value: stats.totalInspections.toString(),
                   icon: Icons.assignment_turned_in_outlined,
                   gradientColors: [Color(0xFF4A5568), Color(0xFF2D3748)],
@@ -298,7 +414,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildCompactStatCard(
-                  label: "Branches",
+                  label: "Branches Assigned",
                   value: stats.branchesIds.length.toString(),
                   icon: Icons.store_outlined,
                   gradientColors: [Color(0xFF9333EA), Color(0xFF7E22CE)],
@@ -354,14 +470,16 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             const SizedBox(height: 4),
             Row(
               children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 12,
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 12,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(width: 5),
@@ -400,7 +518,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             Icons.directions_car_outlined,
           ),
           const Divider(height: 24, color: Colors.white12),
-          _buildScoresChart(stats),
+          buildScoresChart(stats),
           const Divider(height: 24, color: Colors.white12),
           _buildLastUpdatedRow(stats),
         ],
@@ -438,226 +556,6 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     );
   }
 
-  Widget _buildScoresChart(InspectorHistoryModel stats) {
-    if (stats.recentScores.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    // Parse scores from "score/maxScore" format
-    final parsedScores = <ParsedScore>[];
-    double globalMaxScore = 0;
-
-    for (final scoreStr in stats.recentScores.take(10)) {
-      try {
-        final parts = scoreStr.split('/');
-        if (parts.length == 2) {
-          final score = double.parse(parts[0].trim());
-          final maxScore = double.parse(parts[1].trim());
-          parsedScores.add(ParsedScore(score: score, maxScore: maxScore));
-
-          // Track the highest maxScore
-          if (maxScore > globalMaxScore) {
-            globalMaxScore = maxScore;
-          }
-        }
-      } catch (e) {
-        print('Error parsing score: $scoreStr');
-      }
-    }
-
-    if (parsedScores.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.show_chart, color: AppColors.primaryRed, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              "Recent Performance",
-              style: TextStyle(
-                color: AppColors.primaryRed,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          child: Column(
-            children: [
-              // Legend
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildLegendItem(Colors.green, 'Excellent (0-3)'),
-                  const SizedBox(width: 12),
-                  _buildLegendItem(AppColors.amber, 'Good (4-6)'),
-                  const SizedBox(width: 12),
-                  _buildLegendItem(AppColors.primaryRed, 'Poor (7+)'),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 180,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(parsedScores.length, (index) {
-                    final parsedScore = parsedScores[index];
-                    final score = parsedScore.score;
-                    final maxScore = parsedScore.maxScore;
-
-                    // REVERSE: Calculate height - lower score = taller bar
-                    // Invert the score: (globalMaxScore - score)
-                    final invertedScore = globalMaxScore - score;
-                    final heightRatio = (invertedScore / globalMaxScore).clamp(
-                      0.05,
-                      1.0,
-                    );
-                    final barHeight = heightRatio * 120; // Max height of 120
-
-                    // Reverse color logic: lower score = better (green)
-                    final color = _getScoreColorReversed(score);
-
-                    return Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            // Score display
-                            Container(
-                              padding: const EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                color: color.withValues(alpha: 0.2),
-                                // borderRadius: BorderRadius.circular(100),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: color.withValues(alpha: 0.5),
-                                ),
-                              ),
-                              child: FittedBox(
-                                child: Text(
-                                  '${score.toInt()}',
-                                  style: TextStyle(
-                                    color: color,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            // Bar with dynamic height (REVERSED)
-                            Container(
-                              width: double.infinity,
-                              height: barHeight,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                  colors: [color, color.withValues(alpha: 0.6)],
-                                ),
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(6),
-                                ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: color.withValues(alpha: 0.3),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            // Max score label
-                            Text(
-                              '/${maxScore.toInt()}',
-                              style: TextStyle(
-                                color: Colors.white38,
-                                fontSize: 9,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // X-axis labels
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(parsedScores.length, (index) {
-                  return Expanded(
-                    child: Text(
-                      '#${parsedScores.length - index}',
-                      style: TextStyle(
-                        color: Colors.white54,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        Center(
-          child: Text(
-            'Last ${parsedScores.length} inspection${parsedScores.length > 1 ? 's' : ''}',
-            style: TextStyle(
-              color: Colors.white54,
-              fontSize: 11,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(Color color, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(label, style: TextStyle(color: Colors.white54, fontSize: 10)),
-      ],
-    );
-  }
-
-  // Reversed color logic: Lower score = Better (Green)
-  Color _getScoreColorReversed(double score) {
-    if (score <= 3) return Colors.green; // Excellent
-    if (score <= 6) return AppColors.amber; // Good
-    return AppColors.primaryRed; // Poor
-  }
-
   Widget _buildLastUpdatedRow(InspectorHistoryModel stats) {
     return Row(
       children: [
@@ -691,9 +589,3 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
 }
 
 // Helper class to store parsed scores
-class ParsedScore {
-  final double score;
-  final double maxScore;
-
-  ParsedScore({required this.score, required this.maxScore});
-}

@@ -1,19 +1,19 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_bottom_nav_bar.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_branches.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/enums.dart';
 import '../../../models/route_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../providers/provider_panel.dart';
 import '../providers/provider_route.dart';
 import '../providers/provider_tasks.dart';
-import '../../../translations/locale_keys.g.dart';
 import 'screen_submit_report.dart';
 
 class ScreenHome extends StatefulWidget {
@@ -269,21 +269,26 @@ class DashboardCard extends StatelessWidget {
           // Header with user info
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryRed.withValues(alpha: 0.2),
-                      AppColors.primaryRed.withValues(alpha: 0.1),
-                    ],
+              InkWell(
+                onTap: () {
+                  // addDummyInspectorStats();
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primaryRed.withValues(alpha: 0.2),
+                        AppColors.primaryRed.withValues(alpha: 0.1),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.person_outline,
-                  color: AppColors.primaryRed,
-                  size: 22,
+                  child: Icon(
+                    Icons.person_outline,
+                    color: AppColors.primaryRed,
+                    size: 22,
+                  ),
                 ),
               ),
               const SizedBox(width: 14),

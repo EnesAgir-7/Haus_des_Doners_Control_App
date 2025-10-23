@@ -1,10 +1,15 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_branches.dart';
+import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:provider/provider.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../generated/locale_keys.g.dart';
+import '../../inspector/providers/provider_tasks.dart';
+import '../admin_providers/provider_admin_fleet.dart';
 import '../admin_providers/provider_admin_stats.dart';
 
 class ScreenAdminHome extends StatefulWidget {
@@ -34,7 +39,7 @@ class _ScreenAdminHomeState extends State<ScreenAdminHome>
     _animController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderAdminStats>().initialize();
+      // context.read<ProviderAdminStats>().initialize();
     });
   }
 
@@ -230,44 +235,80 @@ class DashboardCard extends StatelessWidget {
               mainAxisSpacing: 16,
               childAspectRatio: 1.4,
               children: [
-                StatBox(
-                  number: provider.totalBranches.toString(),
-                  label: LocaleKeys.total_branches.tr(),
-                  icon: Icons.apartment_outlined,
-                  color: Colors.blue,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
-                  ),
+                Selector<ProviderAdminBranches, Tuple2<bool, int>>(
+                  selector: (_, provider) =>
+                      Tuple2(provider.isLoading, provider.branches.length),
+                  builder: (_, data, __) {
+                    final isLoading = data.item1;
+                    final count = data.item2;
+                    return StatBox(
+                      textSize: isLoading ? 10 : 28,
+                      number: isLoading ? 'Loading...' : count.toString(),
+                      label: LocaleKeys.total_branches.tr(),
+                      icon: Icons.apartment_outlined,
+                      color: Colors.blue,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF2196F3), Color(0xFF1976D2)],
+                      ),
+                    );
+                  },
                 ),
-                StatBox(
-                  number: provider.totalUsers.toString(),
-                  label: LocaleKeys.total_users.tr(),
-                  icon: Icons.people_outline,
-                  color: Colors.green,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF4CAF50), Color(0xFF388E3C)],
-                  ),
+                Selector<ProviderAdminUsers, Tuple2<bool, int>>(
+                  selector: (_, provider) =>
+                      Tuple2(provider.isLoading, provider.inspectors.length),
+                  builder: (_, data, __) {
+                    final isLoading = data.item1;
+                    final count = data.item2;
+                    return StatBox(
+                      textSize: isLoading ? 10 : 28,
+                      number: isLoading ? 'Loading...' : count.toString(),
+                      label: LocaleKeys.total_users.tr(),
+                      icon: Icons.people_outline,
+                      color: Colors.green,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF4CAF50), Color(0xFF388E3C)],
+                      ),
+                    );
+                  },
                 ),
-                StatBox(
-                  number: provider.totalTasks.toString(),
-                  label: LocaleKeys.total_tasks.tr(),
-                  icon: Icons.task_outlined,
-                  color: Colors.orange,
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFFF9800), Color(0xFFF57C00)],
-                  ),
+                Selector<ProviderTasks, Tuple2<bool, int>>(
+                  selector: (_, provider) =>
+                      Tuple2(provider.isLoading, provider.tasks.length),
+                  builder: (_, data, __) {
+                    final isLoading = data.item1;
+                    final count = data.item2;
+                    return StatBox(
+                      textSize: isLoading ? 10 : 28,
+                      number: isLoading ? 'Loading...' : count.toString(),
+                      label: LocaleKeys.total_tasks.tr(),
+                      icon: Icons.task_outlined,
+                      color: Colors.orange,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFFFF9800), Color(0xFFF57C00)],
+                      ),
+                    );
+                  },
                 ),
-                StatBox(
-                  number: provider.totalFleet.toString(),
-                  label: LocaleKeys.total_fleet.tr(),
-                  icon: Icons.directions_car_outlined,
-                  color: AppColors.amber,
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.amber,
-                      AppColors.amber.withValues(alpha: 0.8),
-                    ],
-                  ),
+                Selector<ProviderAdminFleet, Tuple2<bool, int>>(
+                  selector: (_, provider) =>
+                      Tuple2(provider.isLoading, provider.vehicles.length),
+                  builder: (_, data, __) {
+                    final isLoading = data.item1;
+                    final count = data.item2;
+                    return StatBox(
+                      textSize: isLoading ? 10 : 28,
+                      number: isLoading ? 'Loading...' : count.toString(),
+                      label: LocaleKeys.total_fleet.tr(),
+                      icon: Icons.directions_car_outlined,
+                      color: AppColors.amber,
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.amber,
+                          AppColors.amber.withOpacity(0.8),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -284,6 +325,7 @@ class StatBox extends StatelessWidget {
   final Color color;
   final Gradient gradient;
   final VoidCallback? onTap;
+  final double? textSize;
 
   const StatBox({
     super.key,
@@ -293,6 +335,7 @@ class StatBox extends StatelessWidget {
     required this.color,
     required this.gradient,
     this.onTap,
+    this.textSize,
   });
 
   @override
@@ -350,9 +393,9 @@ class StatBox extends StatelessWidget {
                   ),
                   Text(
                     number,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 28,
+                      fontSize: textSize ?? 28,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -0.5,
                     ),

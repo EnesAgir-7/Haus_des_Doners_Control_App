@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 class InspectorHistoryModel {
@@ -24,6 +25,7 @@ class InspectorHistoryModel {
     required this.lastUpdated,
   });
 
+  /// 🧩 Create instance from Firestore map
   factory InspectorHistoryModel.fromMap(Map<String, dynamic> data) {
     return InspectorHistoryModel(
       inspectorId: data[IHF.inspectorId] ?? '',
@@ -31,9 +33,9 @@ class InspectorHistoryModel {
       avgScore: (data[IHF.avgScore]?.toDouble() ?? 0.0),
       tasksTotal: data[IHF.tasksTotal] ?? 0,
       tasksCompleted: data[IHF.tasksCompleted] ?? 0,
-recentScores: data[IHF.recentScores] != null
+      recentScores: data[IHF.recentScores] != null
           ? (data[IHF.recentScores] as List<dynamic>)
-                .map<String>((e) => e.toString()) // ensure all are strings
+                .map<String>((e) => e.toString())
                 .toList()
           : [],
       vehicleIds: data[IHF.vehicleIds] != null
@@ -50,11 +52,13 @@ recentScores: data[IHF.recentScores] != null
     );
   }
 
+  /// 🧩 Create instance directly from Firestore snapshot
   factory InspectorHistoryModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     return InspectorHistoryModel.fromMap(data);
   }
 
+  /// 🧩 Convert model to Firestore map
   Map<String, dynamic> toMap() {
     return {
       IHF.inspectorId: inspectorId,
@@ -68,4 +72,97 @@ recentScores: data[IHF.recentScores] != null
       IHF.lastUpdated: Timestamp.fromDate(lastUpdated),
     };
   }
+
 }
+
+class InspectorAllMonthsData {
+  final String inspectorId;
+  final Map<String, InspectorHistoryModel>
+  monthsData; // key: "01-2025", value: stats
+  final DateTime lastUpdated;
+
+  InspectorAllMonthsData({
+    required this.inspectorId,
+    required this.monthsData,
+    required this.lastUpdated,
+  });
+
+  // Get stats for a specific month
+  InspectorHistoryModel? getMonth(int year, int month) {
+    final key = '${month.toString().padLeft(2, '0')}-$year';
+    console(key.toString());
+    return monthsData[key];
+  }
+
+  // Get list of available months
+  List<String> get availableMonths => monthsData.keys.toList()..sort();
+}
+
+// class InspectorHistoryModel {
+//   final String inspectorId;
+//   final int totalInspections;
+//   final double avgScore;
+//   final int tasksTotal;
+//   final int tasksCompleted;
+//   final List<String> recentScores;
+//   final List<String> vehicleIds;
+//   final List<String> branchesIds;
+//   final DateTime lastUpdated;
+
+//   InspectorHistoryModel({
+//     required this.inspectorId,
+//     required this.totalInspections,
+//     required this.avgScore,
+//     required this.tasksTotal,
+//     required this.tasksCompleted,
+//     required this.recentScores,
+//     required this.vehicleIds,
+//     required this.branchesIds,
+//     required this.lastUpdated,
+//   });
+
+//   factory InspectorHistoryModel.fromMap(Map<String, dynamic> data) {
+//     return InspectorHistoryModel(
+//       inspectorId: data[IHF.inspectorId] ?? '',
+//       totalInspections: data[IHF.totalInspections] ?? 0,
+//       avgScore: (data[IHF.avgScore]?.toDouble() ?? 0.0),
+//       tasksTotal: data[IHF.tasksTotal] ?? 0,
+//       tasksCompleted: data[IHF.tasksCompleted] ?? 0,
+// recentScores: data[IHF.recentScores] != null
+//           ? (data[IHF.recentScores] as List<dynamic>)
+//                 .map<String>((e) => e.toString()) // ensure all are strings
+//                 .toList()
+//           : [],
+//       vehicleIds: data[IHF.vehicleIds] != null
+//           ? List<String>.from(data[IHF.vehicleIds] as List)
+//           : [],
+//       branchesIds: data[IHF.branchesIds] != null
+//           ? List<String>.from(data[IHF.branchesIds] as List)
+//           : [],
+//       lastUpdated: data[IHF.lastUpdated] != null
+//           ? (data[IHF.lastUpdated] is Timestamp
+//                 ? (data[IHF.lastUpdated] as Timestamp).toDate()
+//                 : DateTime.parse(data[IHF.lastUpdated].toString()))
+//           : DateTime.now(),
+//     );
+//   }
+
+//   factory InspectorHistoryModel.fromFirestore(DocumentSnapshot doc) {
+//     final data = doc.data() as Map<String, dynamic>? ?? {};
+//     return InspectorHistoryModel.fromMap(data);
+//   }
+
+//   Map<String, dynamic> toMap() {
+//     return {
+//       IHF.inspectorId: inspectorId,
+//       IHF.totalInspections: totalInspections,
+//       IHF.avgScore: avgScore,
+//       IHF.tasksTotal: tasksTotal,
+//       IHF.tasksCompleted: tasksCompleted,
+//       IHF.recentScores: recentScores,
+//       IHF.vehicleIds: vehicleIds,
+//       IHF.branchesIds: branchesIds,
+//       IHF.lastUpdated: Timestamp.fromDate(lastUpdated),
+//     };
+//   }
+// }
