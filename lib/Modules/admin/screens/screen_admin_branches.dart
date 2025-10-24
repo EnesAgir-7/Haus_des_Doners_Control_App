@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -179,6 +180,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
     return Consumer<ProviderAdminBranches>(
       builder: (context, provider, _) {
         return Container(
+          margin: EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: AppColors.primaryDark.withValues(alpha: 0.3),
@@ -409,16 +411,27 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
           );
         }
 
-        return ListView.separated(
-          key: const PageStorageKey('branchesList'),
-          padding: const EdgeInsets.all(16),
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
+        return MasonryGridView.extent(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          maxCrossAxisExtent: 800,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
           itemCount: branches.length,
           itemBuilder: (context, index) {
-            final branch = branches[index];
-            return AdminBranchCard(branch: branch);
+            return AdminBranchCard(branch: branches[index]);
           },
         );
+
+        // ListView.separated(
+        //   key: const PageStorageKey('branchesList'),
+        //   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        //   separatorBuilder: (context, index) => const SizedBox(height: 12),
+        //   itemCount: branches.length,
+        //   itemBuilder: (context, index) {
+        //     final branch = branches[index];
+        //     return AdminBranchCard(branch: branch);
+        //   },
+        // );
       },
     );
   }
