@@ -35,15 +35,17 @@ class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        // Apply the same gradient background as ScreenBranches
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.primaryRed.withValues(alpha: 0.08),
-            AppColors.primaryDark,
+    return PopScope(
+      canPop: false,
+      child: Container(
+        decoration: BoxDecoration(
+          // Apply the same gradient background as ScreenBranches
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primaryRed.withValues(alpha: 0.08),
+              AppColors.primaryDark,
             AppColors.primaryDark,
           ],
           stops: const [0.0, 0.25, 1.0],

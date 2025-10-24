@@ -53,19 +53,21 @@ class _ScreenAdminHomeState extends State<ScreenAdminHome>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.primaryRed.withValues(alpha: 0.08),
-            AppColors.primaryDark,
-            AppColors.primaryDark,
-          ],
-          stops: const [0.0, 0.25, 1.0],
+    return PopScope(
+      canPop: false,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primaryRed.withValues(alpha: 0.08),
+              AppColors.primaryDark,
+              AppColors.primaryDark,
+            ],
+            stops: const [0.0, 0.25, 1.0],
+          ),
         ),
-      ),
       child: RefreshIndicator(
         onRefresh: () async {
           await context.read<ProviderAdminStats>().refresh();

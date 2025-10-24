@@ -31,148 +31,151 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProviderTasks>(
-      builder: (context, taskProvider, child) {
-        if (taskProvider.isLoading) {
-          return Center(
-            child: CircularProgressIndicator(color: AppColors.primaryRed),
-          );
-        }
+    return PopScope(
+      canPop: false,
+      child: Consumer<ProviderTasks>(
+        builder: (context, taskProvider, child) {
+          if (taskProvider.isLoading) {
+            return Center(
+              child: CircularProgressIndicator(color: AppColors.primaryRed),
+            );
+          }
 
-        final tasks = taskProvider.allTasks;
-        final filteredTasks = _filterTasks(tasks);
+          final tasks = taskProvider.allTasks;
+          final filteredTasks = _filterTasks(tasks);
 
-        return Stack(
-          children: [
-            Column(
-              children: [
-                _buildFilterSection(),
-                _buildTaskStats(tasks),
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () => taskProvider.loadAllTasks(),
-                    color: AppColors.primaryRed,
-                    backgroundColor: AppColors.lightBlack,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: filteredTasks.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: TaskCard(
-                            task: filteredTasks[index],
-                            onTap: () {
-                              showModalBottomSheet(
-                                context: context,
-                                backgroundColor: AppColors.lightBlack,
-                                isScrollControlled: true,
-                                enableDrag: true,
-                                isDismissible: true,
-                                useSafeArea: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(24),
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  _buildFilterSection(),
+                  _buildTaskStats(tasks),
+                  Expanded(
+                    child: RefreshIndicator(
+                      onRefresh: () => taskProvider.loadAllTasks(),
+                      color: AppColors.primaryRed,
+                      backgroundColor: AppColors.lightBlack,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: filteredTasks.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: TaskCard(
+                              task: filteredTasks[index],
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  backgroundColor: AppColors.lightBlack,
+                                  isScrollControlled: true,
+                                  enableDrag: true,
+                                  isDismissible: true,
+                                  useSafeArea: true,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(24),
+                                    ),
                                   ),
-                                ),
-                                builder: (context) => TaskDetailWidget(
-                                  task: filteredTasks[index],
-                                  onTaskUpdated: () {
-                                    // Refresh tasks after update
-                                    context
-                                        .read<ProviderTasks>()
-                                        .loadAllTasks();
-                                  },
-                                ),
-                              );
-                            },
-                            onEdit: () {
-                              showModalBottomSheet(
-                                context: context,
-                                backgroundColor: AppColors.lightBlack,
-                                isScrollControlled: true,
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(24),
+                                  builder: (context) => TaskDetailWidget(
+                                    task: filteredTasks[index],
+                                    onTaskUpdated: () {
+                                      // Refresh tasks after update
+                                      context
+                                          .read<ProviderTasks>()
+                                          .loadAllTasks();
+                                    },
                                   ),
-                                ),
-                                builder: (context) => TaskFormWidget(
-                                  task: filteredTasks[index],
-                                  onSuccess: () {
-                                    // Refresh tasks after update
-                                    context
-                                        .read<ProviderTasks>()
-                                        .loadAllTasks();
-                                  },
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              bottom: 20,
-              right: 20,
-              child: GestureDetector(
-                onTap: () {
-                  showModalBottomSheet(
-                    context: context,
-                    backgroundColor: AppColors.lightBlack,
-                    isScrollControlled: true,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(24),
+                                );
+                              },
+                              onEdit: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  backgroundColor: AppColors.lightBlack,
+                                  isScrollControlled: true,
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(24),
+                                    ),
+                                  ),
+                                  builder: (context) => TaskFormWidget(
+                                    task: filteredTasks[index],
+                                    onSuccess: () {
+                                      // Refresh tasks after update
+                                      context
+                                          .read<ProviderTasks>()
+                                          .loadAllTasks();
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
                       ),
                     ),
-                    builder: (context) => TaskFormWidget(
-                      onSuccess: () {
-                        // Refresh tasks after create
-                        context.read<ProviderTasks>().loadAllTasks();
-                      },
-                    ),
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
                   ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryRed,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.add, color: Colors.white),
-                      SizedBox(width: 8),
-                      Text(
-                        "Task",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                ],
+              ),
+              Positioned(
+                bottom: 20,
+                right: 20,
+                child: GestureDetector(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      backgroundColor: AppColors.lightBlack,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(24),
                         ),
                       ),
-                    ],
+                      builder: (context) => TaskFormWidget(
+                        onSuccess: () {
+                          // Refresh tasks after create
+                          context.read<ProviderTasks>().loadAllTasks();
+                        },
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryRed,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.add, color: Colors.white),
+                        SizedBox(width: 8),
+                        Text(
+                          "Task",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        );
-      },
+            ],
+          );
+        },
+      ),
     );
   }
 
