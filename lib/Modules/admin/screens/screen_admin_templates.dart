@@ -4,30 +4,31 @@ import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/inspection_template_model.dart';
 import '../../inspector/widgets/app_button.dart';
+import '../../inspector/widgets/custom_toast.dart';
 import '../admin_firebase_services/admin_template_service.dart';
 
-class ScreenAdminTemplates extends StatefulWidget {
-  const ScreenAdminTemplates({super.key});
+class ScreenAdminQuestionnaires extends StatefulWidget {
+  const ScreenAdminQuestionnaires({super.key});
 
   @override
-  State<ScreenAdminTemplates> createState() => _ScreenAdminTemplatesState();
+  State<ScreenAdminQuestionnaires> createState() =>
+      _ScreenAdminQuestionnairesState();
 }
 
-class _ScreenAdminTemplatesState extends State<ScreenAdminTemplates> {
+class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
   final TemplateHelper _templateHelper = TemplateHelper();
-  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(),
       floatingActionButton: FloatingActionButton.extended(
-        heroTag: "addTemplateFab",
+        heroTag: "addQuestionnaireFab",
         onPressed: () => _showCreateTemplateDialog(),
         backgroundColor: AppColors.primaryRed,
         icon: Icon(Icons.add, color: Colors.white),
         label: Text(
-          'Create Template',
+          'Create Questionnaire',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
       ),
@@ -52,8 +53,6 @@ class _ScreenAdminTemplatesState extends State<ScreenAdminTemplates> {
               children: [
                 _buildHeader(),
                 const SizedBox(height: 12),
-                _buildSearchBar(),
-                const SizedBox(height: 12),
                 Container(height: 1, color: Colors.white24),
                 const SizedBox(height: 12),
                 Expanded(child: _buildTemplatesList()),
@@ -71,7 +70,7 @@ class _ScreenAdminTemplatesState extends State<ScreenAdminTemplates> {
         Icon(Icons.description, color: Colors.lightBlueAccent),
         SizedBox(width: 6),
         Text(
-          'Inspection Templates',
+          'Inspection Questionnaires',
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
@@ -79,39 +78,6 @@ class _ScreenAdminTemplatesState extends State<ScreenAdminTemplates> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return TextField(
-      onChanged: (value) => setState(() => _searchQuery = value),
-      style: TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        hintText: 'Search templates...',
-        hintStyle: TextStyle(color: Colors.white54),
-        prefixIcon: Icon(Icons.search, color: Colors.white54),
-        suffixIcon: _searchQuery.isNotEmpty
-            ? IconButton(
-                icon: Icon(Icons.clear, color: Colors.white54),
-                onPressed: () => setState(() => _searchQuery = ''),
-              )
-            : null,
-        filled: true,
-        fillColor: AppColors.lightBlack,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white24),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white24),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed),
-        ),
-        contentPadding: EdgeInsets.symmetric(vertical: 12),
-      ),
     );
   }
 
@@ -130,21 +96,12 @@ class _ScreenAdminTemplatesState extends State<ScreenAdminTemplates> {
         }
 
         final templates = snapshot.data ?? [];
-        final filteredTemplates = templates.where((template) {
-          return template.name.toLowerCase().contains(
-            _searchQuery.toLowerCase(),
-          );
-        }).toList();
-
-        if (filteredTemplates.isEmpty) {
-          return _buildEmptyState();
-        }
 
         return ListView.builder(
           padding: EdgeInsets.only(bottom: 80),
-          itemCount: filteredTemplates.length,
+          itemCount: templates.length,
           itemBuilder: (context, index) {
-            final template = filteredTemplates[index];
+            final template = templates[index];
             return _buildTemplateCard(template);
           },
         );
@@ -228,7 +185,7 @@ class _ScreenAdminTemplatesState extends State<ScreenAdminTemplates> {
           Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
           SizedBox(height: 16),
           Text(
-            'Error Loading Templates',
+            'Error Loading Questionnaires',
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -249,37 +206,10 @@ class _ScreenAdminTemplatesState extends State<ScreenAdminTemplates> {
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.description, size: 80, color: Colors.white24),
-          SizedBox(height: 16),
-          Text(
-            _searchQuery.isEmpty
-                ? 'No templates created yet'
-                : 'No templates found',
-            style: TextStyle(color: Colors.white70, fontSize: 16),
-          ),
-          if (_searchQuery.isNotEmpty) ...[
-            SizedBox(height: 8),
-            TextButton(
-              onPressed: () => setState(() => _searchQuery = ''),
-              child: Text(
-                'Clear search',
-                style: TextStyle(color: AppColors.primaryRed),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   void _showCreateTemplateDialog() {
     showDialog(
       context: context,
+
       builder: (context) => TemplateFormDialog(templateHelper: _templateHelper),
     );
   }
@@ -293,8 +223,8 @@ class _ScreenAdminTemplatesState extends State<ScreenAdminTemplates> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => TemplateDetailsSheet(
-        template: template,
-        templateHelper: _templateHelper,
+        questionnaire: template,
+        questionnaireHelper: _templateHelper,
       ),
     );
   }
@@ -311,15 +241,42 @@ class TemplateFormDialog extends StatefulWidget {
   State<TemplateFormDialog> createState() => _TemplateFormDialogState();
 }
 
-class _TemplateFormDialogState extends State<TemplateFormDialog> {
+class _TemplateFormDialogState extends State<TemplateFormDialog>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final List<CategoryInput> _categories = [];
+  final _categories = <CategoryInput>[];
   bool _isLoading = false;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
+  static const int _minScore = 3;
+  static const int _maxScore = 6;
+  static const int _scoreSteps = 3;
 
   @override
   void initState() {
     super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeInOut,
+    );
+    _animationController.forward();
+    _initializeForm();
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    _disposeControllers();
+    super.dispose();
+  }
+
+  void _initializeForm() {
     if (widget.template != null) {
       _nameController.text = widget.template!.name;
       _categories.addAll(
@@ -336,13 +293,11 @@ class _TemplateFormDialogState extends State<TemplateFormDialog> {
     }
   }
 
-  @override
-  void dispose() {
+  void _disposeControllers() {
     _nameController.dispose();
-    for (var cat in _categories) {
+    for (final cat in _categories) {
       cat.titleController.dispose();
     }
-    super.dispose();
   }
 
   void _addCategory() {
@@ -358,6 +313,8 @@ class _TemplateFormDialogState extends State<TemplateFormDialog> {
   }
 
   void _removeCategory(int index) {
+    if (_categories.length <= 1) return;
+
     setState(() {
       _categories[index].titleController.dispose();
       _categories.removeAt(index);
@@ -365,43 +322,38 @@ class _TemplateFormDialogState extends State<TemplateFormDialog> {
   }
 
   Future<void> _saveTemplate() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_categories.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('At least one category is required'),
-          backgroundColor: Colors.red,
-        ),
-      );
+    if (!_formKey.currentState!.validate() || _categories.isEmpty) {
+      if (_categories.isEmpty) {
+        showSnakBarr(context, 'At least one category is required');
+      }
       return;
     }
 
     setState(() => _isLoading = true);
 
-    final categories = _categories.map((cat) {
-      return InspectionCategory(
-        categoryId: cat.categoryId,
-        title: cat.titleController.text.trim(),
-        maxScore: cat.maxScore,
-      );
-    }).toList();
+    final categories = _categories
+        .map(
+          (cat) => InspectionCategory(
+            categoryId: cat.categoryId,
+            title: cat.titleController.text.trim(),
+            maxScore: cat.maxScore,
+          ),
+        )
+        .toList();
 
-    bool success;
-    if (widget.template != null) {
-      success = await widget.templateHelper.updateTemplate(
-        templateId: widget.template!.id,
-        name: _nameController.text,
-        categories: categories,
-        context: context,
-      );
-    } else {
-      final id = await widget.templateHelper.createTemplate(
-        name: _nameController.text,
-        categories: categories,
-        context: context,
-      );
-      success = id != null;
-    }
+    final success = widget.template != null
+        ? await widget.templateHelper.updateQuestionnaire(
+            templateId: widget.template!.id,
+            name: _nameController.text.trim(),
+            categories: categories,
+            context: context,
+          )
+        : await widget.templateHelper.createQuestionnaire(
+                name: _nameController.text.trim(),
+                categories: categories,
+                context: context,
+              ) !=
+              null;
 
     setState(() => _isLoading = false);
 
@@ -412,113 +364,308 @@ class _TemplateFormDialogState extends State<TemplateFormDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: AppColors.lightBlack,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.8,
+    return Scaffold(
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Container(
+          constraints: BoxConstraints(),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.primaryDark, AppColors.lightBlack],
+            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryRed.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _buildHeader(),
+                const SizedBox(height: 24),
+                _buildNameField(),
+                const SizedBox(height: 24),
+                _buildCategoriesHeader(),
+                const SizedBox(height: 12),
+                _buildCategoriesList(),
+                const SizedBox(height: 20),
+                _buildSubmitButton(),
+              ],
+            ),
+          ),
         ),
-        padding: EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primaryRed,
+                  AppColors.primaryRed.withValues(alpha: 0.7),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryRed.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.description, color: Colors.white, size: 24),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.template != null
+                      ? 'Edit Questionnaire'
+                      : 'Create Questionnaire',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  widget.template != null
+                      ? 'Update your template details'
+                      : 'Build a new inspection template',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.close, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNameField() {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: _nameController,
+        style: const TextStyle(color: Colors.white, fontSize: 16),
+        decoration: InputDecoration(
+          labelText: 'Questionnaire Name',
+          labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+          prefixIcon: Icon(Icons.edit_note, color: AppColors.primaryRed),
+          filled: true,
+          fillColor: AppColors.primaryDark.withValues(alpha: 0.5),
+          border: _buildBorder(),
+          enabledBorder: _buildBorder(),
+          focusedBorder: _buildBorder(focused: true),
+          errorBorder: _buildBorder(error: true),
+          focusedErrorBorder: _buildBorder(error: true, focused: true),
+        ),
+        validator: (value) => value?.trim().isEmpty ?? true
+            ? 'Questionnaire name is required'
+            : null,
+      ),
+    );
+  }
+
+  OutlineInputBorder _buildBorder({bool focused = false, bool error = false}) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16),
+      borderSide: BorderSide(
+        color: error
+            ? Colors.red
+            : focused
+            ? AppColors.primaryRed
+            : Colors.white.withValues(alpha: 0.2),
+        width: focused ? 2 : 1.5,
+      ),
+    );
+  }
+
+  Widget _buildCategoriesHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primaryRed.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: AppColors.primaryRed.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.category, color: AppColors.primaryRed, size: 18),
+                const SizedBox(width: 8),
+                const Text(
+                  'Categories',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '${_categories.length}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const Spacer(),
+          Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF00C853), Color(0xFF00E676)],
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF00C853).withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: _addCategory,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(
+                        Icons.add_circle_outline,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      SizedBox(width: 4),
+                      Text(
+                        'Add',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoriesList() {
+    return Expanded(
+      child: ListView.builder(
+        padding: const EdgeInsets.only(top: 4),
+        itemCount: _categories.length,
+        itemBuilder: (context, index) => _buildCategoryCard(index),
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(int index) {
+    final category = _categories[index];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primaryDark.withValues(alpha: 0.8),
+            AppColors.lightBlack.withValues(alpha: 0.6),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.15),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Icon(Icons.description, color: AppColors.primaryRed),
-                  SizedBox(width: 8),
-                  Text(
-                    widget.template != null
-                        ? 'Edit Template'
-                        : 'Create Template',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.close, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _nameController,
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Template Name',
-                  labelStyle: TextStyle(color: Colors.white70),
-                  filled: true,
-                  fillColor: AppColors.primaryDark,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white24),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.white24),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.primaryRed),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Template name is required';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              Row(
-                children: [
-                  Text(
-                    'Categories',
-                    style: TextStyle(
-                      color: AppColors.primaryRed,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.add_circle, color: Colors.green),
-                    onPressed: _addCategory,
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-              Expanded(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _categories.length,
-                  itemBuilder: (context, index) {
-                    return _buildCategoryInput(index);
-                  },
-                ),
-              ),
-              SizedBox(height: 16),
-              AppButton(
-                isLoading: _isLoading,
-                text: widget.template != null
-                    ? 'Update Template'
-                    : 'Create Template',
-                onPressed: _saveTemplate,
-                backgroundColor: AppColors.primaryRed,
-                textStyle: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                borderRadius: 10,
-              ),
+              _buildCategoryTitleRow(index, category),
+              const SizedBox(height: 16),
+              _buildMaxScoreSlider(category),
             ],
           ),
         ),
@@ -526,92 +673,181 @@ class _TemplateFormDialogState extends State<TemplateFormDialog> {
     );
   }
 
-  Widget _buildCategoryInput(int index) {
-    final category = _categories[index];
-    return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  controller: category.titleController,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: 'Category ${index + 1}',
-                    labelStyle: TextStyle(color: Colors.white54, fontSize: 12),
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    filled: true,
-                    fillColor: AppColors.lightBlack,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.white24),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: Colors.white24),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Required';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              SizedBox(width: 8),
-              if (_categories.length > 1)
-                IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red, size: 20),
-                  onPressed: () => _removeCategory(index),
-                ),
-            ],
+  Widget _buildCategoryTitleRow(int index, CategoryInput category) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primaryRed.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(8),
           ),
-          SizedBox(height: 8),
-          Row(
-            children: [
-              Text(
-                'Max Score: ',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
+          child: Text(
+            '${index + 1}',
+            style: TextStyle(
+              color: AppColors.primaryRed,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: TextFormField(
+            controller: category.titleController,
+            style: const TextStyle(color: Colors.white, fontSize: 15),
+            decoration: InputDecoration(
+              hintText: 'Enter category name',
+              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
               ),
-              Expanded(
-                child: Slider(
-                  value: category.maxScore.toDouble(),
-                  min: 1,
-                  max: 10,
-                  divisions: 9,
-                  activeColor: AppColors.primaryRed,
-                  label: category.maxScore.toString(),
-                  onChanged: (value) {
-                    setState(() {
-                      category.maxScore = value.toInt();
-                    });
-                  },
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.05),
+              border: _buildCategoryBorder(),
+              enabledBorder: _buildCategoryBorder(),
+              focusedBorder: _buildCategoryBorder(focused: true),
+              errorBorder: _buildCategoryBorder(error: true),
+            ),
+            validator: (value) =>
+                value?.trim().isEmpty ?? true ? 'Required' : null,
+          ),
+        ),
+        if (_categories.length > 1) ...[
+          const SizedBox(width: 12),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.red.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.red.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: IconButton(
+              icon: const Icon(
+                Icons.delete_outline,
+                color: Colors.red,
+                size: 20,
+              ),
+              onPressed: () => _removeCategory(index),
+              padding: const EdgeInsets.all(8),
+              constraints: const BoxConstraints(),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  OutlineInputBorder _buildCategoryBorder({
+    bool focused = false,
+    bool error = false,
+  }) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(10),
+      borderSide: BorderSide(
+        color: error
+            ? Colors.red
+            : focused
+            ? AppColors.primaryRed
+            : Colors.white.withValues(alpha: 0.2),
+        width: focused ? 2 : 1,
+      ),
+    );
+  }
+
+  Widget _buildMaxScoreSlider(CategoryInput category) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primaryRed.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text(
+              'Max Score',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: SliderTheme(
+              data: SliderThemeData(
+                activeTrackColor: AppColors.primaryRed,
+                inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
+                thumbColor: Colors.white,
+                overlayColor: AppColors.primaryRed.withValues(alpha: 0.2),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+                trackHeight: 6,
+              ),
+              child: Slider(
+                value: category.maxScore.toDouble(),
+                min: _minScore.toDouble(),
+                max: _maxScore.toDouble(),
+                divisions: _scoreSteps,
+                label: category.maxScore.toString(),
+                onChanged: (value) {
+                  setState(() => category.maxScore = value.toInt());
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primaryRed,
+                  AppColors.primaryRed.withValues(alpha: 0.8),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryRed.withValues(alpha: 0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
+              ],
+            ),
+            child: Text(
+              '${category.maxScore}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
               ),
-              Text(
-                '${category.maxScore}',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return AppButton(
+      isLoading: _isLoading,
+      text: widget.template != null
+          ? 'Update Questionnaire'
+          : 'Create Questionnaire',
+      onPressed: _saveTemplate,
+      padding: const EdgeInsets.symmetric(vertical: 16),
     );
   }
 }
@@ -630,12 +866,12 @@ class CategoryInput {
 
 // Template Details Bottom Sheet
 class TemplateDetailsSheet extends StatelessWidget {
-  final InspectionTemplate template;
-  final TemplateHelper templateHelper;
+  final InspectionTemplate questionnaire;
+  final TemplateHelper questionnaireHelper;
 
   const TemplateDetailsSheet({
-    required this.template,
-    required this.templateHelper,
+    required this.questionnaire,
+    required this.questionnaireHelper,
   });
 
   @override
@@ -658,7 +894,7 @@ class TemplateDetailsSheet extends StatelessWidget {
               Divider(color: Colors.white24),
               SizedBox(height: 12),
               Text(
-                'Categories (${template.categories.length})',
+                'Categories (${questionnaire.categories.length})',
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
@@ -669,9 +905,9 @@ class TemplateDetailsSheet extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   controller: scrollController,
-                  itemCount: template.categories.length,
+                  itemCount: questionnaire.categories.length,
                   itemBuilder: (context, index) {
-                    final category = template.categories[index];
+                    final category = questionnaire.categories[index];
                     return Container(
                       margin: EdgeInsets.only(bottom: 12),
                       padding: EdgeInsets.all(12),
@@ -771,7 +1007,7 @@ class TemplateDetailsSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                template.name,
+                questionnaire.name,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -780,7 +1016,7 @@ class TemplateDetailsSheet extends StatelessWidget {
               ),
               SizedBox(height: 4),
               Text(
-                'Template ID: ${template.id}',
+                'Questionnaire ID: ${questionnaire.id}',
                 style: TextStyle(color: Colors.white54, fontSize: 11),
               ),
             ],
@@ -805,8 +1041,8 @@ class TemplateDetailsSheet extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (context) => TemplateFormDialog(
-                  templateHelper: templateHelper,
-                  template: template,
+                  templateHelper: questionnaireHelper,
+                  template: questionnaire,
                 ),
               );
             },
@@ -846,7 +1082,7 @@ class TemplateDetailsSheet extends StatelessWidget {
           style: TextStyle(color: AppColors.primaryRed),
         ),
         content: Text(
-          'Are you sure you want to delete the template "${template.name}"? This action cannot be undone.',
+          'Are you sure you want to delete the Questionnaire "${questionnaire.name}"? This action cannot be undone.',
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -858,8 +1094,8 @@ class TemplateDetailsSheet extends StatelessWidget {
             onPressed: () async {
               Navigator.of(ctx).pop(); // Close dialog
               Navigator.of(context).pop(); // Close bottom sheet
-              await templateHelper.deleteTemplate(
-                templateId: template.id,
+              await questionnaireHelper.deleteTemplate(
+                templateId: questionnaire.id,
                 context: context,
               );
             },

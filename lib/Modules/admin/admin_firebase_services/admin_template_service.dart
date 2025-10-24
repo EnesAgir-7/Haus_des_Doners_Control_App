@@ -12,7 +12,7 @@ class TemplateHelper {
       _firestore.collection(Collections.inspectionTemplates);
 
   /// Create a new template
-  Future<String?> createTemplate({
+  Future<String?> createQuestionnaire({
     required String name,
     required List<InspectionCategory> categories,
     required BuildContext context,
@@ -62,7 +62,7 @@ class TemplateHelper {
   }
 
   /// Update an existing template
-  Future<bool> updateTemplate({
+  Future<bool> updateQuestionnaire({
     required String templateId,
     required String name,
     required List<InspectionCategory> categories,

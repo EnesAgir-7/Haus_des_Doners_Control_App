@@ -7,7 +7,7 @@ import '../admin_firebase_services/admin_template_service.dart';
 
 class TemplateSelectionSheet extends StatelessWidget {
   final TemplateHelper templateHelper;
-  final Function(InspectionTemplate  template) onTemplateSelected;
+  final Function(InspectionTemplate template) onTemplateSelected;
 
   const TemplateSelectionSheet({
     required this.templateHelper,
@@ -99,45 +99,75 @@ class TemplateSelectionSheet extends StatelessWidget {
 
   Widget _buildTemplateTile(BuildContext context, InspectionTemplate template) {
     return GestureDetector(
-      onTap: () {
-        onTemplateSelected(template);
-        Navigator.pop(context); 
+      onTap: () async {
+        await onTemplateSelected(template);
+        Navigator.pop(context);
       },
       child: Container(
-        margin: EdgeInsets.only(bottom: 10),
-        padding: EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.primaryDark,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.white24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 4,
+              offset: Offset(0, 2),
+            ),
+          ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text(
-              template.name,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            // Gradient accent bar
+            Container(
+              width: 4,
+              height: 48,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primaryRed,
+                    AppColors.primaryRed.withValues(alpha: 0.7),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-            SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(Icons.category, size: 12, color: AppColors.primaryRed),
-                SizedBox(width: 4),
-                Text(
-                  '${template.categories.length} Categories',
-                  style: TextStyle(color: Colors.white54, fontSize: 12),
-                ),
-                Spacer(),
-                Text(
-                  'ID: ${template.id.substring(0, 6)}...',
-                  style: TextStyle(color: Colors.white38, fontSize: 10),
-                ),
-              ],
+            SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    template.name,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.category,
+                        size: 14,
+                        color: AppColors.primaryRed,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${template.categories.length} Categories',
+                        style: TextStyle(color: Colors.white54, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
+            Icon(Icons.chevron_right_rounded, color: Colors.white38),
           ],
         ),
       ),

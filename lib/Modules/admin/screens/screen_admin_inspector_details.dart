@@ -9,6 +9,7 @@ import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../widgets/widgets_admin_branch_details.dart';
+import 'screen_admin_inspector_branches.dart';
 
 class ScreenInspectorDetails extends StatefulWidget {
   final UserModel inspector;
@@ -20,55 +21,68 @@ class ScreenInspectorDetails extends StatefulWidget {
 }
 
 class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
-  late int selectedYear;
-  late int selectedMonth;
+  String? _selectedMonthKey;
 
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    selectedYear = now.year;
-    selectedMonth = now.month;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderAdminUsers>().getInspectorStatistics(
-        widget.inspector.id,
-      );
-    });
-  }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final provider = context.read<ProviderAdminUsers>();
+      await provider.getInspectorStatistics(widget.inspector.id);
 
-  String _getMonthName(int month) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month - 1];
-  }
-
-  void _changeMonth(int delta) {
-    setState(() {
-      selectedMonth += delta;
-      if (selectedMonth > 12) {
-        selectedMonth = 1;
-        selectedYear++;
-      } else if (selectedMonth < 1) {
-        selectedMonth = 12;
-        selectedYear--;
+      // Set the last available month as default
+      if (mounted && provider.inspectorAllData != null) {
+        final availableMonths = provider.inspectorAllData!.availableMonths;
+        if (availableMonths.isNotEmpty) {
+          setState(() {
+            _selectedMonthKey = availableMonths.last;
+          });
+          _switchToMonthKey(_selectedMonthKey!);
+        }
       }
     });
+  }
 
-    // Switch month without API call
-    context.read<ProviderAdminUsers>().switchMonth(selectedYear, selectedMonth);
+  String _getMonthNameFromKey(String monthKey) {
+    // monthKey format: "01-2025"
+    final parts = monthKey.split('-');
+    if (parts.length != 2) return monthKey;
+
+    final month = parts[0];
+
+    const monthNames = {
+      "01": "January",
+      "02": "February",
+      "03": "March",
+      "04": "April",
+      "05": "May",
+      "06": "June",
+      "07": "July",
+      "08": "August",
+      "09": "September",
+      "10": "October",
+      "11": "November",
+      "12": "December",
+    };
+
+    return monthNames[month] ?? month;
+  }
+
+  int _getYearFromKey(String monthKey) {
+    final parts = monthKey.split('-');
+    return parts.length == 2 ? int.parse(parts[1]) : DateTime.now().year;
+  }
+
+  int _getMonthFromKey(String monthKey) {
+    final parts = monthKey.split('-');
+    return parts.length == 2 ? int.parse(parts[0]) : DateTime.now().month;
+  }
+
+  void _switchToMonthKey(String monthKey) {
+    final year = _getYearFromKey(monthKey);
+    final month = _getMonthFromKey(monthKey);
+    context.read<ProviderAdminUsers>().switchMonth(year, month);
   }
 
   @override
@@ -154,13 +168,33 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               );
             }
 
-            // No Data State
+            // No Data Available
+            if (provider.inspectorAllData == null ||
+                provider.inspectorAllData!.availableMonths.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.inbox_outlined, size: 64, color: Colors.white38),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No statistics available',
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final availableMonths = provider.inspectorAllData!.availableMonths;
+
+            // No Data State for selected month
             if (provider.currentMonthStats == null) {
               return Column(
                 children: [
-                  // _buildProfileHeader(),
                   SizedBox(height: 16),
-                  _buildMonthSelector(provider),
+                  _buildMonthSelector(provider, availableMonths),
                   Expanded(
                     child: Center(
                       child: Column(
@@ -173,7 +207,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No statistics available for\n${_getMonthName(selectedMonth)} $selectedYear',
+                            'No statistics available for selected month',
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 16,
@@ -199,9 +233,8 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                 physics: const AlwaysScrollableScrollPhysics(),
                 child: Column(
                   children: [
-                    // _buildProfileHeader(),
                     SizedBox(height: 16),
-                    _buildMonthSelector(provider),
+                    _buildMonthSelector(provider, availableMonths),
                     SizedBox(height: 10),
                     _buildStatsGrid(stats),
                     _buildDetailedSection(stats),
@@ -215,153 +248,156 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     );
   }
 
-  Widget _buildMonthSelector(ProviderAdminUsers provider) {
-    final now = DateTime.now();
-    final isCurrentMonth =
-        selectedMonth == now.month && selectedYear == now.year;
-
-    // Check if selected month has data
-    final hasData =
-        provider.inspectorAllData?.getMonth(selectedYear, selectedMonth) !=
-        null;
-
-    bool canGoBack =
-        selectedYear > now.year - 1 ||
-        (selectedYear == now.year - 1 && selectedMonth > now.month);
-
-    // Determine if we can go forward (not beyond current month)
-    bool canGoForward =
-        !(selectedYear == now.year && selectedMonth == now.month);
-
+  Widget _buildMonthSelector(
+    ProviderAdminUsers provider,
+    List<String> availableMonths,
+  ) {
+    if (_selectedMonthKey == null && availableMonths.isNotEmpty) {
+      _selectedMonthKey = availableMonths.last;
+    }
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8), // Reduced bottom margin
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 8,
-      ), // Reduced padding
+      margin: EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(8), // Slightly smaller radius
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        gradient: LinearGradient(
+          colors: [
+            Colors.white.withValues(alpha: 0.1),
+            Colors.white.withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AppColors.primaryRed.withValues(alpha: 0.3),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryRed.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            onPressed: canGoBack ? () => _changeMonth(-1) : null,
-            icon: Icon(Icons.chevron_left, color: Colors.white70, size: 24),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.white.withValues(alpha: 0.1),
-              minimumSize: Size.zero, // Shrink button size
-              padding: EdgeInsets.all(6), // Reduced padding
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedMonthKey,
+          isExpanded: true,
+          isDense: false,
+          dropdownColor: Color(0xFF1a1a1a),
+          icon: Container(
+            padding: EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: AppColors.primaryRed.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(
+              Icons.arrow_drop_down_rounded,
+              color: AppColors.primaryRed,
+              size: 24,
             ),
           ),
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min, // Important for shrinking
-              children: [
-                // Combined Month and Year on one line
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: _getMonthName(selectedMonth),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16, // Reduced size
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextSpan(
-                        text:
-                            ' ${selectedYear.toString()}', // Space added for separation
-                        style: TextStyle(
-                          color: Colors.white60,
-                          fontSize: 14, // Reduced size
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 4), // Small separator
-                // Status Tags Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (isCurrentMonth) ...[
-                      // Current Tag
-                      _StatusTag(
-                        text: 'Current',
-                        color: AppColors.primaryRed,
-                        backgroundColor: AppColors.green,
-                        fontSize: 9,
-                      ),
-                      const SizedBox(width: 4), // Reduced spacing
-                    ],
-                    // Data Status Tag
-                    _StatusTag(
-                      text: hasData ? 'Data Available' : 'No Data',
-                      icon: hasData ? Icons.check_circle : Icons.info_outline,
-                      color: hasData ? Colors.green : Colors.grey,
-                      backgroundColor: hasData
-                          ? Colors.green.withValues(alpha: 0.2)
-                          : Colors.grey.withValues(alpha: 0.2),
-                      fontSize: 9,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+          selectedItemBuilder: (BuildContext context) {
+            return availableMonths.map((monthKey) {
+              return Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryRed.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                    child: Icon(
+                      Icons.calendar_month_rounded,
+                      color: AppColors.primaryRed,
+                      size: 18,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Text(
+                    '${_getMonthNameFromKey(monthKey)} ${_getYearFromKey(monthKey)}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              );
+            }).toList();
+          },
+          items: availableMonths.map((monthKey) {
+            final isSelected = monthKey == _selectedMonthKey;
+            final monthName = _getMonthNameFromKey(monthKey);
+            final year = _getYearFromKey(monthKey);
+
+            return DropdownMenuItem<String>(
+              value: monthKey,
+              child: Container(
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      color: isSelected ? AppColors.primaryRed : Colors.white60,
+                      size: 18,
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            monthName,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.white70,
+                              fontSize: 15,
+                              fontWeight: isSelected
+                                  ? FontWeight.w600
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            year.toString(),
+                            style: TextStyle(
+                              color: isSelected
+                                  ? AppColors.primaryRed.withValues(alpha: 0.8)
+                                  : Colors.white38,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isSelected)
+                      Icon(
+                        Icons.check_circle_rounded,
+                        color: AppColors.primaryRed,
+                        size: 20,
+                      ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: canGoForward ? () => _changeMonth(1) : null,
-            icon: Icon(Icons.chevron_right, color: Colors.white70, size: 24),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.white.withValues(alpha: 0.1),
-              minimumSize: Size.zero, // Shrink button size
-              padding: EdgeInsets.all(6), // Reduced padding
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // You'll need this helper widget (_StatusTag) if you want to use the streamlined approach above
-
-  Widget _StatusTag({
-    required String text,
-    IconData? icon,
-    required Color color,
-    required Color backgroundColor,
-    required double fontSize,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 6,
-        vertical: 1, // Reduced vertical padding
-      ),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: fontSize + 1, color: color),
-            const SizedBox(width: 3), // Reduced spacing
-          ],
-          Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontSize: fontSize,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
+              ),
+            );
+          }).toList(),
+          onChanged: (String? newMonthKey) {
+            if (newMonthKey != null) {
+              setState(() {
+                _selectedMonthKey = newMonthKey;
+              });
+              _switchToMonthKey(newMonthKey);
+            }
+          },
+        ),
       ),
     );
   }
@@ -414,6 +450,17 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildCompactStatCard(
+                  ontap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ScreenAdminInspectorBranches(
+                          inspectorName: widget.inspector.name,
+                          branchIds: stats.branchesIds,
+                        ),
+                      ),
+                    );
+                  },
                   label: "Branches Assigned",
                   value: stats.branchesIds.length.toString(),
                   icon: Icons.store_outlined,
@@ -587,5 +634,3 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     return DateFormat('MMM dd, yyyy HH:mm').format(date);
   }
 }
-
-// Helper class to store parsed scores

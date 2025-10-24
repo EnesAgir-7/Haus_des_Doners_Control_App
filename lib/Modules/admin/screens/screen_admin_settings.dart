@@ -40,13 +40,13 @@ class ScreenAdminSettings extends StatelessWidget {
               _buildSettingsTile(
                 context,
                 icon: Icons.description,
-                title: 'Inspection Templates',
+                title: 'Inspection Questionnaire',
                 subtitle: 'Create, modify, and delete inspection forms.',
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const ScreenAdminTemplates(),
+                      builder: (context) => const ScreenAdminQuestionnaires(),
                     ),
                   );
                 },

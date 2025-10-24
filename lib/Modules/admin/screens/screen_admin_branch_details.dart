@@ -519,10 +519,48 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           onTap: () {
             _showTemplateSelectionSheet();
           },
-          child: _buildInfoTile(
-            label: 'Template',
-            value: widget.branch.templateId,
-            icon: Icons.description_outlined,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.lightBlack,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white24),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.description_outlined,
+                  color: Colors.white54,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  "Questionnaire",
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      widget.branch.templateName,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "Change Questionnaire",
+                      style: const TextStyle(
+                        color: AppColors.primaryRed,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -547,9 +585,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               templateId: template.id,
               templateName: template.name,
             );
-            if (done) {
+            if (mounted && done) {
               widget.branch.templateId = template.id;
-              await _loadBranchDetails();
+              widget.branch.templateName = template.name;
+              _loadBranchDetails();
+
               showSnakBarr(
                 context,
                 "Branch template changed to: ${template.name}",

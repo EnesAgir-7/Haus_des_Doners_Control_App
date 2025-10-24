@@ -263,11 +263,7 @@ class ProviderAdminUsers extends ChangeNotifier {
       // 3. Save to appropriate collection
       await _userService.createUser(userId, user);
 
-      // 4. Add to local state if inspector
-      if (role.toLowerCase() == 'inspector') {
-        _inspectors.add(user);
-        notifyListeners();
-      }
+      notifyListeners();
     } catch (e) {
       rethrow;
     }

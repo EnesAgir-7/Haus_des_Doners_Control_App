@@ -49,6 +49,67 @@ class BranchModel {
     this.stop,
   });
 
+factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
+    return BranchModel(
+      id: id ?? '',
+      name: data[BranchFields.name] ?? '',
+      address: data[BranchFields.address] ?? '',
+      templateId: data[BranchFields.templateId] ?? '',
+      templateName: data[BranchFields.templateName] ?? '',
+      region: data[BranchFields.region],
+      gps:  data[BranchFields.gps] as GeoPoint,
+      contactName: data[BranchFields.contactName] ?? '',
+      contactPhone: data[BranchFields.contactPhone] ?? '',
+      assignedInspector: data[BranchFields.assignedInspector] != null
+          ? AssignedInspector(
+              id:
+                  data[BranchFields.assignedInspector][InspectorFields.id] ??
+                  '',
+              name:
+                  data[BranchFields.assignedInspector][InspectorFields.name] ??
+                  '',
+            )
+          : null,
+      lastInspectionDate: data[BranchFields.lastInspectionDate] != null
+          ? (data[BranchFields.lastInspectionDate] is Timestamp
+                ? (data[BranchFields.lastInspectionDate] as Timestamp).toDate()
+                : DateTime.tryParse(
+                        data[BranchFields.lastInspectionDate].toString(),
+                      ) ??
+                      DateTime.now())
+          : null,
+      lastInspectionScore: data[BranchFields.lastInspectionScore],
+      totalInspections: data[BranchFields.totalInspections] ?? 0,
+      averageScore: (data[BranchFields.averageScore] ?? 0.0).toDouble(),
+      status: data[BranchFields.status] ?? AppConstants.active,
+      createdAt: data[BranchFields.createdAt] != null
+          ? (data[BranchFields.createdAt] is Timestamp
+                ? (data[BranchFields.createdAt] as Timestamp).toDate()
+                : DateTime.tryParse(data[BranchFields.createdAt].toString()) ??
+                      DateTime.now())
+          : DateTime.now(),
+      updatedAt: data[BranchFields.updatedAt] != null
+          ? (data[BranchFields.updatedAt] is Timestamp
+                ? (data[BranchFields.updatedAt] as Timestamp).toDate()
+                : DateTime.tryParse(data[BranchFields.updatedAt].toString()) ??
+                      DateTime.now())
+          : DateTime.now(),
+      stop: data[BranchFields.stop] != null
+          ? RouteStopModel.fromMap(
+              Map<String, dynamic>.from(data[BranchFields.stop]),
+            )
+          : null,
+      last12MonthsScores: data[BranchFields.last12MonthsScores] != null
+          ? List<String>.from(
+              (data[BranchFields.last12MonthsScores] as List<dynamic>).map(
+                (e) => e.toString(),
+              ),
+            )
+          : List.filled(12, '0'),
+    );
+  }
+
+
   factory BranchModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return BranchModel(
