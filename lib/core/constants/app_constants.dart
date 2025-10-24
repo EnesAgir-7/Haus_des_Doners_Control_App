@@ -8,6 +8,7 @@ class AppConstants {
   static const count = "{count}";
   static const high = "high";
   static const date = "date";
+  static const region = "region";
   static const medium = "medium";
   static const low = "low";
   static const all = "all";

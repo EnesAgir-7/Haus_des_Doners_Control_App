@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/console.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../models/branch_model.dart';
 import '../../../models/user_model.dart';
 import '../admin_firebase_services/admin_branch_service.dart';
@@ -15,23 +16,150 @@ class ProviderAdminBranches with ChangeNotifier {
   bool _isLoading = false;
   String _searchQuery = '';
   String? _error;
+  String _sortBy = AppConstants.name;
 
+  List<BranchModel> get allBranches => _branches;
   StreamSubscription<List<BranchModel>>? _branchesSubscription;
 
   // Getters
-  List<BranchModel> get branches => _filterBranches();
+  List<BranchModel> get branches => _filteredAndSortedBranches();
   List<UserModel> get inspectors => _inspectors;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String get sortBy => _sortBy;
 
   // Filter branches based on search query
-  List<BranchModel> _filterBranches() {
-    if (_searchQuery.isEmpty) return _branches;
-    return _branches.where((branch) {
-      final searchLower = _searchQuery.toLowerCase();
-      return branch.name.toLowerCase().contains(searchLower) ||
-          branch.address.toLowerCase().contains(searchLower);
-    }).toList();
+  List<BranchModel> _filteredAndSortedBranches() {
+    var filtered = List<BranchModel>.from(_branches);
+
+    // Filter by search query
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((branch) {
+        final searchLower = _searchQuery.toLowerCase();
+        return branch.name.toLowerCase().contains(searchLower) ||
+            branch.address.toLowerCase().contains(searchLower) ||
+            (branch.region?.toLowerCase().contains(searchLower) ?? false) ||
+            (branch.assignedInspector?.name.toLowerCase().contains(
+                  searchLower,
+                ) ??
+                false) ||
+            branch.contactName.toLowerCase().contains(searchLower);
+      }).toList();
+    }
+
+    // Sort based on selected criteria
+    switch (_sortBy) {
+      case AppConstants.name:
+        filtered.sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
+        break;
+
+      case AppConstants.score:
+        filtered.sort((a, b) {
+          // Sort by average score (highest first)
+          final comparison = b.averageScore.compareTo(a.averageScore);
+          if (comparison != 0) return comparison;
+          // If scores are equal, sort by name
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+        break;
+
+      case AppConstants.nextInspection:
+        filtered.sort((a, b) {
+          final aDateStr = a.stop?.timeSlot;
+          final bDateStr = b.stop?.timeSlot;
+
+          // Handle nulls - branches without scheduled inspections go to the end
+          if (aDateStr == null && bDateStr == null) return 0;
+          if (aDateStr == null) return 1;
+          if (bDateStr == null) return -1;
+
+          try {
+            final aDate = DateTime.parse(aDateStr);
+            final bDate = DateTime.parse(bDateStr);
+            // Sort by earliest date first
+            final comparison = aDate.compareTo(bDate);
+            if (comparison != 0) return comparison;
+            // If dates are equal, sort by name
+            return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          } catch (_) {
+            // If parsing fails, keep the same order
+            return 0;
+          }
+        });
+        break;
+
+      case AppConstants.lastInspection:
+        filtered.sort((a, b) {
+          // Handle nulls - branches never inspected go to the end
+          if (a.lastInspectionDate == null && b.lastInspectionDate == null)
+            return 0;
+          if (a.lastInspectionDate == null) return 1;
+          if (b.lastInspectionDate == null) return -1;
+
+          // Sort by most recent first
+          final comparison = b.lastInspectionDate!.compareTo(
+            a.lastInspectionDate!,
+          );
+          if (comparison != 0) return comparison;
+          // If dates are equal, sort by name
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+        break;
+
+      case AppConstants.region:
+        filtered.sort((a, b) {
+          final aRegion = a.region ?? '';
+          final bRegion = b.region ?? '';
+
+          // Handle nulls - branches without region go to the end
+          if (aRegion.isEmpty && bRegion.isEmpty) return 0;
+          if (aRegion.isEmpty) return 1;
+          if (bRegion.isEmpty) return -1;
+
+          // Sort by region alphabetically
+          final comparison = aRegion.toLowerCase().compareTo(
+            bRegion.toLowerCase(),
+          );
+          if (comparison != 0) return comparison;
+          // If regions are equal, sort by name
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+        break;
+
+      case AppConstants.inspector:
+        filtered.sort((a, b) {
+          final aInspector = a.assignedInspector?.name ?? '';
+          final bInspector = b.assignedInspector?.name ?? '';
+
+          // Handle nulls - branches without assigned inspector go to the end
+          if (aInspector.isEmpty && bInspector.isEmpty) return 0;
+          if (aInspector.isEmpty) return 1;
+          if (bInspector.isEmpty) return -1;
+
+          // Sort by inspector name alphabetically
+          final comparison = aInspector.toLowerCase().compareTo(
+            bInspector.toLowerCase(),
+          );
+          if (comparison != 0) return comparison;
+          // If inspectors are equal, sort by branch name
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+        break;
+
+      default:
+        // Default to name sorting
+        filtered.sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+        );
+    }
+
+    return filtered;
+  }
+  void setSortBy(String sortBy) {
+    _sortBy = sortBy;
+    notifyListeners();
   }
 
   // Set search query
