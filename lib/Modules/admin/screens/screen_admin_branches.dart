@@ -6,7 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../admin_providers/provider_admin_branches.dart';
-import '../widgets/branch_card.dart';
+import '../widgets/admin_branch_card.dart';
 
 class ScreenAdminBranches extends StatefulWidget {
   const ScreenAdminBranches({super.key});
@@ -410,12 +410,13 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
         }
 
         return ListView.separated(
+          key: const PageStorageKey('branchesList'),
           padding: const EdgeInsets.all(16),
           separatorBuilder: (context, index) => const SizedBox(height: 12),
           itemCount: branches.length,
           itemBuilder: (context, index) {
             final branch = branches[index];
-            return BranchCard(branch: branch);
+            return AdminBranchCard(branch: branch);
           },
         );
       },

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../models/branch_model.dart';
 import '../screens/screen_admin_branch_details.dart';
 
-class BranchCard extends StatelessWidget {
+class AdminBranchCard extends StatelessWidget {
   final BranchModel branch;
-  const BranchCard({super.key, required this.branch});
+  const AdminBranchCard({super.key, required this.branch});
 
   @override
   Widget build(BuildContext context) {

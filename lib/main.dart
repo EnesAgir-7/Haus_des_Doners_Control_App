@@ -17,6 +17,7 @@ import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 
 import 'Modules/admin/admin_providers/provider_admin_bottombar.dart';
+import 'Modules/admin/admin_providers/provider_admin_inspections.dart';
 import 'core/constants/app_colors.dart';
 import 'core/global_focus_manager.dart';
 import 'core/theme/app_theme.dart';
@@ -89,6 +90,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderBottomNavBar()),
         ChangeNotifierProvider(create: (_) => ProviderInspection()),
         ChangeNotifierProvider(create: (_) => AdminBottomNavProvider()),
+        ChangeNotifierProvider(create: (_) => ProviderAdminInspections()),
       ],
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,

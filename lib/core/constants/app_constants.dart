@@ -23,4 +23,6 @@ class AppConstants {
   static const assigned = "assigned";
   static const available = "available";
   static const active = "active";
+  static const scheduled = "scheduled";
+  static const branch = "branch";
 }

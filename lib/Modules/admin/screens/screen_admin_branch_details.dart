@@ -757,7 +757,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Last 12 Months Performance',
+                'Last 12 Inspections',
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,

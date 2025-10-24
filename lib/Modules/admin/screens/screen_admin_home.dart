@@ -12,6 +12,7 @@ import '../../inspector/providers/provider_tasks.dart';
 import '../admin_providers/provider_admin_bottombar.dart';
 import '../admin_providers/provider_admin_fleet.dart';
 import '../admin_providers/provider_admin_stats.dart';
+import '../widgets/admin_recent_inspections_section.dart';
 
 class ScreenAdminHome extends StatefulWidget {
   const ScreenAdminHome({super.key});
@@ -122,6 +123,8 @@ class _ScreenAdminHomeState extends State<ScreenAdminHome>
                   children: [
                     const SizedBox(height: 24),
                     DashboardCard(provider: statsProvider),
+                    const SizedBox(height: 24),
+                    const InspectionSection(),
                     const SizedBox(height: 24),
                   ],
                 ),

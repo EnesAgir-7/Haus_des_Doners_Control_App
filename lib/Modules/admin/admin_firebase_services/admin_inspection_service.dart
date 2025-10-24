@@ -4,7 +4,6 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../models/inspection_model.dart';
-import '../../../models/inspection_template_model.dart';
 import '../../../models/route_model.dart';
 
 class AdminInspectionService {
@@ -12,6 +11,85 @@ class AdminInspectionService {
   final String _collection = Collections.inspections;
   final String _collectionBranches = Collections.branches;
   final String _collectionRoutes = Collections.routes;
+
+  Stream<List<InspectionModel>> recentInspectionsStream() {
+    return FirebaseFirestore.instance
+        .collection('inspections')
+        .orderBy('updatedAt', descending: true)
+        .limit(4)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => InspectionModel.fromFirestore(doc))
+              .toList(),
+        );
+  }
+
+  Future<Map<String, dynamic>> getInspections({
+    int pageSize = 50,
+    String? searchQuery,
+    String? sortBy = 'date',
+    DocumentSnapshot? lastDocument,
+  }) async {
+    try {
+      Query query = _db.collection(_collection);
+
+      // Determine sorting
+      String orderByField;
+      bool descending = true;
+
+      switch (sortBy) {
+        case 'date':
+          orderByField = InspectionFields.updatedAt;
+          descending = true;
+          break;
+        case 'score':
+          orderByField = InspectionFields.score;
+          descending = false; // ascending for score
+          break;
+        case 'branch':
+          orderByField = InspectionFields.branchName;
+          descending = false;
+          break;
+        default:
+          orderByField = InspectionFields.updatedAt;
+          descending = true;
+      }
+
+      query = query.orderBy(orderByField, descending: descending);
+
+      // Apply pagination
+      if (lastDocument != null) {
+        query = query.startAfterDocument(lastDocument);
+      }
+
+      query = query.limit(pageSize);
+
+      final snapshot = await query.get();
+
+      List<InspectionModel> inspections = snapshot.docs
+          .map((doc) => InspectionModel.fromFirestore(doc))
+          .toList();
+
+      // Apply search filter locally (if needed)
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        inspections = inspections.where((inspection) {
+          return inspection.branchName.toLowerCase().contains(
+            searchQuery.toLowerCase(),
+          );
+        }).toList();
+      }
+
+      return {
+        'inspections': inspections,
+        'lastDocument': snapshot.docs.isNotEmpty ? snapshot.docs.last : null,
+        'hasMore': snapshot.docs.length == pageSize,
+      };
+    } catch (e) {
+      print('Error getting inspections: $e');
+      rethrow;
+    }
+  }
 
   // Get inspections by branch
   Future<List<InspectionModel>> getInspectionsByBranch(String branchId) async {
@@ -97,7 +175,10 @@ class AdminInspectionService {
       final snapshot = await _db
           .collection(_collection)
           .where(InspectionFields.inspectorId, isEqualTo: inspectorId)
-          .where(InspectionFields.scheduledTime, isGreaterThanOrEqualTo: startOfDay)
+          .where(
+            InspectionFields.scheduledTime,
+            isGreaterThanOrEqualTo: startOfDay,
+          )
           .where(InspectionFields.scheduledTime, isLessThan: endOfDay)
           .orderBy(InspectionFields.scheduledTime)
           .get();
@@ -122,11 +203,15 @@ class AdminInspectionService {
 
       if (startDate != null) {
         query = query.where(
-          InspectionFields.scheduledTime, isGreaterThanOrEqualTo: startDate);
+          InspectionFields.scheduledTime,
+          isGreaterThanOrEqualTo: startDate,
+        );
       }
       if (endDate != null) {
         query = query.where(
-          InspectionFields.scheduledTime, isLessThanOrEqualTo: endDate);
+          InspectionFields.scheduledTime,
+          isLessThanOrEqualTo: endDate,
+        );
       }
 
       final snapshot = await query
@@ -259,21 +344,100 @@ class AdminInspectionService {
     }
   }
 
-  // Fetches the single template document by its ID
-  Future<InspectionTemplate?> getTemplateById(String templateId) async {
-    try {
-      final doc = await _db
-          .collection(Collections.inspectionTemplates)
-          .doc(templateId)
-          .get();
-      if (!doc.exists) {
-        print('Template with ID $templateId not found.');
-        return null;
-      }
-      return InspectionTemplate.fromFirestore(doc);
-    } catch (e) {
-      print('Error getting template: $e');
-      rethrow;
-    }
-  }
+  // // Get inspections by inspector ID with pagination
+  //   Future<Map<String, dynamic>> getInspectionsByInspector({
+  //     required String inspectorId,
+  //     int page = 0,
+  //     int pageSize = 50,
+  //     String? status,
+  //     DocumentSnapshot? lastDocument,
+  //   }) async {
+  //     try {
+  //       Query query = _db
+  //           .collection(_collection)
+  //           .where(InspectionFields.inspectorId, isEqualTo: inspectorId);
+
+  //       if (status != null && status != 'all') {
+  //         query = query.where(InspectionFields.status, isEqualTo: status);
+  //       }
+
+  //       query = query.orderBy(InspectionFields.updatedAt, descending: true);
+
+  //       if (lastDocument != null) {
+  //         query = query.startAfterDocument(lastDocument);
+  //       }
+
+  //       query = query.limit(pageSize);
+
+  //       final snapshot = await query.get();
+
+  //       List<InspectionModel> inspections = snapshot.docs
+  //           .map((doc) => InspectionModel.fromFirestore(doc))
+  //           .toList();
+
+  //       return {
+  //         'inspections': inspections,
+  //         'lastDocument': snapshot.docs.isNotEmpty ? snapshot.docs.last : null,
+  //         'hasMore': snapshot.docs.length == pageSize,
+  //       };
+  //     } catch (e) {
+  //       print('Error getting inspector inspections: $e');
+  //       rethrow;
+  //     }
+  //   }
+
+  //   // Get inspections by branch ID with pagination
+  //   Future<Map<String, dynamic>> getInspectionsByBranch({
+  //     required String branchId,
+  //     int limit = 10,
+  //     DocumentSnapshot? lastDocument,
+  //   }) async {
+  //     try {
+  //       Query query = _db
+  //           .collection(_collection)
+  //           .where(InspectionFields.branchId, isEqualTo: branchId);
+
+  //       query = query.orderBy(InspectionFields.updatedAt, descending: true);
+
+  //       if (lastDocument != null) {
+  //         query = query.startAfterDocument(lastDocument);
+  //       }
+
+  //       query = query.limit(limit);
+
+  //       final snapshot = await query.get();
+
+  //       List<InspectionModel> inspections = snapshot.docs
+  //           .map((doc) => InspectionModel.fromFirestore(doc))
+  //           .toList();
+
+  //       return {
+  //         'inspections': inspections,
+  //         'lastDocument': snapshot.docs.isNotEmpty ? snapshot.docs.last : null,
+  //         'hasMore': snapshot.docs.length == limit,
+  //       };
+  //     } catch (e) {
+  //       print('Error getting branch inspections: $e');
+  //       rethrow;
+  //     }
+  //   }
+
+  //   // Legacy method - kept for backward compatibility
+  //   Future<List<InspectionModel>> getAllInspections({
+  //     int limit = 100,
+  //     DateTime? startDate,
+  //     DateTime? endDate,
+  //   }) async {
+  //     try {
+  //       final result = await getInspections(
+  //         pageSize: limit,
+  //         startDate: startDate,
+  //         endDate: endDate,
+  //       );
+  //       return result['inspections'] as List<InspectionModel>;
+  //     } catch (e) {
+  //       print('Error getting all inspections: $e');
+  //       return [];
+  //     }
+  //   }
 }
