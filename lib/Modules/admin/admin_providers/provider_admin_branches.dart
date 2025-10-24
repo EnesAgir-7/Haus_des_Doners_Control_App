@@ -157,6 +157,7 @@ class ProviderAdminBranches with ChangeNotifier {
 
     return filtered;
   }
+
   void setSortBy(String sortBy) {
     _sortBy = sortBy;
     notifyListeners();
@@ -216,15 +217,14 @@ class ProviderAdminBranches with ChangeNotifier {
     }
   }
 
-
-Future<bool> updateBrachTemplate({
+  Future<bool> updateBrachTemplate({
     required String branchId,
     required String templateId,
     required String templateName,
   }) async {
     try {
       console('Updating branch template...');
-      await  _branchService.updateBranchTemplate(
+      await _branchService.updateBranchTemplate(
         branchId: branchId,
         templateId: templateId,
         templateName: templateName,
@@ -232,12 +232,11 @@ Future<bool> updateBrachTemplate({
       return true;
     } catch (e) {
       console('❌ Error updating template: $e');
-      return false; 
-    } finally {
-    }
+      return false;
+    } finally {}
   }
 
-Future<bool> assignInspectorToBranch({
+  Future<bool> assignInspectorToBranch({
     required String branchId,
     required String inspectorId,
     required String inspectorName,
@@ -265,7 +264,8 @@ Future<bool> assignInspectorToBranch({
   }) async {
     _setLoading(true);
     try {
-      console('Unassigning branch from inspector...');
+      console('Unassigning branch from ${inspectorId} ${branchId}...');
+
       await _branchService.removeBranchFromInspector(
         branchId: branchId,
         inspectorId: inspectorId,
@@ -278,7 +278,6 @@ Future<bool> assignInspectorToBranch({
       _setLoading(false);
     }
   }
-
 
   void _setLoading(bool value) {
     _isLoading = value;

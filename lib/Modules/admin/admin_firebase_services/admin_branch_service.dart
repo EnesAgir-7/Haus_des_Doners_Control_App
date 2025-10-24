@@ -78,14 +78,13 @@ class AdminBranchService {
     if (branchIds.isEmpty) {
       return Stream.value([]);
     }
-
     return FirebaseFirestore.instance
         .collection(Collections.branches)
         .where(FieldPath.documentId, whereIn: branchIds)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
-              .map((doc) => BranchModel.fromMap(doc.data()))
+              .map((doc) => BranchModel.fromFirestore(doc))
               .toList(),
         );
   }
