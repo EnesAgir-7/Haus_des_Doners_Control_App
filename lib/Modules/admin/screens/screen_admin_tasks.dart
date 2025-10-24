@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../widgets/task_form_widget.dart';
+import '../widgets/task_detail_widget.dart';
 
 class ScreenAdminTasks extends StatefulWidget {
   const ScreenAdminTasks({super.key});
@@ -61,6 +62,30 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                           child: TaskCard(
                             task: filteredTasks[index],
                             onTap: () {
+                              showModalBottomSheet(
+                                context: context,
+                                backgroundColor: AppColors.lightBlack,
+                                isScrollControlled: true,
+                                enableDrag: true,
+                                isDismissible: true,
+                                useSafeArea: true,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(24),
+                                  ),
+                                ),
+                                builder: (context) => TaskDetailWidget(
+                                  task: filteredTasks[index],
+                                  onTaskUpdated: () {
+                                    // Refresh tasks after update
+                                    context
+                                        .read<ProviderTasks>()
+                                        .loadAllTasks();
+                                  },
+                                ),
+                              );
+                            },
+                            onEdit: () {
                               showModalBottomSheet(
                                 context: context,
                                 backgroundColor: AppColors.lightBlack,
@@ -293,9 +318,10 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
 
 class TaskCard extends StatelessWidget {
   final TaskModel task;
+  final VoidCallback? onEdit;
   final VoidCallback? onTap;
 
-  const TaskCard({super.key, required this.task, this.onTap});
+  const TaskCard({super.key, required this.task, this.onEdit, this.onTap});
 
   Color _getStatusColor() {
     switch (task.status) {
@@ -398,6 +424,18 @@ class TaskCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(
+                        Icons.edit,
+                        color: Colors.blue.withOpacity(0.7),
+                        size: 20,
+                      ),
+                      onPressed: onEdit,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      splashRadius: 20,
+                    ),
+                    const SizedBox(width: 4),
                     IconButton(
                       icon: Icon(
                         Icons.delete,
