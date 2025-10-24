@@ -9,6 +9,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../inspector/providers/provider_tasks.dart';
+import '../admin_providers/provider_admin_bottombar.dart';
 import '../admin_providers/provider_admin_fleet.dart';
 import '../admin_providers/provider_admin_stats.dart';
 
@@ -242,6 +243,9 @@ class DashboardCard extends StatelessWidget {
                     final isLoading = data.item1;
                     final count = data.item2;
                     return StatBox(
+                      onTap: () {
+                        context.read<AdminBottomNavProvider>().onItemTapped(2);
+                      },
                       textSize: isLoading ? 10 : 28,
                       number: isLoading ? 'Loading...' : count.toString(),
                       label: LocaleKeys.total_branches.tr(),
@@ -260,6 +264,9 @@ class DashboardCard extends StatelessWidget {
                     final isLoading = data.item1;
                     final count = data.item2;
                     return StatBox(
+                      onTap: () {
+                        context.read<AdminBottomNavProvider>().onItemTapped(1);
+                      },
                       textSize: isLoading ? 10 : 28,
                       number: isLoading ? 'Loading...' : count.toString(),
                       label: LocaleKeys.total_users.tr(),
@@ -278,6 +285,9 @@ class DashboardCard extends StatelessWidget {
                     final isLoading = data.item1;
                     final count = data.item2;
                     return StatBox(
+                      onTap: () {
+                        context.read<AdminBottomNavProvider>().onItemTapped(4);
+                      },
                       textSize: isLoading ? 10 : 28,
                       number: isLoading ? 'Loading...' : count.toString(),
                       label: LocaleKeys.total_tasks.tr(),
@@ -296,6 +306,9 @@ class DashboardCard extends StatelessWidget {
                     final isLoading = data.item1;
                     final count = data.item2;
                     return StatBox(
+                      onTap: () {
+                        context.read<AdminBottomNavProvider>().onItemTapped(3);
+                      },
                       textSize: isLoading ? 10 : 28,
                       number: isLoading ? 'Loading...' : count.toString(),
                       label: LocaleKeys.total_fleet.tr(),
@@ -304,7 +317,7 @@ class DashboardCard extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [
                           AppColors.amber,
-                          AppColors.amber.withOpacity(0.8),
+                          AppColors.amber.withValues(alpha: 0.8),
                         ],
                       ),
                     );
