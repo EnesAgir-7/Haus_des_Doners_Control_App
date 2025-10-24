@@ -28,37 +28,28 @@ class AdminInspectionService {
   Future<Map<String, dynamic>> getInspections({
     int pageSize = 50,
     String? searchQuery,
-    String? sortBy = 'date',
+    String? branchId,
     DocumentSnapshot? lastDocument,
   }) async {
     try {
       Query query = _db.collection(_collection);
 
-      // Determine sorting
-      String orderByField;
-      bool descending = true;
-
-      switch (sortBy) {
-        case 'date':
-          orderByField = InspectionFields.updatedAt;
-          descending = true;
-          break;
-        case 'score':
-          orderByField = InspectionFields.score;
-          descending = false; // ascending for score
-          break;
-        case 'branch':
-          orderByField = InspectionFields.branchName;
-          descending = false;
-          break;
-        default:
-          orderByField = InspectionFields.updatedAt;
-          descending = true;
+      // 🔹 Filter by branch if provided
+      if (branchId != null) {
+        query = query.where(InspectionFields.branchId, isEqualTo: branchId);
       }
 
-      query = query.orderBy(orderByField, descending: descending);
+      // 🔹 Handle search
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        query = query
+            .orderBy(InspectionFields.branchName)
+            .startAt([searchQuery])
+            .endAt(['$searchQuery\uf8ff']);
+      } else {
+        query = query.orderBy(InspectionFields.updatedAt, descending: true);
+      }
 
-      // Apply pagination
+      // 🔹 Pagination
       if (lastDocument != null) {
         query = query.startAfterDocument(lastDocument);
       }
@@ -67,18 +58,9 @@ class AdminInspectionService {
 
       final snapshot = await query.get();
 
-      List<InspectionModel> inspections = snapshot.docs
+      final inspections = snapshot.docs
           .map((doc) => InspectionModel.fromFirestore(doc))
           .toList();
-
-      // Apply search filter locally (if needed)
-      if (searchQuery != null && searchQuery.isNotEmpty) {
-        inspections = inspections.where((inspection) {
-          return inspection.branchName.toLowerCase().contains(
-            searchQuery.toLowerCase(),
-          );
-        }).toList();
-      }
 
       return {
         'inspections': inspections,
@@ -90,6 +72,8 @@ class AdminInspectionService {
       rethrow;
     }
   }
+
+
 
   // Get inspections by branch
   Future<List<InspectionModel>> getInspectionsByBranch(String branchId) async {

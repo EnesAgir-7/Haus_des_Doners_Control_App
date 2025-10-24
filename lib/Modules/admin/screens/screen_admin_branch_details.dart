@@ -15,6 +15,7 @@ import '../admin_firebase_services/admin_template_service.dart';
 import '../admin_providers/provider_admin_branches.dart';
 import '../widgets/admin_template_selection_sheet.dart';
 import '../widgets/widgets_admin_branch_details.dart';
+import 'screen_admin_inspections.dart';
 
 class ScreenAdminBranchDetails extends StatefulWidget {
   final BranchModel branch;
@@ -394,6 +395,15 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           children: [
             Expanded(
               child: _buildStatCard(
+                ontap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          ScreenAdminInspections(branch: widget.branch),
+                    ),
+                  );
+                },
                 label: LocaleKeys.total_inspections.tr(),
                 value: widget.branch.totalInspections.toString(),
                 icon: Icons.fact_check_outlined,
@@ -448,35 +458,39 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     required String value,
     required IconData icon,
     required Color color,
+    VoidCallback? ontap,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightRed,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: ontap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.lightRed,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white24),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white70, fontSize: 11),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white70, fontSize: 11),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -572,7 +586,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.primaryDark,
       builder: (context) {
         return TemplateSelectionSheet(
           templateHelper: _templateHelper,

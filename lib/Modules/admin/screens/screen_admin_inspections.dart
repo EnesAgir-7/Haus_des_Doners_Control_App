@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:haus_des_control/models/branch_model.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -11,7 +12,8 @@ import '../admin_providers/provider_admin_inspections.dart';
 import '../widgets/admin_inspection_card.dart';
 
 class ScreenAdminInspections extends StatefulWidget {
-  const ScreenAdminInspections({super.key});
+  final BranchModel? branch;
+  const ScreenAdminInspections({super.key, this.branch});
 
   @override
   State<ScreenAdminInspections> createState() => _ScreenAdminInspectionsState();
@@ -24,7 +26,9 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderAdminInspections>().initialize();
+      context.read<ProviderAdminInspections>().initialize(
+        branchId: widget.branch?.id,
+      );
     });
     _scrollController.addListener(_onScroll);
   }
@@ -45,7 +49,9 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(
+        title: widget.branch != null ? widget.branch?.name : null,
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -68,8 +74,10 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildHeader(provider),
-                    const SizedBox(height: 12),
-                    _buildSearchBar(provider),
+                    if (widget.branch?.id == null) ...[
+                      const SizedBox(height: 12),
+                      _buildSearchBar(provider),
+                    ],
                     const SizedBox(height: 12),
                     _buildSortOptions(provider),
                     const SizedBox(height: 12),

@@ -25,7 +25,7 @@ class TemplateSelectionSheet extends StatelessWidget {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: AppColors.lightBlack,
+            color: AppColors.primaryDark,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           padding: EdgeInsets.all(20),

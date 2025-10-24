@@ -16,6 +16,7 @@ class ProviderAdminInspections extends ChangeNotifier {
   bool _isLoadingMore = false;
   String? _errorMessage;
   Timer? _debounce;
+  String? _activeBranchId;
 
   // Pagination
   int _currentPage = 0;
@@ -41,15 +42,16 @@ class ProviderAdminInspections extends ChangeNotifier {
   DocumentSnapshot? _lastDocument;
 
   // Initialize
-  Future<void> initialize() async {
-    if (_inspections.isNotEmpty) return;
+  Future<void> initialize({String? branchId}) async {
+    if (_inspections.isNotEmpty && _activeBranchId == branchId) return;
+    _activeBranchId = branchId;
 
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      await _fetchInspections(reset: true);
+      await _fetchInspections(reset: true, branchId: branchId);
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -59,7 +61,7 @@ class ProviderAdminInspections extends ChangeNotifier {
   }
 
   // Fetch inspections from service
-  Future<void> _fetchInspections({bool reset = false}) async {
+  Future<void> _fetchInspections({bool reset = false, String? branchId}) async {
     if (reset) {
       _currentPage = 0;
       _inspections = [];
@@ -70,9 +72,9 @@ class ProviderAdminInspections extends ChangeNotifier {
     try {
       final response = await _inspectionService.getInspections(
         pageSize: _pageSize,
-        sortBy: _sortBy,
         searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
         lastDocument: _lastDocument,
+        branchId: branchId,
       );
 
       final List<InspectionModel> newInspections =
@@ -100,7 +102,7 @@ class ProviderAdminInspections extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _fetchInspections();
+      await _fetchInspections(branchId: _activeBranchId);
     } finally {
       _isLoadingMore = false;
       notifyListeners();
@@ -135,7 +137,26 @@ class ProviderAdminInspections extends ChangeNotifier {
   void setSortBy(String sortBy) {
     if (_sortBy == sortBy) return;
     _sortBy = sortBy;
-    refresh();
+
+    _sortLocally(); // Sort existing items without new Firestore query
+    notifyListeners();
+  }
+
+  // Sort locally based on the current sortBy
+  void _sortLocally() {
+    switch (_sortBy) {
+      case AppConstants.date:
+        _inspections.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+        break;
+      case AppConstants.branch:
+        _inspections.sort((a, b) => a.branchName.compareTo(b.branchName));
+        break;
+      case AppConstants.score:
+        _inspections.sort((a, b) => b.score.compareTo(a.score));
+        break;
+      default:
+        break;
+    }
   }
 
   // Clear filters
