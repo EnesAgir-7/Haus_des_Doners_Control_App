@@ -1,6 +1,5 @@
 // ignore_for_file: deprecated_member_use
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
@@ -9,7 +8,7 @@ import 'package:haus_des_control/models/task_model.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../admin_providers/provider_admin_users.dart';
+import '../widgets/task_form_widget.dart';
 
 class ScreenAdminTasks extends StatefulWidget {
   const ScreenAdminTasks({super.key});
@@ -71,8 +70,14 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                                     top: Radius.circular(24),
                                   ),
                                 ),
-                                builder: (context) => _buildUpdateTaskWidget(
-                                  filteredTasks[index],
+                                builder: (context) => TaskFormWidget(
+                                  task: filteredTasks[index],
+                                  onSuccess: () {
+                                    // Refresh tasks after update
+                                    context
+                                        .read<ProviderTasks>()
+                                        .loadAllTasks();
+                                  },
                                 ),
                               );
                             },
@@ -98,9 +103,12 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                         top: Radius.circular(24),
                       ),
                     ),
-                    builder: (context) {
-                      return _buildCreateTaskWidget();
-                    },
+                    builder: (context) => TaskFormWidget(
+                      onSuccess: () {
+                        // Refresh tasks after create
+                        context.read<ProviderTasks>().loadAllTasks();
+                      },
+                    ),
                   );
                 },
                 child: Container(
@@ -138,600 +146,6 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
               ),
             ),
           ],
-        );
-      },
-    );
-  }
-
-  Widget _buildUpdateTaskWidget(TaskModel task) {
-    final screenHeight = MediaQuery.of(context).size.height * 0.75;
-
-    final _titleController = TextEditingController(text: task.title);
-    final _descriptionController = TextEditingController(
-      text: task.description,
-    );
-    String _priority = task.priority;
-    DateTime? _dueDate = task.dueDate;
-    String? _selectedInspectorId = task.assignedInspectorId;
-    String? _selectedInspectorName = task.assignedInspectorName;
-    String _status = task.status;
-
-    // // Ensure inspectors loaded
-    // final adminUsersProvider = context.read<ProviderAdminUsers>();
-    // if (!adminUsersProvider.isLoading && adminUsersProvider.users.isEmpty) {
-    //   final currentUserId = context.read<ProviderAuth>().currentUser?.uid ?? '';
-    //   adminUsersProvider.loadUsers(currentUserId);
-    // }
-
-    return StatefulBuilder(
-      builder: (context, setState) {
-        final inspectors = context.watch<ProviderAdminUsers>().inspectors;
-        final tasksProvider = context.read<ProviderTasks>();
-
-        Future<void> _pickDueDate() async {
-          final picked = await showDatePicker(
-            context: context,
-            initialDate:
-                _dueDate ?? DateTime.now().add(const Duration(days: 1)),
-            firstDate: DateTime.now(),
-            lastDate: DateTime.now().add(const Duration(days: 365)),
-          );
-          if (picked != null) setState(() => _dueDate = picked);
-        }
-
-        return Container(
-          height: screenHeight * 0.95,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.lightBlack,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 8),
-              Center(
-                child: Text(
-                  'Update Task',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                        controller: _titleController,
-                        decoration: const InputDecoration(
-                          labelText: 'Title',
-                          filled: true,
-                        ),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _descriptionController,
-                        maxLines: 4,
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                          filled: true,
-                        ),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: _priority,
-                              items: const [
-                                DropdownMenuItem(
-                                  value: 'low',
-                                  child: Text('Low'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'medium',
-                                  child: Text('Medium'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'high',
-                                  child: Text('High'),
-                                ),
-                              ],
-                              onChanged: (v) {
-                                if (v != null) setState(() => _priority = v);
-                              },
-                              decoration: const InputDecoration(
-                                labelText: 'Priority',
-                                filled: true,
-                              ),
-                              dropdownColor: AppColors.lightBlack,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: InkWell(
-                              onTap: _pickDueDate,
-                              child: InputDecorator(
-                                decoration: const InputDecoration(
-                                  labelText: 'Due date',
-                                  filled: true,
-                                ),
-                                child: Text(
-                                  _dueDate != null
-                                      ? DateFormat(
-                                          'yyyy-MM-dd',
-                                        ).format(_dueDate!)
-                                      : 'Select date',
-                                  style: TextStyle(
-                                    color: _dueDate != null
-                                        ? Colors.white
-                                        : Colors.white70,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Assign to',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                      const SizedBox(height: 8),
-                      if (context.watch<ProviderAdminUsers>().isLoading)
-                        const Center(child: CircularProgressIndicator())
-                      else if (inspectors.isEmpty)
-                        const Text(
-                          'No inspectors available',
-                          style: TextStyle(color: Colors.white70),
-                        )
-                      else
-                        Column(
-                          children: inspectors.map((inspector) {
-                            return RadioListTile<String>(
-                              value: inspector.id,
-
-                              groupValue: _selectedInspectorId,
-                              onChanged: (v) {
-                                setState(() {
-                                  _selectedInspectorId = v;
-                                  _selectedInspectorName = inspector.name;
-                                });
-                              },
-                              title: Text(
-                                inspector.name,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              subtitle: Text(
-                                inspector.serviceAccount,
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              activeColor: AppColors.primaryRed,
-                            );
-                          }).toList(),
-                        ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Status',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                      DropdownButtonFormField<String>(
-                        initialValue: _status,
-                        items: const [
-                          DropdownMenuItem(
-                            value: 'pending',
-                            child: Text('Pending'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'in_progress',
-                            child: Text('In Progress'),
-                          ),
-                          DropdownMenuItem(
-                            value: 'completed',
-                            child: Text('Completed'),
-                          ),
-                        ],
-                        onChanged: (v) {
-                          if (v != null) setState(() => _status = v);
-                        },
-                        decoration: const InputDecoration(
-                          labelText: 'Status',
-                          filled: true,
-                        ),
-                        dropdownColor: AppColors.lightBlack,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text(
-                              'Cancel',
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          ElevatedButton(
-                            onPressed: () async {
-                              final title = _titleController.text.trim();
-                              final description = _descriptionController.text
-                                  .trim();
-
-                              if (title.isEmpty ||
-                                  description.isEmpty ||
-                                  _selectedInspectorId == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Please fill title, description and assign an inspector',
-                                    ),
-                                  ),
-                                );
-                                return;
-                              }
-
-                              final data = {
-                                'title': title,
-                                'description': description,
-                                'assignedInspectorId': _selectedInspectorId,
-                                'assignedInspectorName':
-                                    _selectedInspectorName ?? '',
-                                'priority': _priority,
-                                'status': _status,
-                                'dueDate': _dueDate != null
-                                    ? Timestamp.fromDate(_dueDate!)
-                                    : null,
-                              };
-
-                              final success = await tasksProvider.updateTask(
-                                task.id,
-                                data,
-                              );
-
-                              if (success) {
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Task updated')),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Failed to update task'),
-                                  ),
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryRed,
-                            ),
-                            child: const Text('Update'),
-                          ),
-                          const SizedBox(width: 12),
-                          ElevatedButton(
-                            onPressed: () async {
-                              final tasksProvider = context
-                                  .read<ProviderTasks>();
-                              final confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (ctx) => AlertDialog(
-                                  title: const Text('Delete Task'),
-                                  content: const Text(
-                                    'Are you sure you want to delete this task?',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(ctx).pop(false),
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.of(ctx).pop(true),
-                                      child: const Text(
-                                        'Delete',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                              if (confirm == true) {
-                                try {
-                                  final success = await tasksProvider
-                                      .deleteTask(task.id);
-                                  if (success) {
-                                    Navigator.pop(context); // Close modal
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Task deleted'),
-                                      ),
-                                    );
-                                  } else {
-                                    throw Exception('Failed to delete task');
-                                  }
-                                } catch (e) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Failed to delete task: $e',
-                                      ),
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
-                            child: const Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildCreateTaskWidget() {
-    // Build a form to create a new task and assign it to an inspector
-    final screenHeight = MediaQuery.of(context).size.height * 0.75;
-
-    final _titleController = TextEditingController();
-    final _descriptionController = TextEditingController();
-    String _priority = 'medium';
-    DateTime? _dueDate;
-    String? _selectedInspectorId;
-    String? _selectedInspectorName;
-
-    // // Load inspectors list from ProviderAdminUsers
-    // final adminUsersProvider = context.read<ProviderAdminUsers>();
-    // if (!adminUsersProvider.isLoading && adminUsersProvider.users.isEmpty) {
-    //   // attempt to load users if not loaded yet
-    //   final currentUserId = context.read<ProviderAuth>().currentUser?.uid ?? '';
-    //   adminUsersProvider.loadUsers(currentUserId);
-    // }
-
-    return StatefulBuilder(
-      builder: (context, setState) {
-        final inspectors = context.watch<ProviderAdminUsers>().inspectors;
-        final tasksProvider = context.read<ProviderTasks>();
-
-        Future<void> _pickDueDate() async {
-          final picked = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now().add(const Duration(days: 1)),
-            firstDate: DateTime.now(),
-            lastDate: DateTime.now().add(const Duration(days: 365)),
-          );
-          if (picked != null) setState(() => _dueDate = picked);
-        }
-
-        return Container(
-          height: screenHeight * 0.95,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.lightBlack,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 8),
-              const Center(
-                child: Text(
-                  'Create Task',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                        controller: _titleController,
-                        decoration: const InputDecoration(
-                          labelText: 'Title',
-                          labelStyle: TextStyle(color: Colors.white70),
-                          filled: true,
-                        ),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: _descriptionController,
-                        maxLines: 4,
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                          labelStyle: TextStyle(color: Colors.white70),
-                          filled: true,
-                        ),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: _priority,
-                              items: const [
-                                DropdownMenuItem(
-                                  value: 'low',
-                                  child: Text('Low'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'medium',
-                                  child: Text('Medium'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'high',
-                                  child: Text('High'),
-                                ),
-                              ],
-                              onChanged: (v) {
-                                if (v != null) setState(() => _priority = v);
-                              },
-                              decoration: const InputDecoration(
-                                labelText: 'Priority',
-                                filled: true,
-                              ),
-                              dropdownColor: AppColors.lightBlack,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: InkWell(
-                              onTap: _pickDueDate,
-                              child: InputDecorator(
-                                decoration: const InputDecoration(
-                                  labelText: 'Due date',
-                                  filled: true,
-                                ),
-                                child: Text(
-                                  _dueDate != null
-                                      ? DateFormat(
-                                          'yyyy-MM-dd',
-                                        ).format(_dueDate!)
-                                      : 'Select date',
-                                  style: TextStyle(
-                                    color: _dueDate != null
-                                        ? Colors.white
-                                        : Colors.white70,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'Assign to',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                      const SizedBox(height: 8),
-                      if (context.watch<ProviderAdminUsers>().isLoading)
-                        const Center(child: CircularProgressIndicator())
-                      else if (inspectors.isEmpty)
-                        const Text(
-                          'No inspectors available',
-                          style: TextStyle(color: Colors.white70),
-                        )
-                      else
-                        Column(
-                          children: inspectors.map((inspector) {
-                            return RadioListTile<String>(
-                              value: inspector.id,
-                              groupValue: _selectedInspectorId,
-                              onChanged: (v) {
-                                setState(() {
-                                  _selectedInspectorId = v;
-                                  _selectedInspectorName = inspector.name;
-                                });
-                              },
-                              title: Text(
-                                inspector.name,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              subtitle: Text(
-                                inspector.serviceAccount,
-                                style: TextStyle(color: Colors.white70),
-                              ),
-                              activeColor: AppColors.primaryRed,
-                            );
-                          }).toList(),
-                        ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text(
-                              'Cancel',
-                              style: TextStyle(color: Colors.white70),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          ElevatedButton(
-                            onPressed: () async {
-                              final title = _titleController.text.trim();
-                              final description = _descriptionController.text
-                                  .trim();
-
-                              if (title.isEmpty ||
-                                  description.isEmpty ||
-                                  _selectedInspectorId == null) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Please fill title, description and assign an inspector',
-                                    ),
-                                  ),
-                                );
-                                return;
-                              }
-
-                              final success = await tasksProvider.createTask(
-                                title: title,
-                                description: description,
-                                assignedInspectorId: _selectedInspectorId!,
-                                assignedInspectorName:
-                                    _selectedInspectorName ?? '',
-                                priority: _priority,
-                                dueDate: _dueDate,
-                              );
-
-                              if (success) {
-                                Navigator.pop(context);
-                                // Optionally show success
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Task created')),
-                                );
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Failed to create task'),
-                                  ),
-                                );
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryRed,
-                            ),
-                            child: const Text('Create'),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
         );
       },
     );
@@ -982,6 +396,63 @@ class TaskCard extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                         ),
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(
+                        Icons.delete,
+                        color: Colors.red.withOpacity(0.7),
+                        size: 20,
+                      ),
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text(' '),
+                            content: const Text(
+                              'Are you sure you want to delete this task?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(true),
+                                child: const Text(
+                                  'Delete',
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true) {
+                          try {
+                            final tasksProvider = context.read<ProviderTasks>();
+                            final success = await tasksProvider.deleteTask(
+                              task.id,
+                            );
+                            if (success) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Task deleted')),
+                              );
+                            } else {
+                              throw Exception('Failed to delete task');
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to delete task: $e'),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      splashRadius: 20,
                     ),
                   ],
                 ),
