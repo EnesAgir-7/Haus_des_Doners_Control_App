@@ -31,6 +31,7 @@ class VehicleFields {
 }
 
 class BranchFields {
+  static const String id = 'id';
   static const String name = 'name';
   static const String address = 'address';
   static const String region = 'region';

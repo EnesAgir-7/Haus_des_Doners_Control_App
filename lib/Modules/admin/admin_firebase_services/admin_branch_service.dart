@@ -74,6 +74,47 @@ class AdminBranchService {
     }
   }
 
+  /// Add a new branch
+  Future<void> addBranch(BranchModel branch) async {
+    try {
+      // Use branch.id as doc id, or generate new one if empty
+      final docRef = branch.id.isNotEmpty
+          ? _db.collection(_collectionBranches).doc(branch.id)
+          : _db.collection(_collectionBranches).doc();
+
+      await docRef.set({
+        BranchFields.id: docRef.id,
+        BranchFields.name: branch.name,
+        BranchFields.address: branch.address,
+        BranchFields.templateId: branch.templateId,
+        BranchFields.templateName: branch.templateName,
+        BranchFields.region: branch.region,
+        BranchFields.gps: branch.gps,
+        BranchFields.contactName: branch.contactName,
+        BranchFields.contactPhone: branch.contactPhone,
+        BranchFields.stop: branch.stop != null ? branch.stop!.toMap() : null,
+        BranchFields.assignedInspector: branch.assignedInspector != null
+            ? branch.assignedInspector!.toJson()
+            : null,
+        BranchFields.lastInspectionDate: branch.lastInspectionDate != null
+            ? Timestamp.fromDate(branch.lastInspectionDate!)
+            : null,
+        BranchFields.lastInspectionScore: branch.lastInspectionScore,
+        BranchFields.totalInspections: branch.totalInspections,
+        BranchFields.averageScore: branch.averageScore,
+        BranchFields.status: branch.status,
+        BranchFields.last12MonthsScores: branch.last12MonthsScores ?? [],
+        BranchFields.createdAt: Timestamp.now(),
+        BranchFields.updatedAt: Timestamp.now(),
+      });
+
+      print('Branch added successfully with id: ${docRef.id}');
+    } catch (e) {
+      print('Error adding branch: $e');
+      rethrow;
+    }
+  }
+
   Stream<List<BranchModel>> streamBranchesByIds(List<String> branchIds) {
     if (branchIds.isEmpty) {
       return Stream.value([]);

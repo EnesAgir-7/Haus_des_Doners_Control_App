@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:haus_des_control/Modules/admin/screens/screen_admin_add_branch.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -35,12 +36,23 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _buildHeader(),
-        _buildSortSection(),
-        Expanded(child: _buildBranchList()),
-      ],
+    return Scaffold(
+      body: Column(
+        children: [
+          _buildHeader(),
+          _buildSortSection(),
+          Expanded(child: _buildBranchList()),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ScreenAdminAddBranch()),
+          );
+        },
+        child: Icon(Icons.add_business_outlined),
+      ),
     );
   }
 

@@ -236,6 +236,17 @@ class ProviderAdminBranches with ChangeNotifier {
     } finally {}
   }
 
+  Future<bool> addBranch({required BranchModel branch}) async {
+    try {
+      console('Adding Branch...');
+      await _branchService.addBranch(branch);
+      return true;
+    } catch (e) {
+      console('❌ Error updating template: $e');
+      return false;
+    } finally {}
+  }
+
   Future<bool> assignInspectorToBranch({
     required String branchId,
     required String inspectorId,
