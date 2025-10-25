@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_template_service.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -142,17 +144,20 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                           initialLongitude: double.tryParse(
                             _longitudeController.text,
                           ),
-                          googleMapsApiKey:
-                              'YOUR_GOOGLE_MAPS_API_KEY', // Add your API key
+                          googleMapsApiKey: dotenv.env['GOOGLE_MAPS_KEY']!,
                         );
 
                         if (result != null) {
+                          console(
+                            "${result["address"]}  ${result["latitude"]} ${result["longitude"]} ",
+                          );
                           setState(() {
                             _latitudeController.text = result['latitude']
-                                .toStringAsFixed(6);
+                                .toString();
                             _longitudeController.text = result['longitude']
-                                .toStringAsFixed(6);
-                            // Optional: You can also use result['address'] if needed
+                                .toString();
+                            _addressController.text = result['address']
+                                .toString();
                           });
                         }
                       },
