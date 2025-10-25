@@ -3,6 +3,7 @@
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/admin/screens/screen_admin_vehicle_details.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -149,10 +150,6 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                 )
               : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 16,
-          ),
         ),
         onChanged: (value) {
           setState(() {});
@@ -321,7 +318,18 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
               final vehicle = vehicles[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: VehicleListCard(vehicle: vehicle),
+                child: VehicleListCard(
+                  vehicle: vehicle,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ScreenAdminVehicleDetails(vehicle: vehicle),
+                      ),
+                    );
+                  },
+                ),
               );
             },
           ),
