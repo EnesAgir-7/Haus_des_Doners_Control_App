@@ -116,7 +116,7 @@ class ProviderAdminInspections extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await _fetchInspections(reset: true);
+      await _fetchInspections(reset: true, branchId: _activeBranchId);
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
