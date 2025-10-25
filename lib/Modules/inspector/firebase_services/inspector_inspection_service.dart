@@ -218,6 +218,7 @@ class InspectorInspectionService {
   }) async {
     final branchRef = _db.collection(_collectionBranches).doc(branchId);
     final branchDoc = await branchRef.get();
+
     if (!branchDoc.exists) throw Exception('Branch not found');
 
     final data = branchDoc.data()!;
@@ -233,12 +234,26 @@ class InspectorInspectionService {
     final newAverage =
         ((currentAverage * currentTotal) + numericScore) / newTotal;
 
+    // ✅ Handle last 12 scores
+    final List<dynamic> currentScores = List<String>.from(
+      data[BranchFields.last12MonthsScores] ?? [],
+    );
+
+    currentScores.add(inspectionScore);
+
+    // Keep only the last 12
+    final trimmedScores = currentScores.length > 12
+        ? currentScores.sublist(currentScores.length - 12)
+        : currentScores;
+
+    // ✅ Update Firestore fields
     batch.update(branchRef, {
       BranchFields.totalInspections: newTotal,
       BranchFields.lastInspectionDate: FieldValue.serverTimestamp(),
       BranchFields.averageRating: newAverage,
       BranchFields.stop: null,
       BranchFields.lastInspectionScore: inspectionScore,
+      BranchFields.last12MonthsScores: trimmedScores, // ✅ trimmed list
       BranchFields.updatedAt: FieldValue.serverTimestamp(),
     });
   }

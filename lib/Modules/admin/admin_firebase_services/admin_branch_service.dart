@@ -151,22 +151,6 @@ class AdminBranchService {
     }
   }
 
-  Future<void> updateBranchAssignedInspector(
-    String branchId,
-    Map<String, String> inspectorData,
-  ) async {
-    try {
-      await _db.collection(_collectionBranches).doc(branchId).update({
-        BranchFields.assignedInspector: inspectorData,
-        BranchFields.updatedAt: Timestamp.fromDate(DateTime.now()),
-      });
-      console('Branch assigned inspector updated successfully');
-    } catch (e) {
-      print("Error updating branch assigned inspector: $e");
-      rethrow;
-    }
-  }
-
   Future<void> removeBranchFromInspector({
     required String inspectorId,
     required String branchId,
@@ -206,6 +190,7 @@ class AdminBranchService {
     required String inspectorId,
     required String inspectorName,
     required String branchId,
+    String? oldInspectorId,
   }) async {
     final batch = FirebaseFirestore.instance.batch();
     final branchRef = FirebaseFirestore.instance
@@ -213,7 +198,7 @@ class AdminBranchService {
         .doc(branchId);
 
     try {
-      // 1️⃣ Update branch document
+      // 1️⃣ Update the branch document
       batch.update(branchRef, {
         BranchFields.assignedInspector: {
           InspectorFields.id: inspectorId,
@@ -222,7 +207,19 @@ class AdminBranchService {
         BranchFields.updatedAt: Timestamp.now(),
       });
 
-      // 2️⃣ Update inspector history
+      // 2️⃣ Only remove from old inspector if it's DIFFERENT
+      if (oldInspectorId != null &&
+          oldInspectorId.isNotEmpty &&
+          oldInspectorId != inspectorId) {
+        await _userService.updateInspectorHistoryBatch(
+          batch: batch,
+          inspectorId: oldInspectorId,
+          updates: {
+            IHF.branchesIds: FieldValue.arrayRemove([branchId]),
+          },
+        );
+      }
+
       await _userService.updateInspectorHistoryBatch(
         batch: batch,
         inspectorId: inspectorId,
@@ -231,7 +228,7 @@ class AdminBranchService {
         },
       );
 
-      // 3️⃣ Commit batch
+      // 4️⃣ Commit the batch
       await batch.commit();
 
       console('✅ Branch $branchId assigned successfully to $inspectorName');

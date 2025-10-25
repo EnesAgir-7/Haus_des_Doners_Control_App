@@ -146,24 +146,6 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
-  // Assign branch to inspector
-  Future<void> assignBranchToInspector(
-    String inspectorId,
-    String branchId,
-  ) async {
-    try {
-      final inspector = _inspectors.firstWhere((i) => i.id == inspectorId);
-      await _branchService.updateBranchAssignedInspector(branchId, {
-        InspectorFields.id: inspector.id,
-        InspectorFields.name: inspector.name,
-      });
-
-      notifyListeners();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   // Unassign branch from inspector
   Future<void> unassignBranchFromInspector(
     String branchId,

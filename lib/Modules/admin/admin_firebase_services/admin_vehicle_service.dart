@@ -1,13 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/vehicle_model.dart';
+import 'admin_user_service.dart';
 
 class AdminVehicleService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collectionVehicles = Collections.vehicles;
-
+  final AdminUserService _userService = AdminUserService();
   // Stream vehicle by inspector (real-time)
   Stream<List<VehicleModel>?> streamVehicleByInspector(String inspectorId) {
     return _db
@@ -53,6 +55,127 @@ class AdminVehicleService {
     }
   }
 
+  Future<void> updateVehicleWithBatch({
+    required String vehicleId,
+    int? newKm,
+    String? newPlate,
+    String? newModel,
+    String? newInspectorId,
+    String? newInspectorName,
+    String? oldInspectorId,
+    DateTime? lastServiceDate,
+    DateTime? nextServiceDue,
+    required int maxKm,
+  }) async {
+    final batch = FirebaseFirestore.instance.batch();
+    final vehicleRef = _db.collection(_collectionVehicles).doc(vehicleId);
+
+    try {
+      // Build the update map for vehicle
+      final Map<String, dynamic> vehicleUpdates = {};
+
+      // 1️⃣ Handle kilometer changes
+      if (newKm != null) {
+        final remainingKm = maxKm - newKm;
+        final usagePercent = ((newKm / maxKm) * 100).round();
+
+        vehicleUpdates[VehicleFields.currentKm] = newKm;
+        vehicleUpdates[VehicleFields.remainingKm] = remainingKm;
+        vehicleUpdates[VehicleFields.usagePercent] = usagePercent;
+      }
+
+      // 2️⃣ Handle basic field updates
+      if (newPlate != null) {
+        vehicleUpdates[VehicleFields.plate] = newPlate;
+      }
+      if (newModel != null) {
+        vehicleUpdates[VehicleFields.model] = newModel;
+      }
+
+      // 3️⃣ Handle service date updates
+      if (lastServiceDate != null) {
+        vehicleUpdates[VehicleFields.lastServiceDate] = Timestamp.fromDate(
+          lastServiceDate,
+        );
+      }
+      if (nextServiceDue != null) {
+        vehicleUpdates[VehicleFields.nextServiceDue] = Timestamp.fromDate(
+          nextServiceDue,
+        );
+      }
+
+      // 4️⃣ Handle inspector assignment changes
+      // newInspectorId will be passed ONLY if inspector changed
+      if (newInspectorId != null) {
+        console("Inspector id not null");
+        // Check if unassigning (empty string means unassign)
+        if (newInspectorId.isEmpty) {
+          console("Inspector id empty");
+          // UNASSIGNING
+          vehicleUpdates[VehicleFields.assignedInspectorId] = null;
+          vehicleUpdates[VehicleFields.assignedInspectorName] = null;
+          vehicleUpdates[VehicleFields.status] = AppConstants.available;
+
+          // Remove from old inspector's history
+          if (oldInspectorId != null && oldInspectorId.isNotEmpty) {
+            console("Old inspector is not empty or null");
+            await _userService.updateInspectorHistoryBatch(
+              batch: batch,
+              inspectorId: oldInspectorId,
+              updates: {
+                IHF.vehicleIds: FieldValue.arrayRemove([vehicleId]),
+              },
+            );
+          }
+        } else {
+          console("New inspector is not empty");
+          // ASSIGNING OR REASSIGNING
+          vehicleUpdates[VehicleFields.assignedInspectorId] = newInspectorId;
+          vehicleUpdates[VehicleFields.assignedInspectorName] =
+              newInspectorName;
+          vehicleUpdates[VehicleFields.status] = AppConstants.assigned;
+
+          // Remove from old inspector's history (if exists)
+          if (oldInspectorId != null && oldInspectorId.isNotEmpty) {
+            console("Old inspector is not empty or null");
+            await _userService.updateInspectorHistoryBatch(
+              batch: batch,
+              inspectorId: oldInspectorId,
+              updates: {
+                IHF.vehicleIds: FieldValue.arrayRemove([vehicleId]),
+              },
+            );
+          }
+
+          // Add to new inspector's history
+          await _userService.updateInspectorHistoryBatch(
+            batch: batch,
+            inspectorId: newInspectorId,
+            updates: {
+              IHF.vehicleIds: FieldValue.arrayUnion([vehicleId]),
+            },
+          );
+        }
+      }
+
+      // Add updated timestamp
+      vehicleUpdates[VehicleFields.updatedAt] = FieldValue.serverTimestamp();
+
+      // 5️⃣ Update vehicle document in batch
+      if (vehicleUpdates.isNotEmpty) {
+        batch.update(vehicleRef, vehicleUpdates);
+      }
+
+      // 6️⃣ Commit the batch (All or Nothing)
+      await batch.commit();
+
+      console('✅ Vehicle $vehicleId updated successfully');
+    } catch (e, st) {
+      print("❌ Error updating vehicle: $e\n$st");
+      rethrow;
+    }
+  }
+
   // Update vehicle kilometers
   Future<void> updateVehicleKm(String vehicleId, int newKm) async {
     try {
@@ -63,7 +186,7 @@ class AdminVehicleService {
       if (!vehicle.exists) throw Exception('Vehicle not found');
 
       final data = vehicle.data() as Map<String, dynamic>;
-      final maxKm = data['maxKm'] as int;
+      final maxKm = data[VehicleFields.maxKm] as int;
       final remainingKm = maxKm - newKm;
       final usagePercent = ((newKm / maxKm) * 100).round();
 
@@ -148,7 +271,10 @@ class AdminVehicleService {
         VehicleFields.lastServiceDate: Timestamp.fromDate(lastServiceDate),
         VehicleFields.nextServiceDue: Timestamp.fromDate(nextServiceDue),
         VehicleFields.status: AppConstants.available,
-        VehicleFields.assignedInspector: {InspectorFields.id: null, InspectorFields.name: null},
+        VehicleFields.assignedInspector: {
+          InspectorFields.id: null,
+          InspectorFields.name: null,
+        },
         VehicleFields.createdAt: FieldValue.serverTimestamp(),
         VehicleFields.updatedAt: FieldValue.serverTimestamp(),
       });

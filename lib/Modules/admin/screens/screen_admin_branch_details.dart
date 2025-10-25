@@ -1307,6 +1307,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             branchId: widget.branch.id,
             inspectorId: selected.id,
             inspectorName: selected.name,
+            oldInspectorId: widget.branch.assignedInspector?.id,
           );
 
           if (success) {

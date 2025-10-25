@@ -251,6 +251,7 @@ class ProviderAdminBranches with ChangeNotifier {
     required String branchId,
     required String inspectorId,
     required String inspectorName,
+    String? oldInspectorId, // ✅ Add this parameter
   }) async {
     _setLoading(true);
     try {
@@ -259,6 +260,7 @@ class ProviderAdminBranches with ChangeNotifier {
         inspectorId: inspectorId,
         inspectorName: inspectorName,
         branchId: branchId,
+        oldInspectorId: oldInspectorId, // ✅ Pass it down
       );
       return true; // ✅ Success
     } catch (e) {

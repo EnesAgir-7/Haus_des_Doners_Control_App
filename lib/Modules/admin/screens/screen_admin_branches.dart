@@ -424,6 +424,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
         }
 
         return MasonryGridView.extent(
+          key: const PageStorageKey('branchesList'),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           maxCrossAxisExtent: 800,
           mainAxisSpacing: 12,

@@ -50,41 +50,36 @@ class ProviderAdminFleet extends ChangeNotifier {
     }
   }
 
-  Future<void> assignInspector(
-    String vehicleId,
-    String inspectorId,
-    String inspectorName,
-  ) async {
+  Future<void> updateVehicleWithBatch({
+    required String vehicleId,
+    int? newKm,
+    String? newPlate,
+    String? newModel,
+    String? newInspectorId,
+    String? newInspectorName,
+    String? oldInspectorId,
+    DateTime? lastServiceDate,
+    DateTime? nextServiceDue,
+    required int maxKm,
+  }) async {
     try {
-      await _vehicleService.assignVehicleToInspector(
-        vehicleId,
-        inspectorId,
-        inspectorName,
+      await _vehicleService.updateVehicleWithBatch(
+        vehicleId: vehicleId,
+        newKm: newKm,
+        newPlate: newPlate,
+        newModel: newModel,
+        newInspectorId: newInspectorId,
+        newInspectorName: newInspectorName,
+        oldInspectorId: oldInspectorId,
+        lastServiceDate: lastServiceDate,
+        nextServiceDue: nextServiceDue,
+        maxKm: maxKm,
       );
-      await loadData(); // Refresh data after assignment
+      loadData();
     } catch (e) {
       _error = e.toString();
       notifyListeners();
-    }
-  }
-
-  Future<void> unassignInspector(String vehicleId) async {
-    try {
-      await _vehicleService.unassignVehicle(vehicleId);
-      await loadData(); // Refresh data after unassignment
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
-    }
-  }
-
-  Future<void> updateVehicleKilometers(String vehicleId, int newKm) async {
-    try {
-      await _vehicleService.updateVehicleKm(vehicleId, newKm);
-      await loadData(); // Refresh data after update
-    } catch (e) {
-      _error = e.toString();
-      notifyListeners();
+      rethrow;
     }
   }
 
@@ -109,7 +104,7 @@ class ProviderAdminFleet extends ChangeNotifier {
         lastServiceDate: lastServiceDate,
         nextServiceDue: nextServiceDue,
       );
-      await loadData(); // Refresh data after creation
+      loadData();
     } catch (e) {
       _error = e.toString();
       notifyListeners();

@@ -1,11 +1,15 @@
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/constants/app_colors.dart';
+import '../../../models/user_model.dart';
 import '../../../models/vehicle_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../admin_providers/provider_admin_fleet.dart';
-import '../../../translations/locale_keys.g.dart';
 import '../admin_providers/provider_admin_users.dart';
 
 class ScreenAdminVehicleDetails extends StatefulWidget {
@@ -34,9 +38,6 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
   void initState() {
     super.initState();
     _initializeControllers();
-    Future.microtask(() {
-      context.read<ProviderAdminUsers>().streamAllInspectors();
-    });
   }
 
   void _initializeControllers() {
@@ -120,7 +121,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
         child: Form(
           key: _formKey,
           child: Column(
@@ -348,11 +349,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
         Expanded(
           child: OutlinedButton.icon(
             onPressed: () {
-              final inspectors = context
-                  .read<ProviderAdminUsers>()
-                  .inspectors
-                  .where((i) => i.active)
-                  .toList();
+              final inspectors = context.read<ProviderAdminUsers>().inspectors;
               _showInspectorSelectionSheet(inspectors);
             },
             style: OutlinedButton.styleFrom(
@@ -392,7 +389,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
     );
   }
 
-  void _showInspectorSelectionSheet(List<dynamic> inspectors) {
+  void _showInspectorSelectionSheet(List<UserModel> inspectors) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -805,69 +802,73 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
     setState(() => _isSaving = true);
 
     try {
+      // Parse new values
       final newKm = int.parse(_kmController.text);
+      final newPlate = _plateController.text.trim();
+      final newModel = _modelController.text.trim();
 
-      // Update vehicle kilometers
-      await context.read<ProviderAdminFleet>().updateVehicleKilometers(
-        widget.vehicle.id,
-        newKm,
-      );
+      // Get old values
+      final oldInspectorId = widget.vehicle.assignedInspector?.id;
 
-      // Handle inspector assignment changes
-      if (_selectedInspectorId != widget.vehicle.assignedInspector?.id) {
+      // Check what changed
+      final kmChanged = newKm != widget.vehicle.currentKm;
+      final plateChanged = newPlate != widget.vehicle.plate;
+      final modelChanged = newModel != widget.vehicle.model;
+      final datesChanged =
+          _lastServiceDate != widget.vehicle.lastServiceDate ||
+          _nextServiceDue != widget.vehicle.nextServiceDue;
+
+      // Inspector changed check
+      final inspectorChanged = _selectedInspectorId != oldInspectorId;
+
+      // If nothing changed, just exit
+      if (!kmChanged &&
+          !inspectorChanged &&
+          !plateChanged &&
+          !modelChanged &&
+          !datesChanged) {
+        if (!mounted) return;
+        showSnakBarr(context, "No changes detected");
+        setState(() => _isSaving = false);
+        return;
+      }
+
+      // Prepare inspector ID to pass (only if changed)
+      String? inspectorIdToPass;
+      if (inspectorChanged) {
+        // If unselecting inspector, pass empty string
         if (_selectedInspectorId == null || _selectedInspectorId!.isEmpty) {
-          await context.read<ProviderAdminFleet>().unassignInspector(
-            widget.vehicle.id,
-          );
+          inspectorIdToPass = ''; // Empty string means unassign
         } else {
-          await context.read<ProviderAdminFleet>().assignInspector(
-            widget.vehicle.id,
-            _selectedInspectorId!,
-            _selectedInspectorName!,
-          );
+          inspectorIdToPass = _selectedInspectorId; // New inspector ID
         }
       }
 
-      if (!mounted) return;
+      console('Inspector Changed: $inspectorChanged');
+      console('Old Inspector: $oldInspectorId');
+      console('New Inspector: $_selectedInspectorId');
+      console('Passing Inspector ID: $inspectorIdToPass');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 12),
-              Text('Vehicle updated successfully'),
-            ],
-          ),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
+      // Call the batch update method
+      await context.read<ProviderAdminFleet>().updateVehicleWithBatch(
+        vehicleId: widget.vehicle.id,
+        newKm: kmChanged ? newKm : null,
+        newPlate: plateChanged ? newPlate : null,
+        newModel: modelChanged ? newModel : null,
+        newInspectorId: inspectorIdToPass, // Only set if changed
+        newInspectorName: inspectorChanged ? _selectedInspectorName : null,
+        oldInspectorId: oldInspectorId,
+        lastServiceDate: datesChanged ? _lastServiceDate : null,
+        nextServiceDue: datesChanged ? _nextServiceDue : null,
+        maxKm: widget.vehicle.maxKm,
       );
 
+      if (!mounted) return;
+      showSnakBarr(context, "Vehicle updated successfully");
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error, color: Colors.white),
-              const SizedBox(width: 12),
-              Expanded(child: Text(e.toString().replaceAll('Exception: ', ''))),
-            ],
-          ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          duration: const Duration(seconds: 4),
-        ),
-      );
+      showSnakBarr(context, e.toString().replaceAll('Exception: ', ''));
     } finally {
       if (mounted) {
         setState(() => _isSaving = false);

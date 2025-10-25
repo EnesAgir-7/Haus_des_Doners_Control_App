@@ -12,7 +12,7 @@ class InspectorVehicleService {
     try {
       final snapshot = await _db
           .collection(_collectionVehicles)
-          .where('assignedInspector.id', isEqualTo: inspectorId)
+          .where(VehicleFields.assignedInspectorId, isEqualTo: inspectorId)
           .get();
 
       if (snapshot.docs.isEmpty) return [];
@@ -30,7 +30,7 @@ class InspectorVehicleService {
   Stream<List<VehicleModel>?> streamVehicleByInspector(String inspectorId) {
     return _db
         .collection(_collectionVehicles)
-        .where('assignedInspectorId', isEqualTo: inspectorId)
+        .where(VehicleFields.assignedInspectorId, isEqualTo: inspectorId)
         .snapshots()
         .map((snapshot) {
           if (snapshot.docs.isEmpty) return null;
@@ -50,15 +50,15 @@ class InspectorVehicleService {
       if (!vehicle.exists) throw Exception('Vehicle not found');
 
       final data = vehicle.data() as Map<String, dynamic>;
-      final maxKm = data['maxKm'] as int;
+      final maxKm = data[VehicleFields.maxKm] as int;
       final remainingKm = maxKm - newKm;
       final usagePercent = ((newKm / maxKm) * 100).round();
 
       await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        'currentKm': newKm,
-        'remainingKm': remainingKm,
-        'usagePercent': usagePercent,
-        'updatedAt': FieldValue.serverTimestamp(),
+        VehicleFields.currentKm: newKm,
+        VehicleFields.remainingKm: remainingKm,
+        VehicleFields.usagePercent: usagePercent,
+        VehicleFields.updatedAt: FieldValue.serverTimestamp(),
       });
     } catch (e) {
       print('Error updating vehicle KM: $e');
