@@ -77,20 +77,7 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _addressController,
-                      label: 'Address',
-                      hint: 'Enter branch address',
-                      icon: Icons.location_on,
-                      maxLines: 3,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Address is required';
-                        }
-                        return null;
-                      },
-                    ),
+
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _regionController,
@@ -183,6 +170,20 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                           ],
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      controller: _addressController,
+                      label: 'Address',
+                      hint: 'Enter branch address',
+                      icon: Icons.location_on,
+                      maxLines: 3,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Address is required';
+                        }
+                        return null;
+                      },
                     ),
                     const SizedBox(height: 24),
                     _buildSectionHeader(
