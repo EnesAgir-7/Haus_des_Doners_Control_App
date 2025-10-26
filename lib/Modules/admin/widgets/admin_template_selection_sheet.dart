@@ -30,6 +30,7 @@ class TemplateSelectionSheet extends StatelessWidget {
           ),
           padding: EdgeInsets.all(20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildDragHandle(),
               SizedBox(height: 16),
@@ -40,6 +41,23 @@ class TemplateSelectionSheet extends StatelessWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
+              ),
+              SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.info_outline, color: AppColors.amber),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Note: Updating the questionnaire may not be reflected in the branches already assigned in the inspectors\' routes. However, it will be updated for the new inspectors when they add this to their route.',
+                      style: TextStyle(
+                        color: AppColors.white.withValues(alpha: 0.6),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 16),
               Expanded(
@@ -67,6 +85,7 @@ class TemplateSelectionSheet extends StatelessWidget {
 
                     final templates = snapshot.data!;
                     return ListView.builder(
+                      key: PageStorageKey('templatesList'),
                       controller: scrollController,
                       itemCount: templates.length,
                       itemBuilder: (context, index) {

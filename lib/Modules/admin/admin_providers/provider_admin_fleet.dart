@@ -8,7 +8,6 @@ class ProviderAdminFleet extends ChangeNotifier {
 
   List<VehicleModel> _vehicles = [];
   List<VehicleModel> get vehicles => _filterVehicles();
-  String? _activeInspectorId;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -19,8 +18,7 @@ class ProviderAdminFleet extends ChangeNotifier {
   String _searchQuery = '';
 
   Future<void> initialize({String? inspectorID}) async {
-    if (_vehicles.isNotEmpty && _activeInspectorId == inspectorID) return;
-    _activeInspectorId = inspectorID;
+    if (_vehicles.isNotEmpty) return;
 
     // _isLoading = true;
     // _error = null;
@@ -59,9 +57,7 @@ class ProviderAdminFleet extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _vehicles = await _vehicleService.getAllVehicles(
-        inspectorId: _activeInspectorId,
-      );
+      _vehicles = await _vehicleService.getAllVehicles();
       _error = null;
     } catch (e) {
       _error = e.toString();
@@ -74,6 +70,7 @@ class ProviderAdminFleet extends ChangeNotifier {
   Future<void> updateVehicleWithBatch({
     required String vehicleId,
     int? newKm,
+    int? maximumKm,
     String? newPlate,
     String? newModel,
     String? newInspectorId,

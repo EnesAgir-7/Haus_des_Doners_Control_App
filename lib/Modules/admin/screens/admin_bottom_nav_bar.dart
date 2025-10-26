@@ -94,7 +94,7 @@ class AdminBottomNavBar extends StatelessWidget {
                       Icons.apartment,
                       color: AppColors.primaryRed,
                     ),
-                    label: LocaleKeys.my_branches.tr(),
+                    label: "Branches",
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.car_rental, color: Colors.white70),
@@ -112,9 +112,12 @@ class AdminBottomNavBar extends StatelessWidget {
 
                   NavigationDestination(
                     icon: const Icon(Icons.settings, color: Colors.white70),
-                    selectedIcon: Icon(Icons.settings, color: AppColors.primaryRed),
+                    selectedIcon: Icon(
+                      Icons.settings,
+                      color: AppColors.primaryRed,
+                    ),
                     label: "Settings",
-                  )
+                  ),
                 ],
               ),
             ),

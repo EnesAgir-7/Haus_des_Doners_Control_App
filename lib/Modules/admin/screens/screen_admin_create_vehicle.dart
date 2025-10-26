@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/app_button.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:provider/provider.dart';
@@ -72,7 +73,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
       backgroundColor: AppColors.primaryDark,
       appBar: CustomAppBar(title: 'Create Vehicle'),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
@@ -103,7 +104,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
                   return null;
                 },
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
               _buildSectionHeader('Mileage Details', Icons.speed),
               const SizedBox(height: 16),
               _buildTextField(
@@ -146,7 +147,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
                   return null;
                 },
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 20),
               _buildSectionHeader('Service Schedule', Icons.build),
               const SizedBox(height: 16),
               _buildDateTile(
@@ -303,36 +304,11 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
   }
 
   Widget _buildCreateButton() {
-    return ElevatedButton(
+    return AppButton(
       onPressed: _isCreating ? null : _createVehicle,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryRed,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 4,
-        disabledBackgroundColor: AppColors.primaryRed.withValues(alpha: 0.5),
-      ),
-      child: _isCreating
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.check_circle, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  'Create Vehicle',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+      isLoading: _isCreating,
+      icon: Icons.check_circle,
+      text: 'Create Vehicle',
     );
   }
 

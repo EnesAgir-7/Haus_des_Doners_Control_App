@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/app_button.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,7 @@ class ScreenAdminVehicleDetails extends StatefulWidget {
 class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
   final _formKey = GlobalKey<FormState>();
   final _kmController = TextEditingController();
+  final _maxController = TextEditingController();
   final _plateController = TextEditingController();
   final _modelController = TextEditingController();
 
@@ -43,6 +45,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
   void _initializeControllers() {
     _kmController.text = widget.vehicle.currentKm.toString();
     _plateController.text = widget.vehicle.plate;
+    _maxController.text = widget.vehicle.maxKm.toString();
     _modelController.text = widget.vehicle.model;
     _selectedInspectorId = widget.vehicle.assignedInspector?.id;
     _selectedInspectorName = widget.vehicle.assignedInspector?.name;
@@ -55,6 +58,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
     _kmController.dispose();
     _plateController.dispose();
     _modelController.dispose();
+    _maxController.dispose();
     super.dispose();
   }
 
@@ -121,18 +125,18 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildVehicleInfoSection(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               _buildMileageSection(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               _buildServiceSection(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               _buildInspectorSection(),
               const SizedBox(height: 32),
               if (_isEditing) _buildSaveButton(),
@@ -210,11 +214,30 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
           },
         ),
         const SizedBox(height: 16),
-        _buildInfoCard(
+        _buildEditableField(
+          controller: _maxController,
           label: LocaleKeys.max_km.tr(),
-          value: '$maxKm km',
           icon: Icons.flag,
-          color: Colors.blue,
+          suffix: 'km',
+          enabled: _isEditing,
+          keyboardType: TextInputType.number,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Maximum kilometer is required';
+            }
+            final km = int.tryParse(value);
+            if (km == null || km < 0) {
+              return LocaleKeys.invalid_km_value.tr();
+            }
+
+            // ✅ Ensure max >= current
+            final currentKm = int.tryParse(_kmController.text);
+            if (currentKm != null && km < currentKm) {
+              return 'Maximum kilometer cannot be less than current kilometer';
+            }
+
+            return null; // ✅ Valid case
+          },
         ),
         const SizedBox(height: 12),
         _buildInfoCard(
@@ -763,36 +786,11 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
   }
 
   Widget _buildSaveButton() {
-    return ElevatedButton(
+    return AppButton(
       onPressed: _isSaving ? null : _saveChanges,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryRed,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 4,
-        disabledBackgroundColor: AppColors.primaryRed.withValues(alpha: 0.5),
-      ),
-      child: _isSaving
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            )
-          : const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.save, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  'Save Changes',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
+      isLoading: _isSaving,
+      icon: Icons.save,
+      text: 'Save Changes',
     );
   }
 
@@ -804,6 +802,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
     try {
       // Parse new values
       final newKm = int.parse(_kmController.text);
+      final maxKm = int.parse(_maxController.text);
       final newPlate = _plateController.text.trim();
       final newModel = _modelController.text.trim();
 
@@ -813,6 +812,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       // Check what changed
       final kmChanged = newKm != widget.vehicle.currentKm;
       final plateChanged = newPlate != widget.vehicle.plate;
+      final maxKmChange = maxKm != widget.vehicle.maxKm;
       final modelChanged = newModel != widget.vehicle.model;
       final datesChanged =
           _lastServiceDate != widget.vehicle.lastServiceDate ||
@@ -825,6 +825,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       if (!kmChanged &&
           !inspectorChanged &&
           !plateChanged &&
+          !maxKmChange &&
           !modelChanged &&
           !datesChanged) {
         if (!mounted) return;
@@ -860,7 +861,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
         oldInspectorId: oldInspectorId,
         lastServiceDate: datesChanged ? _lastServiceDate : null,
         nextServiceDue: datesChanged ? _nextServiceDue : null,
-        maxKm: widget.vehicle.maxKm,
+        maxKm: maxKmChange ? maxKm : widget.vehicle.maxKm,
       );
 
       if (!mounted) return;

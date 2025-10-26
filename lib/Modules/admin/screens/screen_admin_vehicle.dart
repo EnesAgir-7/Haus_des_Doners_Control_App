@@ -10,8 +10,7 @@ import '../admin_providers/provider_admin_fleet.dart';
 import 'screen_admin_create_vehicle.dart';
 
 class ScreenAdminVehicle extends StatefulWidget {
-  final String? inspectorID;
-  const ScreenAdminVehicle({super.key, this.inspectorID});
+  const ScreenAdminVehicle({super.key});
 
   @override
   State<ScreenAdminVehicle> createState() => _ScreenAdminVehicleState();
@@ -24,7 +23,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderAdminFleet>().initialize(inspectorID: widget.inspectorID);
+      context.read<ProviderAdminFleet>().loadData();
     });
   }
 
@@ -280,7 +279,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                       fontSize: 14,
                     ),
                   ),
-                  if (_searchController.text.isEmpty || widget.inspectorID != null) ...[
+                  if (_searchController.text.isEmpty) ...[
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
                       onPressed: _navigateToCreateVehicle,
@@ -310,25 +309,22 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
           color: AppColors.primaryRed,
           backgroundColor: AppColors.primaryDark,
           child: ListView.builder(
-            key: const PageStorageKey('vehiclesListKey'),
+            key: PageStorageKey("vehiclesListAdmin"),
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
             itemCount: vehicles.length,
             itemBuilder: (context, index) {
               final vehicle = vehicles[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: VehicleListCard(
-                  vehicle: vehicle,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ScreenAdminVehicleDetails(vehicle: vehicle),
-                      ),
-                    );
-                  },
-                ),
+              return VehicleListCard(
+                vehicle: vehicle,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ScreenAdminVehicleDetails(vehicle: vehicle),
+                    ),
+                  );
+                },
               );
             },
           ),

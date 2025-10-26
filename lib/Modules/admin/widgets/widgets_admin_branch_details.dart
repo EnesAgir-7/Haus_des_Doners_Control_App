@@ -129,7 +129,6 @@ class AdminStopInfoSheet extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _infoRow('Branch Name', stop.branchName),
-        _infoRow('Branch Name', stop.branchName),
         _infoRow('Branch Address', stop.branchAddress ?? 'N/A'),
         _infoRow('Time Slot', formatTimeSlot(stop.timeSlot)),
         _infoRow('Status', stop.status),
@@ -263,8 +262,6 @@ class AdminStopInfoSheet extends StatelessWidget {
     }
   }
 }
-
-
 
 class ParsedScore {
   final double score;
@@ -470,6 +467,7 @@ Widget buildScoresChart(InspectorHistoryModel stats) {
     ],
   );
 }
+
 Widget _buildLegendItem(Color color, String label) {
   return Row(
     mainAxisSize: MainAxisSize.min,

@@ -25,26 +25,17 @@ class AdminVehicleService {
   }
 
   // Get all vehicles (admin)
-Future<List<VehicleModel>> getAllVehicles({String? inspectorId}) async {
+  Future<List<VehicleModel>> getAllVehicles() async {
     try {
-      Query query = _db.collection(_collectionVehicles);
-
-      // 🔍 If inspectorId is provided, filter by it
-      if (inspectorId != null && inspectorId.isNotEmpty) {
-        query = query.where(VehicleFields.assignedInspectorId, isEqualTo: inspectorId);
-      }
-
-      final snapshot = await query.get();
-
+      final snapshot = await _db.collection(_collectionVehicles).get();
       return snapshot.docs
           .map((doc) => VehicleModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error getting vehicles: $e');
+      print('Error getting all vehicles: $e');
       return [];
     }
   }
-
 
   // Get vehicles by status
   Future<List<VehicleModel>> getVehiclesByStatus(String status) async {
@@ -82,6 +73,9 @@ Future<List<VehicleModel>> getAllVehicles({String? inspectorId}) async {
       // Build the update map for vehicle
       final Map<String, dynamic> vehicleUpdates = {};
 
+      // 0️⃣ Always update maxKm
+      vehicleUpdates[VehicleFields.maxKm] = maxKm;
+
       // 1️⃣ Handle kilometer changes
       if (newKm != null) {
         final remainingKm = maxKm - newKm;
@@ -113,20 +107,14 @@ Future<List<VehicleModel>> getAllVehicles({String? inspectorId}) async {
       }
 
       // 4️⃣ Handle inspector assignment changes
-      // newInspectorId will be passed ONLY if inspector changed
       if (newInspectorId != null) {
-        console("Inspector id not null");
-        // Check if unassigning (empty string means unassign)
+        // UNASSIGN
         if (newInspectorId.isEmpty) {
-          console("Inspector id empty");
-          // UNASSIGNING
           vehicleUpdates[VehicleFields.assignedInspectorId] = null;
           vehicleUpdates[VehicleFields.assignedInspectorName] = null;
           vehicleUpdates[VehicleFields.status] = AppConstants.available;
 
-          // Remove from old inspector's history
           if (oldInspectorId != null && oldInspectorId.isNotEmpty) {
-            console("Old inspector is not empty or null");
             await _userService.updateInspectorHistoryBatch(
               batch: batch,
               inspectorId: oldInspectorId,
@@ -136,16 +124,13 @@ Future<List<VehicleModel>> getAllVehicles({String? inspectorId}) async {
             );
           }
         } else {
-          console("New inspector is not empty");
-          // ASSIGNING OR REASSIGNING
+          // ASSIGN/REASSIGN
           vehicleUpdates[VehicleFields.assignedInspectorId] = newInspectorId;
           vehicleUpdates[VehicleFields.assignedInspectorName] =
               newInspectorName;
           vehicleUpdates[VehicleFields.status] = AppConstants.assigned;
 
-          // Remove from old inspector's history (if exists)
           if (oldInspectorId != null && oldInspectorId.isNotEmpty) {
-            console("Old inspector is not empty or null");
             await _userService.updateInspectorHistoryBatch(
               batch: batch,
               inspectorId: oldInspectorId,
@@ -155,7 +140,6 @@ Future<List<VehicleModel>> getAllVehicles({String? inspectorId}) async {
             );
           }
 
-          // Add to new inspector's history
           await _userService.updateInspectorHistoryBatch(
             batch: batch,
             inspectorId: newInspectorId,

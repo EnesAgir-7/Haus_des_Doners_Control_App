@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:haus_des_control/core/extensions.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -680,14 +681,12 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         if (widget.branch.lastInspectionDate != null) ...[
           _buildInfoTile(
             label: LocaleKeys.last_inspected.tr(),
-            value: DateFormat(
-              'dd.MM.yyyy HH:mm',
-            ).format(widget.branch.lastInspectionDate!),
+            value: widget.branch.lastInspectionDate!.getFormattedDateTime(),
             icon: Icons.calendar_today,
           ),
           const SizedBox(height: 12),
           _buildInfoTile(
-            label: 'Days Since Last',
+            label: 'Days Since Last Inspection',
             value: '${widget.branch.daysSinceLastInspection} days',
             icon: Icons.timeline,
             valueColor: _getUrgencyColor(
@@ -716,14 +715,9 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         const SizedBox(height: 12),
         _buildInfoTile(
           label: LocaleKeys.assigned_at.tr(),
-          value: DateFormat('dd.MM.yyyy HH:mm').format(widget.branch.createdAt),
+          value: widget.branch.createdAt.getFormattedDateTime(),
+
           icon: Icons.event,
-        ),
-        const SizedBox(height: 12),
-        _buildInfoTile(
-          label: LocaleKeys.last_inspected.tr(),
-          value: DateFormat('dd.MM.yyyy HH:mm').format(widget.branch.updatedAt),
-          icon: Icons.update,
         ),
       ],
     );

@@ -1,13 +1,17 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/models/task_model.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+
+import '../../inspector/screens/screen_full_image.dart';
 
 class TaskDetailWidget extends StatefulWidget {
   final TaskModel task;
@@ -22,10 +26,10 @@ class TaskDetailWidget extends StatefulWidget {
 class _TaskDetailWidgetState extends State<TaskDetailWidget> {
   final TextEditingController _commentController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
+  final ScrollController _scrollController = ScrollController();
   List<File> _commentPhotos = [];
   bool _isAddingComment = false;
-
-  // Local task state to track updates
+  bool _showCommentInput = false;
   late TaskModel _currentTask;
 
   @override
@@ -37,6 +41,7 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
   @override
   void dispose() {
     _commentController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -52,11 +57,8 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
 
     try {
       final tasksProvider = context.read<ProviderTasks>();
-
-      // Set the provider's controller with our text
       tasksProvider.commentController.text = commentText;
 
-      // Add photos to provider
       for (final photo in _commentPhotos) {
         tasksProvider.addCommentPhoto(photo);
       }
@@ -64,7 +66,6 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
       final comment = await tasksProvider.addComment(_currentTask.id, context);
 
       if (comment != null) {
-        // Update local task state with new comment
         setState(() {
           _currentTask = TaskModel(
             id: _currentTask.id,
@@ -81,6 +82,7 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
             createdAt: _currentTask.createdAt,
             updatedAt: DateTime.now(),
           );
+          _showCommentInput = false;
         });
 
         _commentController.clear();
@@ -121,22 +123,17 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
   }
 
   void _showSnackBar(String message, {bool isError = true}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-      ),
-    );
+    showSnakBarr(context, message);
   }
 
   Color _getStatusColor() {
     switch (_currentTask.status) {
       case 'pending':
-        return Colors.orange;
+        return const Color(0xFFFF9800);
       case 'in_progress':
-        return Colors.blue;
+        return const Color(0xFF2196F3);
       case 'completed':
-        return Colors.green;
+        return const Color(0xFF4CAF50);
       default:
         return Colors.grey;
     }
@@ -158,11 +155,11 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
   Color _getPriorityColor() {
     switch (_currentTask.priority) {
       case 'high':
-        return Colors.red;
+        return const Color(0xFFEF5350);
       case 'medium':
-        return Colors.orange;
+        return const Color(0xFFFFA726);
       case 'low':
-        return Colors.green;
+        return const Color(0xFF66BB6A);
       default:
         return Colors.grey;
     }
@@ -170,422 +167,265 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height * 0.85;
     final statusColor = _getStatusColor();
     final priorityColor = _getPriorityColor();
 
     return Container(
-      height: screenHeight,
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
       decoration: BoxDecoration(
         color: AppColors.lightBlack,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _currentTask.title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 12, 0),
+
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _currentTask.title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: -0.5,
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close, color: Colors.white70),
-              ),
-            ],
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
 
-          // Task Details
+          // Content
           Expanded(
-            child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Status and Priority
-                  Row(
+            child: ListView(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              children: [
+                // Status and Priority Badges
+                Row(
+                  children: [
+                    _buildBadge(_getStatusText(), statusColor, Icons.circle),
+                    const SizedBox(width: 10),
+                    _buildBadge(
+                      '${_currentTask.priority[0].toUpperCase()}${_currentTask.priority.substring(1)} Priority',
+                      priorityColor,
+                      Icons.flag_rounded,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Description Card
+                _buildSectionCard(
+                  title: 'Description',
+                  child: Text(
+                    _currentTask.description,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Task Information Card
+                _buildSectionCard(
+                  title: 'Task Information',
+                  child: Column(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: statusColor.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          _getStatusText(),
-                          style: TextStyle(
-                            color: statusColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                      _buildInfoRow(
+                        icon: Icons.person_outline_rounded,
+                        label: 'Assigned to',
+                        value: _currentTask.assignedInspectorName,
                       ),
-                      const SizedBox(width: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                      if (_currentTask.dueDate != null) ...[
+                        const SizedBox(height: 12),
+                        _buildInfoRow(
+                          icon: Icons.event_rounded,
+                          label: 'Due Date',
+                          value: DateFormat(
+                            'MMM dd, yyyy',
+                          ).format(_currentTask.dueDate!),
                         ),
-                        decoration: BoxDecoration(
-                          color: priorityColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: priorityColor.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          _currentTask.priority.toUpperCase(),
-                          style: TextStyle(
-                            color: priorityColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      _buildInfoRow(
+                        icon: Icons.access_time_rounded,
+                        label: 'Created',
+                        value: DateFormat(
+                          'MMM dd, yyyy · HH:mm',
+                        ).format(_currentTask.createdAt),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                ),
+                const SizedBox(height: 16),
 
-                  // Description
-                  Text(
-                    'Description',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.1),
+                // Comments Section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Comments',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    child: Text(
-                      _currentTask.description,
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Task Info
-                  _buildInfoRow(
-                    icon: Icons.person_outline,
-                    label: 'Assigned to',
-                    value: _currentTask.assignedInspectorName,
-                  ),
-                  const SizedBox(height: 8),
-                  if (_currentTask.dueDate != null) ...[
-                    _buildInfoRow(
-                      icon: Icons.calendar_today,
-                      label: 'Due Date',
-                      value: DateFormat(
-                        'MMM dd, yyyy',
-                      ).format(_currentTask.dueDate!),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                  _buildInfoRow(
-                    icon: Icons.access_time,
-                    label: 'Created',
-                    value: DateFormat(
-                      'MMM dd, yyyy - HH:mm',
-                    ).format(_currentTask.createdAt),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Comments Section
-                  Text(
-                    'Comments (${_currentTask.comments.length})',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Comments List
-                  if (_currentTask.comments.isEmpty)
                     Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1),
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${_currentTask.comments.length}',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      child: const Text(
-                        'No comments yet',
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  else
-                    Column(
-                      children: _currentTask.comments.map((comment) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    comment.userName,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    DateFormat(
-                                      'MMM dd, HH:mm',
-                                    ).format(comment.timestamp),
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (comment.text.isNotEmpty) ...[
-                                const SizedBox(height: 8),
-                                Text(
-                                  comment.text,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                              if (comment.photos.isNotEmpty) ...[
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: comment.photos.map((photoUrl) {
-                                    return Container(
-                                      width: 60,
-                                      height: 60,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.2,
-                                          ),
-                                        ),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          photoUrl,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                                return Container(
-                                                  color: Colors.grey.withValues(
-                                                    alpha: 0.3,
-                                                  ),
-                                                  child: const Icon(
-                                                    Icons.image,
-                                                    color: Colors.white70,
-                                                  ),
-                                                );
-                                              },
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ],
-                            ],
-                          ),
-                        );
-                      }).toList(),
                     ),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
-                  const SizedBox(height: 16),
-
-                  // Add Comment Section
-                  Text(
-                    'Add Comment',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Comment Input
+                // Comments List
+                if (_currentTask.comments.isEmpty)
                   Container(
+                    padding: const EdgeInsets.all(32),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white.withValues(alpha: 0.03),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.1),
+                        color: Colors.white.withValues(alpha: 0.06),
                       ),
                     ),
                     child: Column(
                       children: [
-                        TextField(
-                          controller: _commentController,
-                          style: const TextStyle(color: Colors.white),
-                          maxLines: 3,
-                          decoration: const InputDecoration(
-                            hintText: 'Write a comment...',
-                            hintStyle: TextStyle(color: Colors.white70),
-                            border: InputBorder.none,
-                            contentPadding: EdgeInsets.all(12),
-                          ),
+                        Icon(
+                          Icons.chat_bubble_outline_rounded,
+                          color: Colors.white.withValues(alpha: 0.3),
+                          size: 32,
                         ),
-                        if (_commentPhotos.isNotEmpty) ...[
-                          const Divider(color: Colors.white24),
-                          Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: _commentPhotos.asMap().entries.map((
-                                entry,
-                              ) {
-                                final index = entry.key;
-                                final photo = entry.value;
-                                return Stack(
-                                  children: [
-                                    Container(
-                                      width: 60,
-                                      height: 60,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.2,
-                                          ),
-                                        ),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.file(
-                                          photo,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: -5,
-                                      right: -5,
-                                      child: GestureDetector(
-                                        onTap: () => _removePhoto(index),
-                                        child: Container(
-                                          width: 20,
-                                          height: 20,
-                                          decoration: const BoxDecoration(
-                                            color: Colors.red,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: const Icon(
-                                            Icons.close,
-                                            color: Colors.white,
-                                            size: 12,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                        ],
-                        const Divider(color: Colors.white24),
-                        Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Row(
-                            children: [
-                              IconButton(
-                                onPressed: _pickImage,
-                                icon: const Icon(
-                                  Icons.photo_camera,
-                                  color: Colors.white70,
-                                ),
-                                tooltip: 'Add Photo',
-                              ),
-                              const Spacer(),
-                              ElevatedButton(
-                                onPressed: _isAddingComment
-                                    ? null
-                                    : _addComment,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryRed,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
-                                  ),
-                                ),
-                                child: _isAddingComment
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                Colors.white,
-                                              ),
-                                        ),
-                                      )
-                                    : const Text('Add Comment'),
-                              ),
-                            ],
+                        const SizedBox(height: 8),
+                        Text(
+                          'No comments yet',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontSize: 14,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
+                  )
+                else
+                  ...List.generate(_currentTask.comments.length, (index) {
+                    final comment = _currentTask.comments[index];
+                    final isLast = index == _currentTask.comments.length - 1;
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
+                      child: _buildCommentCard(comment),
+                    );
+                  }),
+                const SizedBox(height: 16),
+
+                // Add Comment Button/Input
+                if (!_showCommentInput)
+                  OutlinedButton.icon(
+                    onPressed: () => setState(() => _showCommentInput = true),
+                    icon: const Icon(Icons.add_comment_rounded, size: 18),
+                    label: const Text('Add Comment'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white.withValues(alpha: 0.9),
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.2),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  )
+                else
+                  _buildCommentInput(),
+              ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBadge(String text, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: color),
+          const SizedBox(width: 6),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionCard({required String title, required Widget child}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 12),
+          child,
         ],
       ),
     );
@@ -598,19 +438,311 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.white70),
-        const SizedBox(width: 8),
+        Icon(icon, size: 16, color: Colors.white.withValues(alpha: 0.5)),
+        const SizedBox(width: 10),
         Text(
-          '$label: ',
-          style: const TextStyle(color: Colors.white70, fontSize: 14),
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 13,
+          ),
         ),
+        const SizedBox(width: 8),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.end,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCommentCard(comment) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 14,
+                backgroundColor: AppColors.primaryRed.withValues(alpha: 0.2),
+                child: Text(
+                  comment.userName[0].toUpperCase(),
+                  style: const TextStyle(
+                    color: AppColors.primaryRed,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      comment.userName,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      DateFormat('MMM dd · HH:mm').format(comment.timestamp),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.4),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (comment.text.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(
+              comment.text,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.85),
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+          ],
+          if (comment.photos.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: comment.photos.map<Widget>((photoUrl) {
+                return InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => FullScreenImageViewer(
+                          images: comment.photos,
+                          initialIndex: comment.photos.indexOf(photoUrl),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
+                      ),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CachedNetworkImage(
+                        imageUrl: photoUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          color: Colors.white.withValues(alpha: 0.05),
+                          child: Center(
+                            child: SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation(
+                                  Colors.white.withValues(alpha: 0.3),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            child: Icon(
+                              Icons.broken_image_rounded,
+                              color: Colors.white.withValues(alpha: 0.3),
+                              size: 20,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentInput() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        children: [
+          TextField(
+            controller: _commentController,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 14,
+            ),
+            maxLines: 3,
+            minLines: 2,
+            decoration: InputDecoration(
+              hintText: 'Write your comment...',
+              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.all(14),
+            ),
+          ),
+          if (_commentPhotos.isNotEmpty) ...[
+            Divider(color: Colors.white.withValues(alpha: 0.08), height: 1),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: _commentPhotos.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final photo = entry.value;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.15),
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.file(photo, fit: BoxFit.cover),
+                        ),
+                      ),
+                      Positioned(
+                        top: -6,
+                        right: -6,
+                        child: GestureDetector(
+                          onTap: () => _removePhoto(index),
+                          child: Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  blurRadius: 4,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+          Divider(color: Colors.white.withValues(alpha: 0.08), height: 1),
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: _pickImage,
+                  icon: Icon(
+                    Icons.image_rounded,
+                    color: Colors.white.withValues(alpha: 0.6),
+                  ),
+                  iconSize: 22,
+                  padding: const EdgeInsets.all(8),
+                  constraints: const BoxConstraints(),
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _showCommentInput = false;
+                      _commentController.clear();
+                      _commentPhotos.clear();
+                    });
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _isAddingComment ? null : _addComment,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryRed,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: _isAddingComment
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : const Text(
+                          'Post',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
