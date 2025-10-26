@@ -70,10 +70,209 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
       initialDate: _dueDate ?? DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: AppColors.primaryRed,
+              onPrimary: Colors.white,
+              surface: AppColors.lightBlack,
+              onSurface: Colors.white,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (picked != null) {
       setState(() => _dueDate = picked);
     }
+  }
+
+  void _showInspectorPicker() {
+    final adminUsersProvider = context.read<ProviderAdminUsers>();
+    final inspectors = adminUsersProvider.inspectors;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: AppColors.lightBlack,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      width: 1,
+                    ),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Text(
+                      'Select Inspector',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Inspector List
+              if (adminUsersProvider.isLoading)
+                const Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primaryRed,
+                      ),
+                    ),
+                  ),
+                )
+              else if (inspectors.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.person_off_rounded,
+                          size: 48,
+                          color: Colors.white.withValues(alpha: 0.3),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'No inspectors available',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: inspectors.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final inspector = inspectors[index];
+                      final isSelected = _selectedInspectorId == inspector.id;
+
+                      return InkWell(
+                        onTap: () {
+                          setState(() {
+                            _selectedInspectorId = inspector.id;
+                            _selectedInspectorName = inspector.name;
+                          });
+                          Navigator.pop(context);
+                        },
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? AppColors.primaryRed.withValues(alpha: 0.15)
+                                : Colors.white.withValues(alpha: 0.03),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.primaryRed.withValues(alpha: 0.4)
+                                  : Colors.white.withValues(alpha: 0.06),
+                              width: isSelected ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 20,
+                                backgroundColor: isSelected
+                                    ? AppColors.primaryRed
+                                    : Colors.white.withValues(alpha: 0.1),
+                                child: Text(
+                                  inspector.name[0].toUpperCase(),
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Colors.white.withValues(alpha: 0.7),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      inspector.name,
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.9,
+                                        ),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      inspector.serviceAccount,
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.5,
+                                        ),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (isSelected)
+                                Icon(
+                                  Icons.check_circle_rounded,
+                                  color: AppColors.primaryRed,
+                                  size: 24,
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _submitForm() async {
@@ -81,8 +280,13 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
     final description = _descriptionController.text.trim();
 
     // Validation
-    if (title.isEmpty || description.isEmpty) {
-      _showSnackBar('Please fill in title and description');
+    if (title.isEmpty) {
+      _showSnackBar('Please enter a title');
+      return;
+    }
+
+    if (description.isEmpty) {
+      _showSnackBar('Please enter a description');
       return;
     }
 
@@ -149,16 +353,34 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete Task'),
-        content: const Text('Are you sure you want to delete this task?'),
+        backgroundColor: AppColors.lightBlack,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Delete Task',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        ),
+        content: Text(
+          'Are you sure you want to delete this task? This action cannot be undone.',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+            ),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Delete'),
           ),
         ],
       ),
@@ -191,239 +413,340 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
       SnackBar(
         content: Text(message),
         backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
 
+  Color _getPriorityColor(String priority) {
+    switch (priority) {
+      case 'high':
+        return const Color(0xFFEF5350);
+      case 'medium':
+        return const Color(0xFFFFA726);
+      case 'low':
+        return const Color(0xFF66BB6A);
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height * 0.75;
-    final inspectors = context.watch<ProviderAdminUsers>().inspectors;
-    final adminUsersProvider = context.watch<ProviderAdminUsers>();
+    final screenHeight = MediaQuery.of(context).size.height * 0.88;
 
     return Container(
-      height: screenHeight * 0.95,
-      padding: const EdgeInsets.all(16),
+      height: screenHeight,
       decoration: BoxDecoration(
         color: AppColors.lightBlack,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 8),
-          Center(
-            child: Text(
-              isUpdateMode ? 'Update Task' : 'Create Task',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+          // Header
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  width: 1,
+                ),
               ),
             ),
+            child: Row(
+              children: [
+                Text(
+                  isUpdateMode ? 'Edit Task' : 'Create Task',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const Spacer(),
+                if (isUpdateMode)
+                  IconButton(
+                    onPressed: _isLoading ? null : _deleteTask,
+                    icon: const Icon(Icons.delete_rounded, color: Colors.red),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
+
+          // Form Content
           Expanded(
             child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Title field
-                  TextField(
+                  _buildInputField(
+                    label: 'Task Title',
                     controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Title',
-                      labelStyle: TextStyle(color: Colors.white70),
-                      filled: true,
-                    ),
-                    style: const TextStyle(color: Colors.white),
+                    hint: 'Enter task title',
+                    icon: Icons.title_rounded,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
 
                   // Description field
-                  TextField(
+                  _buildInputField(
+                    label: 'Description',
                     controller: _descriptionController,
+                    hint: 'Enter task description',
+                    icon: Icons.description_rounded,
                     maxLines: 4,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
-                      labelStyle: TextStyle(color: Colors.white70),
-                      filled: true,
-                    ),
-                    style: const TextStyle(color: Colors.white),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 20),
 
-                  // Priority and Due Date row
+                  // Priority Selection
+                  Text(
+                    'Priority',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(
-                        child: DropdownButtonFormField<String>(
-                          value: _priority,
-                          items: const [
-                            DropdownMenuItem(value: 'low', child: Text('Low')),
-                            DropdownMenuItem(
-                              value: 'medium',
-                              child: Text('Medium'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'high',
-                              child: Text('High'),
-                            ),
-                          ],
-                          onChanged: (v) {
-                            if (v != null) setState(() => _priority = v);
-                          },
-                          decoration: const InputDecoration(
-                            labelText: 'Priority',
-                            filled: true,
-                          ),
-                          dropdownColor: AppColors.lightBlack,
-                          style: const TextStyle(color: Colors.white),
+                      _buildPriorityChip('Low', 'low'),
+                      const SizedBox(width: 8),
+                      _buildPriorityChip('Medium', 'medium'),
+                      const SizedBox(width: 8),
+                      _buildPriorityChip('High', 'high'),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Due Date
+                  Text(
+                    'Due Date (Optional)',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  InkWell(
+                    onTap: _pickDueDate,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.03),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: InkWell(
-                          onTap: _pickDueDate,
-                          child: InputDecorator(
-                            decoration: const InputDecoration(
-                              labelText: 'Due date',
-                              filled: true,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.calendar_today_rounded,
+                            size: 18,
+                            color: _dueDate != null
+                                ? AppColors.primaryRed
+                                : Colors.white.withValues(alpha: 0.5),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            _dueDate != null
+                                ? DateFormat('MMM dd, yyyy').format(_dueDate!)
+                                : 'Select due date',
+                            style: TextStyle(
+                              color: _dueDate != null
+                                  ? Colors.white.withValues(alpha: 0.9)
+                                  : Colors.white.withValues(alpha: 0.5),
+                              fontSize: 14,
+                              fontWeight: _dueDate != null
+                                  ? FontWeight.w500
+                                  : FontWeight.normal,
                             ),
+                          ),
+                          const Spacer(),
+                          if (_dueDate != null)
+                            InkWell(
+                              onTap: () => setState(() => _dueDate = null),
+                              child: Icon(
+                                Icons.close_rounded,
+                                size: 18,
+                                color: Colors.white.withValues(alpha: 0.5),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Assigned Inspector
+                  Text(
+                    'Assigned Inspector',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  InkWell(
+                    onTap: _showInspectorPicker,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: _selectedInspectorId != null
+                            ? AppColors.primaryRed.withValues(alpha: 0.08)
+                            : Colors.white.withValues(alpha: 0.03),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _selectedInspectorId != null
+                              ? AppColors.primaryRed.withValues(alpha: 0.3)
+                              : Colors.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 18,
+                            backgroundColor: _selectedInspectorId != null
+                                ? AppColors.primaryRed.withValues(alpha: 0.2)
+                                : Colors.white.withValues(alpha: 0.1),
+                            child: Icon(
+                              _selectedInspectorId != null
+                                  ? Icons.person_rounded
+                                  : Icons.person_add_rounded,
+                              color: _selectedInspectorId != null
+                                  ? AppColors.primaryRed
+                                  : Colors.white.withValues(alpha: 0.5),
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
                             child: Text(
-                              _dueDate != null
-                                  ? DateFormat('yyyy-MM-dd').format(_dueDate!)
-                                  : 'Select date',
+                              _selectedInspectorName ?? 'Select inspector',
                               style: TextStyle(
-                                color: _dueDate != null
-                                    ? Colors.white
-                                    : Colors.white70,
+                                color: _selectedInspectorId != null
+                                    ? Colors.white.withValues(alpha: 0.9)
+                                    : Colors.white.withValues(alpha: 0.5),
+                                fontSize: 14,
+                                fontWeight: _selectedInspectorId != null
+                                    ? FontWeight.w500
+                                    : FontWeight.normal,
                               ),
                             ),
                           ),
-                        ),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: Colors.white.withValues(alpha: 0.3),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Inspector selection
-                  const Text(
-                    'Assign to',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 8),
-                  if (adminUsersProvider.isLoading)
-                    const Center(child: CircularProgressIndicator())
-                  else if (inspectors.isEmpty)
-                    const Text(
-                      'No inspectors available',
-                      style: TextStyle(color: Colors.white70),
-                    )
-                  else
-                    Column(
-                      children: inspectors.map((inspector) {
-                        return RadioListTile<String>(
-                          value: inspector.id,
-                          groupValue: _selectedInspectorId,
-                          onChanged: (v) {
-                            setState(() {
-                              _selectedInspectorId = v;
-                              _selectedInspectorName = inspector.name;
-                            });
-                          },
-                          title: Text(
-                            inspector.name,
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          subtitle: Text(
-                            inspector.serviceAccount,
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                          activeColor: AppColors.primaryRed,
-                        );
-                      }).toList(),
                     ),
+                  ),
 
                   // Status field (only for update mode)
                   if (isUpdateMode) ...[
-                    const SizedBox(height: 12),
-                    const Text(
+                    const SizedBox(height: 20),
+                    Text(
                       'Status',
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    DropdownButtonFormField<String>(
-                      value: _status,
-                      items: const [
-                        DropdownMenuItem(
-                          value: 'pending',
-                          child: Text('Pending'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'in_progress',
-                          child: Text('In Progress'),
-                        ),
-                        DropdownMenuItem(
-                          value: 'completed',
-                          child: Text('Completed'),
-                        ),
-                      ],
-                      onChanged: (v) {
-                        if (v != null) setState(() => _status = v);
-                      },
-                      decoration: const InputDecoration(
-                        labelText: 'Status',
-                        filled: true,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
                       ),
-                      dropdownColor: AppColors.lightBlack,
-                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _buildStatusChip('Pending', 'pending'),
+                        const SizedBox(width: 8),
+                        _buildStatusChip('In Progress', 'in_progress'),
+                        const SizedBox(width: 8),
+                        _buildStatusChip('Completed', 'completed'),
+                      ],
                     ),
                   ],
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 32),
 
                   // Action buttons
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      TextButton(
-                        onPressed: _isLoading
-                            ? null
-                            : () => Navigator.pop(context),
-                        child: const Text(
-                          'Cancel',
-                          style: TextStyle(color: Colors.white70),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white.withValues(
+                              alpha: 0.9,
+                            ),
+                            side: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.2),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Cancel',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      ElevatedButton(
-                        onPressed: _isLoading ? null : _submitForm,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryRed,
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _submitForm,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryRed,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  isUpdateMode ? 'Update Task' : 'Create Task',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              )
-                            : Text(isUpdateMode ? 'Update' : 'Create'),
-                      ),
-                      if (isUpdateMode) ...[
-                        const SizedBox(width: 12),
-                        ElevatedButton(
-                          onPressed: _isLoading ? null : _deleteTask,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                          ),
-                          child: const Text('Delete'),
                         ),
-                      ],
+                      ),
                     ],
                   ),
                 ],
@@ -431,6 +754,153 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.03),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          child: TextField(
+            controller: controller,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 14,
+            ),
+            maxLines: maxLines,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+              prefixIcon: Icon(
+                icon,
+                size: 20,
+                color: Colors.white.withValues(alpha: 0.5),
+              ),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.all(14),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPriorityChip(String label, String value) {
+    final isSelected = _priority == value;
+    final color = _getPriorityColor(value);
+
+    return Expanded(
+      child: InkWell(
+        onTap: () => setState(() => _priority = value),
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: 0.15)
+                : Colors.white.withValues(alpha: 0.03),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected
+                  ? color.withValues(alpha: 0.4)
+                  : Colors.white.withValues(alpha: 0.08),
+              width: isSelected ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.flag_rounded,
+                size: 16,
+                color: isSelected ? color : Colors.white.withValues(alpha: 0.5),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected
+                      ? color
+                      : Colors.white.withValues(alpha: 0.7),
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusChip(String label, String value) {
+    final isSelected = _status == value;
+    Color color;
+    switch (value) {
+      case 'pending':
+        color = const Color(0xFFFF9800);
+        break;
+      case 'in_progress':
+        color = const Color(0xFF2196F3);
+        break;
+      case 'completed':
+        color = const Color(0xFF4CAF50);
+        break;
+      default:
+        color = Colors.grey;
+    }
+
+    return Expanded(
+      child: InkWell(
+        onTap: () => setState(() => _status = value),
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? color.withValues(alpha: 0.15)
+                : Colors.white.withValues(alpha: 0.03),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected
+                  ? color.withValues(alpha: 0.4)
+                  : Colors.white.withValues(alpha: 0.08),
+              width: isSelected ? 1.5 : 1,
+            ),
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? color : Colors.white.withValues(alpha: 0.7),
+              fontSize: 12,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            ),
+          ),
+        ),
       ),
     );
   }

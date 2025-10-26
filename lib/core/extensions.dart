@@ -7,3 +7,39 @@ extension DateTimeExtension on DateTime {
     ).format(DateTime.parse(this.toIso8601String().replaceAll('Z', '+00:00')));
   }
 }
+
+
+
+extension StringCamelCase on String {
+  /// Converts a string like "Hello What" to "helloWhat"
+  String toCamelCase() {
+    if (isEmpty) return '';
+
+    // Split by spaces
+    final words = split(' ').where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return '';
+
+    final firstWord = words.first.toLowerCase();
+    final restWords = words.skip(1).map((word) {
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join();
+
+    return '$firstWord$restWords';
+  }
+}
+
+
+extension StringCapitalizedWords on String {
+  /// Capitalizes the first letter of each word and keeps spaces
+  String capitalizeWords() {
+    if (isEmpty) return '';
+
+    return split(' ')
+        .map((word) {
+          if (word.isEmpty) return '';
+          return word[0].toUpperCase() + word.substring(1).toLowerCase();
+        })
+        .join(' ');
+  }
+}
+

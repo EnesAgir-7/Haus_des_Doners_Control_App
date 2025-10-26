@@ -170,211 +170,216 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
     final statusColor = _getStatusColor();
     final priorityColor = _getPriorityColor();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 12, 0),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Container(
+        decoration: BoxDecoration(
+          color: AppColors.lightBlack,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 12, 0),
 
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _currentTask.title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: Icon(
-                    Icons.close_rounded,
-                    color: Colors.white.withValues(alpha: 0.7),
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-          ),
-
-          // Content
-          Expanded(
-            child: ListView(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Status and Priority Badges
-                Row(
-                  children: [
-                    _buildBadge(_getStatusText(), statusColor, Icons.circle),
-                    const SizedBox(width: 10),
-                    _buildBadge(
-                      '${_currentTask.priority[0].toUpperCase()}${_currentTask.priority.substring(1)} Priority',
-                      priorityColor,
-                      Icons.flag_rounded,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Description Card
-                _buildSectionCard(
-                  title: 'Description',
-                  child: Text(
-                    _currentTask.description,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 14,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Task Information Card
-                _buildSectionCard(
-                  title: 'Task Information',
-                  child: Column(
-                    children: [
-                      _buildInfoRow(
-                        icon: Icons.person_outline_rounded,
-                        label: 'Assigned to',
-                        value: _currentTask.assignedInspectorName,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _currentTask.title,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: -0.5,
                       ),
-                      if (_currentTask.dueDate != null) ...[
-                        const SizedBox(height: 12),
-                        _buildInfoRow(
-                          icon: Icons.event_rounded,
-                          label: 'Due Date',
-                          value: DateFormat(
-                            'MMM dd, yyyy',
-                          ).format(_currentTask.dueDate!),
-                        ),
-                      ],
-                      const SizedBox(height: 12),
-                      _buildInfoRow(
-                        icon: Icons.access_time_rounded,
-                        label: 'Created',
-                        value: DateFormat(
-                          'MMM dd, yyyy · HH:mm',
-                        ).format(_currentTask.createdAt),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+            ),
+
+            // Content
+            Expanded(
+              child: ListView(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // Status and Priority Badges
+                  Row(
+                    children: [
+                      _buildBadge(_getStatusText(), statusColor, Icons.circle),
+                      const SizedBox(width: 10),
+                      _buildBadge(
+                        '${_currentTask.priority[0].toUpperCase()}${_currentTask.priority.substring(1)} Priority',
+                        priorityColor,
+                        Icons.flag_rounded,
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Comments Section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Comments',
+                  // Description Card
+                  _buildSectionCard(
+                    title: 'Description',
+                    child: Text(
+                      _currentTask.description,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        height: 1.5,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${_currentTask.comments.length}',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
+                  ),
+                  const SizedBox(height: 16),
 
-                // Comments List
-                if (_currentTask.comments.isEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.03),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.06),
-                      ),
-                    ),
+                  // Task Information Card
+                  _buildSectionCard(
+                    title: 'Task Information',
                     child: Column(
                       children: [
-                        Icon(
-                          Icons.chat_bubble_outline_rounded,
-                          color: Colors.white.withValues(alpha: 0.3),
-                          size: 32,
+                        _buildInfoRow(
+                          icon: Icons.person_outline_rounded,
+                          label: 'Assigned to',
+                          value: _currentTask.assignedInspectorName,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'No comments yet',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            fontSize: 14,
+                        if (_currentTask.dueDate != null) ...[
+                          const SizedBox(height: 12),
+                          _buildInfoRow(
+                            icon: Icons.event_rounded,
+                            label: 'Due Date',
+                            value: DateFormat(
+                              'MMM dd, yyyy',
+                            ).format(_currentTask.dueDate!),
                           ),
+                        ],
+                        const SizedBox(height: 12),
+                        _buildInfoRow(
+                          icon: Icons.access_time_rounded,
+                          label: 'Created',
+                          value: DateFormat(
+                            'MMM dd, yyyy · HH:mm',
+                          ).format(_currentTask.createdAt),
                         ),
                       ],
                     ),
-                  )
-                else
-                  ...List.generate(_currentTask.comments.length, (index) {
-                    final comment = _currentTask.comments[index];
-                    final isLast = index == _currentTask.comments.length - 1;
-                    return Padding(
-                      padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-                      child: _buildCommentCard(comment),
-                    );
-                  }),
-                const SizedBox(height: 16),
+                  ),
+                  const SizedBox(height: 16),
 
-                // Add Comment Button/Input
-                if (!_showCommentInput)
-                  OutlinedButton.icon(
-                    onPressed: () => setState(() => _showCommentInput = true),
-                    icon: const Icon(Icons.add_comment_rounded, size: 18),
-                    label: const Text('Add Comment'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white.withValues(alpha: 0.9),
-                      side: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.2),
+                  // Comments Section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Comments',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${_currentTask.comments.length}',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Comments List
+                  if (_currentTask.comments.isEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(32),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.03),
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.06),
+                        ),
                       ),
-                    ),
-                  )
-                else
-                  _buildCommentInput(),
-              ],
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.chat_bubble_outline_rounded,
+                            color: Colors.white.withValues(alpha: 0.3),
+                            size: 32,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'No comments yet',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.5),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    ...List.generate(_currentTask.comments.length, (index) {
+                      final comment = _currentTask.comments[index];
+                      final isLast = index == _currentTask.comments.length - 1;
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
+                        child: _buildCommentCard(comment),
+                      );
+                    }),
+                  const SizedBox(height: 16),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+      floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+      floatingActionButtonLocation: _showCommentInput
+          ? FloatingActionButtonLocation.centerDocked
+          : FloatingActionButtonLocation.endFloat,
+      floatingActionButton: !_showCommentInput
+          ? OutlinedButton.icon(
+              onPressed: () => setState(() => _showCommentInput = true),
+              icon: const Icon(Icons.add_comment_rounded, size: 18),
+              label: const Text('Add Comment'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white.withValues(alpha: 0.9),
+                side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildCommentInput(),
+            ),
     );
   }
 
@@ -596,11 +601,12 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
   Widget _buildCommentInput() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
+        color: AppColors.primaryDark,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _commentController,
@@ -608,9 +614,10 @@ class _TaskDetailWidgetState extends State<TaskDetailWidget> {
               color: Colors.white.withValues(alpha: 0.9),
               fontSize: 14,
             ),
-            maxLines: 3,
-            minLines: 2,
+            maxLines: 5,
+            minLines: 1,
             decoration: InputDecoration(
+              isDense: true,
               hintText: 'Write your comment...',
               hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
               border: InputBorder.none,
