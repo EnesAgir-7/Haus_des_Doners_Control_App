@@ -3,12 +3,11 @@ import 'package:easy_localization/easy_localization.dart';
 extension DateTimeExtension on DateTime {
   String getFormattedDateTime() {
     return DateFormat(
-      'dd MMM yyyy, HH:mm a',
-    ).format(DateTime.parse(this.toIso8601String().replaceAll('Z', '+00:00')));
+      'dd MMM yyyy, hh:mm a',
+      'en_US',
+    ).format(this.toLocal()).replaceAll('AM/PM', '');
   }
 }
-
-
 
 extension StringCamelCase on String {
   /// Converts a string like "Hello What" to "helloWhat"
@@ -28,7 +27,6 @@ extension StringCamelCase on String {
   }
 }
 
-
 extension StringCapitalizedWords on String {
   /// Capitalizes the first letter of each word and keeps spaces
   String capitalizeWords() {
@@ -42,4 +40,3 @@ extension StringCapitalizedWords on String {
         .join(' ');
   }
 }
-

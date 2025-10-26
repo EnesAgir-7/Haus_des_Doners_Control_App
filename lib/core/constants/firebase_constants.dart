@@ -128,6 +128,7 @@ class TaskFields {
 
 class TaskCommentFields {
   static const String userId = 'userId';
+  static const String id = 'id';
   static const String userName = 'userName';
   static const String text = 'text';
   static const String timestamp = 'timestamp';

@@ -52,9 +52,13 @@ class TaskModel {
           ? (data[TaskFields.dueDate] as Timestamp).toDate()
           : null,
       comments:
-          commentsData
-              ?.map((c) => TaskCommentModel.fromMap(c as Map<String, dynamic>))
-              .toList() ??
+          commentsData?.asMap().entries.map((entry) {
+            final commentMap = entry.value as Map<String, dynamic>;
+            final commentId =
+                commentMap[TaskCommentFields.id] ??
+                'comment_${entry.key}_${DateTime.now().millisecondsSinceEpoch}';
+            return TaskCommentModel.fromMap(commentMap, id: commentId);
+          }).toList() ??
           [],
       createdAt: (data[TaskFields.createdAt] as Timestamp).toDate(),
       updatedAt: (data[TaskFields.updatedAt] as Timestamp).toDate(),
@@ -94,6 +98,7 @@ class TaskModel {
 }
 
 class TaskCommentModel {
+  final String id; // ADD THIS
   final String userId;
   final String userName;
   final String text;
@@ -101,6 +106,7 @@ class TaskCommentModel {
   final List<String> photos;
 
   TaskCommentModel({
+    required this.id, // ADD THIS
     required this.userId,
     required this.userName,
     required this.text,
@@ -108,8 +114,9 @@ class TaskCommentModel {
     required this.photos,
   });
 
-  factory TaskCommentModel.fromMap(Map<String, dynamic> data) {
+  factory TaskCommentModel.fromMap(Map<String, dynamic> data, {String? id}) {
     return TaskCommentModel(
+      id: id ?? data[TaskCommentFields.id] ?? '', // ADD THIS
       userId: data[TaskCommentFields.userId] ?? '',
       userName: data[TaskCommentFields.userName] ?? '',
       text: data[TaskCommentFields.text] ?? '',
@@ -120,6 +127,7 @@ class TaskCommentModel {
 
   Map<String, dynamic> toMap() {
     return {
+      TaskCommentFields.id: id, // ADD THIS
       TaskCommentFields.userId: userId,
       TaskCommentFields.userName: userName,
       TaskCommentFields.text: text,

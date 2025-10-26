@@ -159,7 +159,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.primaryRed : AppColors.lightBlack,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isSelected ? AppColors.primaryRed : Colors.white24,
                 ),

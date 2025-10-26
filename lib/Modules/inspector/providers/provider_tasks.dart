@@ -9,6 +9,7 @@ import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 
 import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../admin/admin_firebase_services/admin_tasks_service.dart';
 import '../firebase_services/inspector_tasks_service.dart';
 import '../../../models/task_model.dart';
 
@@ -16,6 +17,7 @@ import '../../../models/task_model.dart';
 /// Shows and manages tasks assigned to inspector
 class ProviderTasks extends ChangeNotifier {
   final InspectorTaskService _taskService = InspectorTaskService();
+  final AdminTaskService _taskAdminService = AdminTaskService();
 
   // State
   List<TaskModel> _tasks = [];
@@ -123,6 +125,29 @@ class ProviderTasks extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<bool> deleteComments(String taskId, List<String> commentIds) async {
+    try {
+      final success = await _taskAdminService.deleteComments(
+        taskId,
+        commentIds,
+      );
+
+      if (success) {
+        await loadAllTasks();
+      }
+
+      return success;
+    } catch (e) {
+      print('Provider error deleting comments: $e');
+      return false;
+    }
+  }
+
+  /// Delete a single comment from a task
+  Future<bool> deleteComment(String taskId, String commentId) async {
+    return deleteComments(taskId, [commentId]);
   }
 
   // Select a task
@@ -325,8 +350,13 @@ class ProviderTasks extends ChangeNotifier {
         photoUrls.add(url);
       }
 
+      // Generate unique ID for the comment
+      final commentId =
+          '${DateTime.now().millisecondsSinceEpoch}_${loggedInUser!.id}';
+
       // Create comment
       final comment = TaskCommentModel(
+        id: commentId, // ✅ UPDATED: Use generated unique ID instead of taskId
         userId: loggedInUser!.id,
         userName: loggedInUser?.name ?? 'Inspector',
         text: commentText,
