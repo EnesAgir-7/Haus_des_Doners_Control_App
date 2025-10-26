@@ -23,15 +23,11 @@ class AdminBranchCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFF212121),
           borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(
-            color: _getPriorityColor().withValues(alpha: 0.3),
-            width: 1.5,
-          ),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: Colors.black26,
               blurRadius: 10.0,
-              offset: const Offset(0, 4),
+              offset: Offset(0, 4),
             ),
           ],
         ),
@@ -372,15 +368,6 @@ class AdminBranchCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Color _getPriorityColor() {
-    if (branch.isNextInspectionToday) return Colors.orangeAccent;
-    if (branch.daysSinceLastInspection != null &&
-        branch.daysSinceLastInspection! > 30) {
-      return Colors.redAccent;
-    }
-    return _getStatusColor();
   }
 
   Color _getStatusColor() {

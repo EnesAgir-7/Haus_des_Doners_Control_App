@@ -40,7 +40,6 @@ class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
       child: Scaffold(
         body: Container(
           decoration: BoxDecoration(
-            // Apply the same gradient background as ScreenBranches
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
@@ -53,139 +52,66 @@ class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
             ),
           ),
           child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(context),
-                  const SizedBox(height: 12),
-                  _buildSearchBar(context),
-                  const SizedBox(height: 12),
-                  Container(height: 1, color: Colors.white24),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: Consumer<ProviderAdminUsers>(
-                      builder: (context, provider, child) {
-                        if (provider.isLoading) {
-                          return Center(
-                            child: CircularProgressIndicator(
-                              color: AppColors.primaryRed,
-                            ),
-                          );
-                        }
-
-                        if (provider.error != null) {
-                          return Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  LocaleKeys.error_occurred.tr(),
-                                  style: TextStyle(
-                                    color: AppColors.primaryRed,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Error: ${provider.error}',
-                                  style: const TextStyle(color: Colors.white70),
-                                ),
-                                const SizedBox(height: 12),
-                                ElevatedButton(
-                                  onPressed: () =>
-                                      provider.streamAllInspectors(),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.primaryRed,
-                                  ),
-                                  child: Text(LocaleKeys.retry.tr()),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-
-                        final inspectors = provider.inspectors;
-                        if (inspectors.isEmpty) {
-                          final text = _searchController.text.isNotEmpty
-                              ? LocaleKeys.no_users_found.tr()
-                              : 'No users available';
-                          return Center(
-                            child: Text(
-                              text,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                          );
-                        }
-
-                        return ListView.builder(
-                          key: const PageStorageKey('inspectorsList'),
-                          itemCount: inspectors.length,
-                          itemBuilder: (context, index) {
-                            final inspector = inspectors[index];
-                            return _InspectorListItem(inspector: inspector);
-                          },
-                        );
-                      },
-                    ),
+            child: Consumer<ProviderAdminUsers>(
+              builder: (context, provider, child) {
+                return Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(provider),
+                      const SizedBox(height: 12),
+                      _buildSearchBar(provider),
+                      const SizedBox(height: 12),
+                      Container(height: 1, color: Colors.white24),
+                      const SizedBox(height: 12),
+                      Expanded(child: _buildUsersList(provider)),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ),
-        floatingActionButton: ElevatedButton.icon(
-          onPressed: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const ScreenAdminCreateUser(),
-              ),
-            );
-          },
-          icon: const Icon(Icons.add, size: 20),
-          label: Text(LocaleKeys.create_user.tr()),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primaryRed,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            textStyle: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
+        floatingActionButton: _buildFAB(context),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(ProviderAdminUsers provider) {
     return Row(
       children: [
-        const Icon(Icons.people, color: Colors.lightBlueAccent),
-        const SizedBox(width: 6),
+        Icon(Icons.people, color: Colors.lightBlueAccent),
+        SizedBox(width: 6),
         Text(
           'Inspectors',
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: 16,
+          ),
+        ),
+        Spacer(),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.lightRed,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            '${provider.inspectors.length} Users',
+            style: TextStyle(
+              color: AppColors.primaryRed,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSearchBar(BuildContext context) {
-    final provider = context.read<ProviderAdminUsers>();
+  Widget _buildSearchBar(ProviderAdminUsers provider) {
     return TextField(
       controller: _searchController,
       onChanged: (value) => provider.setSearchQuery(value),
@@ -204,7 +130,7 @@ class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
               )
             : null,
         filled: true,
-        fillColor: AppColors.lightBlack, // Use lightBlack for the fill color
+        fillColor: AppColors.lightBlack,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Colors.white24),
@@ -215,130 +141,309 @@ class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: AppColors.primaryRed,
-          ), // PrimaryRed focus color
+          borderSide: BorderSide(color: AppColors.primaryRed),
         ),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 12,
-          horizontal: 16,
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
+      ),
+    );
+  }
+
+  Widget _buildUsersList(ProviderAdminUsers provider) {
+    if (provider.isLoading) {
+      return Center(
+        child: CircularProgressIndicator(color: AppColors.primaryRed),
+      );
+    }
+
+    if (provider.error != null) {
+      return _buildErrorState(provider);
+    }
+
+    if (provider.inspectors.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async => provider.streamAllInspectors(),
+      color: AppColors.primaryRed,
+      backgroundColor: AppColors.lightBlack,
+      child: ListView.builder(
+        padding: EdgeInsets.only(bottom: 80),
+        key: const PageStorageKey('inspectorsList'),
+        physics: AlwaysScrollableScrollPhysics(),
+        itemCount: provider.inspectors.length,
+        itemBuilder: (context, index) {
+          return InspectorCard(inspector: provider.inspectors[index]);
+        },
+      ),
+    );
+  }
+
+  Widget _buildErrorState(ProviderAdminUsers provider) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          SizedBox(height: 16),
+          Text(
+            LocaleKeys.error_occurred.tr(),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              provider.error!,
+              style: TextStyle(color: Colors.white70),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () => provider.streamAllInspectors(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryRed,
+            ),
+            child: Text(LocaleKeys.retry.tr()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.people_outline, size: 80, color: Colors.white24),
+            SizedBox(height: 16),
+            Text(
+              _searchController.text.isEmpty
+                  ? 'No users available'
+                  : LocaleKeys.no_users_found.tr(),
+              style: TextStyle(color: Colors.white70, fontSize: 16),
+            ),
+            if (_searchController.text.isNotEmpty) ...[
+              SizedBox(height: 8),
+              TextButton(
+                onPressed: () {
+                  _searchController.clear();
+                  context.read<ProviderAdminUsers>().setSearchQuery('');
+                },
+                child: Text(
+                  LocaleKeys.clear_search.tr(),
+                  style: TextStyle(color: AppColors.primaryRed),
+                ),
+              ),
+            ],
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildFAB(BuildContext context) {
+    return FloatingActionButton.extended(
+      heroTag: "addUserFab",
+      onPressed: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const ScreenAdminCreateUser(),
+          ),
+        );
+      },
+      backgroundColor: AppColors.primaryRed,
+      icon: Icon(Icons.add, color: Colors.white),
+      label: Text(
+        LocaleKeys.create_user.tr(),
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     );
   }
 }
 
-class _InspectorListItem extends StatelessWidget {
+class InspectorCard extends StatelessWidget {
   final UserModel inspector;
 
-  const _InspectorListItem({required this.inspector});
+  const InspectorCard({super.key, required this.inspector});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: () async {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            // builder: (context) => ScreenAdminUserDetails(inspector: inspector),
             builder: (context) => ScreenInspectorDetails(inspector: inspector),
           ),
         );
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.lightBlack, // Darker background for card
-          borderRadius: BorderRadius.circular(12),
-
-          boxShadow: [
+          color: const Color(0xFF212121),
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
+              color: Colors.black26,
+              blurRadius: 10.0,
+              offset: Offset(0, 4),
             ),
           ],
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Leading Circle Avatar
+            // Avatar
             CircleAvatar(
               backgroundColor: AppColors.primaryRed,
+              radius: 22,
               child: Text(
                 inspector.name[0].toUpperCase(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
+                  fontSize: 18,
                 ),
               ),
             ),
             const SizedBox(width: 12),
-            // User Details (Title/Subtitle)
+            // Info Section
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    inspector.name,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          inspector.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Container(
+                      //   padding: const EdgeInsets.symmetric(
+                      //     horizontal: 8,
+                      //     vertical: 3,
+                      //   ),
+                      //   decoration: BoxDecoration(
+                      //     color: _getRoleColor().withValues(alpha: 0.2),
+                      //     borderRadius: BorderRadius.circular(10),
+                      //     border: Border.all(
+                      //       color: _getRoleColor().withValues(alpha: 0.3),
+                      //     ),
+                      //   ),
+                      //   child: Text(
+                      //     inspector.role.toUpperCase(),
+                      //     style: TextStyle(
+                      //       color: _getRoleColor(),
+                      //       fontSize: 9,
+                      //       fontWeight: FontWeight.w600,
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     inspector.serviceAccount,
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                    style: TextStyle(color: Colors.grey.shade400, fontSize: 12),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Text(
-                        '${LocaleKeys.role.tr()}: ',
-                        style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 12,
+                  if (inspector.region != null) ...[
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          size: 12,
+                          color: Colors.grey.shade600,
                         ),
+                        const SizedBox(width: 4),
+                        Text(
+                          inspector.region!,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Status & Switch
+            Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: inspector.active
+                        ? Colors.green.withValues(alpha: 0.2)
+                        : Colors.red.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: inspector.active
+                          ? Colors.green.withValues(alpha: 0.3)
+                          : Colors.red.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        inspector.active ? Icons.check_circle : Icons.cancel,
+                        size: 12,
+                        color: inspector.active ? Colors.green : Colors.red,
                       ),
+                      const SizedBox(width: 4),
                       Text(
-                        inspector.role.toUpperCase(),
+                        inspector.active ? 'Active' : 'Inactive',
                         style: TextStyle(
-                          color: Colors.blueAccent,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                          color: inspector.active ? Colors.green : Colors.red,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
-                  if (inspector.region != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: Text(
-                        '${LocaleKeys.region.tr()}: ${inspector.region}',
-                        style: const TextStyle(
-                          color: Colors.white54,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            // Trailing Switch for Active Status
-            Switch(
-              value: inspector.active,
-              onChanged: (value) async {
-                await context.read<ProviderAdminUsers>().toggleInspectorActive(
-                  inspector.id,
-                  value,
-                );
-              },
-              activeThumbColor: Colors.greenAccent,
-              inactiveThumbColor: Colors.redAccent,
-              inactiveTrackColor: Colors.redAccent.withValues(alpha: 0.5),
+                ),
+                const SizedBox(height: 4),
+                // Switch(
+                //   value: inspector.active,
+                //   onChanged: (value) async {
+                //     await context
+                //         .read<ProviderAdminUsers>()
+                //         .toggleInspectorActive(inspector.id, value);
+                //   },
+                //   activeThumbColor: Colors.greenAccent,
+                //   inactiveThumbColor: Colors.redAccent,
+                //   inactiveTrackColor: Colors.redAccent.withValues(alpha: 0.5),
+                //   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                // ),
+              ],
             ),
           ],
         ),
@@ -346,5 +451,3 @@ class _InspectorListItem extends StatelessWidget {
     );
   }
 }
-
-// Ensure you have AppColors, UserModel, ProviderAdminUsers, and translation keys imported correctly.

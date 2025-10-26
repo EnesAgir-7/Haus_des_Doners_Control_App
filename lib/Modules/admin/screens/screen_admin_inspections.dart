@@ -182,12 +182,13 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
             icon: Icons.star,
             provider: provider,
           ),
-          _buildSortChip(
-            label: "By Branch",
-            value: AppConstants.branch,
-            icon: Icons.apartment,
-            provider: provider,
-          ),
+          if (widget.branch == null)
+            _buildSortChip(
+              label: "By Branch",
+              value: AppConstants.branch,
+              icon: Icons.apartment,
+              provider: provider,
+            ),
         ],
       ),
     );

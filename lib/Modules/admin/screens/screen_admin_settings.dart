@@ -10,15 +10,6 @@ class ScreenAdminSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Admin Settings',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: AppColors.primaryDark,
-        elevation: 0,
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -36,6 +27,7 @@ class ScreenAdminSettings extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              _buildHeader(),
               _buildSectionTitle(context, 'Inspection Management'),
               _buildSettingsTile(
                 context,
@@ -98,6 +90,23 @@ class ScreenAdminSettings extends StatelessWidget {
     );
   }
 
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Icon(Icons.settings, color: Colors.lightBlueAccent),
+        SizedBox(width: 6),
+        Text(
+          "Admin Settings",
+          style: TextStyle(
+            color: AppColors.primaryRed,
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildSectionTitle(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 8, bottom: 8),
@@ -126,9 +135,15 @@ class ScreenAdminSettings extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.lightBlack,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white24),
+          color: const Color(0xFF212121),
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10.0,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [

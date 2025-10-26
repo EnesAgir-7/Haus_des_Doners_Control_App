@@ -33,12 +33,10 @@ class AdminInspectionCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
-            const SizedBox(height: 12.0),
             _buildBranchInfo(),
-            const SizedBox(height: 12.0),
+            const SizedBox(height: 8.0),
             _buildInspectorInfo(),
-            const SizedBox(height: 12.0),
+            const SizedBox(height: 8.0),
             _buildFooter(),
           ],
         ),
@@ -46,19 +44,12 @@ class AdminInspectionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildScore() {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Expanded(
-          child: Row(
-            children: [
-              const SizedBox(width: 8.0),
-              if (inspection.status == AppConstants.completed)
-                _buildScoreBadge(),
-            ],
-          ),
-        ),
+        if (inspection.status == AppConstants.completed) _buildScoreBadge(),
       ],
     );
   }
@@ -105,15 +96,22 @@ class AdminInspectionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  inspection.branchName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        inspection.branchName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    _buildScore(),
+                  ],
                 ),
                 if (inspection.overallNotes.isNotEmpty) ...[
                   const SizedBox(height: 4.0),
