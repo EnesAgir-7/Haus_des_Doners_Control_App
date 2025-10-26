@@ -3,24 +3,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/models/task_model.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/constants/firebase_constants.dart';
 import '../admin_providers/provider_admin_users.dart';
 
-class TaskFormWidget extends StatefulWidget {
+class TaskAddEditSheet extends StatefulWidget {
   final TaskModel? task; // null for create, TaskModel for update
   final VoidCallback? onSuccess;
 
-  const TaskFormWidget({super.key, this.task, this.onSuccess});
+  const TaskAddEditSheet({super.key, this.task, this.onSuccess});
 
   @override
-  State<TaskFormWidget> createState() => _TaskFormWidgetState();
+  State<TaskAddEditSheet> createState() => _TaskAddEditSheetState();
 }
 
-class _TaskFormWidgetState extends State<TaskFormWidget> {
+class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
   // Form controllers
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
@@ -281,17 +283,17 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
 
     // Validation
     if (title.isEmpty) {
-      _showSnackBar('Please enter a title');
+      showSnakBarr(context, 'Please enter a title');
       return;
     }
 
     if (description.isEmpty) {
-      _showSnackBar('Please enter a description');
+      showSnakBarr(context, 'Please enter a description');
       return;
     }
 
     if (_selectedInspectorId == null) {
-      _showSnackBar('Please select an inspector');
+      showSnakBarr(context, 'Please select an inspector');
       return;
     }
 
@@ -304,13 +306,15 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
       if (isUpdateMode) {
         // Update existing task
         final data = {
-          'title': title,
-          'description': description,
-          'assignedInspectorId': _selectedInspectorId,
-          'assignedInspectorName': _selectedInspectorName ?? '',
-          'priority': _priority,
-          'status': _status,
-          'dueDate': _dueDate != null ? Timestamp.fromDate(_dueDate!) : null,
+          TaskFields.title: title,
+          TaskFields.description: description,
+          TaskFields.assignedInspectorId: _selectedInspectorId,
+          TaskFields.assignedInspectorName: _selectedInspectorName ?? '',
+          TaskFields.priority: _priority,
+          TaskFields.status: _status,
+          TaskFields.dueDate: _dueDate != null
+              ? Timestamp.fromDate(_dueDate!)
+              : null,
         };
 
         success = await tasksProvider.updateTask(widget.task!.id, data);
@@ -328,20 +332,21 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
 
       if (success) {
         Navigator.pop(context);
-        _showSnackBar(
+        showSnakBarr(
+          context,
           isUpdateMode
               ? 'Task updated successfully'
               : 'Task created successfully',
-          isError: false,
         );
         widget.onSuccess?.call();
       } else {
-        _showSnackBar(
+        showSnakBarr(
+          context,
           isUpdateMode ? 'Failed to update task' : 'Failed to create task',
         );
       }
     } catch (e) {
-      _showSnackBar('Error: ${e.toString()}');
+      showSnakBarr(context, 'Error: ${e.toString()}');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -395,28 +400,17 @@ class _TaskFormWidgetState extends State<TaskFormWidget> {
 
         if (success) {
           Navigator.pop(context);
-          _showSnackBar('Task deleted successfully', isError: false);
+          showSnakBarr(context, 'Task deleted successfully');
           widget.onSuccess?.call();
         } else {
-          _showSnackBar('Failed to delete task');
+          showSnakBarr(context, 'Failed to delete task');
         }
       } catch (e) {
-        _showSnackBar('Error deleting task: ${e.toString()}');
+        showSnakBarr(context, 'Error deleting task: ${e.toString()}');
       } finally {
         setState(() => _isLoading = false);
       }
     }
-  }
-
-  void _showSnackBar(String message, {bool isError = true}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
   }
 
   Color _getPriorityColor(String priority) {

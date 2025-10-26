@@ -15,17 +15,17 @@ import 'package:provider/provider.dart';
 
 import '../../inspector/screens/screen_full_image.dart';
 
-class TaskDetailWidget extends StatefulWidget {
+class TaskDetailSheet extends StatefulWidget {
   final TaskModel task;
   final VoidCallback? onTaskUpdated;
 
-  const TaskDetailWidget({super.key, required this.task, this.onTaskUpdated});
+  const TaskDetailSheet({super.key, required this.task, this.onTaskUpdated});
 
   @override
-  State<TaskDetailWidget> createState() => _TaskDetailWidgetState();
+  State<TaskDetailSheet> createState() => _TaskDetailSheetState();
 }
 
-class _TaskDetailWidgetState extends State<TaskDetailWidget> {
+class _TaskDetailSheetState extends State<TaskDetailSheet> {
   final TextEditingController _commentController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   final ScrollController _scrollController = ScrollController();
