@@ -1,6 +1,3 @@
-// screen_admin_vehicle.dart
-// =====================================================
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admin_vehicle_details.dart';
@@ -13,7 +10,8 @@ import '../admin_providers/provider_admin_fleet.dart';
 import 'screen_admin_create_vehicle.dart';
 
 class ScreenAdminVehicle extends StatefulWidget {
-  const ScreenAdminVehicle({super.key});
+  final String? inspectorID;
+  const ScreenAdminVehicle({super.key, this.inspectorID});
 
   @override
   State<ScreenAdminVehicle> createState() => _ScreenAdminVehicleState();
@@ -26,7 +24,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderAdminFleet>().loadData();
+      context.read<ProviderAdminFleet>().initialize(inspectorID: widget.inspectorID);
     });
   }
 
@@ -282,7 +280,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                       fontSize: 14,
                     ),
                   ),
-                  if (_searchController.text.isEmpty) ...[
+                  if (_searchController.text.isEmpty || widget.inspectorID != null) ...[
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
                       onPressed: _navigateToCreateVehicle,
@@ -312,6 +310,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
           color: AppColors.primaryRed,
           backgroundColor: AppColors.primaryDark,
           child: ListView.builder(
+            key: const PageStorageKey('vehiclesListKey'),
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
             itemCount: vehicles.length,
             itemBuilder: (context, index) {

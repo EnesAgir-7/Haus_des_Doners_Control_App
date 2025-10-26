@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 class InspectorHistoryModel {
@@ -77,26 +76,16 @@ class InspectorHistoryModel {
 
 class InspectorAllMonthsData {
   final String inspectorId;
-  final Map<String, InspectorHistoryModel>
-  monthsData; // key: "01-2025", value: stats
+  final List<String> availableMonths; // ["01-2025", "02-2025", ...]
   final DateTime lastUpdated;
 
   InspectorAllMonthsData({
     required this.inspectorId,
-    required this.monthsData,
+    required this.availableMonths,
     required this.lastUpdated,
   });
-
-  // Get stats for a specific month
-  InspectorHistoryModel? getMonth(int year, int month) {
-    final key = '${month.toString().padLeft(2, '0')}-$year';
-    console(key.toString());
-    return monthsData[key];
-  }
-
-  // Get list of available months
-  List<String> get availableMonths => monthsData.keys.toList()..sort();
 }
+
 
 // class InspectorHistoryModel {
 //   final String inspectorId;

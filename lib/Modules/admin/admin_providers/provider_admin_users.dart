@@ -88,19 +88,29 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
-  Future getInspectorStatistics(String userId) async {
+  Future<void> getInspectorStatistics(String userId) async {
     try {
       _isLoading = true;
       _error = null;
       notifyListeners();
 
-      _inspectorAllData = await _userService.getInspectorStats(userId);
+      // Get current month stats
+      final now = DateTime.now();
+      _currentMonthStats = await _userService.getInspectorMonthStats(
+        userId,
+        now.year,
+        now.month,
+      );
 
-      // Set current month as default
-      if (_inspectorAllData != null) {
-        final now = DateTime.now();
-        _currentMonthStats = _inspectorAllData!.getMonth(now.year, now.month);
-      }
+      // Get list of available months (lightweight)
+      final availableMonths = await _userService.getAvailableMonths(userId);
+
+      // Store inspector ID and available months
+      _inspectorAllData = InspectorAllMonthsData(
+        inspectorId: userId,
+        availableMonths: availableMonths,
+        lastUpdated: DateTime.now(),
+      );
 
       _isLoading = false;
       notifyListeners();
@@ -112,9 +122,22 @@ class ProviderAdminUsers extends ChangeNotifier {
   }
 
   // Switch month without API call
-  void switchMonth(int year, int month) {
-    if (_inspectorAllData != null) {
-      _currentMonthStats = _inspectorAllData!.getMonth(year, month);
+  Future<void> switchMonth(int year, int month) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      _currentMonthStats = await _userService.getInspectorMonthStats(
+        _inspectorAllData!.inspectorId,
+        year,
+        month,
+      );
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
       notifyListeners();
     }
   }
@@ -224,13 +247,15 @@ class ProviderAdminUsers extends ChangeNotifier {
     String? region,
   }) async {
     try {
-      // 1. Create user in Firebase Auth
-      final userId = await _authHelper.createUser(
-        email: email,
-        password: password,
-      );
+      _isLoading = true;
+      notifyListeners();
 
-      // 2. Create user model
+      final userCredential = await _authHelper.createUserWithEmail(
+        email,
+        password,
+      );
+      final userId = userCredential.user!.uid;
+
       final user = UserModel(
         id: userId,
         name: name,
@@ -242,12 +267,20 @@ class ProviderAdminUsers extends ChangeNotifier {
         updatedAt: DateTime.now().toIso8601String(),
       );
 
-      // 3. Save to appropriate collection
-      await _userService.createUser(userId, user);
+      try {
+        await _userService.createUser(userId, user);
+      } catch (firestoreError) {
+        await userCredential.user!.delete();
+        throw Exception('Failed to save user data: $firestoreError');
+      }
 
       notifyListeners();
     } catch (e) {
+      print('❌ Error creating user: $e');
       rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -257,6 +290,33 @@ class ProviderAdminUsers extends ChangeNotifier {
       await _userService.updateInspector(inspectorId, {'active': active});
     } catch (e) {
       _error = e.toString();
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateUser({
+    required String userId,
+    String? name,
+    String? region,
+    String? role,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _userService.updateUserDetails(
+        userId: userId,
+        name: name,
+        region: region,
+        role: role,
+      );
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      rethrow;
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }

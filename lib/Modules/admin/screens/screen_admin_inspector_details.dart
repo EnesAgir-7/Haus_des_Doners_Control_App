@@ -10,6 +10,7 @@ import '../../../models/user_model.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../widgets/widgets_admin_branch_details.dart';
 import 'screen_admin_inspector_branches.dart';
+import 'screen_admin_user_details.dart';
 
 class ScreenInspectorDetails extends StatefulWidget {
   final UserModel inspector;
@@ -24,6 +25,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
   String? _selectedMonthKey;
 
   @override
+  @override
   void initState() {
     super.initState();
 
@@ -31,17 +33,29 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
       final provider = context.read<ProviderAdminUsers>();
       await provider.getInspectorStatistics(widget.inspector.id);
 
-      // Set the last available month as default
-      if (mounted && provider.inspectorAllData != null) {
-        final availableMonths = provider.inspectorAllData!.availableMonths;
-        if (availableMonths.isNotEmpty) {
-          setState(() {
-            _selectedMonthKey = availableMonths.last;
-          });
-          _switchToMonthKey(_selectedMonthKey!);
-        }
+      // Set current month as default
+      if (mounted) {
+        final now = DateTime.now();
+        final currentMonthKey =
+            '${now.month.toString().padLeft(2, '0')}-${now.year}';
+        setState(() {
+          _selectedMonthKey = currentMonthKey;
+        });
       }
     });
+  }
+
+  List<String> _generateLast12Months() {
+    final List<String> months = [];
+    final now = DateTime.now();
+
+    for (int i = 0; i < 12; i++) {
+      final date = DateTime(now.year, now.month - i, 1);
+      final monthKey = '${date.month.toString().padLeft(2, '0')}-${date.year}';
+      months.add(monthKey);
+    }
+
+    return months;
   }
 
   String _getMonthNameFromKey(String monthKey) {
@@ -86,119 +100,136 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
-      appBar: CustomAppBar(title: "${widget.inspector.name}'s Statistics"),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primaryRed.withValues(alpha: 0.08),
-              AppColors.primaryDark,
-              AppColors.primaryDark,
-            ],
-            stops: const [0.0, 0.25, 1.0],
+      appBar: CustomAppBar(
+        title: "${widget.inspector.name}'s Statistics",
+        actions: [
+          IconButton.filled(
+            visualDensity: VisualDensity.comfortable,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ScreenAdminUserDetails(user: widget.inspector),
+                ),
+              );
+            },
+            icon: Text(
+              widget.inspector.name[0],
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
           ),
-        ),
-        child: Consumer<ProviderAdminUsers>(
-          builder: (context, provider, child) {
-            // Loading State
-            if (provider.isLoading) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(color: AppColors.primaryRed),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Loading statistics...',
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            // Error State
-            if (provider.error != null) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: AppColors.primaryRed,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Error Loading Statistics',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        provider.error!,
-                        style: TextStyle(color: Colors.white70, fontSize: 14),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          provider.getInspectorStatistics(widget.inspector.id);
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryRed,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ],
+          SizedBox(width: 10),
+        ],
+      ),
+      body: Consumer<ProviderAdminUsers>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: AppColors.primaryRed),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading statistics...',
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
-                ),
-              );
-            }
+                ],
+              ),
+            );
+          }
 
-            // No Data Available
-            if (provider.inspectorAllData == null ||
-                provider.inspectorAllData!.availableMonths.isEmpty) {
-              return Center(
+          // Error State
+          if (provider.error != null) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.inbox_outlined, size: 64, color: Colors.white38),
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: AppColors.primaryRed,
+                    ),
                     const SizedBox(height: 16),
                     Text(
-                      'No statistics available',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      'Error Loading Statistics',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      provider.error!,
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                       textAlign: TextAlign.center,
                     ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        provider.getInspectorStatistics(widget.inspector.id);
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryRed,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
-              );
-            }
+              ),
+            );
+          }
 
-            final availableMonths = provider.inspectorAllData!.availableMonths;
+          // No Data State
+          if (provider.inspectorAllData == null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.inbox_outlined, size: 64, color: Colors.white38),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No statistics available',
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
 
-            // No Data State for selected month
-            if (provider.currentMonthStats == null) {
-              return Column(
+          // Success State - Show month selector always
+          return RefreshIndicator(
+            onRefresh: () async {
+              await provider.getInspectorStatistics(widget.inspector.id);
+            },
+            color: AppColors.primaryRed,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
                 children: [
                   SizedBox(height: 16),
-                  _buildMonthSelector(provider, availableMonths),
-                  Expanded(
-                    child: Center(
+                  _buildMonthSelector(provider),
+                  SizedBox(height: 10),
+
+                  // Show stats if available, otherwise show no data message
+                  if (provider.currentMonthStats != null) ...[
+                    _buildStatsGrid(provider.currentMonthStats!),
+                    _buildDetailedSection(provider.currentMonthStats!),
+                  ] else ...[
+                    SizedBox(height: 100),
+                    Center(
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.inbox_outlined,
@@ -207,54 +238,37 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No statistics available for selected month',
+                            'No data for selected month',
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 16,
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ],
-              );
-            }
-
-            // Success State
-            final stats = provider.currentMonthStats!;
-            return RefreshIndicator(
-              onRefresh: () async {
-                await provider.getInspectorStatistics(widget.inspector.id);
-              },
-              color: AppColors.primaryRed,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  children: [
-                    SizedBox(height: 16),
-                    _buildMonthSelector(provider, availableMonths),
-                    SizedBox(height: 10),
-                    _buildStatsGrid(stats),
-                    _buildDetailedSection(stats),
                   ],
-                ),
+                ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildMonthSelector(
-    ProviderAdminUsers provider,
-    List<String> availableMonths,
-  ) {
-    if (_selectedMonthKey == null && availableMonths.isNotEmpty) {
-      _selectedMonthKey = availableMonths.last;
+  Widget _buildMonthSelector(ProviderAdminUsers provider) {
+    // Generate last 12 months
+    final last12Months = _generateLast12Months();
+
+    // Filter to show only available months (optional)
+    final availableMonths = provider.inspectorAllData?.availableMonths ?? [];
+
+    // Use last12Months for dropdown, but mark unavailable ones
+    if (_selectedMonthKey == null && last12Months.isNotEmpty) {
+      _selectedMonthKey = last12Months.first; // Current month
     }
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -305,7 +319,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             letterSpacing: 0.5,
           ),
           selectedItemBuilder: (BuildContext context) {
-            return availableMonths.map((monthKey) {
+            return last12Months.map((monthKey) {
               return Row(
                 children: [
                   Container(
@@ -333,8 +347,9 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               );
             }).toList();
           },
-          items: availableMonths.map((monthKey) {
+          items: last12Months.map((monthKey) {
             final isSelected = monthKey == _selectedMonthKey;
+            final isAvailable = availableMonths.contains(monthKey);
             final monthName = _getMonthNameFromKey(monthKey);
             final year = _getYearFromKey(monthKey);
 
@@ -344,8 +359,12 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                 child: Row(
                   children: [
                     Icon(
-                      Icons.calendar_today_rounded,
-                      color: isSelected ? AppColors.primaryRed : Colors.white60,
+                      isAvailable
+                          ? Icons.calendar_today_rounded
+                          : Icons.calendar_today_outlined,
+                      color: isSelected
+                          ? AppColors.primaryRed
+                          : (isAvailable ? Colors.white60 : Colors.white30),
                       size: 18,
                     ),
                     SizedBox(width: 12),
@@ -354,15 +373,34 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            monthName,
-                            style: TextStyle(
-                              color: isSelected ? Colors.white : Colors.white70,
-                              fontSize: 15,
-                              fontWeight: isSelected
-                                  ? FontWeight.w600
-                                  : FontWeight.w500,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                monthName,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : (isAvailable
+                                            ? Colors.white70
+                                            : Colors.white38),
+                                  fontSize: 15,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
+                                ),
+                              ),
+                              if (!isAvailable) ...[
+                                SizedBox(width: 6),
+                                Text(
+                                  '(No data)',
+                                  style: TextStyle(
+                                    color: Colors.white30,
+                                    fontSize: 11,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                           SizedBox(height: 2),
                           Text(

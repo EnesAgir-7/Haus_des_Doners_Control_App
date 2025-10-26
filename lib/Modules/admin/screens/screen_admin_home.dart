@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_branches.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
+import 'package:haus_des_control/dummy_func/add_inspector_stats.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -174,21 +175,26 @@ class DashboardCard extends StatelessWidget {
           // Header with admin info
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryRed.withValues(alpha: 0.2),
-                      AppColors.primaryRed.withValues(alpha: 0.1),
-                    ],
+              InkWell(
+                onTap: () {
+                  addDummyInspectorStats();
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primaryRed.withValues(alpha: 0.2),
+                        AppColors.primaryRed.withValues(alpha: 0.1),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.admin_panel_settings,
-                  color: AppColors.primaryRed,
-                  size: 22,
+                  child: Icon(
+                    Icons.admin_panel_settings,
+                    color: AppColors.primaryRed,
+                    size: 22,
+                  ),
                 ),
               ),
               const SizedBox(width: 14),

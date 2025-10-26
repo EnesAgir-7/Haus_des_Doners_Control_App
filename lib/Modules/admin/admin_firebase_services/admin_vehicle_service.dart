@@ -25,18 +25,26 @@ class AdminVehicleService {
   }
 
   // Get all vehicles (admin)
-  Future<List<VehicleModel>> getAllVehicles() async {
+Future<List<VehicleModel>> getAllVehicles({String? inspectorId}) async {
     try {
-      final snapshot = await _db.collection(_collectionVehicles).get();
+      Query query = _db.collection(_collectionVehicles);
+
+      // 🔍 If inspectorId is provided, filter by it
+      if (inspectorId != null && inspectorId.isNotEmpty) {
+        query = query.where(VehicleFields.assignedInspectorId, isEqualTo: inspectorId);
+      }
+
+      final snapshot = await query.get();
 
       return snapshot.docs
           .map((doc) => VehicleModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      print('Error getting all vehicles: $e');
+      print('Error getting vehicles: $e');
       return [];
     }
   }
+
 
   // Get vehicles by status
   Future<List<VehicleModel>> getVehiclesByStatus(String status) async {

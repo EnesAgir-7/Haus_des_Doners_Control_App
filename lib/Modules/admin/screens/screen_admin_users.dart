@@ -37,124 +37,109 @@ class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      child: Container(
-        decoration: BoxDecoration(
-          // Apply the same gradient background as ScreenBranches
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primaryRed.withValues(alpha: 0.08),
-              AppColors.primaryDark,
-              AppColors.primaryDark,
-            ],
-            stops: const [0.0, 0.25, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(context),
-                const SizedBox(height: 12),
-                _buildSearchBar(context),
-                const SizedBox(height: 12),
-                Container(height: 1, color: Colors.white24),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: Consumer<ProviderAdminUsers>(
-                    builder: (context, provider, child) {
-                      if (provider.isLoading) {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.primaryRed,
-                          ),
-                        );
-                      }
-
-                      if (provider.error != null) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                LocaleKeys.error_occurred.tr(),
-                                style: TextStyle(
-                                  color: AppColors.primaryRed,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Error: ${provider.error}',
-                                style: const TextStyle(color: Colors.white70),
-                              ),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () => provider.streamAllInspectors(),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryRed,
-                                ),
-                                child: Text(LocaleKeys.retry.tr()),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      final inspectors = provider.inspectors;
-                      if (inspectors.isEmpty) {
-                        final text = _searchController.text.isNotEmpty
-                            ? LocaleKeys.no_users_found.tr()
-                            : 'No users available';
-                        return Center(
-                          child: Text(
-                            text,
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                            ),
-                          ),
-                        );
-                      }
-
-                      return ListView.builder(
-                        itemCount: inspectors.length,
-                        itemBuilder: (context, index) {
-                          final inspector = inspectors[index];
-                          return _InspectorListItem(inspector: inspector);
-                        },
-                      );
-                    },
-                  ),
-                ),
+      child: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            // Apply the same gradient background as ScreenBranches
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                AppColors.primaryRed.withValues(alpha: 0.08),
+                AppColors.primaryDark,
+                AppColors.primaryDark,
               ],
+              stops: const [0.0, 0.25, 1.0],
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(context),
+                  const SizedBox(height: 12),
+                  _buildSearchBar(context),
+                  const SizedBox(height: 12),
+                  Container(height: 1, color: Colors.white24),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: Consumer<ProviderAdminUsers>(
+                      builder: (context, provider, child) {
+                        if (provider.isLoading) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.primaryRed,
+                            ),
+                          );
+                        }
+
+                        if (provider.error != null) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  LocaleKeys.error_occurred.tr(),
+                                  style: TextStyle(
+                                    color: AppColors.primaryRed,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Error: ${provider.error}',
+                                  style: const TextStyle(color: Colors.white70),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton(
+                                  onPressed: () =>
+                                      provider.streamAllInspectors(),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primaryRed,
+                                  ),
+                                  child: Text(LocaleKeys.retry.tr()),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        final inspectors = provider.inspectors;
+                        if (inspectors.isEmpty) {
+                          final text = _searchController.text.isNotEmpty
+                              ? LocaleKeys.no_users_found.tr()
+                              : 'No users available';
+                          return Center(
+                            child: Text(
+                              text,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                              ),
+                            ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          key: const PageStorageKey('inspectorsList'),
+                          itemCount: inspectors.length,
+                          itemBuilder: (context, index) {
+                            final inspector = inspectors[index];
+                            return _InspectorListItem(inspector: inspector);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(Icons.people, color: Colors.lightBlueAccent),
-        const SizedBox(width: 6),
-        Text(
-          'Inspectors',
-          style: TextStyle(
-            color: AppColors.primaryRed,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        const Spacer(),
-        // Create User Button
-        ElevatedButton.icon(
+        floatingActionButton: ElevatedButton.icon(
           onPressed: () async {
             await Navigator.push(
               context,
@@ -176,6 +161,23 @@ class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Row(
+      children: [
+        const Icon(Icons.people, color: Colors.lightBlueAccent),
+        const SizedBox(width: 6),
+        Text(
+          'Inspectors',
+          style: TextStyle(
+            color: AppColors.primaryRed,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
           ),
         ),
       ],
