@@ -1,37 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
 import 'package:haus_des_control/core/console.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/task_model.dart';
 
 class AdminTaskService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collection = Collections.tasks;
+  final AdminUserService adminUserService = AdminUserService();
 
-  // Stream tasks by inspector (real-time)
-  Stream<List<TaskModel>> streamTasksByInspector(String inspectorId) {
-    return _db
-        .collection(_collection)
-        .where(TaskFields.assignedInspectorId, isEqualTo: inspectorId)
-        .orderBy(TaskFields.createdAt, descending: true)
-        .snapshots()
-        .map(
-          (snapshot) =>
-              snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList(),
-        );
-  }
 
-  Future<void> updateTaskStatus(String taskId, String newStatus) async {
-    try {
-      await _db.collection(_collection).doc(taskId).update({
-        TaskFields.status: newStatus,
-        TaskFields.updatedAt: FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      console('Error updating task status: $e');
-      rethrow;
-    }
-  }
+
 
   Future<void> addTaskComment(String taskId, TaskCommentModel comment) async {
     console("Adding comnet");
@@ -48,12 +29,37 @@ class AdminTaskService {
 
   // Delete task
   Future<void> deleteTask(String taskId) async {
-    try {
-      await _db.collection(_collection).doc(taskId).delete();
-    } catch (e) {
-      console('Error deleting task: $e');
-      rethrow;
+    // Get task to know which inspector to update
+    final task = await getTaskById(taskId);
+    if (task == null) {
+      throw Exception('Task not found');
     }
+
+    final batch = _db.batch();
+
+    // Delete task document
+    final docRef = _db.collection(Collections.tasks).doc(taskId);
+
+    batch.delete(docRef);
+
+    // Update inspector history
+    final Map<String, dynamic> updates = {
+      IHF.tasksTotal: FieldValue.increment(-1),
+    };
+
+    // If task was completed, also decrement completed count
+    if (task.status == 'completed') {
+      updates[IHF.tasksCompleted] = FieldValue.increment(-1);
+    }
+
+    await adminUserService.updateInspectorHistoryBatch(
+      batch: batch,
+      inspectorId: task.assignedInspectorId,
+      updates: updates,
+    );
+
+    // Commit batch
+    await batch.commit();
   }
 
   Future<bool> deleteComments(String taskId, List<String> commentIds) async {
@@ -128,5 +134,148 @@ class AdminTaskService {
         // Continue with other photos even if one fails
       }
     }
+  }
+
+  // Get tasks by inspector
+  Future<List<TaskModel>> getTasksByInspector(String inspectorId) async {
+    try {
+      final snapshot = await _db
+          .collection(_collection)
+          .where('assignedInspectorId', isEqualTo: inspectorId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();
+    } catch (e) {
+      console('Error getting tasks by inspector: $e');
+      return [];
+    }
+  }
+
+
+
+  // Get all tasks (admin)
+  Future<List<TaskModel>> getAllTasks() async {
+    try {
+      final snapshot = await _db
+          .collection(_collection)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();
+    } catch (e) {
+      console('Error getting all tasks: $e');
+      return [];
+    }
+  }
+
+  // Get single task
+  Future<TaskModel?> getTaskById(String taskId) async {
+    try {
+      final doc = await _db.collection(Collections.tasks).doc(taskId).get();
+
+      if (!doc.exists) return null;
+
+      return TaskModel.fromFirestore(doc);
+    } catch (e) {
+      print('Error getting task: $e');
+      return null;
+    }
+  }
+
+  // Create task
+  Future<void> createTask(TaskModel task) async {
+    final batch = _db.batch();
+
+    final docRef = _db.collection(Collections.tasks).doc();
+
+    final taskData = task.copyWith(id: docRef.id).toMap();
+    batch.set(docRef, taskData);
+
+    await adminUserService.updateInspectorHistoryBatch(
+      batch: batch,
+      inspectorId: task.assignedInspectorId,
+      updates: {IHF.tasksTotal: FieldValue.increment(1)},
+    );
+
+    // Commit batch
+    await batch.commit();
+  }
+
+  // Update task
+  Future<void> updateTask(String taskId, Map<String, dynamic> data) async {
+    // Get current task state
+    final currentTask = await getTaskById(taskId);
+    if (currentTask == null) {
+      throw Exception('Task not found');
+    }
+
+    final batch = _db.batch();
+
+    // Update task document
+    final docRef = _db.collection(Collections.tasks).doc(taskId);
+
+    final updateData = {...data, TaskFields.updatedAt: Timestamp.now()};
+
+    batch.update(docRef, updateData);
+
+    // Check if inspector was changed
+    final newInspectorId = data[TaskFields.assignedInspectorId] as String?;
+    final inspectorChanged =
+        newInspectorId != null &&
+        newInspectorId != currentTask.assignedInspectorId;
+
+    if (inspectorChanged) {
+      // Decrement from old inspector
+      await adminUserService.updateInspectorHistoryBatch(
+        batch: batch,
+        inspectorId: currentTask.assignedInspectorId,
+        updates: {
+          IHF.tasksTotal: FieldValue.increment(-1),
+          // If task was completed, also decrement completed count
+          if (currentTask.status == AppConstants.completed)
+            IHF.tasksCompleted: FieldValue.increment(-1),
+        },
+      );
+
+      // Increment for new inspector
+      await adminUserService.updateInspectorHistoryBatch(
+        batch: batch,
+        inspectorId: newInspectorId,
+        updates: {
+          IHF.tasksTotal: FieldValue.increment(1),
+          // If task is completed, also increment completed count
+          if (currentTask.status == AppConstants.completed)
+            IHF.tasksCompleted: FieldValue.increment(1),
+        },
+      );
+    }
+
+    // Check if status changed to/from completed (only if inspector wasn't changed)
+    final newStatus = data[TaskFields.status] as String?;
+    final statusChanged = newStatus != null && newStatus != currentTask.status;
+
+    if (statusChanged && !inspectorChanged) {
+      if (newStatus == AppConstants.completed &&
+          currentTask.status != AppConstants.completed) {
+        // Task was just completed
+        await adminUserService.updateInspectorHistoryBatch(
+          batch: batch,
+          inspectorId: currentTask.assignedInspectorId,
+          updates: {IHF.tasksCompleted: FieldValue.increment(1)},
+        );
+      } else if (newStatus != AppConstants.completed &&
+          currentTask.status == AppConstants.completed) {
+        // Task was un-completed
+        await adminUserService.updateInspectorHistoryBatch(
+          batch: batch,
+          inspectorId: currentTask.assignedInspectorId,
+          updates: {IHF.tasksCompleted: FieldValue.increment(-1)},
+        );
+      }
+    }
+
+    // Commit batch
+    await batch.commit();
   }
 }

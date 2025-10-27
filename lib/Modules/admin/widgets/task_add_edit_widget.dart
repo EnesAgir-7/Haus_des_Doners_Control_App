@@ -2,7 +2,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/models/task_model.dart';
@@ -10,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/firebase_constants.dart';
+import '../admin_providers/provider_admin_tasks.dart';
 import '../admin_providers/provider_admin_users.dart';
 
 class TaskAddEditSheet extends StatefulWidget {
@@ -300,7 +300,7 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
     setState(() => _isLoading = true);
 
     try {
-      final tasksProvider = context.read<ProviderTasks>();
+      final tasksProvider = context.read<ProviderAdminTasks>();
       bool success;
 
       if (isUpdateMode) {
@@ -395,7 +395,7 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
       setState(() => _isLoading = true);
 
       try {
-        final tasksProvider = context.read<ProviderTasks>();
+        final tasksProvider = context.read<ProviderAdminTasks>();
         final success = await tasksProvider.deleteTask(widget.task!.id);
 
         if (success) {

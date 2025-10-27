@@ -4,30 +4,23 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../admin/admin_firebase_services/admin_tasks_service.dart';
-import '../firebase_services/inspector_tasks_service.dart';
 import '../../../models/task_model.dart';
+import '../firebase_services/inspector_tasks_service.dart';
 
 /// Provider for Tasks screen
 /// Shows and manages tasks assigned to inspector
 class ProviderTasks extends ChangeNotifier {
   final InspectorTaskService _taskService = InspectorTaskService();
-  final AdminTaskService _taskAdminService = AdminTaskService();
 
   // State
   List<TaskModel> _tasks = [];
-  List<TaskModel> _allTasks = []; // For admin view
-  TaskModel? _selectedTask;
   bool _isLoading = false;
-  bool _isUpdating = false;
   bool _isAddingComment = false;
-  String? _errorMessage;
-  String? _successMessage;
 
   // Filters
   String _statusFilter = AppConstants.all;
@@ -40,17 +33,9 @@ class ProviderTasks extends ChangeNotifier {
 
   // Getters
   List<TaskModel> get tasks => _filteredAndSortedTasks();
-  List<TaskModel> get allTasks => _allTasks; // For admin view
-  TaskModel? get selectedTask => _selectedTask;
   bool get isLoading => _isLoading;
-  bool get isUpdating => _isUpdating;
   bool get isAddingComment => _isAddingComment;
-  String? get errorMessage => _errorMessage;
-  String? get successMessage => _successMessage;
   String get statusFilter => _statusFilter;
-  String get priorityFilter => _priorityFilter;
-  String get sortBy => _sortBy;
-  List<File> get commentPhotos => _commentPhotos;
 
   // Computed values
   int get totalTasks => _tasks.length;
@@ -59,36 +44,10 @@ class ProviderTasks extends ChangeNotifier {
   int get completedTasksCount => _tasks.where((t) => t.isCompleted).length;
   int get overdueTasksCount => _tasks.where((t) => t.isOverdue).length;
 
-  List<TaskModel> get overdueTasks => _tasks.where((t) => t.isOverdue).toList();
-  List<TaskModel> get highPriorityTasks => _tasks
-      .where((t) => t.priority == AppConstants.high && !t.isCompleted)
-      .toList();
-
   StreamSubscription<List<TaskModel>>? _tasksSubscription;
   String? _currentInspectorId;
-
-  /// Initialize provider with Firestore stream
   Future<void> initialize() async {
-    if (loggedInUser?.isAdmin == true) {
-      await loadAllTasks();
-    } else {
-      initializeTasksStream();
-    }
-  }
-
-  Future<void> loadAllTasks() async {
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      _allTasks = await _taskService.getAllTasks();
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _errorMessage = 'Error loading all tasks: $e';
-      _isLoading = false;
-      notifyListeners();
-    }
+    initializeTasksStream();
   }
 
   initializeTasksStream() {
@@ -115,68 +74,19 @@ class ProviderTasks extends ChangeNotifier {
               notifyListeners();
             },
             onError: (error) {
-              _errorMessage = 'Error in tasks stream: $error';
               _isLoading = false;
               notifyListeners();
             },
           );
     } catch (e) {
-      _errorMessage = 'Error initializing tasks stream: $e';
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> deleteComments(String taskId, List<String> commentIds) async {
-    try {
-      final success = await _taskAdminService.deleteComments(
-        taskId,
-        commentIds,
-      );
-
-      if (success) {
-        await loadAllTasks();
-      }
-
-      return success;
-    } catch (e) {
-      print('Provider error deleting comments: $e');
-      return false;
-    }
-  }
-
-  /// Delete a single comment from a task
-  Future<bool> deleteComment(String taskId, String commentId) async {
-    return deleteComments(taskId, [commentId]);
-  }
-
-  // Select a task
-  void selectTask(TaskModel task) {
-    _selectedTask = task;
-    notifyListeners();
-  }
-
-  // Clear selection
-  void clearSelection() {
-    _selectedTask = null;
-    commentController.clear();
-    _commentPhotos.clear();
-    notifyListeners();
-  }
-
   // Filter and sort tasks
   void setStatusFilter(String status) {
     _statusFilter = status;
-    notifyListeners();
-  }
-
-  void setPriorityFilter(String priority) {
-    _priorityFilter = priority;
-    notifyListeners();
-  }
-
-  void setSortBy(String sortBy) {
-    _sortBy = sortBy;
     notifyListeners();
   }
 
@@ -228,14 +138,8 @@ class ProviderTasks extends ChangeNotifier {
   // Update task status
   Future<bool> updateTaskStatus(String taskId, String newStatus) async {
     try {
-      _isUpdating = true;
-      _errorMessage = null;
-      notifyListeners();
-
       await _taskService.updateTaskStatus(taskId, newStatus);
 
-      _successMessage = 'Task status updated successfully';
-      _isUpdating = false;
       notifyListeners();
 
       // Update local state
@@ -259,42 +163,8 @@ class ProviderTasks extends ChangeNotifier {
         notifyListeners();
       }
 
-      _successMessage = null;
-      notifyListeners();
-
       return true;
     } catch (e) {
-      _errorMessage =
-          'Görev durumu güncellenirken hata oluştu: ${e.toString()}';
-      _isUpdating = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  /// Generic update for a task. `data` should contain the fields to update.
-  Future<bool> updateTask(String taskId, Map<String, dynamic> data) async {
-    try {
-      _isUpdating = true;
-      _errorMessage = null;
-      notifyListeners();
-
-      await _taskService.updateTask(taskId, data);
-
-      // Refresh lists/streams after update
-      if (loggedInUser?.isAdmin == true) {
-        await loadAllTasks();
-      } else {
-        initializeTasksStream();
-      }
-
-      _isUpdating = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _errorMessage = 'Error updating task: $e';
-      _isUpdating = false;
-      notifyListeners();
       return false;
     }
   }
@@ -410,96 +280,6 @@ class ProviderTasks extends ChangeNotifier {
 
   Future<void> refresh() async {
     initializeTasksStream();
-  }
-
-  /// Create a new task and refresh lists/streams accordingly
-  Future<bool> createTask({
-    required String title,
-    required String description,
-    required String assignedInspectorId,
-    required String assignedInspectorName,
-    String? relatedBranchId,
-    String? relatedInspectionId,
-    String status = 'pending',
-    String priority = 'medium',
-    DateTime? dueDate,
-  }) async {
-    try {
-      _isUpdating = true;
-      _errorMessage = null;
-      notifyListeners();
-
-      final now = DateTime.now();
-      final task = TaskModel(
-        id: '',
-        title: title,
-        description: description,
-        assignedInspectorId: assignedInspectorId,
-        assignedInspectorName: assignedInspectorName,
-        relatedBranchId: relatedBranchId,
-        relatedInspectionId: relatedInspectionId,
-        status: status,
-        priority: priority,
-        dueDate: dueDate,
-        comments: [],
-        createdAt: now,
-        updatedAt: now,
-      );
-
-      await _taskService.createTask(task);
-
-      // Refresh according to current user role
-      if (loggedInUser?.isAdmin == true) {
-        await loadAllTasks();
-      } else {
-        initializeTasksStream();
-      }
-
-      _isUpdating = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _errorMessage = 'Error creating task: $e';
-      _isUpdating = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  Future<bool> deleteTask(String taskId) async {
-    try {
-      _isUpdating = true;
-      _errorMessage = null;
-      notifyListeners();
-
-      await _taskService.deleteTask(taskId);
-
-      // Refresh according to current user role
-      if (loggedInUser?.isAdmin == true) {
-        await loadAllTasks();
-      } else {
-        initializeTasksStream();
-      }
-
-      _isUpdating = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _errorMessage = 'Error deleting task: $e';
-      _isUpdating = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  void clearError() {
-    _errorMessage = null;
-    notifyListeners();
-  }
-
-  void clearSuccess() {
-    _successMessage = null;
-    notifyListeners();
   }
 
   @override

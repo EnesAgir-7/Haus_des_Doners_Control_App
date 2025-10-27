@@ -1,9 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_tasks.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/task_model.dart';
-import '../../inspector/providers/provider_tasks.dart';
 import '../../inspector/widgets/custom_toast.dart';
 
 class AdminTaskCard extends StatelessWidget {
@@ -294,7 +294,7 @@ class AdminTaskCard extends StatelessWidget {
 
                 if (confirm == true) {
                   try {
-                    final tasksProvider = context.read<ProviderTasks>();
+                    final tasksProvider = context.read<ProviderAdminTasks>();
                     final success = await tasksProvider.deleteTask(task.id);
                     if (success) {
                       showSnakBarr(context, "Task Deleted");

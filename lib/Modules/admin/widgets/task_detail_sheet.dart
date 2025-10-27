@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/core/extensions.dart';
@@ -14,6 +13,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../inspector/screens/screen_full_image.dart';
+import '../admin_providers/provider_admin_tasks.dart';
 
 class TaskDetailSheet extends StatefulWidget {
   final TaskModel task;
@@ -122,7 +122,7 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
     setState(() => _isDeletingComments = true);
 
     try {
-      final tasksProvider = context.read<ProviderTasks>();
+      final tasksProvider = context.read<ProviderAdminTasks>();
 
       // Get the comment IDs to delete
       final commentIdsToDelete = _selectedCommentIndices
@@ -186,7 +186,7 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
     setState(() => _isAddingComment = true);
 
     try {
-      final tasksProvider = context.read<ProviderTasks>();
+      final tasksProvider = context.read<ProviderAdminTasks>();
       tasksProvider.commentController.text = commentText;
 
       for (final photo in _commentPhotos) {
@@ -1027,7 +1027,7 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
 //     setState(() => _isAddingComment = true);
 
 //     try {
-//       final tasksProvider = context.read<ProviderTasks>();
+//       final tasksProvider = context.read<ProviderAdminTasks>();
 //       tasksProvider.commentController.text = commentText;
 
 //       for (final photo in _commentPhotos) {

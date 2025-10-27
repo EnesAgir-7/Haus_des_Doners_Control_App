@@ -64,6 +64,39 @@ class TaskModel {
       updatedAt: (data[TaskFields.updatedAt] as Timestamp).toDate(),
     );
   }
+   /// ✅ CopyWith method
+  TaskModel copyWith({
+    String? id,
+    String? title,
+    String? description,
+    String? assignedInspectorId,
+    String? assignedInspectorName,
+    String? relatedBranchId,
+    String? relatedInspectionId,
+    String? status,
+    String? priority,
+    DateTime? dueDate,
+    List<TaskCommentModel>? comments,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return TaskModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      assignedInspectorId: assignedInspectorId ?? this.assignedInspectorId,
+      assignedInspectorName:
+          assignedInspectorName ?? this.assignedInspectorName,
+      relatedBranchId: relatedBranchId ?? this.relatedBranchId,
+      relatedInspectionId: relatedInspectionId ?? this.relatedInspectionId,
+      status: status ?? this.status,
+      priority: priority ?? this.priority,
+      dueDate: dueDate ?? this.dueDate,
+      comments: comments ?? this.comments,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {

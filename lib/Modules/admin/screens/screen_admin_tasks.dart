@@ -1,15 +1,15 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/core/extensions.dart';
 import 'package:haus_des_control/models/task_model.dart';
 import 'package:provider/provider.dart';
 
+import '../admin_providers/provider_admin_tasks.dart';
 import '../widgets/admin_task_card.dart';
-import '../widgets/task_detail_sheet.dart';
 import '../widgets/task_add_edit_widget.dart';
+import '../widgets/task_detail_sheet.dart';
 
 class ScreenAdminTasks extends StatefulWidget {
   const ScreenAdminTasks({super.key});
@@ -25,7 +25,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderTasks>().loadAllTasks();
+      context.read<ProviderAdminTasks>().loadAllTasks();
     });
   }
 
@@ -48,7 +48,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
             ),
           ),
           child: SafeArea(
-            child: Consumer<ProviderTasks>(
+            child: Consumer<ProviderAdminTasks>(
               builder: (context, taskProvider, child) {
                 final tasks = taskProvider.allTasks;
                 final filteredTasks = _filterTasks(tasks);
@@ -84,7 +84,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
     );
   }
 
-  Widget _buildHeader(ProviderTasks provider) {
+  Widget _buildHeader(ProviderAdminTasks provider) {
     return Row(
       children: [
         Icon(Icons.task_alt, color: Colors.lightBlueAccent),
@@ -213,7 +213,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
     );
   }
 
-  Widget _buildEmptyState(ProviderTasks provider) {
+  Widget _buildEmptyState(ProviderAdminTasks provider) {
     return Center(
       child: SingleChildScrollView(
         physics: AlwaysScrollableScrollPhysics(),
@@ -244,7 +244,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
     );
   }
 
-  Widget _buildTaskList(ProviderTasks provider, List<TaskModel> filteredTasks) {
+  Widget _buildTaskList(ProviderAdminTasks provider, List<TaskModel> filteredTasks) {
     return RefreshIndicator(
       onRefresh: () => provider.loadAllTasks(),
       color: AppColors.primaryRed,
@@ -294,7 +294,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
       ),
       builder: (context) => TaskDetailSheet(
         task: task,
-        onTaskUpdated: () => context.read<ProviderTasks>().loadAllTasks(),
+        onTaskUpdated: () => context.read<ProviderAdminTasks>().loadAllTasks(),
       ),
     );
   }
@@ -309,7 +309,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
       ),
       builder: (context) => TaskAddEditSheet(
         task: task,
-        onSuccess: () => context.read<ProviderTasks>().loadAllTasks(),
+        onSuccess: () => context.read<ProviderAdminTasks>().loadAllTasks(),
       ),
     );
   }
