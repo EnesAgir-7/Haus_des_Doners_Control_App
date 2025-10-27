@@ -8,6 +8,7 @@ import '../../../models/branch_model.dart';
 import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
 import '../../../models/vehicle_model.dart';
+import '../../inspector/widgets/custom_toast.dart';
 import '../admin_firebase_services/admin_branch_service.dart';
 import '../admin_firebase_services/admin_user_service.dart';
 import '../admin_firebase_services/admin_vehicle_service.dart';
@@ -281,6 +282,33 @@ class ProviderAdminUsers extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> deleteInspector({
+    required String inspectorUid,
+    required BuildContext parentContext,
+  }) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      await _authHelper.deleteInspectorAccount(inspectorUid: inspectorUid);
+
+      _isLoading = false;
+      notifyListeners();
+
+      if (parentContext.mounted) {
+        showSnakBarr(parentContext, "Inspector deleted successfully ✅");
+        Navigator.of(parentContext).pop(); // go back only on success
+      }
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+
+      if (parentContext.mounted) {
+        showSnakBarr(parentContext, "$e");
+      }
     }
   }
 

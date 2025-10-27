@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../generated/lib/translations/locale_keys.g.dart';
 import '../../../models/user_model.dart';
+import '../../inspector/widgets/app_button.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../../inspector/widgets/custom_toast.dart';
 import '../admin_providers/provider_admin_users.dart';
@@ -82,7 +83,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
 
       showSnakBarr(context, 'User updated successfully');
       setState(() => _isEditing = false);
-      Navigator.pop(context, true); 
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
       showSnakBarr(context, e.toString().replaceAll('Exception: ', ''));
@@ -124,10 +125,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildSectionHeader(
-                    'User Information',
-                    Icons.person_outline,
-                  ),
+                  _buildSectionHeader('User Information', Icons.person_outline),
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _nameController,
@@ -145,7 +143,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                   _buildTextField(
                     controller: _emailController,
                     label: LocaleKeys.email.tr(),
-      
+
                     icon: Icons.email,
                     enabled: false,
                     keyboardType: TextInputType.emailAddress,
@@ -177,6 +175,8 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                   _buildAccountStatus(),
                   const SizedBox(height: 40),
                   if (_isEditing) _buildSaveButton(provider),
+                  const SizedBox(height: 16),
+                  if (_isEditing) _buildDeleteAccountButton(provider),
                 ],
               ),
             ),
@@ -358,36 +358,77 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
   }
 
   Widget _buildSaveButton(ProviderAdminUsers provider) {
-    return ElevatedButton(
+    return AppButton(
       onPressed: provider.isLoading ? null : _saveChanges,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryRed,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 4,
-        disabledBackgroundColor: AppColors.primaryRed.withValues(alpha: 0.5),
-      ),
-      child: provider.isLoading
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      isLoading: provider.isLoading,
+      text: 'Save Changes',
+      icon: Icons.save,
+    );
+  }
+
+  Widget _buildDeleteAccountButton(ProviderAdminUsers provider) {
+    return AppButton(
+      onPressed: () => _showDeleteAccountDialog(provider, widget.user, context),
+      isLoading: provider.isLoading,
+      text: 'Delete Account',
+      icon: Icons.delete,
+    );
+  }
+
+  Future<void> _showDeleteAccountDialog(
+    ProviderAdminUsers provider,
+    UserModel inspectorUser,
+    BuildContext parentContext,
+  ) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Inspector Account'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Are you sure you want to delete this inspector account?',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-            )
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.save, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  'Save Changes',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
+              const SizedBox(height: 12),
+              Text('Inspector: ${inspectorUser.name}'),
+              Text('Email: ${inspectorUser.serviceAccount}'),
+              const SizedBox(height: 12),
+              const Text(
+                'This action cannot be undone. This will permanently delete:',
+                style: TextStyle(color: Colors.red),
+              ),
+              const SizedBox(height: 8),
+              const Text('• Inspector authentication account'),
+              const Text('• Inspector user data'),
+              const Text('• Inspector route (if empty)'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
             ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () async {
+                Navigator.of(context).pop(); // close confirmation dialog
+
+                await provider.deleteInspector(
+                  inspectorUid: inspectorUser.id,
+                  parentContext: parentContext, // pass the screen context here
+                );
+              },
+              child: const Text('Delete'),
+            )
+
+          ],
+        );
+      },
     );
   }
 }

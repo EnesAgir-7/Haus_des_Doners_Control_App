@@ -1,15 +1,16 @@
 /**
- * Cloud Function to remove expired stops from route documents.
- * Scans the "routes" collection and removes stops whose expiryDate
- * is in the past. Scheduled to run periodically.
+ * Cloud Functions for Firebase Admin operations
  */
 
 const {onSchedule} = require("firebase-functions/v2/scheduler");
+const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const {initializeApp} = require("firebase-admin/app");
 const {getFirestore, FieldValue} = require("firebase-admin/firestore");
+const {getAuth} = require("firebase-admin/auth");
 
 initializeApp();
 const db = getFirestore();
+const auth = getAuth();
 
 /**
  * Parse an expiry value to a JavaScript Date.
@@ -38,12 +39,11 @@ function parseExpiry(expiry) {
 
 /**
  * Scheduled function that removes expired stops from each route doc.
- * Runs at 8:00 AM Asia/Karachi time every day.
+ * Runs every 5 minutes for testing (change to daily in production).
  */
-
 exports.cleanupExpiredStops = onSchedule(
     {
-      schedule: "*/5 * * * *", // for testing: runs every 5 mins
+      schedule: "0 8 * * *",
       timeZone: "Asia/Karachi",
     },
     async (event) => {
@@ -98,7 +98,7 @@ exports.cleanupExpiredStops = onSchedule(
         }
 
         console.log(
-            `✅ Chckd ${totalStopsChecked} stops, removed ${totalStopsRemoved}`,
+            `Checked ${totalStopsChecked} stops, removed ${totalStopsRemoved}`,
         );
         return null;
       } catch (err) {
@@ -108,57 +108,119 @@ exports.cleanupExpiredStops = onSchedule(
     },
 );
 
+/**
+ * Callable function to delete an inspector account.
+ * Only admins can call this function.
+ * Deletes user from Auth, Firestore users collection, and routes collection.
+ */
+exports.deleteInspector = onCall(async (request) => {
+  // Check if user is authenticated
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "User must be logged in to perform this action",
+    );
+  }
 
-// exports.cleanupExpiredStops = onSchedule(
-//     {
-//       schedule: "0 8 * * *",
-//       timeZone: "Asia/Karachi",
-//       // timeZone: "Europe/Berlin"
-//       // schedule: "*/3 * * * *",
-//     },
-//     async (event) => {
-//       const now = new Date();
+  const insUid = request.data.uid;
+  const callerUid = request.auth.uid;
 
-//       try {
-//         const routesSnap = await db.collection("routes").get();
+  // Validate input
+  if (!insUid) {
+    throw new HttpsError("invalid-argument", "Inspector UID is required");
+  }
 
-//         // Collect updates to apply
-//         const updates = [];
+  try {
+    // Verify caller is admin
+    const callerDoc = await db.collection("admins").doc(callerUid).get();
 
-//         for (const doc of routesSnap.docs) {
-//           const data = doc.data() || {};
-//           const stops = Array.isArray(data.stops) ? data.stops : [];
+    if (!callerDoc.exists) {
+      throw new HttpsError("permission-denied", "Caller user not found");
+    }
 
-//           const filteredStops = stops.filter((stop) => {
-//             const expiryDate = parseExpiry(stop.expiryDate);
-//             // Keep the stop if no expiry or expiry is in the future
-//           return expiryDate === null || expiryDate.getTime() > now.getTime();
-//           });
+    const callerData = callerDoc.data();
 
-//           if (filteredStops.length !== stops.length) {
-//             updates.push({
-//               ref: doc.ref,
-//               data: {
-//                 stops: filteredStops,
-//                 updatedAt: FieldValue.serverTimestamp(),
-//               },
-//             });
-//           }
-//         }
+    // Check if caller is admin (adjust field name based on your schema)
+    // Common field names: role, userType, type, etc.
+    const isAdmin =
+      callerData.role === "admin" ||
+      callerData.userType === "admin" ||
+      callerData.type === "admin";
 
-//         // Commit updates in batches of up to 500
-//         while (updates.length) {
-//           const batch = db.batch();
-//           const chunk = updates.splice(0, 500);
-//           chunk.forEach((u) => batch.update(u.ref, u.data));
-//           await batch.commit();
-//         }
+    if (!isAdmin) {
+      throw new HttpsError(
+          "permission-denied",
+          "Only admins can delete inspectors",
+      );
+    }
 
-//         console.log("cleanupExpiredStops completed.");
-//         return null;
-//       } catch (err) {
-//         console.error("Error in cleanupExpiredStops:", err);
-//         throw err;
-//       }
-//     },
-// );
+    // Prevent admin from deleting themselves
+    if (insUid === callerUid) {
+      throw new HttpsError(
+          "failed-precondition",
+          "You cannot delete your own account",
+      );
+    }
+
+    // Check if inspector exists
+    const inspectorDoc = await db.collection("inspectors").doc(insUid).get();
+    if (!inspectorDoc.exists) {
+      throw new HttpsError("not-found", "Inspector not found");
+    }
+
+    // Check if inspector's route has stops
+    const routeDoc = await db.collection("routes").doc(insUid).get();
+
+    if (routeDoc.exists) {
+      const routeData = routeDoc.data();
+      const stops = routeData.stops || [];
+
+      if (stops.length > 0) {
+        throw new HttpsError(
+            "failed-precondition",
+            "There is an active branch visit in the route. " +
+          "Please remove all stops first.",
+        );
+      }
+    }
+
+    // Use batch for atomic Firestore operations
+    const batch = db.batch();
+
+    // Delete user document
+    const userRef = db.collection("inspectors").doc(insUid);
+    batch.delete(userRef);
+
+    // Delete route document if exists
+    if (routeDoc.exists) {
+      const routeRef = db.collection("routes").doc(insUid);
+      batch.delete(routeRef);
+    }
+
+    // Commit batch
+    await batch.commit();
+    console.log(`✅ Deleted Firestore data for inspector: ${insUid}`);
+
+    // Delete from Firebase Auth using Admin SDK
+    await auth.deleteUser(insUid);
+    console.log(`✅ Deleted Auth account for inspector: ${insUid}`);
+
+    return {
+      success: true,
+      message: "Inspector deleted successfully",
+    };
+  } catch (error) {
+    console.error("❌ Error deleting inspector:", error);
+
+    // If it's already an HttpsError, throw it as is
+    if (error instanceof HttpsError) {
+      throw error;
+    }
+
+    // Otherwise, wrap it in an HttpsError
+    throw new HttpsError(
+        "internal",
+        `Failed to delete inspector: ${error.message}`,
+    );
+  }
+});
