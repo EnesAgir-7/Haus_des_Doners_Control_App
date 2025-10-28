@@ -9,14 +9,14 @@ import '../admin_providers/provider_admin_users.dart';
 import 'screen_admin_create_user.dart';
 import 'screen_admin_inspector_details.dart';
 
-class ScreenAdminUsers extends StatefulWidget {
-  const ScreenAdminUsers({super.key});
+class ScreenAdminInspectors extends StatefulWidget {
+  const ScreenAdminInspectors({super.key});
 
   @override
-  State<ScreenAdminUsers> createState() => _ScreenAdminUsersState();
+  State<ScreenAdminInspectors> createState() => _ScreenAdminInspectorsState();
 }
 
-class _ScreenAdminUsersState extends State<ScreenAdminUsers> {
+class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
   final _searchController = TextEditingController();
 
   @override

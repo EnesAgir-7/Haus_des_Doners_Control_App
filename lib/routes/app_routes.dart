@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../Modules/admin/screens/screen_admin_branches.dart';
 import '../Modules/admin/screens/screen_admin_tasks.dart';
-import '../Modules/admin/screens/screen_admin_users.dart';
+import '../Modules/admin/screens/screen_admin_inspectors.dart';
 import '../Modules/admin/screens/screen_admin_vehicle.dart';
 import '../Modules/inspector/screens/bottom_nav_bar.dart';
 import '../Modules/inspector/screens/screen_auth.dart';
@@ -45,7 +45,7 @@ class AppRouter {
     RouteNames.mainLayout: (context) => ScreenBottomNavBar(),
 
     // Admin routes
-    RouteNames.adminUsers: (context) => const ScreenAdminUsers(),
+    RouteNames.adminUsers: (context) => const ScreenAdminInspectors(),
     RouteNames.adminBranches: (context) => const ScreenAdminBranches(),
     RouteNames.adminFleet: (context) => const ScreenAdminVehicle(),
     RouteNames.adminTasks: (context) => const ScreenAdminTasks(),

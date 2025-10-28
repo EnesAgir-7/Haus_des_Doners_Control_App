@@ -1,6 +1,7 @@
 // lib/screens/admin/screen_admin_settings.dart
 
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/admin/screens/screen_admins_listing.dart';
 import '../../../core/constants/app_colors.dart';
 import 'screen_admin_templates.dart'; // Import the screen we just completed
 
@@ -46,10 +47,19 @@ class ScreenAdminSettings extends StatelessWidget {
               ),
               _buildSettingsTile(
                 context,
-                icon: Icons.category,
-                title: 'Manage Categories (Dummy)',
-                subtitle: 'Configure global inspection categories.',
-                onTap: () {},
+                icon: Icons.admin_panel_settings,
+                title: 'Manage Admins',
+                subtitle: 'Add, edit, or remove admin accounts.',
+
+                color: AppColors.primaryRed,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ScreenAdminListing(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 20),
               _buildSectionTitle(context, 'User & Access'),

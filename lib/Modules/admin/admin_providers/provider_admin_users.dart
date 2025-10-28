@@ -76,6 +76,7 @@ class ProviderAdminUsers extends ChangeNotifier {
     );
   }
 
+
   // Get inspector details with branches and vehicle
   Future<Map<String, dynamic>> getInspectorDetails(String inspectorId) async {
     try {
