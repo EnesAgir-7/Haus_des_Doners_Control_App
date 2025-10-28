@@ -90,7 +90,10 @@ class ProviderBranches extends ChangeNotifier {
     _inspectionsSubscription?.cancel();
 
     _inspectionsSubscription = _inspectionService
-        .streamInspectionsByBranch(branch.id)
+        .streamInspectionsByBranchAndInspector(
+          branch.id,
+          branch.assignedInspector!.id,
+        )
         .listen(
           (inspections) {
             _branchInspections = inspections;
@@ -177,8 +180,6 @@ class ProviderBranches extends ChangeNotifier {
 
     return filtered;
   }
-
-
 
   Future<bool> updateStopTimeSlotForMe({
     required String branchId,

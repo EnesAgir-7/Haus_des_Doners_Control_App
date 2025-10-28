@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
+import '../../../core/console.dart';
 import '../../../models/vehicle_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../firebase_services/inspector_vehicle_service.dart';
@@ -39,8 +42,11 @@ class ProviderVehicle extends ChangeNotifier {
   String get serviceDueText => _assignedVehiclee?.serviceDueText ?? '';
   String get kmProgressColor => _assignedVehiclee?.kmProgressColor ?? 'green';
 
+  StreamSubscription<List<VehicleModel>>? _vehiclesSubscription;
+  String? _currentInspectorId;
+
   Future<void> initialize() async {
-    await fetchInspectorVehicles();
+    initializeVehiclesStream();
   }
 
   setSelectedVehicle(VehicleModel vehicle) {
@@ -49,26 +55,43 @@ class ProviderVehicle extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> fetchInspectorVehicles() async {
-    try {
-      _isLoading = true;
-      _errorMessage = null;
-      notifyListeners();
+  void initializeVehiclesStream() {
+    final inspectorId = loggedInUser!.id;
 
-      _vehicles = await _vehicleService.getVehiclesByInspector(
-        loggedInUser!.id,
-      );
-      _isLoading = false;
-      notifyListeners();
+    if (_vehiclesSubscription != null && _currentInspectorId == inspectorId) {
+      console("Same user and stream is On");
+      return;
+    }
+
+    _currentInspectorId = inspectorId;
+    _vehiclesSubscription?.cancel();
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      _vehiclesSubscription = _vehicleService
+          .streamVehiclesByInspector(inspectorId)
+          .listen(
+            (vehicles) {
+              _vehicles = vehicles;
+              _isLoading = false;
+              notifyListeners();
+            },
+            onError: (error) {
+              _errorMessage =
+                  '${LocaleKeys.error_loading_vehicle.tr(args: [error.toString()])}';
+              _isLoading = false;
+              notifyListeners();
+            },
+          );
     } catch (e) {
       _errorMessage =
           '${LocaleKeys.error_loading_vehicle.tr(args: [e.toString()])}';
       _isLoading = false;
       notifyListeners();
-      print(_errorMessage);
     }
   }
-
 
   Future<bool> updateVehicleKm(int newKm, BuildContext context) async {
     if (_assignedVehiclee == null) {
@@ -108,7 +131,6 @@ class ProviderVehicle extends ChangeNotifier {
       showSnakBarr(context, LocaleKeys.km_update_success.tr());
 
       notifyListeners();
-      await fetchInspectorVehicles();
 
       return true;
     } catch (e) {
@@ -140,10 +162,6 @@ class ProviderVehicle extends ChangeNotifier {
     if (done) {}
   }
 
-  Future<void> refresh() async {
-    await fetchInspectorVehicles();
-  }
-
   void clearError() {
     _errorMessage = null;
     notifyListeners();
@@ -156,6 +174,8 @@ class ProviderVehicle extends ChangeNotifier {
 
   @override
   void dispose() {
+    _vehiclesSubscription?.cancel();
+
     kmController.dispose();
     super.dispose();
   }

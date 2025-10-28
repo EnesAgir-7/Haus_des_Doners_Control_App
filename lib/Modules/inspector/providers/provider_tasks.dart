@@ -136,9 +136,17 @@ class ProviderTasks extends ChangeNotifier {
   }
 
   // Update task status
-  Future<bool> updateTaskStatus(String taskId, String newStatus) async {
+  Future<bool> updateTaskStatus({
+    required String taskId,
+    required String newStatus,
+    required String insId,
+  }) async {
     try {
-      await _taskService.updateTaskStatus(taskId, newStatus);
+      await _taskService.updateTaskStatus(
+        taskId: taskId,
+        newStatus: newStatus,
+        inspectorId: insId,
+      );
 
       notifyListeners();
 
@@ -256,14 +264,26 @@ class ProviderTasks extends ChangeNotifier {
   }
 
   // Helper methods for status
-  Future<bool> markAsPending(String taskId) async =>
-      await updateTaskStatus(taskId, AppConstants.pending);
+  Future<bool> markAsPending(String taskId, String inspectorId) async =>
+      await updateTaskStatus(
+        taskId: taskId,
+        newStatus: AppConstants.pending,
+        insId: inspectorId,
+      );
 
-  Future<bool> markAsInProgress(String taskId) async =>
-      await updateTaskStatus(taskId, AppConstants.inProgress);
+  Future<bool> markAsInProgress(String taskId, String inspectorId) async =>
+      await updateTaskStatus(
+        taskId: taskId,
+        newStatus: AppConstants.inProgress,
+        insId: inspectorId,
+      );
 
-  Future<bool> markAsCompleted(String taskId) async =>
-      await updateTaskStatus(taskId, AppConstants.completed);
+  Future<bool> markAsCompleted(String taskId, String inspectorId) async =>
+      await updateTaskStatus(
+        taskId: taskId,
+        newStatus: AppConstants.completed,
+        insId: inspectorId,
+      );
 
   // Utility methods
   TaskModel? getTaskById(String taskId) {

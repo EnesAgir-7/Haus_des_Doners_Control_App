@@ -8,15 +8,15 @@ import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../providers/provider_vehicle.dart';
 
-class ScreenVehicle extends StatefulWidget {
+class ScreenVehicleDetail extends StatefulWidget {
   final VehicleModel vehicle;
-  const ScreenVehicle({super.key, required this.vehicle});
+  const ScreenVehicleDetail({super.key, required this.vehicle});
 
   @override
-  State<ScreenVehicle> createState() => _ScreenVehicleState();
+  State<ScreenVehicleDetail> createState() => _ScreenVehicleDetailState();
 }
 
-class _ScreenVehicleState extends State<ScreenVehicle>
+class _ScreenVehicleDetailState extends State<ScreenVehicleDetail>
     with TickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;

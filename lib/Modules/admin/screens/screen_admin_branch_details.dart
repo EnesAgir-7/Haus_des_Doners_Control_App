@@ -9,6 +9,7 @@ import 'package:haus_des_control/core/extensions.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../helpers/app_helpers.dart';
 import '../../../models/branch_model.dart';
 import '../../../models/route_model.dart';
 import '../../../models/user_model.dart';
@@ -132,13 +133,12 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
 
       if (mounted) {
         setState(() => _isEditing = false);
-        showSnakBarr(context, LocaleKeys.inspection_saved_successfully.tr());
+        showSnakBarr(context, "Branch updated successfully");
       }
     } catch (e) {
       if (mounted) showSnakBarr(context, 'Error: $e');
     }
   }
-
 
   Future<void> _pickLocationFromMap() async {
     final result = await showLocationPickerDialog(
@@ -623,7 +623,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           value: widget.branch.lastInspectionScore ?? 'N/A',
           icon: Icons.star,
           color: widget.branch.lastInspectionScore != null
-              ? _getScoreColor(widget.branch.lastInspectionScore!)
+              ? getScoreColor(widget.branch.lastInspectionScore!)
               : Colors.grey,
         ),
       ],
@@ -1444,18 +1444,5 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     return Colors.red;
   }
 
-  Color _getScoreColor(String scoreString) {
-    final parts = scoreString.split('/');
-    if (parts.length != 2) return Colors.grey;
-
-    final score = double.tryParse(parts.first) ?? 0.0;
-    final maxScore = double.tryParse(parts.last) ?? 1.0;
-    final percentage = (score / maxScore) * 100;
-    final reversedPercentage = 100 - percentage;
-
-    if (reversedPercentage >= 80) return Colors.green;
-    if (reversedPercentage >= 60) return Colors.lightGreen;
-    if (reversedPercentage >= 40) return Colors.orange;
-    return Colors.red;
-  }
+ 
 }

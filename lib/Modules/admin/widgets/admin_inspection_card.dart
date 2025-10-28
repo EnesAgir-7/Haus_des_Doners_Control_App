@@ -55,7 +55,7 @@ class AdminInspectionCard extends StatelessWidget {
   }
 
   Widget _buildScoreBadge() {
-    final scoreColor = _getScoreColor();
+    final scoreColor = getScoreColor(inspection.score);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
       decoration: BoxDecoration(
@@ -212,13 +212,4 @@ class AdminInspectionCard extends StatelessWidget {
     );
   }
 
-  Color _getScoreColor() {
-    final parts = inspection.score.split('/');
-    final score = double.tryParse(parts.first) ?? 0.0;
-
-    // Lower score = better (green), higher = worse (red)
-    if (score <= 3.0) return Colors.green;
-    if (score <= 6.0) return Colors.amber;
-    return Colors.red;
-  }
 }

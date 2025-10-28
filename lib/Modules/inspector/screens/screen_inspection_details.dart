@@ -112,7 +112,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
     ProviderInspection provider,
     InspectionModel inspection,
   ) {
-    final scoreColor = provider.getScoreColor(inspection.score);
+    final scoreColor = getScoreColor(inspection.score);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -333,7 +333,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
     InspectionCategoryModel data,
     String path,
   ) {
-    final scoreColor = provider.getScoreColor(data.score);
+    final scoreColor = getScoreColor(data.score);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -374,7 +374,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
                       Icon(Icons.star, size: 12, color: scoreColor),
                       const SizedBox(width: 4),
                       Text(
-                        '${data.score}/4',
+                        '${data.score}',
                         style: TextStyle(
                           color: scoreColor,
                           fontWeight: FontWeight.w600,

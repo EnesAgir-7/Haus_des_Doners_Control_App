@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../helpers/app_helpers.dart';
 import '../../../models/branch_model.dart';
 import '../screens/screen_admin_branch_details.dart';
 
@@ -217,7 +218,7 @@ class AdminBranchCard extends StatelessWidget {
     final days = branch.daysSinceLastInspection ?? 0;
     final urgencyColor = _getUrgencyColor(days);
     final scoreColor = branch.lastInspectionScore != null
-        ? _getScoreColor(branch.lastInspectionScore!)
+        ? getScoreColor(branch.lastInspectionScore!)
         : Colors.grey;
 
     return Row(
@@ -400,20 +401,6 @@ class AdminBranchCard extends StatelessWidget {
     if (days == 0) return Colors.greenAccent;
     if (days <= 7) return Colors.greenAccent;
     if (days <= 30) return Colors.orangeAccent;
-    return Colors.redAccent;
-  }
-
-  Color _getScoreColor(String scoreString) {
-    final parts = scoreString.split('/');
-    if (parts.length != 2) return Colors.grey;
-
-    final score = double.tryParse(parts.first) ?? 0.0;
-    final maxScore = double.tryParse(parts.last) ?? 1.0;
-    final percentage = (score / maxScore) * 100;
-
-    if (percentage >= 80) return Colors.greenAccent;
-    if (percentage >= 60) return Colors.yellowAccent;
-    if (percentage >= 40) return Colors.orangeAccent;
     return Colors.redAccent;
   }
 

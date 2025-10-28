@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ import 'package:haus_des_control/Modules/inspector/providers/provider_route.dart
 import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import 'Modules/admin/admin_providers/provider_admin_bottombar.dart';
 import 'Modules/admin/admin_providers/provider_admin_inspections.dart';
@@ -108,6 +111,29 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.light,
           navigatorKey: navigatorKey,
           navigatorObservers: [GlobalFocusManager()],
+          builder: (context, widget) {
+            return SafeArea(
+              bottom: Platform.isIOS ? false : true,
+              top: false,
+              child: ResponsiveBreakpoints.builder(
+                child: ResponsiveScaledBox(
+                  width: 460,
+                  child: widget ?? Container(),
+                ),
+                breakpoints: [
+                  const Breakpoint(start: 0, end: 450, name: MOBILE),
+                  const Breakpoint(start: 451, end: 800, name: TABLET),
+                  const Breakpoint(start: 801, end: 1000, name: TABLET),
+                  const Breakpoint(start: 801, end: 1200, name: DESKTOP),
+                  const Breakpoint(
+                    start: 1921,
+                    end: double.infinity,
+                    name: '4K',
+                  ),
+                ],
+              ),
+            );
+          },
 
           darkTheme: AppTheme.dark,
           themeMode: ThemeMode.dark,

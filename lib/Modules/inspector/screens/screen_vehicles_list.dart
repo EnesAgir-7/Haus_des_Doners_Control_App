@@ -7,7 +7,7 @@ import '../../../translations/locale_keys.g.dart';
 import '../../../models/vehicle_model.dart';
 import '../../common/widget_vehicle_common.dart';
 import '../providers/provider_vehicle.dart';
-import 'screen_vehicle.dart';
+import 'screen_vehicle_detail.dart';
 
 class ScreenVehiclesList extends StatefulWidget {
   const ScreenVehiclesList({super.key});
@@ -117,23 +117,18 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
       return _buildEmptyState(provider);
     }
 
-    return RefreshIndicator(
-      onRefresh: provider.refresh,
-      color: AppColors.primaryRed,
-      backgroundColor: AppColors.lightBlack,
-      child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 50),
-        key: const PageStorageKey('vehiclesList'),
-        physics: const AlwaysScrollableScrollPhysics(),
-        itemCount: provider.vehicles.length,
-        itemBuilder: (context, index) {
-          final vehicleModel = provider.vehicles[index];
-          return GestureDetector(
-            onTap: () => _navigateToVehicleDetails(context, vehicleModel),
-            child: VehicleListCard(vehicle: vehicleModel),
-          );
-        },
-      ),
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 50),
+      key: const PageStorageKey('vehiclesList'),
+      physics: const AlwaysScrollableScrollPhysics(),
+      itemCount: provider.vehicles.length,
+      itemBuilder: (context, index) {
+        final vehicleModel = provider.vehicles[index];
+        return GestureDetector(
+          onTap: () => _navigateToVehicleDetails(context, vehicleModel),
+          child: VehicleListCard(vehicle: vehicleModel),
+        );
+      },
     );
   }
 
@@ -163,7 +158,9 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: provider.refresh,
+            onPressed: () {
+              provider.initialize();
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryRed,
             ),
@@ -184,10 +181,8 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
   ) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ScreenVehicle(vehicle: vehicleModel),
+        builder: (context) => ScreenVehicleDetail(vehicle: vehicleModel),
       ),
     );
   }
 }
-
-

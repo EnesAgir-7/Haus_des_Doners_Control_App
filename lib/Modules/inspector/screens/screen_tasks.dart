@@ -634,7 +634,10 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                           icon: Icons.play_arrow,
                           color: Color(0xFFFFA726),
                           onPressed: () {
-                            widget.provider.markAsInProgress(widget.task.id);
+                            widget.provider.markAsInProgress(
+                              widget.task.id,
+                              widget.task.assignedInspectorId,
+                            );
                             Navigator.pop(context);
                           },
                         ),
@@ -646,7 +649,10 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                           icon: Icons.check_circle,
                           color: Color(0xFF4CAF50),
                           onPressed: () {
-                            widget.provider.markAsCompleted(widget.task.id);
+                            widget.provider.markAsCompleted(
+                              widget.task.id,
+                              widget.task.assignedInspectorId,
+                            );
                             Navigator.pop(context);
                           },
                         ),

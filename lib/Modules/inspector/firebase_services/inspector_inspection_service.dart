@@ -52,10 +52,11 @@ class InspectorInspectionService {
   }
 
   // Stream inspections by branch (real-time)
-  Stream<List<InspectionModel>> streamInspectionsByBranch(String branchId) {
+  Stream<List<InspectionModel>> streamInspectionsByBranchAndInspector(String branchId, String inspectorId) {
     return _db
         .collection(_collection)
         .where(InspectionFields.branchId, isEqualTo: branchId)
+        .where(InspectionFields.inspectorId, isEqualTo: inspectorId)
         .orderBy(InspectionFields.scheduledTime, descending: true)
         .limit(10)
         .snapshots()

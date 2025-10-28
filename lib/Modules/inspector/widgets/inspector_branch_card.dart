@@ -140,15 +140,17 @@ class InspectorBranchCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const Spacer(),
-          Text(
-            branch.lastInspectionDate != null
-                ? "${formatDate(branch.lastInspectionDate!)} (${branch.lastInspectionScore})"
-                : LocaleKeys.pending_first.tr(),
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 13.0,
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: Text(
+              textAlign: TextAlign.end,
+              branch.lastInspectionDate != null
+                  ? "${formatDate(branch.lastInspectionDate!)} (${branch.lastInspectionScore})"
+                  : LocaleKeys.pending_first.tr(),
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 13.0,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

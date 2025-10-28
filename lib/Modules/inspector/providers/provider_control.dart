@@ -359,9 +359,8 @@ class ProviderControl extends ChangeNotifier {
       notifyListeners();
 
       // ✅ Calculate total possible score from template
-      final maxScore = maxPossibleScore;
       final currentScore = totalScore;
-      final scoreString = '$currentScore/$maxScore'; // e.g., "3/12"
+      final scoreString = '$currentScore/$maxPossibleScore'; // e.g., "3/12"
 
       // 🔹 Only after all uploads succeeded, create inspection object
       final inspection = InspectionModel(
@@ -382,7 +381,7 @@ class ProviderControl extends ChangeNotifier {
             return MapEntry(
               cat.title,
               InspectionCategoryModel(
-                score: score.toString(),
+                score: "${score}/${cat.maxScore}",
                 photos: photos,
                 notes: notes,
               ),

@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/models/branch_model.dart';
 import 'package:provider/provider.dart';
-
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
@@ -573,7 +572,7 @@ class BranchDetailsSheet extends StatelessWidget {
 
   Widget _buildInspectionHistoryHeader() {
     return Text(
-      "Last 10 Inspections",
+      "Last 10 Inspections by you",
       style: TextStyle(
         color: AppColors.primaryRed,
         fontSize: 16,
@@ -641,7 +640,7 @@ class BranchDetailsSheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Inspected by: ${inspection.inspectorName}",
+                            "Inspected by You",
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -664,12 +663,12 @@ class BranchDetailsSheet extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: _getScoreColor(
+                        color: getScoreColor(
                           inspection.score,
                         ).withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: _getScoreColor(inspection.score),
+                          color: getScoreColor(inspection.score),
                         ),
                       ),
                       child: Row(
@@ -677,13 +676,13 @@ class BranchDetailsSheet extends StatelessWidget {
                           Icon(
                             Icons.star,
                             size: 14,
-                            color: _getScoreColor(inspection.score),
+                            color: getScoreColor(inspection.score),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             inspection.score,
                             style: TextStyle(
-                              color: _getScoreColor(inspection.score),
+                              color: getScoreColor(inspection.score),
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                             ),
@@ -831,17 +830,6 @@ class BranchDetailsSheet extends StatelessWidget {
       builder: (context) =>
           RouteManagementSheet(branch: branch, provider: prod),
     );
-  }
-
-  Color _getScoreColor(String scoreString) {
-    // Extract the first part before '/'
-    final parts = scoreString.split('/');
-    final score = double.tryParse(parts.first) ?? 0.0;
-
-    // Lower score = better (green), higher = worse (red)
-    if (score <= 3.0) return Colors.green;
-    if (score <= 6.0) return Colors.amber;
-    return Colors.red;
   }
 }
 
