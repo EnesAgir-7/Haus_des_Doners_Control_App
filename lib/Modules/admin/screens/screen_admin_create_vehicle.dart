@@ -323,7 +323,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
     final usagePercent = ((currentKm / maxKm) * 100).round();
 
     try {
-      await context.read<ProviderAdminFleet>().createVehicle(
+      await context.read<ProviderAdminVehicles>().createVehicle(
         plate: _plateController.text.trim(),
         model: _modelController.text.trim(),
         currentKm: currentKm,

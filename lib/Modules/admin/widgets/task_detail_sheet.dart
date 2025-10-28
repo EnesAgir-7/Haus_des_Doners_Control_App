@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 
 import '../../inspector/screens/screen_full_image.dart';
 import '../admin_providers/provider_admin_tasks.dart';
+import 'task_add_edit_widget.dart';
 
 class TaskDetailSheet extends StatefulWidget {
   final TaskModel task;
@@ -409,8 +410,70 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
                           priorityColor,
                           Icons.flag_rounded,
                         ),
+
+                        Spacer(),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _showTaskForm(context, _currentTask);
+                          },
+                          child: Text('Edit'),
+                        ),
+                        TextButton(
+                          child: Text('Delete'),
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Delete Task'),
+                                content: const Text(
+                                  'Are you sure you want to delete this task? This action cannot be undone.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(ctx).pop(false);
+                                    },
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(ctx).pop(true);
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text(
+                                      'Delete',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (confirm == true) {
+                              try {
+                                final tasksProvider = context
+                                    .read<ProviderAdminTasks>();
+                                final success = await tasksProvider.deleteTask(
+                                  _currentTask.id,
+                                );
+                                if (success) {
+                                  showSnakBarr(context, "Task Deleted");
+                                } else {
+                                  throw Exception('Failed to delete task');
+                                }
+                              } catch (e) {
+                                showSnakBarr(
+                                  context,
+                                  'Failed to delete task: $e',
+                                );
+                              }
+                            }
+                          },
+                        ),
                       ],
                     ),
+
                     const SizedBox(height: 16),
 
                     // Description Card
@@ -570,6 +633,18 @@ class _TaskDetailSheetState extends State<TaskDetailSheet> {
               padding: const EdgeInsets.all(16.0),
               child: _buildCommentInput(),
             ),
+    );
+  }
+
+  void _showTaskForm(BuildContext context, TaskModel? task) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppColors.lightBlack,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => TaskAddEditSheet(task: task, onSuccess: () {}),
     );
   }
 

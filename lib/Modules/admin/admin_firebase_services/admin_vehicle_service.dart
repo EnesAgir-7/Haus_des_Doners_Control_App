@@ -11,33 +11,18 @@ class AdminVehicleService {
   final String _collectionVehicles = Collections.vehicles;
   final AdminUserService _userService = AdminUserService();
   // Stream vehicle by inspector (real-time)
-  Stream<List<VehicleModel>?> streamVehicleByInspector(String inspectorId) {
+  Stream<List<VehicleModel>> streamAllVehicles() {
     return _db
         .collection(_collectionVehicles)
-        .where(VehicleFields.assignedInspectorId, isEqualTo: inspectorId)
+        .orderBy(VehicleFields.createdAt, descending: true)
         .snapshots()
-        .map((snapshot) {
-          if (snapshot.docs.isEmpty) return null;
-          return snapshot.docs
+        .map(
+          (snapshot) => snapshot.docs
               .map((doc) => VehicleModel.fromFirestore(doc))
-              .toList();
-        });
+              .toList(),
+        );
   }
 
-  // Get all vehicles (admin)
-  Future<List<VehicleModel>> getAllVehicles() async {
-    try {
-      final snapshot = await _db.collection(_collectionVehicles).get();
-      return snapshot.docs
-          .map((doc) => VehicleModel.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      print('Error getting all vehicles: $e');
-      return [];
-    }
-  }
-
-  // Get vehicles by status
   Future<List<VehicleModel>> getVehiclesByStatus(String status) async {
     try {
       final snapshot = await _db
@@ -70,6 +55,15 @@ class AdminVehicleService {
     final vehicleRef = _db.collection(_collectionVehicles).doc(vehicleId);
 
     try {
+      // Get current vehicle to access currentKm if needed
+      final vehicleDoc = await vehicleRef.get();
+      if (!vehicleDoc.exists) {
+        throw Exception('Vehicle not found');
+      }
+
+      final vehicleData = vehicleDoc.data()!;
+      final currentKmInDb = vehicleData[VehicleFields.currentKm] as int? ?? 0;
+
       // Build the update map for vehicle
       final Map<String, dynamic> vehicleUpdates = {};
 
@@ -77,11 +71,21 @@ class AdminVehicleService {
       vehicleUpdates[VehicleFields.maxKm] = maxKm;
 
       // 1️⃣ Handle kilometer changes
-      if (newKm != null) {
-        final remainingKm = maxKm - newKm;
-        final usagePercent = ((newKm / maxKm) * 100).round();
+      // IMPORTANT: Use newKm if provided, otherwise use current km from database
+      final kmToUse = newKm ?? currentKmInDb;
 
-        vehicleUpdates[VehicleFields.currentKm] = newKm;
+      // Always recalculate remaining and usage when maxKm changes OR when newKm is provided
+      if (newKm != null || maxKm != vehicleData[VehicleFields.maxKm]) {
+        final remainingKm = maxKm - kmToUse;
+        final usagePercent = ((kmToUse / maxKm) * 100).clamp(0, 100).toInt();
+
+        console(remainingKm, tag: "Remaining km");
+        console(maxKm, tag: "Max km");
+        console(kmToUse, tag: "Current km");
+
+        if (newKm != null) {
+          vehicleUpdates[VehicleFields.currentKm] = newKm;
+        }
         vehicleUpdates[VehicleFields.remainingKm] = remainingKm;
         vehicleUpdates[VehicleFields.usagePercent] = usagePercent;
       }
@@ -238,6 +242,42 @@ class AdminVehicleService {
       });
     } catch (e) {
       print('Error unassigning vehicle: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteVehicle({
+    required String vehicleId,
+    String? inspectorId,
+  }) async {
+    final batch = _db.batch();
+    final vehicleRef = _db.collection(_collectionVehicles).doc(vehicleId);
+
+    try {
+      // 1️⃣ Delete vehicle document
+      batch.delete(vehicleRef);
+
+      // 2️⃣ If assigned inspector exists, update their history
+      if (inspectorId != null && inspectorId.isNotEmpty) {
+        final inspectorHistoryRef = _db
+            .collection(Collections.inspectorStats)
+            .doc(inspectorId);
+
+        batch.update(inspectorHistoryRef, {
+          IHF.vehicleIds: FieldValue.arrayRemove([vehicleId]),
+          IHF.lastUpdated: Timestamp.now(),
+        });
+      }
+
+      // 3️⃣ Commit all batched changes together
+      await batch.commit();
+
+      console('✅ Vehicle $vehicleId deleted successfully');
+      if (inspectorId != null && inspectorId.isNotEmpty) {
+        console('🧾 Inspector $inspectorId history updated (vehicle removed)');
+      }
+    } catch (e, st) {
+      print('❌ Error deleting vehicle: $e\n$st');
       rethrow;
     }
   }

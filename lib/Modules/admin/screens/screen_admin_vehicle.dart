@@ -23,7 +23,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderAdminFleet>().loadData();
+      context.read<ProviderAdminVehicles>().initialize();
     });
   }
 
@@ -34,15 +34,10 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
   }
 
   void _navigateToCreateVehicle() async {
-    final result = await Navigator.push(
+    await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const ScreenAdminCreateVehicle()),
     );
-
-    // Refresh list if vehicle was created
-    if (result == true && mounted) {
-      context.read<ProviderAdminFleet>().loadData();
-    }
   }
 
   @override
@@ -101,7 +96,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Consumer<ProviderAdminFleet>(
+                Consumer<ProviderAdminVehicles>(
                   builder: (context, provider, child) {
                     return Text(
                       '${provider.vehicles.length} vehicles',
@@ -142,7 +137,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                   ),
                   onPressed: () {
                     _searchController.clear();
-                    context.read<ProviderAdminFleet>().setSearchQuery('');
+                    context.read<ProviderAdminVehicles>().setSearchQuery('');
                   },
                 )
               : null,
@@ -150,14 +145,14 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
         ),
         onChanged: (value) {
           setState(() {});
-          context.read<ProviderAdminFleet>().setSearchQuery(value);
+          context.read<ProviderAdminVehicles>().setSearchQuery(value);
         },
       ),
     );
   }
 
   Widget _buildVehicleList() {
-    return Consumer<ProviderAdminFleet>(
+    return Consumer<ProviderAdminVehicles>(
       builder: (context, provider, child) {
         if (provider.isLoading) {
           return Center(
@@ -216,7 +211,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
-                    onPressed: () => provider.loadData(),
+                    onPressed: () => provider.initialize(),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryRed,
                       foregroundColor: Colors.white,
@@ -304,30 +299,25 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
           );
         }
 
-        return RefreshIndicator(
-          onRefresh: () => provider.loadData(),
-          color: AppColors.primaryRed,
-          backgroundColor: AppColors.primaryDark,
-          child: ListView.builder(
-            key: PageStorageKey("vehiclesListAdmin"),
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-            itemCount: vehicles.length,
-            itemBuilder: (context, index) {
-              final vehicle = vehicles[index];
-              return VehicleListCard(
-                vehicle: vehicle,
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ScreenAdminVehicleDetails(vehicle: vehicle),
-                    ),
-                  );
-                },
-              );
-            },
-          ),
+        return ListView.builder(
+          key: PageStorageKey("vehiclesListAdmin"),
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+          itemCount: vehicles.length,
+          itemBuilder: (context, index) {
+            final vehicle = vehicles[index];
+            return VehicleListCard(
+              vehicle: vehicle,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ScreenAdminVehicleDetails(vehicle: vehicle),
+                  ),
+                );
+              },
+            );
+          },
         );
       },
     );

@@ -352,67 +352,6 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
     }
   }
 
-  Future<void> _deleteTask() async {
-    if (!isUpdateMode) return;
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.lightBlack,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Delete Task',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-        content: Text(
-          'Are you sure you want to delete this task? This action cannot be undone.',
-          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      setState(() => _isLoading = true);
-
-      try {
-        final tasksProvider = context.read<ProviderAdminTasks>();
-        final success = await tasksProvider.deleteTask(widget.task!.id);
-
-        if (success) {
-          Navigator.pop(context);
-          showSnakBarr(context, 'Task deleted successfully');
-          widget.onSuccess?.call();
-        } else {
-          showSnakBarr(context, 'Failed to delete task');
-        }
-      } catch (e) {
-        showSnakBarr(context, 'Error deleting task: ${e.toString()}');
-      } finally {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
   Color _getPriorityColor(String priority) {
     switch (priority) {
       case 'high':
@@ -437,38 +376,20 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  width: 1,
-                ),
+          SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              isUpdateMode ? 'Edit Task' : 'Create Task',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                letterSpacing: -0.5,
               ),
-            ),
-            child: Row(
-              children: [
-                Text(
-                  isUpdateMode ? 'Edit Task' : 'Create Task',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const Spacer(),
-                if (isUpdateMode)
-                  IconButton(
-                    onPressed: _isLoading ? null : _deleteTask,
-                    icon: const Icon(Icons.delete_rounded, color: Colors.red),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-              ],
             ),
           ),
 

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
+import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../models/task_model.dart';
 import '../../admin/admin_firebase_services/admin_tasks_service.dart';
@@ -33,7 +34,7 @@ class ProviderAdminTasks extends ChangeNotifier {
   final TextEditingController commentController = TextEditingController();
   List<File> _commentPhotos = [];
 
-  List<TaskModel> get allTasks => _allTasks; // For admin view
+  List<TaskModel> get allTasks => _allTasks;
   TaskModel? get selectedTask => _selectedTask;
   bool get isLoading => _isLoading;
   bool get isUpdating => _isUpdating;
@@ -46,22 +47,40 @@ class ProviderAdminTasks extends ChangeNotifier {
   List<File> get commentPhotos => _commentPhotos;
 
   StreamSubscription<List<TaskModel>>? _tasksSubscription;
+  String? _currentInspectorId;
 
-  /// Initialize provider with Firestore stream
   Future<void> initialize() async {
-    await loadAllTasks();
+    await initializeTasksStream();
   }
 
-  Future<void> loadAllTasks() async {
+  initializeTasksStream() {
+    final inspectorId = loggedInUser!.id;
+
+    if (_tasksSubscription != null && _currentInspectorId == inspectorId) {
+      console("Same user and stream is On");
+      return;
+    }
+    _currentInspectorId = inspectorId;
+    _tasksSubscription?.cancel();
+
     _isLoading = true;
     notifyListeners();
 
     try {
-      _allTasks = await _taskAdminService.getAllTasks();
-      _isLoading = false;
-      notifyListeners();
+      _tasksSubscription = _taskAdminService
+          .streamAllTasks(inspectorId)
+          .listen(
+            (tasks) {
+              _allTasks = tasks;
+              _isLoading = false;
+              notifyListeners();
+            },
+            onError: (error) {
+              _isLoading = false;
+              notifyListeners();
+            },
+          );
     } catch (e) {
-      _errorMessage = 'Error loading all tasks: $e';
       _isLoading = false;
       notifyListeners();
     }
@@ -73,10 +92,6 @@ class ProviderAdminTasks extends ChangeNotifier {
         taskId,
         commentIds,
       );
-
-      if (success) {
-        await loadAllTasks();
-      }
 
       return success;
     } catch (e) {
@@ -130,8 +145,6 @@ class ProviderAdminTasks extends ChangeNotifier {
 
       // Service handles all batch operations and history updates
       await _taskAdminService.updateTask(taskId, data);
-
-      await loadAllTasks();
 
       _isUpdating = false;
       notifyListeners();
@@ -230,10 +243,6 @@ class ProviderAdminTasks extends ChangeNotifier {
     }
   }
 
-  Future<void> refresh() async {
-    loadAllTasks();
-  }
-
   Future<bool> createTask({
     required String title,
     required String description,
@@ -270,8 +279,6 @@ class ProviderAdminTasks extends ChangeNotifier {
       // Service handles all batch operations and history updates
       await _taskAdminService.createTask(task);
 
-      await loadAllTasks();
-
       _isUpdating = false;
       notifyListeners();
       return true;
@@ -286,19 +293,14 @@ class ProviderAdminTasks extends ChangeNotifier {
   Future<bool> deleteTask(String taskId) async {
     try {
       _isUpdating = true;
-      _errorMessage = null;
       notifyListeners();
 
-      // Service handles all batch operations and history updates
       await _taskAdminService.deleteTask(taskId);
-
-      await loadAllTasks();
 
       _isUpdating = false;
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = 'Error deleting task: $e';
       _isUpdating = false;
       notifyListeners();
       return false;

@@ -65,11 +65,13 @@ class AdminBranchService {
         BranchFields.address: branch.address,
         BranchFields.contactName: branch.contactName,
         BranchFields.contactPhone: branch.contactPhone,
-        BranchFields.updatedAt: Timestamp.fromDate(DateTime.now()),
+        BranchFields.region: branch.region,
+        BranchFields.gps: branch.gps,
+        BranchFields.updatedAt: Timestamp.now(),
       });
-      console('Branch updated successfully');
+      console('✅ Branch updated successfully');
     } catch (e) {
-      print("Error updating branch: $e");
+      print("❌ Error updating branch: $e");
       rethrow;
     }
   }
@@ -182,6 +184,39 @@ class AdminBranchService {
       console('✅ Branch $branchId unassigned successfully and history updated');
     } catch (e, st) {
       print("❌ Error unassigning branch: $e\n$st");
+      rethrow;
+    }
+  }
+
+  Future<void> deleteBranch({
+    required String branchId,
+    required String? inspectorId,
+  }) async {
+    final firestore = FirebaseFirestore.instance;
+    final batch = firestore.batch();
+    final branchRef = firestore.collection(_collectionBranches).doc(branchId);
+
+    try {
+      // 1️⃣ Delete the branch document
+      batch.delete(branchRef);
+
+      // 2️⃣ If an inspector was assigned, update their history
+      if (inspectorId != null && inspectorId.isNotEmpty) {
+        await _userService.updateInspectorHistoryBatch(
+          batch: batch,
+          inspectorId: inspectorId,
+          updates: {
+            IHF.branchesIds: FieldValue.arrayRemove([branchId]),
+          },
+        );
+      }
+
+      // 3️⃣ Commit batch
+      await batch.commit();
+
+      console('✅ Branch $branchId deleted successfully');
+    } catch (e, st) {
+      print("❌ Error deleting branch $branchId: $e\n$st");
       rethrow;
     }
   }

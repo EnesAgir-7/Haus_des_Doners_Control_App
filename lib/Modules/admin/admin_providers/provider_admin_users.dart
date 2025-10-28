@@ -25,7 +25,6 @@ class ProviderAdminUsers extends ChangeNotifier {
 
   List<UserModel> _inspectors = [];
   List<BranchModel> _unAssignedBranches = [];
-  List<VehicleModel> _allVehicles = [];
   String? _currentUserId;
   InspectorHistoryModel? get currentMonthStats => _currentMonthStats;
   InspectorAllMonthsData? get inspectorAllData => _inspectorAllData;
@@ -191,53 +190,11 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
-  // Get unassigned vehicles
-  Future<List<VehicleModel>> getUnassignedVehicles() async {
-    try {
-      if (_allVehicles.isEmpty) {
-        _allVehicles = await _vehicleService.getAllVehicles();
-      }
-      return _allVehicles
-          .where((vehicle) => vehicle.assignedInspector == null)
-          .toList();
-    } catch (e) {
-      rethrow;
-    }
-  }
 
-  // Assign vehicle to inspector
-  Future<void> assignVehicleToInspector(
-    String inspectorId,
-    String vehicleId,
-  ) async {
-    try {
-      final inspector = _inspectors.firstWhere((i) => i.id == inspectorId);
 
-      await _vehicleService.assignVehicleToInspector(
-        vehicleId,
-        inspector.id,
-        inspector.name,
-      );
 
-      _allVehicles = await _vehicleService.getAllVehicles();
-      notifyListeners();
-    } catch (e) {
-      rethrow;
-    }
-  }
 
-  // Unassign vehicle from inspector
-  Future<void> unassignVehicleFromInspector(String vehicleId) async {
-    try {
-      await _vehicleService.unassignVehicle(vehicleId);
 
-      // Refresh vehicles list
-      _allVehicles = await _vehicleService.getAllVehicles();
-      notifyListeners();
-    } catch (e) {
-      rethrow;
-    }
-  }
 
   // Create new user (inspector or admin)
   Future<void> createUser({

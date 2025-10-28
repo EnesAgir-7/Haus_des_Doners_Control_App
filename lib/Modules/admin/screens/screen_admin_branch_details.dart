@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
+import 'package:haus_des_control/Modules/admin/widgets/admin_location_picker.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/extensions.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +17,7 @@ import '../../inspector/widgets/app_button.dart';
 import '../../inspector/widgets/custom_toast.dart';
 import '../admin_firebase_services/admin_template_service.dart';
 import '../admin_providers/provider_admin_branches.dart';
+import '../widgets/admin_branch_chart.dart';
 import '../widgets/admin_template_selection_sheet.dart';
 import '../widgets/widgets_admin_branch_details.dart';
 import 'screen_admin_inspections.dart';
@@ -39,6 +43,10 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   bool _isLoadingDetails = true;
   String? _detailsError;
 
+  // Location data
+  double? _latitude;
+  double? _longitude;
+
   final TemplateHelper _templateHelper = TemplateHelper();
 
   @override
@@ -53,6 +61,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     _contactPhoneController = TextEditingController(
       text: widget.branch.contactPhone,
     );
+
+    // Initialize lat/lng if available
+    _latitude = widget.branch.gps.latitude;
+    _longitude = widget.branch.gps.longitude;
+
     _loadBranchDetails();
   }
 
@@ -63,13 +76,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         _detailsError = null;
       });
 
-      // If you need to fetch additional details from provider
-      // final provider = context.read<ProviderAdminBranches>();
-      // await provider.loadBranchDetails(widget.branch.id);
-
-      await Future.delayed(
-        const Duration(milliseconds: 500),
-      ); // Simulate loading
+      await Future.delayed(const Duration(milliseconds: 500));
 
       if (mounted) {
         setState(() => _isLoadingDetails = false);
@@ -101,6 +108,8 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
       _regionController.text = widget.branch.region ?? '';
       _contactNameController.text = widget.branch.contactName;
       _contactPhoneController.text = widget.branch.contactPhone;
+      _latitude = widget.branch.gps.latitude;
+      _longitude = widget.branch.gps.longitude;
     }
     setState(() => _isEditing = !_isEditing);
   }
@@ -114,6 +123,9 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         region: _regionController.text.isEmpty ? null : _regionController.text,
         contactName: _contactNameController.text,
         contactPhone: _contactPhoneController.text,
+        gps: (_latitude != null && _longitude != null)
+            ? GeoPoint(_latitude!, _longitude!)
+            : widget.branch.gps,
       );
 
       await provider.updateBranch(updatedBranch);
@@ -123,17 +135,210 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         showSnakBarr(context, LocaleKeys.inspection_saved_successfully.tr());
       }
     } catch (e) {
-      if (mounted) {
-        showSnakBarr(context, 'Error: $e');
+      if (mounted) showSnakBarr(context, 'Error: $e');
+    }
+  }
+
+
+  Future<void> _pickLocationFromMap() async {
+    final result = await showLocationPickerDialog(
+      context,
+      initialLatitude: _latitude,
+      initialLongitude: _longitude,
+      googleMapsApiKey: dotenv.env['GOOGLE_MAPS_KEY']!,
+    );
+
+    if (result != null) {
+      setState(() {
+        _latitude = result['latitude'];
+        _longitude = result['longitude'];
+        _regionController.text = result['address'].toString();
+      });
+    }
+  }
+
+  Future<void> _deleteBranch() async {
+    final nameController = TextEditingController();
+
+    // 🟡 Check if branch is already in inspector's route
+    if (widget.branch.stop != null) {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: AppColors.lightBlack,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.amber, size: 28),
+              const SizedBox(width: 12),
+              const Text(
+                'Branch in Route',
+                style: TextStyle(color: Colors.white),
+              ),
+            ],
+          ),
+          content: Text(
+            'This branch is currently part of ${widget.branch.assignedInspector!.name} route.\n\n'
+            'It cannot be deleted until the route is completed or removed.',
+            style: TextStyle(color: Colors.white70, fontSize: 14),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK', style: TextStyle(color: Colors.white70)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    // 🟢 Normal delete flow if branch.stop == null
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.lightBlack,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+            const SizedBox(width: 12),
+            const Text('Delete Branch', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'This action cannot be undone. To confirm, please type the branch name:',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              widget.branch.name,
+              style: TextStyle(
+                color: AppColors.primaryRed,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: nameController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Enter branch name',
+                hintStyle: const TextStyle(color: Colors.white38),
+                filled: true,
+                fillColor: AppColors.primaryDark,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.white24),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: Colors.white24),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: AppColors.primaryRed),
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          Consumer<ProviderAdminBranches>(
+            builder: (context, provider, _) {
+              return TextButton(
+                onPressed: provider.isLoading
+                    ? null
+                    : () {
+                        if (nameController.text.trim() ==
+                            widget.branch.name.trim()) {
+                          Navigator.pop(context, true);
+                        } else {
+                          showSnakBarr(context, 'Branch name does not match');
+                        }
+                      },
+                child: provider.isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.red,
+                        ),
+                      )
+                    : const Text('Delete', style: TextStyle(color: Colors.red)),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      final provider = context.read<ProviderAdminBranches>();
+      try {
+        await provider.deleteBranch(
+          branchId: widget.branch.id,
+          inspectorId: widget.branch.assignedInspector?.id,
+        );
+        if (mounted) {
+          Navigator.pop(context);
+          showSnakBarr(context, 'Branch deleted successfully');
+        }
+      } catch (e) {
+        if (mounted) {
+          showSnakBarr(context, 'Error deleting branch: $e');
+        }
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width > 600;
+
     return Scaffold(
       appBar: CustomAppBar(
         actions: [
+          if (!_isEditing)
+            PopupMenuButton<String>(
+              icon: Icon(Icons.more_vert, color: Colors.white),
+              color: AppColors.lightBlack,
+              onSelected: (value) {
+                if (value == 'delete') {
+                  _deleteBranch();
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Delete Branch',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           IconButton(
             icon: Icon(
               _isEditing ? Icons.close : Icons.edit,
@@ -154,7 +359,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                             color: Colors.white,
                           ),
                         )
-                      : const Icon(Icons.save, color: Colors.white),
+                      : const Icon(Icons.check, color: Colors.white),
                   onPressed: provider.isLoading ? null : _saveChanges,
                 );
               },
@@ -175,7 +380,9 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ),
         ),
         child: SafeArea(
-          child: _isLoadingDetails ? _buildLoadingState() : _buildContent(),
+          child: _isLoadingDetails
+              ? _buildLoadingState()
+              : _buildContent(isTablet),
         ),
       ),
     );
@@ -187,7 +394,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(bool isTablet) {
     if (_detailsError != null) {
       return _buildErrorState();
     }
@@ -199,34 +406,721 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
       child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
-          // _buildAppBar(),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(isTablet ? 24 : 16),
+              child: isTablet ? _buildTabletLayout() : _buildMobileLayout(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildCompactHeader(),
+        const SizedBox(height: 16),
+        _buildStatsGrid(),
+        const SizedBox(height: 16),
+        _buildQuickInfoCard(),
+        const SizedBox(height: 16),
+        _buildContactCard(),
+        const SizedBox(height: 16),
+        if (!widget.branch.haveNoScores) ...[
+          buildBranchPerformanceChart(widget.branch.last12MonthsScores),
+          const SizedBox(height: 16),
+        ],
+        _buildInspectorCard(),
+        const SizedBox(height: 80),
+      ],
+    );
+  }
+
+  Widget _buildTabletLayout() {
+    return Column(
+      children: [
+        _buildCompactHeader(),
+        const SizedBox(height: 20),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildHeaderSection(),
-                  const SizedBox(height: 16),
-                  _buildStatsCards(),
-                  const SizedBox(height: 16),
-                  _buildBasicInfoSection(),
-                  const SizedBox(height: 16),
-                  const SizedBox(height: 16),
-                  _buildContactInfoSection(),
-                  const SizedBox(height: 16),
-                  const SizedBox(height: 16),
-                  _buildInspectionHistorySection(),
-                  const SizedBox(height: 16),
-                  const SizedBox(height: 16),
-                  if (!widget.branch.haveNoScores) ...[
-                    _buildPerformanceChart(),
-                    const SizedBox(height: 16),
-                  ],
-                  _buildAssignedInspectorSection(),
-                  const SizedBox(height: 80),
+                  _buildStatsGrid(),
+                  const SizedBox(height: 20),
+                  if (!widget.branch.haveNoScores)
+                    buildBranchPerformanceChart(
+                      widget.branch.last12MonthsScores,
+                    ),
                 ],
               ),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  _buildQuickInfoCard(),
+                  const SizedBox(height: 20),
+                  _buildContactCard(),
+                  const SizedBox(height: 20),
+                  _buildInspectorCard(),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 80),
+      ],
+    );
+  }
+
+  Widget _buildCompactHeader() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryRed.withValues(alpha: 0.15),
+            AppColors.lightBlack,
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primaryRed.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryRed.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Icons.business,
+                  color: AppColors.primaryRed,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.branch.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.branch.address,
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 13,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              _buildCompactStatusBadge(),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactStatusBadge() {
+    Color color;
+    IconData icon;
+
+    switch (widget.branch.status.toLowerCase()) {
+      case 'active':
+        color = Colors.green;
+        icon = Icons.check_circle;
+        break;
+      case 'inactive':
+        color = Colors.grey;
+        icon = Icons.cancel;
+        break;
+      case 'pending':
+        color = Colors.orange;
+        icon = Icons.access_time;
+        break;
+      default:
+        color = Colors.grey;
+        icon = Icons.info;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        shape: BoxShape.circle,
+        border: Border.all(color: color, width: 2),
+      ),
+      child: Icon(icon, size: 20, color: color),
+    );
+  }
+
+  Widget _buildStatsGrid() {
+    final performancePercent = 100 - widget.branch.averageScore;
+
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
+      childAspectRatio: 1.3,
+      children: [
+        _buildCompactStatCard(
+          label: LocaleKeys.total_inspections.tr(),
+          value: widget.branch.totalInspections.toString(),
+          icon: Icons.fact_check_outlined,
+          color: Colors.blue,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ScreenAdminInspections(branch: widget.branch),
+            ),
+          ),
+        ),
+        _buildCompactStatCard(
+          label: 'Performance',
+          value: '${performancePercent.toStringAsFixed(1)}%',
+          icon: Icons.trending_up,
+          color: getBranchPerformanceColor(performancePercent),
+        ),
+        _buildCompactStatCard(
+          label: 'Last Inspection',
+          value: widget.branch.daysSinceLastInspection != null
+              ? '${widget.branch.daysSinceLastInspection}d'
+              : 'Never',
+          icon: Icons.schedule,
+          color: widget.branch.daysSinceLastInspection != null
+              ? _getUrgencyColor(widget.branch.daysSinceLastInspection!)
+              : Colors.grey,
+        ),
+        _buildCompactStatCard(
+          label: 'Last Score',
+          value: widget.branch.lastInspectionScore ?? 'N/A',
+          icon: Icons.star,
+          color: widget.branch.lastInspectionScore != null
+              ? _getScoreColor(widget.branch.lastInspectionScore!)
+              : Colors.grey,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompactStatCard({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.lightBlack,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                color: color,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.white60, fontSize: 11),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickInfoCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.lightBlack,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.info_outline, color: AppColors.primaryRed, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Branch Info',
+                style: TextStyle(
+                  color: AppColors.primaryRed,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildCompactField(
+            label: LocaleKeys.subsidiaries.tr(),
+            controller: _nameController,
+            enabled: _isEditing,
+            icon: Icons.business_outlined,
+          ),
+          const SizedBox(height: 12),
+          _buildCompactField(
+            label: LocaleKeys.region.tr(),
+            controller: _addressController,
+            enabled: _isEditing,
+            icon: Icons.location_city,
+          ),
+          const SizedBox(height: 12),
+          // Location Picker
+          !_isEditing
+              ? SizedBox.shrink()
+              : InkWell(
+                  onTap: _isEditing ? _pickLocationFromMap : null,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _isEditing
+                          ? AppColors.primaryDark.withValues(alpha: 0.6)
+                          : AppColors.primaryDark.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: _isEditing
+                            ? AppColors.primaryRed.withValues(alpha: 0.4)
+                            : Colors.white.withValues(alpha: 0.1),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.map,
+                          color: _isEditing
+                              ? AppColors.primaryRed
+                              : Colors.white38,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Location',
+                                style: TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 11,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                _regionController.text.isEmpty
+                                    ? 'Tap to pick from map'
+                                    : _regionController.text,
+                                style: TextStyle(
+                                  color: _isEditing
+                                      ? Colors.white
+                                      : Colors.white70,
+                                  fontSize: 13,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_isEditing)
+                          Icon(
+                            Icons.chevron_right,
+                            color: AppColors.primaryRed,
+                            size: 20,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+          const SizedBox(height: 12),
+          // Template Selection
+          InkWell(
+            onTap: _showTemplateSelectionSheet,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primaryDark.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.description_outlined,
+                    color: Colors.white54,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Questionnaire',
+                          style: TextStyle(color: Colors.white54, fontSize: 11),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.branch.templateName,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: AppColors.primaryRed,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.lightBlack,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.contact_phone, color: AppColors.primaryRed, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Contact',
+                style: TextStyle(
+                  color: AppColors.primaryRed,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildCompactField(
+            label: LocaleKeys.branch_representative.tr(),
+            controller: _contactNameController,
+            enabled: _isEditing,
+            icon: Icons.person_outline,
+          ),
+          const SizedBox(height: 12),
+          _buildCompactField(
+            label: 'Phone',
+            controller: _contactPhoneController,
+            enabled: _isEditing,
+            icon: Icons.phone_outlined,
+            keyboardType: TextInputType.phone,
+          ),
+          const SizedBox(height: 12),
+          _buildInfoRow(
+            'Created',
+            widget.branch.createdAt.getFormattedDateTime(),
+            Icons.event,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInspectorCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.lightBlack,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.person_outline, color: AppColors.primaryRed, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                LocaleKeys.assigned_to.tr(),
+                style: TextStyle(
+                  color: AppColors.primaryRed,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (widget.branch.assignedInspector == null)
+            _buildEmptyInspector()
+          else
+            _buildAssignedInspector(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyInspector() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppColors.primaryDark.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Column(
+            children: [
+              Icon(Icons.person_off_outlined, size: 40, color: Colors.white24),
+              const SizedBox(height: 8),
+              Text(
+                LocaleKeys.unassigned.tr(),
+                style: TextStyle(color: Colors.white54, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: AppButton(
+            text: 'Assign Inspector',
+            onPressed: _showAssignInspectorDialog,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            borderRadius: 10,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAssignedInspector() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppColors.primaryDark.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: AppColors.primaryRed,
+                child: Text(
+                  widget.branch.assignedInspector!.name[0].toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.branch.assignedInspector!.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              if (widget.branch.stop != null)
+                Tooltip(
+                  message: 'In Route',
+                  child: Icon(Icons.route, color: Colors.green, size: 20),
+                )
+              else
+                IconButton(
+                  icon: Icon(Icons.close, color: Colors.red, size: 20),
+                  onPressed: _unassignInspector,
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints(),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (widget.branch.stop == null)
+          SizedBox(
+            width: double.infinity,
+            child: AppButton(
+              text: 'Change Inspector',
+              onPressed: _showAssignInspectorDialog,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              borderRadius: 10,
+            ),
+          )
+        else
+          Column(
+            children: [
+              Text(
+                '⚠️ Branch is in an active route',
+                style: TextStyle(
+                  color: Colors.orange,
+                  fontSize: 12,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _showRouteStopInfo(widget.branch.stop!),
+                  icon: Icon(Icons.route, size: 18),
+                  label: Text('View Route'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white70,
+                    side: BorderSide(color: Colors.white24),
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
+
+  Widget _buildCompactField({
+    required String label,
+    required TextEditingController controller,
+    required bool enabled,
+    required IconData icon,
+    TextInputType? keyboardType,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: enabled
+            ? AppColors.primaryDark.withValues(alpha: 0.6)
+            : AppColors.primaryDark.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+        // border: Border.all(
+        //   color: enabled
+        //       ? AppColors.primaryRed.withValues(alpha: 0.3)
+        //       : Colors.white.withValues(alpha: 0.1),
+        // ),
+      ),
+      child: TextField(
+        controller: controller,
+        enabled: enabled,
+        keyboardType: keyboardType,
+        style: TextStyle(
+          color: enabled ? Colors.white : Colors.white70,
+          fontSize: 14,
+        ),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            color: enabled ? AppColors.primaryRed : Colors.white54,
+            fontSize: 12,
+          ),
+          prefixIcon: Icon(
+            icon,
+            color: enabled ? AppColors.primaryRed : Colors.white38,
+            size: 20,
+          ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 12,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.primaryDark.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white38, size: 18),
+          const SizedBox(width: 12),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white60, fontSize: 12),
+          ),
+          const Spacer(),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -271,781 +1165,37 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     );
   }
 
-  Widget _buildHeaderSection() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  widget.branch.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on_outlined,
-                      color: Colors.white70,
-                      size: 14,
-                    ),
-                    const SizedBox(width: 4),
-                    Flexible(
-                      child: Text(
-                        widget.branch.address,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                if (widget.branch.region != null)
-                  Text(
-                    widget.branch.region!,
-                    style: const TextStyle(color: Colors.white54, fontSize: 11),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          _buildStatusBadge(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge() {
-    Color color;
-    String text;
-
-    switch (widget.branch.status.toLowerCase()) {
-      case 'active':
-        color = Colors.green;
-        text = 'Active';
-        break;
-      case 'inactive':
-        color = Colors.grey;
-        text = 'Inactive';
-        break;
-      case 'pending':
-        color = Colors.orange;
-        text = 'Pending';
-        break;
-      default:
-        color = Colors.grey;
-        text = widget.branch.status;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            widget.branch.status.toLowerCase() == 'active'
-                ? Icons.check_circle
-                : Icons.info,
-            size: 16,
-            color: color,
-          ),
-          const SizedBox(width: 6),
-          Text(
-            text.toUpperCase(),
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatsCards() {
-    final performancePercent = widget.branch.averageScore;
-    final reversedPercent = 100 - performancePercent;
-
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                ontap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          ScreenAdminInspections(branch: widget.branch),
-                    ),
-                  );
-                },
-                label: LocaleKeys.total_inspections.tr(),
-                value: widget.branch.totalInspections.toString(),
-                icon: Icons.fact_check_outlined,
-                color: Colors.blue,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                label: 'Performance',
-                value: '${reversedPercent.toStringAsFixed(1)}%',
-                icon: Icons.trending_up,
-                color: _getPerformanceColor(reversedPercent),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                label: 'Last Inspection',
-                value: widget.branch.lastInspectionDate != null
-                    ? '${widget.branch.daysSinceLastInspection} days ago'
-                    : 'Never',
-                icon: Icons.history,
-                color: widget.branch.daysSinceLastInspection != null
-                    ? _getUrgencyColor(widget.branch.daysSinceLastInspection!)
-                    : Colors.grey,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                label: 'Last Score',
-                value: widget.branch.lastInspectionScore ?? 'N/A',
-                icon: Icons.star_outline,
-                color: widget.branch.lastInspectionScore != null
-                    ? _getScoreColor(widget.branch.lastInspectionScore!)
-                    : Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatCard({
-    required String label,
-    required String value,
-    required IconData icon,
-    required Color color,
-    VoidCallback? ontap,
-  }) {
-    return GestureDetector(
-      onTap: ontap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.lightRed,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white24),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.white70, fontSize: 11),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBasicInfoSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.info_outline, color: AppColors.primaryRed, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              LocaleKeys.about_the_branch.tr(),
-              style: TextStyle(
-                color: AppColors.primaryRed,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _buildInfoField(
-          label: LocaleKeys.subsidiaries.tr(),
-          controller: _nameController,
-          enabled: _isEditing,
-          icon: Icons.business,
-        ),
-        const SizedBox(height: 12),
-        _buildInfoField(
-          label: LocaleKeys.region.tr(),
-          controller: _addressController,
-          enabled: _isEditing,
-          icon: Icons.location_on,
-        ),
-
-        const SizedBox(height: 12),
-        GestureDetector(
-          onTap: () {
-            _showTemplateSelectionSheet();
-          },
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.lightBlack,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white24),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.description_outlined,
-                  color: Colors.white54,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  "Questionnaire",
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                ),
-                const Spacer(),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      widget.branch.templateName,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      "Change Questionnaire",
-                      style: const TextStyle(
-                        color: AppColors.primaryRed,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  // 1. Define the handler function (if not already defined):
   void _showTemplateSelectionSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.primaryDark,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return TemplateSelectionSheet(
           templateHelper: _templateHelper,
           onTemplateSelected: (template) async {
             final provider = context.read<ProviderAdminBranches>();
-            print('Template Selected: ${template.id}');
 
             final bool done = await provider.updateBrachTemplate(
               branchId: widget.branch.id,
               templateId: template.id,
               templateName: template.name,
             );
+
             if (mounted && done) {
               widget.branch.templateId = template.id;
               widget.branch.templateName = template.name;
-              _loadBranchDetails();
-
-              showSnakBarr(
-                context,
-                "Branch template changed to: ${template.name}",
-              );
-            } else {
-              showSnakBarr(context, "Error while changing the template");
+              setState(() {});
+              showSnakBarr(context, "Template updated successfully");
+            } else if (mounted) {
+              showSnakBarr(context, "Error updating template");
             }
           },
         );
       },
-    );
-  }
-
-  Widget _buildContactInfoSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              Icons.contacts_outlined,
-              color: AppColors.primaryRed,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              LocaleKeys.branch_information.tr(),
-              style: TextStyle(
-                color: AppColors.primaryRed,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        _buildInfoField(
-          label: LocaleKeys.branch_representative.tr(),
-          controller: _contactNameController,
-          enabled: _isEditing,
-          icon: Icons.person_outline,
-        ),
-        const SizedBox(height: 12),
-        _buildInfoField(
-          label: 'Phone',
-          controller: _contactPhoneController,
-          enabled: _isEditing,
-          icon: Icons.phone_outlined,
-          keyboardType: TextInputType.phone,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInspectionHistorySection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.history, color: AppColors.primaryRed, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              LocaleKeys.inspection_details.tr(),
-              style: TextStyle(
-                color: AppColors.primaryRed,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (widget.branch.lastInspectionDate != null) ...[
-          _buildInfoTile(
-            label: LocaleKeys.last_inspected.tr(),
-            value: widget.branch.lastInspectionDate!.getFormattedDateTime(),
-            icon: Icons.calendar_today,
-          ),
-          const SizedBox(height: 12),
-          _buildInfoTile(
-            label: 'Days Since Last Inspection',
-            value: '${widget.branch.daysSinceLastInspection} days',
-            icon: Icons.timeline,
-            valueColor: _getUrgencyColor(
-              widget.branch.daysSinceLastInspection ?? 0,
-            ),
-          ),
-        ] else
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.lightBlack,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white24),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.info_outline, color: Colors.white54, size: 20),
-                const SizedBox(width: 12),
-                Text(
-                  'No inspection yet',
-                  style: TextStyle(color: Colors.white54, fontSize: 14),
-                ),
-              ],
-            ),
-          ),
-        const SizedBox(height: 12),
-        _buildInfoTile(
-          label: LocaleKeys.assigned_at.tr(),
-          value: widget.branch.createdAt.getFormattedDateTime(),
-
-          icon: Icons.event,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPerformanceChart() {
-    // Parse scores and extract actual values
-    final List<Map<String, dynamic>> parsedScores = [];
-    double maxActualScore = 0;
-
-    for (var s in widget.branch.last12MonthsScores!) {
-      if (s.contains('/')) {
-        final parts = s.split('/');
-        final score = double.tryParse(parts.first.trim()) ?? 0.0;
-        final max = double.tryParse(parts.last.trim()) ?? 100.0;
-        final percentage = (max > 0) ? (score / max) * 100 : 0.0;
-
-        parsedScores.add({
-          'score': score,
-          'maxScore': max,
-          'percentage': percentage,
-          'displayText': s,
-        });
-
-        if (score > maxActualScore) maxActualScore = score;
-      } else {
-        final score = double.tryParse(s) ?? 0.0;
-        parsedScores.add({
-          'score': score,
-          'maxScore': 100.0,
-          'percentage': score,
-          'displayText': score.toStringAsFixed(0),
-        });
-
-        if (score > maxActualScore) maxActualScore = score;
-      }
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(Icons.bar_chart, color: AppColors.primaryRed, size: 20),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Last 12 Inspections',
-                style: TextStyle(
-                  color: AppColors.primaryRed,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppColors.lightBlack,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white24),
-          ),
-          child: Column(
-            children: [
-              // Max score indicator
-              if (maxActualScore > 0)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Oldest ← → Latest',
-                        style: TextStyle(
-                          color: Colors.white54,
-                          fontSize: 10,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                      Text(
-                        'Scale: 0-${maxActualScore.toStringAsFixed(0)}',
-                        style: TextStyle(color: Colors.white54, fontSize: 11),
-                      ),
-                    ],
-                  ),
-                ),
-              // Chart with SingleChildScrollView to prevent overflow
-              SizedBox(
-                height: 240,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.vertical,
-                  physics: NeverScrollableScrollPhysics(),
-                  child: SizedBox(
-                    height: 240,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(parsedScores.length, (index) {
-                        final item = parsedScores[index];
-                        final score = item['score'] as double;
-                        final maxScore = item['maxScore'] as double;
-                        final percentage = item['percentage'] as double;
-
-                        final invertedPercentage = 100 - percentage;
-                        final height = (invertedPercentage / 100) * 160;
-
-                        // Color based on percentage (lower score = green)
-                        final color = _getPerformanceColor(invertedPercentage);
-
-                        // Calculate month number (1 = oldest, 12 = latest)
-                        final monthNumber = index + 1;
-
-                        return Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 2),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Score label
-                                if (score > 0)
-                                  Container(
-                                    height: 32,
-                                    alignment: Alignment.bottomCenter,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          score.toStringAsFixed(0),
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 9,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          maxLines: 1,
-                                        ),
-                                        if (maxScore != 100)
-                                          Text(
-                                            '/${maxScore.toStringAsFixed(0)}',
-                                            style: TextStyle(
-                                              color: Colors.white54,
-                                              fontSize: 7,
-                                            ),
-                                            maxLines: 1,
-                                          ),
-                                      ],
-                                    ),
-                                  )
-                                else
-                                  SizedBox(height: 32),
-
-                                const SizedBox(height: 4),
-
-                                // Bar
-                                Container(
-                                  height: height.clamp(4.0, 160.0).toDouble(),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        color,
-                                        color.withValues(alpha: 0.7),
-                                      ],
-                                    ),
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(4),
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 6),
-
-                                // Month number label
-                                Container(
-                                  height: 20,
-                                  alignment: Alignment.topCenter,
-                                  child: Text(
-                                    monthNumber.toString(),
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                    maxLines: 1,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Legend with wrapped layout
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                children: [
-                  _buildLegendItem(Colors.green, 'Excellent'),
-                  _buildLegendItem(Colors.lightGreen, 'Good'),
-                  _buildLegendItem(Colors.orange, 'Average'),
-                  _buildLegendItem(Colors.red, 'Poor'),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLegendItem(Color color, String label) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: TextStyle(color: Colors.white54, fontSize: 10),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAssignedInspectorSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.person_outline,
-                  color: AppColors.primaryRed,
-                  size: 20,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  LocaleKeys.assigned_to.tr(),
-                  style: TextStyle(
-                    color: AppColors.primaryRed,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        if (widget.branch.assignedInspector == null)
-          _buildEmptyState(
-            icon: Icons.person_off_outlined,
-            message: LocaleKeys.unassigned.tr(),
-            actionText: 'Assign Inspector',
-            onAction: _showAssignInspectorDialog,
-          )
-        else
-          Column(
-            children: [
-              _buildInspectorCard(widget.branch.assignedInspector!),
-              const SizedBox(height: 12),
-              widget.branch.stop == null
-                  ? AppButton(
-                      text: 'Change Inspector',
-                      onPressed: _showAssignInspectorDialog,
-
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      borderRadius: 10,
-                    )
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '⚠️ This branch is already assigned to the route of inspector ${widget.branch.assignedInspector?.name} and cannot be removed until it is completed or manually removed from the route.',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 13,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Center(
-                          child: Text(
-                            'To see the route details, click the button below.',
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 12,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 8),
-                        AppButton(
-                          text: 'View Route Info',
-                          onPressed: () =>
-                              _showRouteStopInfo(widget.branch.stop!),
-
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          borderRadius: 10,
-                        ),
-                      ],
-                    ),
-            ],
-          ),
-      ],
     );
   }
 
@@ -1057,181 +1207,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       isScrollControlled: true,
-      builder: (context) {
-        return AdminStopInfoSheet(stop: stop);
-      },
-    );
-  }
-
-  Widget _buildInspectorCard(AssignedInspector inspector) {
-    return Consumer<ProviderAdminBranches>(
-      builder: (context, provider, _) {
-        return Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: AppColors.lightBlack,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white24),
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.lightRed,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(
-                  Icons.person,
-                  color: AppColors.primaryRed,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  inspector.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              widget.branch.stop != null
-                  ? Tooltip(
-                      message: 'Already in Route',
-                      child: Icon(Icons.route, color: Colors.green, size: 24),
-                    )
-                  : IconButton(
-                      icon: const Icon(
-                        Icons.remove_circle_outline,
-                        color: Colors.red,
-                      ),
-                      onPressed: provider.isLoading
-                          ? null
-                          : () => _unassignInspector(),
-                    ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildEmptyState({
-    required IconData icon,
-    required String message,
-    required String actionText,
-    required VoidCallback onAction,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 48, color: Colors.white24),
-          const SizedBox(height: 12),
-          Text(
-            message,
-            style: const TextStyle(color: Colors.white54, fontSize: 14),
-          ),
-          const SizedBox(height: 16),
-          AppButton(
-            text: actionText,
-            onPressed: onAction,
-            backgroundColor: AppColors.primaryRed,
-            textStyle: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-            borderRadius: 10,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoField({
-    required String label,
-    required TextEditingController controller,
-    required bool enabled,
-    required IconData icon,
-    TextInputType? keyboardType,
-    bool readOnly = false,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(12),
-        // border: Border.all(
-        //   color: enabled ? AppColors.primaryRed : Colors.white24,
-        // ),
-      ),
-      child: TextField(
-        readOnly: readOnly,
-        controller: controller,
-        enabled: enabled,
-        keyboardType: keyboardType,
-        style: TextStyle(color: enabled ? Colors.white : Colors.white70),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-            color: enabled ? AppColors.primaryRed : Colors.white54,
-          ),
-          prefixIcon: Icon(
-            icon,
-            color: enabled ? AppColors.primaryRed : Colors.white54,
-            size: 20,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoTile({
-    required String label,
-    required String value,
-    required IconData icon,
-    Color? valueColor,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white24),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white54, size: 20),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white70, fontSize: 14),
-          ),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              color: valueColor ?? Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+      builder: (context) => AdminStopInfoSheet(stop: stop),
     );
   }
 
@@ -1255,43 +1231,112 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        builder: (context) => _buildSelectionSheet(
-          title: 'Select Inspector',
-          items: inspectors,
-          itemBuilder: (UserModel inspector) => ListTile(
-            leading: CircleAvatar(
-              backgroundColor: AppColors.primaryRed,
-              child: Text(
-                inspector.name[0].toUpperCase(),
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-            title: Text(
-              inspector.name,
-              style: const TextStyle(color: Colors.white),
-            ),
-            subtitle: Text(
-              inspector.serviceAccount,
-              style: const TextStyle(color: Colors.white70),
-            ),
-            trailing: inspector.region != null
-                ? Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
+        builder: (context) => DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.3,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    child: Text(
-                      inspector.region!,
-                      style: const TextStyle(color: Colors.blue, fontSize: 11),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Select Inspector',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                  )
-                : null,
-            onTap: () => Navigator.pop(context, inspector),
-          ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.separated(
+                      controller: scrollController,
+                      itemCount: inspectors.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final inspector = inspectors[index];
+                        return InkWell(
+                          onTap: () => Navigator.pop(context, inspector),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryDark,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white12),
+                            ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: AppColors.primaryRed,
+                                  child: Text(
+                                    inspector.name[0].toUpperCase(),
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        inspector.name,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      Text(
+                                        inspector.serviceAccount,
+                                        style: const TextStyle(
+                                          color: Colors.white60,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (inspector.region != null)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      inspector.region!,
+                                      style: const TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       );
 
@@ -1309,9 +1354,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               id: selected.id,
               name: selected.name,
             );
-
-            await _loadBranchDetails();
-
+            setState(() {});
             if (mounted) {
               showSnakBarr(context, 'Inspector assigned successfully');
             }
@@ -1333,64 +1376,6 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     }
   }
 
-  Widget _buildSelectionSheet<T>({
-    required String title,
-    required List<T> items,
-    required Widget Function(T) itemBuilder,
-  }) {
-    return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.3,
-      maxChildSize: 0.9,
-      expand: false,
-      builder: (context, scrollController) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: items.isEmpty
-                    ? const Center(
-                        child: Text(
-                          'No items available',
-                          style: TextStyle(color: Colors.white54),
-                        ),
-                      )
-                    : ListView.builder(
-                        controller: scrollController,
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          return itemBuilder(items[index]);
-                        },
-                      ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _unassignInspector() async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -1402,7 +1387,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           style: TextStyle(color: Colors.white),
         ),
         content: const Text(
-          'Are you sure you want to unassign the inspector from this branch?',
+          'Are you sure you want to unassign this inspector?',
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -1435,9 +1420,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
 
         if (success) {
           widget.branch.assignedInspector = null;
-
-          await _loadBranchDetails();
-
+          setState(() {});
           if (mounted) {
             showSnakBarr(context, 'Inspector unassigned successfully');
           }
@@ -1454,13 +1437,6 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     }
   }
 
-  Color _getPerformanceColor(double percentage) {
-    if (percentage >= 80) return Colors.green;
-    if (percentage >= 60) return Colors.lightGreen;
-    if (percentage >= 40) return Colors.orange;
-    return Colors.red;
-  }
-
   Color _getUrgencyColor(int days) {
     if (days == 0) return Colors.green;
     if (days <= 7) return Colors.lightGreen;
@@ -1475,8 +1451,6 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     final score = double.tryParse(parts.first) ?? 0.0;
     final maxScore = double.tryParse(parts.last) ?? 1.0;
     final percentage = (score / maxScore) * 100;
-
-    // Reversed for German standard
     final reversedPercentage = 100 - percentage;
 
     if (reversedPercentage >= 80) return Colors.green;

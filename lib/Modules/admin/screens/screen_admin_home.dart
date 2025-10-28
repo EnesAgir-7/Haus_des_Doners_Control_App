@@ -305,7 +305,7 @@ class DashboardCard extends StatelessWidget {
                     );
                   },
                 ),
-                Selector<ProviderAdminFleet, Tuple2<bool, int>>(
+                Selector<ProviderAdminVehicles, Tuple2<bool, int>>(
                   selector: (_, provider) =>
                       Tuple2(provider.isLoading, provider.vehicles.length),
                   builder: (_, data, __) {

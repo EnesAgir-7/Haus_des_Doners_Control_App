@@ -25,7 +25,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderAdminTasks>().loadAllTasks();
+      context.read<ProviderAdminTasks>().initialize();
     });
   }
 
@@ -244,27 +244,25 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
     );
   }
 
-  Widget _buildTaskList(ProviderAdminTasks provider, List<TaskModel> filteredTasks) {
-    return RefreshIndicator(
-      onRefresh: () => provider.loadAllTasks(),
-      color: AppColors.primaryRed,
-      backgroundColor: AppColors.lightBlack,
-      child: ListView.builder(
-        padding: EdgeInsets.only(bottom: 80),
-        key: const PageStorageKey('tasksList'),
-        physics: AlwaysScrollableScrollPhysics(),
-        itemCount: filteredTasks.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: AdminTaskCard(
-              task: filteredTasks[index],
-              onTap: () => _showTaskDetails(context, filteredTasks[index]),
-              onEdit: () => _showTaskForm(context, filteredTasks[index]),
-            ),
-          );
-        },
-      ),
+  Widget _buildTaskList(
+    ProviderAdminTasks provider,
+    List<TaskModel> filteredTasks,
+  ) {
+    return ListView.builder(
+      padding: EdgeInsets.only(bottom: 80),
+      key: const PageStorageKey('tasksListAdmin'),
+      physics: AlwaysScrollableScrollPhysics(),
+      itemCount: filteredTasks.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: AdminTaskCard(
+            task: filteredTasks[index],
+            onTap: () => _showTaskDetails(context, filteredTasks[index]),
+            onEdit: () => {},
+          ),
+        );
+      },
     );
   }
 
@@ -292,10 +290,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => TaskDetailSheet(
-        task: task,
-        onTaskUpdated: () => context.read<ProviderAdminTasks>().loadAllTasks(),
-      ),
+      builder: (context) => TaskDetailSheet(task: task, onTaskUpdated: () {}),
     );
   }
 
@@ -307,10 +302,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => TaskAddEditSheet(
-        task: task,
-        onSuccess: () => context.read<ProviderAdminTasks>().loadAllTasks(),
-      ),
+      builder: (context) => TaskAddEditSheet(task: task, onSuccess: () {}),
     );
   }
 }

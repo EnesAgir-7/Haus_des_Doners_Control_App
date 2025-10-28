@@ -217,6 +217,25 @@ class ProviderAdminBranches with ChangeNotifier {
     }
   }
 
+Future<void> deleteBranch({
+    required String branchId,
+    required String? inspectorId,
+  }) async {
+    _setLoading(true);
+    _error = null;
+
+    try {
+      await _branchService.deleteBranch(
+        branchId: branchId,
+        inspectorId: inspectorId,
+      );
+    } catch (e) {
+      _error = 'Error deleting branch: $e';
+    } finally {
+      _setLoading(false);
+    }
+  }
+
   Future<bool> updateBrachTemplate({
     required String branchId,
     required String templateId,

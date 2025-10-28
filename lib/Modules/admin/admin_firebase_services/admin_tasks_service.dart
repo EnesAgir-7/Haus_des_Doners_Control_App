@@ -11,8 +11,16 @@ class AdminTaskService {
   final String _collection = Collections.tasks;
   final AdminUserService adminUserService = AdminUserService();
 
-
-
+  Stream<List<TaskModel>> streamAllTasks(String inspectorId) {
+    return _db
+        .collection(_collection)
+        .orderBy(TaskFields.createdAt, descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList(),
+        );
+  }
 
   Future<void> addTaskComment(String taskId, TaskCommentModel comment) async {
     console("Adding comnet");
@@ -28,6 +36,7 @@ class AdminTaskService {
   }
 
   // Delete task
+  /// Delete task and update inspector history
   Future<void> deleteTask(String taskId) async {
     // Get task to know which inspector to update
     final task = await getTaskById(taskId);
@@ -42,21 +51,15 @@ class AdminTaskService {
 
     batch.delete(docRef);
 
-    // Update inspector history
-    final Map<String, dynamic> updates = {
-      IHF.tasksTotal: FieldValue.increment(-1),
-    };
-
-    // If task was completed, also decrement completed count
-    if (task.status == 'completed') {
-      updates[IHF.tasksCompleted] = FieldValue.increment(-1);
+    // Only update history if task was NOT completed
+    // Completed tasks should remain in history even if deleted
+    if (task.status != AppConstants.completed) {
+      await adminUserService.updateInspectorHistoryBatch(
+        batch: batch,
+        inspectorId: task.assignedInspectorId,
+        updates: {IHF.tasksTotal: FieldValue.increment(-1)},
+      );
     }
-
-    await adminUserService.updateInspectorHistoryBatch(
-      batch: batch,
-      inspectorId: task.assignedInspectorId,
-      updates: updates,
-    );
 
     // Commit batch
     await batch.commit();
@@ -148,23 +151,6 @@ class AdminTaskService {
       return snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();
     } catch (e) {
       console('Error getting tasks by inspector: $e');
-      return [];
-    }
-  }
-
-
-
-  // Get all tasks (admin)
-  Future<List<TaskModel>> getAllTasks() async {
-    try {
-      final snapshot = await _db
-          .collection(_collection)
-          .orderBy('createdAt', descending: true)
-          .get();
-
-      return snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();
-    } catch (e) {
-      console('Error getting all tasks: $e');
       return [];
     }
   }

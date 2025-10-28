@@ -103,6 +103,10 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       appBar: CustomAppBar(
         title: widget.vehicle.plate,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.white),
+            onPressed: () => _deleteVehicleDialog(context),
+          ),
           if (!_isEditing)
             IconButton(
               icon: const Icon(Icons.edit, color: Colors.white),
@@ -812,7 +816,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       // Check what changed
       final kmChanged = newKm != widget.vehicle.currentKm;
       final plateChanged = newPlate != widget.vehicle.plate;
-      final maxKmChange = maxKm != widget.vehicle.maxKm;
+      final maxKmChanged = maxKm != widget.vehicle.maxKm;
       final modelChanged = newModel != widget.vehicle.model;
       final datesChanged =
           _lastServiceDate != widget.vehicle.lastServiceDate ||
@@ -825,7 +829,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       if (!kmChanged &&
           !inspectorChanged &&
           !plateChanged &&
-          !maxKmChange &&
+          !maxKmChanged &&
           !modelChanged &&
           !datesChanged) {
         if (!mounted) return;
@@ -851,17 +855,17 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       console('Passing Inspector ID: $inspectorIdToPass');
 
       // Call the batch update method
-      await context.read<ProviderAdminFleet>().updateVehicleWithBatch(
+      await context.read<ProviderAdminVehicles>().updateVehicleWithBatch(
         vehicleId: widget.vehicle.id,
         newKm: kmChanged ? newKm : null,
         newPlate: plateChanged ? newPlate : null,
         newModel: modelChanged ? newModel : null,
-        newInspectorId: inspectorIdToPass, // Only set if changed
+        newInspectorId: inspectorIdToPass,
         newInspectorName: inspectorChanged ? _selectedInspectorName : null,
         oldInspectorId: oldInspectorId,
         lastServiceDate: datesChanged ? _lastServiceDate : null,
         nextServiceDue: datesChanged ? _nextServiceDue : null,
-        maxKm: maxKmChange ? maxKm : widget.vehicle.maxKm,
+        maxKm: maxKm, // ALWAYS pass maxKm, not conditionally
       );
 
       if (!mounted) return;
@@ -874,6 +878,75 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       if (mounted) {
         setState(() => _isSaving = false);
       }
+    }
+  }
+
+  Future<void> _deleteVehicleDialog(BuildContext context) async {
+    final assignedInspector = widget.vehicle.assignedInspector;
+    final hasInspector = assignedInspector?.id != null;
+    final inspectorName = assignedInspector?.name ?? '';
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.lightBlack,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+            const SizedBox(width: 12),
+            const Text('Delete Vehicle', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: Text(
+          hasInspector
+              ? 'This vehicle is currently assigned to inspector "$inspectorName".\n\n'
+                    'Deleting it will also remove it from the inspector’s history.\n\n'
+                    'Are you sure you want to proceed?'
+              : 'Are you sure you want to delete this vehicle?\n\n'
+                    'This action cannot be undone.',
+          style: const TextStyle(color: Colors.white70, fontSize: 14),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          Consumer<ProviderAdminVehicles>(
+            builder: (context, provider, _) {
+              return TextButton(
+                onPressed: provider.isLoading
+                    ? null
+                    : () => Navigator.pop(context, true),
+                child: provider.isLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.red,
+                        ),
+                      )
+                    : const Text('Delete', style: TextStyle(color: Colors.red)),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      final provider = context.read<ProviderAdminVehicles>();
+
+      await provider.deleteVehicle(
+        vehicleId: widget.vehicle.id,
+        inspectorId: assignedInspector?.id,
+        context: context,
+        inspectorName: inspectorName,
+      );
     }
   }
 }

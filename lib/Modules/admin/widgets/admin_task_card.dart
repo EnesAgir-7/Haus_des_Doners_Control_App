@@ -1,10 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_tasks.dart';
-import 'package:provider/provider.dart';
 
 import '../../../models/task_model.dart';
-import '../../inspector/widgets/custom_toast.dart';
 
 class AdminTaskCard extends StatelessWidget {
   final TaskModel task;
@@ -254,66 +251,20 @@ class AdminTaskCard extends StatelessWidget {
           ),
         ),
         // Right side - Action Buttons
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            InkWell(
-              onTap: onEdit,
+        // Row(
+        //   mainAxisSize: MainAxisSize.min,
+        //   children: [
+        //     InkWell(
+        //       onTap: onEdit,
 
-              child: Icon(
-                Icons.edit,
-                color: Colors.blue.withValues(alpha: 0.7),
-                size: 20,
-              ),
-            ),
-            const SizedBox(width: 20),
-            InkWell(
-              onTap: () async {
-                final confirm = await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Delete Task'),
-                    content: const Text(
-                      'Are you sure you want to delete this task?',
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(false),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(ctx).pop(true),
-                        child: const Text(
-                          'Delete',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-
-                if (confirm == true) {
-                  try {
-                    final tasksProvider = context.read<ProviderAdminTasks>();
-                    final success = await tasksProvider.deleteTask(task.id);
-                    if (success) {
-                      showSnakBarr(context, "Task Deleted");
-                    } else {
-                      throw Exception('Failed to delete task');
-                    }
-                  } catch (e) {
-                    showSnakBarr(context, 'Failed to delete task: $e');
-                  }
-                }
-              },
-              child: Icon(
-                Icons.delete,
-                color: Colors.red.withValues(alpha: 0.7),
-                size: 20,
-              ),
-            ),
-          ],
-        ),
+        //       child: Icon(
+        //         Icons.edit,
+        //         color: Colors.blue.withValues(alpha: 0.7),
+        //         size: 20,
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ],
     );
   }

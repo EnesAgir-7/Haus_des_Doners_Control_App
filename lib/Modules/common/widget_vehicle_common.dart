@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/constants/app_colors.dart';
 import '../../generated/lib/translations/locale_keys.g.dart';
 import '../../models/vehicle_model.dart';
 
@@ -219,24 +220,29 @@ class VehicleListCard extends StatelessWidget {
 
   /// Shows status and assigned inspector info
   Widget _buildStatusAndAssigned() {
+    bool isUnassigned =
+        vehicle.assignedInspector == null ||
+        vehicle.assignedInspector!.name.isEmpty;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        if (vehicle.assignedInspector != null)
-          Row(
-            children: [
-              Icon(
-                Icons.person_outline,
-                size: 14.0,
-                color: Colors.grey.shade500,
+        Row(
+          children: [
+            Icon(Icons.person_outline, size: 14.0, color: Colors.grey.shade500),
+            const SizedBox(width: 6.0),
+            Text(
+              isUnassigned
+                  ? "Unassigned"
+                  : vehicle.assignedInspector?.name ?? "Unknown",
+              style: TextStyle(
+                color: isUnassigned
+                    ? AppColors.primaryRed
+                    : Colors.grey.shade400,
+                fontSize: 12.0,
               ),
-              const SizedBox(width: 6.0),
-              Text(
-                vehicle.assignedInspector!.name,
-                style: TextStyle(color: Colors.grey.shade400, fontSize: 12.0),
-              ),
-            ],
-          ),
+            ),
+          ],
+        ),
         Text(
           "Last Serviced: ${formatDate(vehicle.lastServiceDate)}",
           style: TextStyle(color: Colors.grey.shade600, fontSize: 12.0),

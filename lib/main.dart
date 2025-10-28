@@ -85,7 +85,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderControl()),
         ChangeNotifierProvider(create: (_) => BranchMapController()),
         ChangeNotifierProvider(create: (_) => ProviderAdminBranches()),
-        ChangeNotifierProvider(create: (_) => ProviderAdminFleet()),
+        ChangeNotifierProvider(create: (_) => ProviderAdminVehicles()),
         ChangeNotifierProvider(create: (_) => ProviderAdminStats()),
         ChangeNotifierProvider(create: (_) => ProviderAdminUsers()),
         ChangeNotifierProvider(create: (_) => ProviderBottomNavBar()),
