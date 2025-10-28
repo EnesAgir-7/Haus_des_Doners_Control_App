@@ -121,7 +121,7 @@ class AdminBranchService {
     if (branchIds.isEmpty) {
       return Stream.value([]);
     }
-    return FirebaseFirestore.instance
+    return _db
         .collection(Collections.branches)
         .where(FieldPath.documentId, whereIn: branchIds)
         .snapshots()
@@ -157,8 +157,8 @@ class AdminBranchService {
     required String inspectorId,
     required String branchId,
   }) async {
-    final batch = FirebaseFirestore.instance.batch();
-    final branchRef = FirebaseFirestore.instance
+    final batch = _db.batch();
+    final branchRef = _db
         .collection(_collectionBranches)
         .doc(branchId);
 
@@ -192,9 +192,8 @@ class AdminBranchService {
     required String branchId,
     required String? inspectorId,
   }) async {
-    final firestore = FirebaseFirestore.instance;
-    final batch = firestore.batch();
-    final branchRef = firestore.collection(_collectionBranches).doc(branchId);
+    final batch = _db.batch();
+    final branchRef = _db.collection(_collectionBranches).doc(branchId);
 
     try {
       // 1️⃣ Delete the branch document
@@ -227,8 +226,8 @@ class AdminBranchService {
     required String branchId,
     String? oldInspectorId,
   }) async {
-    final batch = FirebaseFirestore.instance.batch();
-    final branchRef = FirebaseFirestore.instance
+    final batch = _db.batch();
+    final branchRef = _db
         .collection(_collectionBranches)
         .doc(branchId);
 

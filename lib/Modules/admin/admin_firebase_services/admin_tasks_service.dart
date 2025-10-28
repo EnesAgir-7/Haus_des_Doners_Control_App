@@ -144,7 +144,7 @@ class AdminTaskService {
     try {
       final snapshot = await _db
           .collection(_collection)
-          .where('assignedInspectorId', isEqualTo: inspectorId)
+          .where(TaskFields.assignedInspectorId, isEqualTo: inspectorId)
           .orderBy('createdAt', descending: true)
           .get();
 

@@ -23,22 +23,6 @@ class AdminVehicleService {
         );
   }
 
-  Future<List<VehicleModel>> getVehiclesByStatus(String status) async {
-    try {
-      final snapshot = await _db
-          .collection(_collectionVehicles)
-          .where(VehicleFields.status, isEqualTo: status)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => VehicleModel.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      print('Error getting vehicles by status: $e');
-      return [];
-    }
-  }
-
   Future<void> updateVehicleWithBatch({
     required String vehicleId,
     int? newKm,
@@ -172,80 +156,6 @@ class AdminVehicleService {
     }
   }
 
-  // Update vehicle kilometers
-  Future<void> updateVehicleKm(String vehicleId, int newKm) async {
-    try {
-      final vehicle = await _db
-          .collection(_collectionVehicles)
-          .doc(vehicleId)
-          .get();
-      if (!vehicle.exists) throw Exception('Vehicle not found');
-
-      final data = vehicle.data() as Map<String, dynamic>;
-      final maxKm = data[VehicleFields.maxKm] as int;
-      final remainingKm = maxKm - newKm;
-      final usagePercent = ((newKm / maxKm) * 100).round();
-
-      await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        VehicleFields.currentKm: newKm,
-        VehicleFields.remainingKm: remainingKm,
-        VehicleFields.usagePercent: usagePercent,
-        VehicleFields.updatedAt: FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Error updating vehicle KM: $e');
-      rethrow;
-    }
-  }
-
-  // Get vehicle by ID
-  Future<VehicleModel?> getVehicleById(String vehicleId) async {
-    try {
-      final doc = await _db
-          .collection(Collections.vehicles)
-          .doc(vehicleId)
-          .get();
-      if (!doc.exists) return null;
-      return VehicleModel.fromFirestore(doc);
-    } catch (e) {
-      print('Error getting vehicle: $e');
-      return null;
-    }
-  }
-
-  // Assign vehicle to inspector
-  Future<void> assignVehicleToInspector(
-    String vehicleId,
-    String inspectorId,
-    String inspectorName,
-  ) async {
-    try {
-      await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        VehicleFields.assignedInspectorId: inspectorId,
-        VehicleFields.assignedInspectorName: inspectorName,
-        VehicleFields.status: AppConstants.assigned,
-        VehicleFields.updatedAt: FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Error assigning vehicle: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> unassignVehicle(String vehicleId) async {
-    try {
-      await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        VehicleFields.assignedInspectorId: null,
-        VehicleFields.assignedInspectorName: null,
-        VehicleFields.status: AppConstants.available,
-        VehicleFields.updatedAt: FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Error unassigning vehicle: $e');
-      rethrow;
-    }
-  }
-
   Future<void> deleteVehicle({
     required String vehicleId,
     String? inspectorId,
@@ -312,18 +222,6 @@ class AdminVehicleService {
       });
     } catch (e) {
       print('Error creating vehicle: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> updatedVehicleStatus(String vehicleId, String status) async {
-    try {
-      await _db.collection(_collectionVehicles).doc(vehicleId).update({
-        VehicleFields.status: status,
-        VehicleFields.updatedAt: FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      print('Error updating vehicle status: $e');
       rethrow;
     }
   }

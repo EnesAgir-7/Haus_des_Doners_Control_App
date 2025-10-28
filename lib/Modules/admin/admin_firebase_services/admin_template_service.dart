@@ -32,35 +32,6 @@ class TemplateHelper {
     }
   }
 
-  /// Read all templates
-  Future<List<InspectionTemplate>> getAllTemplates() async {
-    try {
-      final querySnapshot = await _templatesCollection.get();
-
-      return querySnapshot.docs
-          .map((doc) => InspectionTemplate.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      debugPrint('Error fetching templates: $e');
-      return [];
-    }
-  }
-
-  /// Read a single template by ID
-  Future<InspectionTemplate?> getTemplateById(String templateId) async {
-    try {
-      final doc = await _templatesCollection.doc(templateId).get();
-
-      if (doc.exists) {
-        return InspectionTemplate.fromFirestore(doc);
-      }
-      return null;
-    } catch (e) {
-      debugPrint('Error fetching template: $e');
-      return null;
-    }
-  }
-
   /// Update an existing template
   Future<bool> updateQuestionnaire({
     required String templateId,
@@ -100,23 +71,5 @@ class TemplateHelper {
           .map((doc) => InspectionTemplate.fromFirestore(doc))
           .toList();
     });
-  }
-
-  /// Check if template name already exists
-  Future<bool> isTemplateNameExists(String name, {String? excludeId}) async {
-    try {
-      final querySnapshot = await _templatesCollection
-          .where(InspectionTemplateFields.name, isEqualTo: name.trim())
-          .get();
-
-      if (excludeId != null) {
-        return querySnapshot.docs.any((doc) => doc.id != excludeId);
-      }
-
-      return querySnapshot.docs.isNotEmpty;
-    } catch (e) {
-      debugPrint('Error checking template name: $e');
-      return false;
-    }
   }
 }
