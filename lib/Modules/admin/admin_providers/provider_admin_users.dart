@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../common_services/firebase_auth_service.dart';
@@ -190,12 +191,6 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
-
-
-
-
-
-
   // Create new user (inspector or admin)
   Future<void> createUser({
     required String email,
@@ -239,6 +234,36 @@ class ProviderAdminUsers extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> updateInspectorPassword({
+    required String inspectorUid,
+    required String newPassword,
+    required BuildContext parentContext,
+  }) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      await _authHelper.updateInspectorPassword(
+        inspectorUid: inspectorUid,
+        newPassword: newPassword,
+      );
+
+      _isLoading = false;
+      notifyListeners();
+
+      if (parentContext.mounted) {
+        showSnakBarr(parentContext, 'Password updated successfully ✅');
+      }
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      console(e);
+      if (parentContext.mounted) {
+        showSnakBarr(parentContext, 'Error updating password: $e');
+      }
     }
   }
 

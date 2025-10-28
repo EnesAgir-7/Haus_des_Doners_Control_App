@@ -1,5 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:haus_des_control/core/console.dart';
 
 class FirebaseAuthHelper {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -66,6 +67,29 @@ class FirebaseAuthHelper {
     } catch (e) {
       // Catch all other errors
       throw Exception('Failed to delete inspector: $e');
+    }
+  }
+
+  Future<void> updateInspectorPassword({
+    required String inspectorUid,
+    required String newPassword,
+  }) async {
+    console(inspectorUid);
+    try {
+      final callable = FirebaseFunctions.instance.httpsCallable(
+        'updatePassword',
+      );
+
+      final result = await callable.call({
+        'uid': inspectorUid,
+        'newPassword': newPassword,
+      });
+
+      if (result.data['success'] != true) {
+        throw Exception(result.data['message'] ?? 'Failed to update password');
+      }
+    } on FirebaseFunctionsException catch (e) {
+      throw Exception(e.message ?? 'Failed to update password');
     }
   }
 

@@ -7,6 +7,8 @@ const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const {initializeApp} = require("firebase-admin/app");
 const {getFirestore, FieldValue} = require("firebase-admin/firestore");
 const {getAuth} = require("firebase-admin/auth");
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 
 initializeApp();
 const db = getFirestore();
@@ -107,6 +109,67 @@ exports.cleanupExpiredStops = onSchedule(
       }
     },
 );
+
+
+// Cloud Function to update inspector password and force logout
+exports.updatePassword = functions.https.onCall(async (request) => {
+  const insUid = request.data && request.data.uid;
+  const newPassword = request.data && request.data.newPassword;
+  const callerUid = request.auth && request.auth.uid;
+
+
+  // Validate input
+  if (!insUid) {
+    throw new HttpsError("invalid-argument", "Inspector UID is required");
+  }
+  if (!newPassword || newPassword.length < 6) {
+    throw new HttpsError(
+        "invalid-argument",
+        "New password must be at least 6 characters long",
+    );
+  }
+
+  try {
+    // Verify caller is admin
+    const callerDoc = await db.collection("admins").doc(callerUid).get();
+    if (!callerDoc.exists) {
+      throw new HttpsError("permission-denied", "Caller user not found");
+    }
+
+    const callerData = callerDoc.data();
+    const isAdmin =
+      callerData.role === "admin" ||
+      callerData.userType === "admin" ||
+      callerData.type === "admin";
+
+    if (!isAdmin) {
+      throw new HttpsError(
+          "permission-denied",
+          "Only admins can update inspector passwords",
+      );
+    }
+
+    // Update password
+    await admin.auth().updateUser(insUid, {password: newPassword});
+    await admin.auth().revokeRefreshTokens(insUid);
+
+    return {
+      success: true,
+      message: "Password updated successfully. Inspector will be logged out.",
+    };
+  } catch (error) {
+    console.error("Error updating password:", error);
+
+    if (error instanceof HttpsError) {
+      throw error;
+    }
+
+    throw new HttpsError(
+        "internal",
+        error.message || "Failed to update password",
+    );
+  }
+});
 
 /**
  * Callable function to delete an inspector account.

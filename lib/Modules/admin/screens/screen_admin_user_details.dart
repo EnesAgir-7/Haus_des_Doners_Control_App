@@ -1,7 +1,3 @@
-// =====================================================
-// SCREEN 2: User Details/Edit Screen
-// =====================================================
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -172,11 +168,24 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                     enabled: _isEditing,
                   ),
                   const SizedBox(height: 32),
-                  _buildAccountStatus(),
-                  const SizedBox(height: 40),
-                  if (_isEditing) _buildSaveButton(provider),
+                  if (!provider.isLoading) ...[
+                    _buildAccountStatus(),
+                    const SizedBox(height: 40),
+                    if (_isEditing) _buildSaveButton(provider),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        if (_isEditing)
+                          Expanded(child: _buildUpdatePasswordButton(provider)),
+                        const SizedBox(width: 16),
+                        if (_isEditing)
+                          Expanded(child: _buildDeleteAccountButton(provider)),
+                      ],
+                    ),
+                  ] else ...[
+                    Center(child: CircularProgressIndicator()),
+                  ],
                   const SizedBox(height: 16),
-                  if (_isEditing) _buildDeleteAccountButton(provider),
                 ],
               ),
             ),
@@ -362,6 +371,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
       onPressed: provider.isLoading ? null : _saveChanges,
       isLoading: provider.isLoading,
       text: 'Save Changes',
+      backgroundColor: AppColors.primaryRed,
       icon: Icons.save,
     );
   }
@@ -371,7 +381,132 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
       onPressed: () => _showDeleteAccountDialog(provider, widget.user, context),
       isLoading: provider.isLoading,
       text: 'Delete Account',
+      backgroundColor: AppColors.primaryRed,
       icon: Icons.delete,
+    );
+  }
+
+  Widget _buildUpdatePasswordButton(ProviderAdminUsers provider) {
+    return AppButton(
+      onPressed: () => showUpdatePasswordDialog(
+        context: context,
+        inspectorUid: widget.user.id,
+      ),
+      backgroundColor: AppColors.green,
+      isLoading: provider.isLoading,
+      text: 'Update Password',
+      icon: Icons.delete,
+    );
+  }
+
+  Future<void> showUpdatePasswordDialog({
+    required BuildContext context,
+    required String inspectorUid,
+  }) async {
+    final _passwordController = TextEditingController();
+    final _confirmPasswordController = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.lightBlack,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.lock_reset, color: Colors.blue, size: 28),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Update Inspector Password',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+        content: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _passwordController,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Enter new password',
+                  hintStyle: TextStyle(color: Colors.white38),
+                  filled: true,
+                  fillColor: AppColors.primaryDark,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter a password';
+                  }
+                  if (value.length < 6) {
+                    return 'Password must be at least 6 characters';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Confirm password',
+                  hintStyle: TextStyle(color: Colors.white38),
+                  filled: true,
+                  fillColor: AppColors.primaryDark,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                validator: (value) {
+                  if (value != _passwordController.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                Navigator.pop(ctx); // close dialog immediately
+                // Call Provider method
+                final provider = context.read<ProviderAdminUsers>();
+                await provider.updateInspectorPassword(
+                  inspectorUid: inspectorUid,
+                  newPassword: _passwordController.text.trim(),
+                  parentContext: context,
+                );
+              }
+            },
+            child: const Text('Update', style: TextStyle(color: Colors.blue)),
+          ),
+        ],
+      ),
     );
   }
 
@@ -424,8 +559,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                 );
               },
               child: const Text('Delete'),
-            )
-
+            ),
           ],
         );
       },

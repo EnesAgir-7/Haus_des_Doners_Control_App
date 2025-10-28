@@ -24,7 +24,30 @@ class ProviderAuth extends ChangeNotifier {
     FirebaseAuth.instance.authStateChanges().listen((user) {
       _handleAuthStateChange(user);
     });
+
+    FirebaseAuth.instance.idTokenChanges().listen((user) async {
+      if (user != null) {
+        try {
+          await user.getIdToken(true); // true = force refresh
+        } catch (e) {
+          print('Token invalid or revoked, logging out: $e');
+          await _forceLogout();
+        }
+      }
+    });
   }
+
+Future<void> _forceLogout() async {
+    _user = null;
+    userModel = null;
+    loggedInUser = null;
+
+    await FirebaseAuth.instance.signOut();
+    await LocalStorageHelper.instance.removeData(cacheUserKey);
+
+    notifyListeners();
+  }
+
 
   User? get currentUser => _user;
   bool get isLoading => _isLoading;

@@ -2,12 +2,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/app_assets.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
-import 'package:haus_des_control/Modules/inspector/widgets/language_button.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../translations/locale_keys.g.dart';
 import '../providers/provider_auth.dart';
 import '../widgets/app_button.dart';
+import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_field.dart';
 import '../widgets/custom_toast.dart';
 
@@ -43,10 +43,7 @@ class _ScreenAuthState extends State<ScreenAuth> {
       builder: (context, provider, _) {
         return Scaffold(
           backgroundColor: AppColors.primaryDark,
-          appBar: AppBar(
-            actions: const [LanguageButton()],
-            backgroundColor: AppColors.primaryDark,
-          ),
+          appBar: CustomAppBar(showLang: true),
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(24.0),
@@ -122,22 +119,8 @@ class _ScreenAuthState extends State<ScreenAuth> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 12),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {},
-                            child: Text(
-                              LocaleKeys.forgot_password.tr(),
-                              style: const TextStyle(
-                                color: AppColors.primaryRed,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 30),
                         AppButton(
                           isLoading: provider.isLoading,
                           text: LocaleKeys.login.tr(),
