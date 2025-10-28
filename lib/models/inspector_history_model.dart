@@ -4,7 +4,6 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 class InspectorHistoryModel {
   final String inspectorId;
   final int totalInspections;
-  final double avgScore;
   final int tasksTotal;
   final int tasksCompleted;
   final List<String> recentScores;
@@ -15,7 +14,6 @@ class InspectorHistoryModel {
   InspectorHistoryModel({
     required this.inspectorId,
     required this.totalInspections,
-    required this.avgScore,
     required this.tasksTotal,
     required this.tasksCompleted,
     required this.recentScores,
@@ -29,7 +27,6 @@ class InspectorHistoryModel {
     return InspectorHistoryModel(
       inspectorId: data[IHF.inspectorId] ?? '',
       totalInspections: data[IHF.totalInspections] ?? 0,
-      avgScore: (data[IHF.avgScore]?.toDouble() ?? 0.0),
       tasksTotal: data[IHF.tasksTotal] ?? 0,
       tasksCompleted: data[IHF.tasksCompleted] ?? 0,
       recentScores: data[IHF.recentScores] != null
@@ -62,7 +59,6 @@ class InspectorHistoryModel {
     return {
       IHF.inspectorId: inspectorId,
       IHF.totalInspections: totalInspections,
-      IHF.avgScore: avgScore,
       IHF.tasksTotal: tasksTotal,
       IHF.tasksCompleted: tasksCompleted,
       IHF.recentScores: recentScores,

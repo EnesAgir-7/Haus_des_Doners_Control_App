@@ -4,7 +4,6 @@ import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_us
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../generated/lib/translations/locale_keys.g.dart';
 import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
@@ -462,12 +461,13 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildCompactStatCard(
-                  label: LocaleKeys.average_score.tr(),
-                  value: stats.avgScore.toStringAsFixed(1),
+                  label: "Assigned Vehicles",
+                  value: stats.vehicleIds.length.toString(),
                   icon: Icons.star_outline,
                   gradientColors: [
-                    _getScoreColor(stats.avgScore),
-                    _getScoreColor(stats.avgScore).withValues(alpha: 0.7),
+                    Color(0xFF0F766E), Color(0xFF115E59),
+                    // _getScoreColor(stats.),
+                    // _getScoreColor(stats.avgScore).withValues(alpha: 0.7),
                   ],
                 ),
               ),
@@ -597,53 +597,9 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildInfoRow(
-            "Vehicles Assigned",
-            stats.vehicleIds.length.toString(),
-            Icons.directions_car_outlined,
-          ),
-          const Divider(height: 24, color: Colors.white12),
           buildScoresChart(stats),
           const Divider(height: 24, color: Colors.white12),
           _buildLastUpdatedRow(stats),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(
-    String label,
-    String value,
-    IconData icon, {
-    VoidCallback? ontap,
-  }) {
-    return GestureDetector(
-      onTap: ontap,
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: Colors.white70, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
         ],
       ),
     );
@@ -668,12 +624,6 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
         ),
       ],
     );
-  }
-
-  Color _getScoreColor(double score) {
-    if (score >= 7.0) return Colors.green;
-    if (score >= 4.0) return Colors.amber;
-    return AppColors.primaryRed;
   }
 
   String _formatDate(DateTime date) {

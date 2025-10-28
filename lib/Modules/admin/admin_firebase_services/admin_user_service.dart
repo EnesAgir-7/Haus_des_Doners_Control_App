@@ -171,6 +171,196 @@ class AdminUserService {
     }
   }
 
+  // Future<void> updateInspectorHistoryBatch({
+  //   required WriteBatch batch,
+  //   required String inspectorId,
+  //   required Map<String, dynamic> updates,
+  // }) async {
+  //   console("Updating Inspector History Batch");
+
+  //   final inspectorRef = FirebaseFirestore.instance
+  //       .collection(Collections.inspectorStats)
+  //       .doc(inspectorId);
+
+  //   final now = DateTime.now();
+  //   final monthKey = '${now.month.toString().padLeft(2, '0')}-${now.year}';
+
+  //   // Reference to the month subcollection document
+  //   final monthRef = inspectorRef.collection('months').doc(monthKey);
+
+  //   final inspectorDoc = await inspectorRef.get();
+  //   final monthDoc = await monthRef.get();
+
+  //   // Default model values
+  //   InspectorHistoryModel defaultModel = InspectorHistoryModel(
+  //     inspectorId: inspectorId,
+  //     totalInspections: 0,
+  //     avgScore: 0.0,
+  //     tasksTotal: 0,
+  //     tasksCompleted: 0,
+  //     recentScores: [],
+  //     vehicleIds: [],
+  //     branchesIds: [],
+  //     lastUpdated: now,
+  //   );
+
+  //   bool documentExists = inspectorDoc.exists;
+  //   bool monthExists = monthDoc.exists;
+
+  //   // Get current month data or create new one
+  //   Map<String, dynamic> currentMonthData = monthExists
+  //       ? (monthDoc.data() ?? defaultModel.toMap())
+  //       : defaultModel.toMap();
+
+  //   // Build the month object with all fields
+  //   Map<String, dynamic> monthData = {
+  //     IHF.inspectorId: inspectorId,
+  //     IHF.totalInspections:
+  //         currentMonthData[IHF.totalInspections] ??
+  //         defaultModel.totalInspections,
+  //     IHF.avgScore: currentMonthData[IHF.avgScore] ?? defaultModel.avgScore,
+  //     IHF.tasksTotal:
+  //         currentMonthData[IHF.tasksTotal] ?? defaultModel.tasksTotal,
+  //     IHF.tasksCompleted:
+  //         currentMonthData[IHF.tasksCompleted] ?? defaultModel.tasksCompleted,
+  //     IHF.recentScores: List<String>.from(
+  //       currentMonthData[IHF.recentScores] ?? defaultModel.recentScores,
+  //     ),
+  //     IHF.vehicleIds: List<String>.from(
+  //       currentMonthData[IHF.vehicleIds] ?? defaultModel.vehicleIds,
+  //     ),
+  //     IHF.branchesIds: List<String>.from(
+  //       currentMonthData[IHF.branchesIds] ?? defaultModel.branchesIds,
+  //     ),
+  //     IHF.lastUpdated: FieldValue.serverTimestamp(),
+  //   };
+
+  //   // Apply updates to monthData BEFORE creating/updating
+  //   for (var entry in updates.entries) {
+  //     final key = entry.key;
+  //     final value = entry.value;
+
+  //     if (key == IHF.recentScores && value is List) {
+  //       // Handle recent scores - ADD to existing scores
+  //       final existingScores = List<String>.from(
+  //         monthData[IHF.recentScores] ?? [],
+  //       );
+  //       final newScores = value.cast<String>();
+  //       final allScores = [...existingScores, ...newScores];
+
+  //       // Keep only last 10 scores
+  //       final limitedScores = allScores.length > 10
+  //           ? allScores.sublist(allScores.length - 10)
+  //           : allScores;
+
+  //       monthData[key] = limitedScores;
+
+  //       // Calculate avgScore from recent scores
+  //       final scores = limitedScores
+  //           .map((s) => double.tryParse(s) ?? 0.0)
+  //           .where((s) => s > 0)
+  //           .toList();
+  //       if (scores.isNotEmpty) {
+  //         final avgScore = scores.reduce((a, b) => a + b) / scores.length;
+  //         monthData[IHF.avgScore] = double.parse(avgScore.toStringAsFixed(2));
+  //       }
+  //     } else if (value is FieldValue) {
+  //       // Handle FieldValue operations
+  //       String valueStr = value.toString();
+
+  //       if (valueStr.contains('increment')) {
+  //         // Handle increment
+  //         final currentValue = monthData[key] ?? 0;
+  //         monthData[key] = (currentValue is int ? currentValue : 0) + 1;
+  //       }
+  //       // arrayUnion and arrayRemove will be handled below
+  //     } else {
+  //       // Regular field update
+  //       monthData[key] = value;
+  //     }
+  //   }
+
+  //   // Recalculate avgScore from recentScores
+  //   final scoresList = List<String>.from(monthData[IHF.recentScores] ?? []);
+  //   final numericScores = scoresList
+  //       .map((s) => double.tryParse(s) ?? 0.0)
+  //       .where((s) => s > 0)
+  //       .toList();
+  //   monthData[IHF.avgScore] = numericScores.isNotEmpty
+  //       ? double.parse(
+  //           (numericScores.reduce((a, b) => a + b) / numericScores.length)
+  //               .toStringAsFixed(2),
+  //         )
+  //       : 0.0;
+
+  //   // 1️⃣ Update/Create parent inspector document
+  //   if (!documentExists) {
+  //     batch.set(inspectorRef, {
+  //       IHF.inspectorId: inspectorId,
+  //       IHF.lastUpdated: FieldValue.serverTimestamp(),
+  //     }, SetOptions(merge: true));
+  //     console('✅ Created inspector document for $inspectorId');
+  //   } else {
+  //     batch.update(inspectorRef, {
+  //       IHF.lastUpdated: FieldValue.serverTimestamp(),
+  //     });
+  //   }
+
+  //   // 2️⃣ Handle month subcollection document
+  //   if (!monthExists) {
+  //     // Month doesn't exist - CREATE with full structure
+  //     batch.set(monthRef, monthData, SetOptions(merge: true));
+  //     console('✅ Created new month $monthKey for inspector $inspectorId');
+
+  //     // Apply FieldValue operations (arrayUnion, arrayRemove)
+  //     final Map<String, dynamic> fieldValueUpdates = {};
+  //     for (var entry in updates.entries) {
+  //       final key = entry.key;
+  //       final value = entry.value;
+
+  //       if (value is FieldValue) {
+  //         fieldValueUpdates[key] = value;
+  //       }
+  //     }
+
+  //     if (fieldValueUpdates.isNotEmpty) {
+  //       batch.update(monthRef, fieldValueUpdates);
+  //       console('✅ Applied FieldValue operations for $inspectorId');
+  //     }
+  //   } else {
+  //     // Month exists - UPDATE with FieldValue operations
+  //     final Map<String, dynamic> updateMap = {};
+
+  //     for (var entry in updates.entries) {
+  //       final key = entry.key;
+  //       final value = entry.value;
+
+  //       if (value is FieldValue) {
+  //         // Use FieldValue directly for arrayUnion, arrayRemove, increment
+  //         updateMap[key] = value;
+  //       } else if (key == IHF.recentScores) {
+  //         // Update recent scores array and avgScore
+  //         updateMap[key] = monthData[key];
+  //         updateMap[IHF.avgScore] = monthData[IHF.avgScore];
+  //       } else {
+  //         // Regular field updates
+  //         updateMap[key] = value;
+  //       }
+  //     }
+
+  //     // Always update lastUpdated
+  //     updateMap[IHF.lastUpdated] = FieldValue.serverTimestamp();
+
+  //     batch.update(monthRef, updateMap);
+  //     console('✅ Updated existing month $monthKey for inspector $inspectorId');
+  //   }
+
+  //   // 3️⃣ Prune old months (keep last 12) - only if document exists
+  //   if (documentExists) {
+  //     await _pruneOldMonthsSubcollection(batch, inspectorRef, monthKey);
+  //   }
+  // }
+
   Future<void> updateInspectorHistoryBatch({
     required WriteBatch batch,
     required String inspectorId,
@@ -195,7 +385,6 @@ class AdminUserService {
     InspectorHistoryModel defaultModel = InspectorHistoryModel(
       inspectorId: inspectorId,
       totalInspections: 0,
-      avgScore: 0.0,
       tasksTotal: 0,
       tasksCompleted: 0,
       recentScores: [],
@@ -218,7 +407,6 @@ class AdminUserService {
       IHF.totalInspections:
           currentMonthData[IHF.totalInspections] ??
           defaultModel.totalInspections,
-      IHF.avgScore: currentMonthData[IHF.avgScore] ?? defaultModel.avgScore,
       IHF.tasksTotal:
           currentMonthData[IHF.tasksTotal] ?? defaultModel.tasksTotal,
       IHF.tasksCompleted:
@@ -234,6 +422,10 @@ class AdminUserService {
       ),
       IHF.lastUpdated: FieldValue.serverTimestamp(),
     };
+
+    // Separate updates into FieldValue operations and regular updates
+    Map<String, dynamic> regularUpdates = {};
+    Map<String, dynamic> fieldValueUpdates = {};
 
     // Apply updates to monthData BEFORE creating/updating
     for (var entry in updates.entries) {
@@ -254,44 +446,16 @@ class AdminUserService {
             : allScores;
 
         monthData[key] = limitedScores;
-
-        // Calculate avgScore from recent scores
-        final scores = limitedScores
-            .map((s) => double.tryParse(s) ?? 0.0)
-            .where((s) => s > 0)
-            .toList();
-        if (scores.isNotEmpty) {
-          final avgScore = scores.reduce((a, b) => a + b) / scores.length;
-          monthData[IHF.avgScore] = double.parse(avgScore.toStringAsFixed(2));
-        }
+        regularUpdates[key] = limitedScores;
       } else if (value is FieldValue) {
-        // Handle FieldValue operations
-        String valueStr = value.toString();
-
-        if (valueStr.contains('increment')) {
-          // Handle increment
-          final currentValue = monthData[key] ?? 0;
-          monthData[key] = (currentValue is int ? currentValue : 0) + 1;
-        }
-        // arrayUnion and arrayRemove will be handled below
+        // Store FieldValue operations separately for proper batch handling
+        fieldValueUpdates[key] = value;
       } else {
         // Regular field update
         monthData[key] = value;
+        regularUpdates[key] = value;
       }
     }
-
-    // Recalculate avgScore from recentScores
-    final scoresList = List<String>.from(monthData[IHF.recentScores] ?? []);
-    final numericScores = scoresList
-        .map((s) => double.tryParse(s) ?? 0.0)
-        .where((s) => s > 0)
-        .toList();
-    monthData[IHF.avgScore] = numericScores.isNotEmpty
-        ? double.parse(
-            (numericScores.reduce((a, b) => a + b) / numericScores.length)
-                .toStringAsFixed(2),
-          )
-        : 0.0;
 
     // 1️⃣ Update/Create parent inspector document
     if (!documentExists) {
@@ -308,45 +472,32 @@ class AdminUserService {
 
     // 2️⃣ Handle month subcollection document
     if (!monthExists) {
-      // Month doesn't exist - CREATE with full structure
-      batch.set(monthRef, monthData, SetOptions(merge: true));
+      // Month doesn't exist - CREATE with initial structure (no FieldValues)
+      final Map<String, dynamic> createData = Map.from(monthData);
+
+      // Remove any FieldValue objects from initial creation
+      createData.removeWhere((key, value) => value is FieldValue);
+
+      batch.set(monthRef, createData, SetOptions(merge: true));
       console('✅ Created new month $monthKey for inspector $inspectorId');
 
-      // Apply FieldValue operations (arrayUnion, arrayRemove)
-      final Map<String, dynamic> fieldValueUpdates = {};
-      for (var entry in updates.entries) {
-        final key = entry.key;
-        final value = entry.value;
-
-        if (value is FieldValue) {
-          fieldValueUpdates[key] = value;
-        }
-      }
-
+      // Apply FieldValue operations after document creation
       if (fieldValueUpdates.isNotEmpty) {
-        batch.update(monthRef, fieldValueUpdates);
+        batch.update(monthRef, {
+          ...fieldValueUpdates,
+          IHF.lastUpdated: FieldValue.serverTimestamp(),
+        });
         console('✅ Applied FieldValue operations for $inspectorId');
       }
     } else {
-      // Month exists - UPDATE with FieldValue operations
+      // Month exists - UPDATE with all changes
       final Map<String, dynamic> updateMap = {};
 
-      for (var entry in updates.entries) {
-        final key = entry.key;
-        final value = entry.value;
+      // Add regular updates
+      updateMap.addAll(regularUpdates);
 
-        if (value is FieldValue) {
-          // Use FieldValue directly for arrayUnion, arrayRemove, increment
-          updateMap[key] = value;
-        } else if (key == IHF.recentScores) {
-          // Update recent scores array and avgScore
-          updateMap[key] = monthData[key];
-          updateMap[IHF.avgScore] = monthData[IHF.avgScore];
-        } else {
-          // Regular field updates
-          updateMap[key] = value;
-        }
-      }
+      // Add FieldValue operations
+      updateMap.addAll(fieldValueUpdates);
 
       // Always update lastUpdated
       updateMap[IHF.lastUpdated] = FieldValue.serverTimestamp();
