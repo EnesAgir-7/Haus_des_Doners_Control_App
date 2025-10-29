@@ -661,7 +661,7 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
         lastInspectionDate: null,
         lastInspectionScore: null,
         totalInspections: 0,
-        averageScore: 0.0,
+        averageScore: "0/0",
         status: 'active',
         last12MonthsScores: [],
         createdAt: DateTime.now(),

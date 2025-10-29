@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
+import 'package:haus_des_control/helpers/app_helpers.dart';
 
 import '../core/constants/firebase_constants.dart';
 import 'route_model.dart';
@@ -20,7 +21,7 @@ class BranchModel {
   final DateTime? lastInspectionDate;
   final String? lastInspectionScore;
   final int totalInspections;
-  final double averageScore;
+  final String averageScore;
   final String status;
   final List<String>? last12MonthsScores;
 
@@ -49,7 +50,7 @@ class BranchModel {
     this.stop,
   });
 
-factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
+  factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
     return BranchModel(
       id: id ?? '',
       name: data[BranchFields.name] ?? '',
@@ -57,7 +58,7 @@ factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
       templateId: data[BranchFields.templateId] ?? '',
       templateName: data[BranchFields.templateName] ?? '',
       region: data[BranchFields.region],
-      gps:  data[BranchFields.gps] as GeoPoint,
+      gps: data[BranchFields.gps] as GeoPoint,
       contactName: data[BranchFields.contactName] ?? '',
       contactPhone: data[BranchFields.contactPhone] ?? '',
       assignedInspector: data[BranchFields.assignedInspector] != null
@@ -80,7 +81,7 @@ factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
           : null,
       lastInspectionScore: data[BranchFields.lastInspectionScore],
       totalInspections: data[BranchFields.totalInspections] ?? 0,
-      averageScore: (data[BranchFields.averageScore] ?? 0.0).toDouble(),
+      averageScore: (data[BranchFields.averageScore] ?? "0/0"),
       status: data[BranchFields.status] ?? AppConstants.active,
       createdAt: data[BranchFields.createdAt] != null
           ? (data[BranchFields.createdAt] is Timestamp
@@ -109,7 +110,6 @@ factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
     );
   }
 
-
   factory BranchModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return BranchModel(
@@ -137,7 +137,7 @@ factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
           : null,
       lastInspectionScore: data[BranchFields.lastInspectionScore],
       totalInspections: data[BranchFields.totalInspections] ?? 0,
-      averageScore: (data[BranchFields.averageScore] ?? 0.0).toDouble(),
+      averageScore: (data[BranchFields.averageScore] ?? "0.0"),
       status: data[BranchFields.status] ?? AppConstants.active,
       createdAt: data[BranchFields.createdAt] != null
           ? (data[BranchFields.createdAt] as Timestamp).toDate()
@@ -174,7 +174,7 @@ factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
     DateTime? lastInspectionDate,
     String? lastInspectionScore,
     int? totalInspections,
-    double? averageScore,
+    String? averageScore,
     String? status,
     DateTime? createdAt,
     List<String>? last12MonthsScores,
@@ -271,6 +271,10 @@ factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
   bool get haveNoScores {
     return last12MonthsScores == null ||
         last12MonthsScores!.every((score) => score == '0');
+  }
+
+  String get averagePercent {
+    return calculatePerformancePercent(averageScore);
   }
 }
 

@@ -158,9 +158,7 @@ class AdminBranchService {
     required String branchId,
   }) async {
     final batch = _db.batch();
-    final branchRef = _db
-        .collection(_collectionBranches)
-        .doc(branchId);
+    final branchRef = _db.collection(_collectionBranches).doc(branchId);
 
     try {
       // 1️⃣ Unassign branch document
@@ -227,9 +225,7 @@ class AdminBranchService {
     String? oldInspectorId,
   }) async {
     final batch = _db.batch();
-    final branchRef = _db
-        .collection(_collectionBranches)
-        .doc(branchId);
+    final branchRef = _db.collection(_collectionBranches).doc(branchId);
 
     try {
       // 1️⃣ Update the branch document

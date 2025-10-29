@@ -17,7 +17,6 @@ Future<void> openInBrowser(String pdfUrl, BuildContext context) async {
   // }
 }
 
-
 Color getScoreColor(String scoreString) {
   if (!scoreString.contains('/')) return Colors.grey;
 
@@ -35,4 +34,23 @@ Color getScoreColor(String scoreString) {
   if (ratio <= 0.3) return Colors.green;
   if (ratio <= 0.6) return Colors.amber;
   return Colors.red;
+}
+
+String calculatePerformancePercent(averageScoreStr) {
+  final parts = averageScoreStr.split('/');
+  double percentage = 0.0;
+  if (parts.length == 2) {
+    final points = double.tryParse(parts[0]) ?? 0.0;
+    final total = double.tryParse(parts[1]) ?? 1.0;
+
+    if (total > 0) {
+      percentage = (points / total) * 100.0;
+    } else {
+      percentage = 0.0; // Avoid division by zero
+    }
+  } else {
+    percentage = double.tryParse(averageScoreStr) ?? 0.0;
+  }
+
+  return '${percentage.toStringAsFixed(0)}';
 }

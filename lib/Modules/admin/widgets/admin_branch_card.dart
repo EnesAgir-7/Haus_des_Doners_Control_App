@@ -44,10 +44,6 @@ class AdminBranchCard extends StatelessWidget {
               const SizedBox(height: 12.0),
               _buildNextInspectionInfo(),
             ],
-            if (branch.averageScore > 0) ...[
-              const SizedBox(height: 12.0),
-              _buildAverageScore(),
-            ],
           ],
         ),
       ),
@@ -105,28 +101,28 @@ class AdminBranchCard extends StatelessWidget {
             ],
           ),
         ),
-        _buildStatusBadge(),
+        _buildPerformancePercentage(),
       ],
     );
   }
 
-  Widget _buildStatusBadge() {
-    final color = _getStatusColor();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(20.0),
-        border: Border.all(color: color, width: 1),
-      ),
-      child: Text(
-        _getStatusText().toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontSize: 11.0,
-          fontWeight: FontWeight.w600,
+  Widget _buildPerformancePercentage() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.trending_up, color: Colors.green, size: 16.0),
+        const SizedBox(width: 4.0),
+        Text(
+          '${branch.averagePercent}%',
+          style: TextStyle(
+            color: _getAverageScoreColor(
+              double.tryParse(branch.averagePercent) ?? 0,
+            ),
+            fontSize: 14.0,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-      ),
+      ],
     );
   }
 
@@ -336,65 +332,6 @@ class AdminBranchCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  /// Average score display
-  Widget _buildAverageScore() {
-    final scoreColor = _getAverageScoreColor(branch.averageScore);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        color: scoreColor.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(10.0),
-        border: Border.all(color: scoreColor.withValues(alpha: 0.3), width: 1),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.trending_up, color: scoreColor, size: 16.0),
-          const SizedBox(width: 8.0),
-          Text(
-            'Average Performance',
-            style: TextStyle(color: Colors.grey.shade400, fontSize: 12.0),
-          ),
-          const Spacer(),
-          Text(
-            '${branch.averageScore.toStringAsFixed(1)}%',
-            style: TextStyle(
-              color: scoreColor,
-              fontSize: 14.0,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color _getStatusColor() {
-    switch (branch.status.toLowerCase()) {
-      case 'active':
-        return Colors.green;
-      case 'inactive':
-        return Colors.grey;
-      case 'pending':
-        return Colors.orange;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  String _getStatusText() {
-    switch (branch.status.toLowerCase()) {
-      case 'active':
-        return 'Active';
-      case 'inactive':
-        return 'Inactive';
-      case 'pending':
-        return 'Pending';
-      default:
-        return branch.status;
-    }
   }
 
   Color _getUrgencyColor(int days) {

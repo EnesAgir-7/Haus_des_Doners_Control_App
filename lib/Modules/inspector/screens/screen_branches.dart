@@ -464,7 +464,7 @@ class BranchDetailsSheet extends StatelessWidget {
         Expanded(
           child: _buildStatCard(
             label: LocaleKeys.average_score.tr(),
-            value: branch.averageScore.toStringAsFixed(1),
+            value: branch.averageScore,
             icon: Icons.star,
             color: Colors.amber,
           ),

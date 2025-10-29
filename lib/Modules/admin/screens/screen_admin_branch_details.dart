@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:haus_des_control/Modules/admin/widgets/admin_location_picker.dart';
@@ -429,13 +430,146 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         const SizedBox(height: 16),
         _buildContactCard(),
         const SizedBox(height: 16),
+
         if (!widget.branch.haveNoScores) ...[
+          _buildPerformanceSummary(),
+          const SizedBox(height: 12),
           buildBranchPerformanceChart(widget.branch.last12MonthsScores),
           const SizedBox(height: 16),
         ],
         _buildInspectorCard(),
         const SizedBox(height: 80),
       ],
+    );
+  }
+
+  Widget _buildPerformanceSummary() {
+    // Parse scores in "score/total" format
+    // Lower score = better (it's a defect count)
+    final parsedScores = widget.branch.last12MonthsScores!
+        .where((s) => s != '0' && s.contains('/'))
+        .map((s) {
+          final parts = s.split('/');
+          if (parts.length == 2) {
+            final score = double.tryParse(parts[0]) ?? 0;
+            final total = double.tryParse(parts[1]) ?? 1;
+
+            // Calculate performance: 100% - (score/total * 100)
+            // Example: 1/6 = 100% - (16.67%) = 83.33%... wait, let me recalculate
+            // Actually: (total - score) / total * 100
+            // Example: 1/6 = (6-1)/6 * 100 = 83.33%
+            // But you said 1/6 should be 100%...
+
+            // So the formula should be:
+            // If score is minimum (1), show 100%
+            // If score is maximum (total), show 0%
+            return ((total - score + 1) / total) * 100;
+          }
+          return 0.0;
+        })
+        .where((p) => p > 0)
+        .toList();
+
+    if (parsedScores.isEmpty) return SizedBox.shrink();
+
+    // Best = highest percentage (lowest defect count)
+    final bestScore = parsedScores.reduce((a, b) => a > b ? a : b);
+    // Worst = lowest percentage (highest defect count)
+    final worstScore = parsedScores.reduce((a, b) => a < b ? a : b);
+    // Trend = last month vs first month (positive = improving)
+    final trend = parsedScores.length >= 2
+        ? (parsedScores.last - parsedScores.first)
+        : 0.0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.lightBlack,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.analytics, color: AppColors.primaryRed, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                '12-Month Summary',
+                style: TextStyle(
+                  color: AppColors.primaryRed,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildSummaryItem(
+                  'Best',
+                  '${bestScore.toStringAsFixed(1)}%',
+                  Icons.trending_up,
+                  Colors.green,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildSummaryItem(
+                  'Worst',
+                  '${worstScore.toStringAsFixed(1)}%',
+                  Icons.trending_down,
+                  Colors.red,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildSummaryItem(
+                  'Trend',
+                  '${trend >= 0 ? '+' : ''}${trend.toStringAsFixed(1)}%',
+                  trend >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
+                  trend >= 0 ? Colors.green : Colors.red,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryItem(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.primaryDark.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              color: color,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(color: Colors.white60, fontSize: 11)),
+        ],
+      ),
     );
   }
 
@@ -580,8 +714,6 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   }
 
   Widget _buildStatsGrid() {
-    final performancePercent = 100 - widget.branch.averageScore;
-
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -604,9 +736,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         ),
         _buildCompactStatCard(
           label: 'Performance',
-          value: '${performancePercent.toStringAsFixed(1)}%',
+          value: '${widget.branch.averagePercent}%',
           icon: Icons.trending_up,
-          color: getBranchPerformanceColor(performancePercent),
+          color: getBranchPerformanceColor(
+            double.tryParse(widget.branch.averagePercent) ?? 0,
+          ),
         ),
         _buildCompactStatCard(
           label: 'Last Inspection',
@@ -701,6 +835,34 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             ],
           ),
           const SizedBox(height: 16),
+
+          // Branch ID
+          Row(
+            children: [
+              Expanded(
+                child: _buildInfoRow('Branch ID', widget.branch.id, Icons.tag),
+              ),
+              IconButton(
+                icon: Icon(Icons.content_copy, color: AppColors.primaryRed),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: widget.branch.id));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Copied to clipboard')),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Status with full display
+          _buildInfoRow(
+            'Status',
+            widget.branch.status.toUpperCase(),
+            Icons.circle,
+          ),
+          const SizedBox(height: 12),
+
           _buildCompactField(
             label: LocaleKeys.subsidiaries.tr(),
             controller: _nameController,
@@ -715,74 +877,74 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             icon: Icons.location_city,
           ),
           const SizedBox(height: 12),
-          // Location Picker
-          !_isEditing
-              ? SizedBox.shrink()
-              : InkWell(
-                  onTap: _isEditing ? _pickLocationFromMap : null,
+
+          // Show region even when not editing
+          if (!_isEditing && _regionController.text.isNotEmpty) ...[
+            _buildInfoRow('Location', _regionController.text, Icons.map),
+            const SizedBox(height: 12),
+          ],
+
+          // Location Picker (only in edit mode)
+          if (_isEditing) ...[
+            InkWell(
+              onTap: _pickLocationFromMap,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryDark.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: _isEditing
-                          ? AppColors.primaryDark.withValues(alpha: 0.6)
-                          : AppColors.primaryDark.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: _isEditing
-                            ? AppColors.primaryRed.withValues(alpha: 0.4)
-                            : Colors.white.withValues(alpha: 0.1),
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.map,
-                          color: _isEditing
-                              ? AppColors.primaryRed
-                              : Colors.white38,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Location',
-                                style: TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 11,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                _regionController.text.isEmpty
-                                    ? 'Tap to pick from map'
-                                    : _regionController.text,
-                                style: TextStyle(
-                                  color: _isEditing
-                                      ? Colors.white
-                                      : Colors.white70,
-                                  fontSize: 13,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (_isEditing)
-                          Icon(
-                            Icons.chevron_right,
-                            color: AppColors.primaryRed,
-                            size: 20,
-                          ),
-                      ],
-                    ),
+                  border: Border.all(
+                    color: AppColors.primaryRed.withValues(alpha: 0.4),
                   ),
                 ),
+                child: Row(
+                  children: [
+                    Icon(Icons.map, color: AppColors.primaryRed, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Location',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 11,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            _regionController.text.isEmpty
+                                ? 'Tap to pick from map'
+                                : _regionController.text,
+                            style: TextStyle(color: Colors.white, fontSize: 13),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: AppColors.primaryRed,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // GPS Coordinates
+          _buildInfoRow(
+            'GPS',
+            '${widget.branch.gps.latitude.toStringAsFixed(4)}, ${widget.branch.gps.longitude.toStringAsFixed(4)}',
+            Icons.gps_fixed,
+          ),
           const SizedBox(height: 12),
+
           // Template Selection
           InkWell(
             onTap: _showTemplateSelectionSheet,
@@ -881,6 +1043,12 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             'Created',
             widget.branch.createdAt.getFormattedDateTime(),
             Icons.event,
+          ),
+          const SizedBox(height: 8),
+          _buildInfoRow(
+            'Last Updated',
+            widget.branch.updatedAt.getFormattedDateTime(),
+            Icons.update,
           ),
         ],
       ),
@@ -1443,6 +1611,4 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     if (days <= 30) return Colors.orange;
     return Colors.red;
   }
-
- 
 }

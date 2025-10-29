@@ -211,7 +211,6 @@ class InspectorInspectionService {
     }
   }
 
-  // Helper: adds branch statistics update to batch
   Future<void> _prepareBranchStatisticsBatch({
     required WriteBatch batch,
     required String branchId,
@@ -224,19 +223,46 @@ class InspectorInspectionService {
 
     final data = branchDoc.data()!;
     final currentTotal = data[BranchFields.totalInspections] ?? 0;
-    final currentAverage = (data[BranchFields.averageRating] ?? 0.0).toDouble();
     final newTotal = currentTotal + 1;
 
-    // Extract numeric part from "3/12"
-    final inspectionParts = inspectionScore.split('/');
-    final numericScore = double.tryParse(inspectionParts.first) ?? 0.0;
+    // ✅ Get current cumulative average score (stored as "totalPoints/totalPossible")
+    final dynamic currentAverageData = data[BranchFields.averageScore];
+    String currentAverageScoreStr = "0/0";
 
-    // Calculate new average
+    // Handle both old (double) and new (string) format
+    if (currentAverageData is String) {
+      currentAverageScoreStr = currentAverageData;
+    } else if (currentAverageData is double || currentAverageData is int) {
+      // Migration: if old format exists, keep it as is for now
+      currentAverageScoreStr = "0/0";
+    }
+
+    final currentParts = currentAverageScoreStr.split('/');
+    final currentPoints =
+        int.tryParse(currentParts.isNotEmpty ? currentParts[0] : "0") ?? 0;
+    final currentPossible =
+        int.tryParse(currentParts.length > 1 ? currentParts[1] : "0") ?? 0;
+
+    // ✅ Parse new inspection score "8/16"
+    final inspectionParts = inspectionScore.split('/');
+    final newPoints = int.tryParse(inspectionParts[0]) ?? 0;
+    final newPossible =
+        int.tryParse(inspectionParts.length > 1 ? inspectionParts[1] : "0") ??
+        0;
+
+    // ✅ Accumulate: 10/20 + 8/16 = 18/36
+    final totalPoints = currentPoints + newPoints;
+    final totalPossible = currentPossible + newPossible;
+    final newAverageScore = "$totalPoints/$totalPossible";
+
+    // Calculate numeric average for averageRating field (for backward compatibility)
+    final numericScore = double.tryParse(inspectionParts.first) ?? 0.0;
+    final currentAverage = (data[BranchFields.averageRating] ?? 0.0).toDouble();
     final newAverage =
         ((currentAverage * currentTotal) + numericScore) / newTotal;
 
     // ✅ Handle last 12 scores
-    final List<dynamic> currentScores = List<String>.from(
+    final List<String> currentScores = List<String>.from(
       data[BranchFields.last12MonthsScores] ?? [],
     );
 
@@ -251,75 +277,64 @@ class InspectorInspectionService {
     batch.update(branchRef, {
       BranchFields.totalInspections: newTotal,
       BranchFields.lastInspectionDate: FieldValue.serverTimestamp(),
-      BranchFields.averageRating: newAverage,
+      BranchFields.averageRating: newAverage, // Keep for backward compatibility
+      BranchFields.averageScore: newAverageScore, 
       BranchFields.stop: null,
       BranchFields.lastInspectionScore: inspectionScore,
-      BranchFields.last12MonthsScores: trimmedScores, // ✅ trimmed list
+      BranchFields.last12MonthsScores: trimmedScores,
       BranchFields.updatedAt: FieldValue.serverTimestamp(),
     });
   }
 
-  // Future<void> _prepareInspectorHistoryBatch({
+  // Helper: adds branch statistics update to batch
+  // Future<void> _prepareBranchStatisticsBatch({
   //   required WriteBatch batch,
-  //   required String inspectorId,
+  //   required String branchId,
   //   required String inspectionScore,
   // }) async {
-  //   final inspectorRef = _db
-  //       .collection(Collections.inspectorStats)
-  //       .doc(inspectorId);
+  //   final branchRef = _db.collection(_collectionBranches).doc(branchId);
+  //   final branchDoc = await branchRef.get();
 
-  //   final inspectorDoc = await inspectorRef.get();
+  //   if (!branchDoc.exists) throw Exception('Branch not found');
 
-  //   if (inspectorDoc.exists) {
-  //     final data = inspectorDoc.data()!;
-  //     final currentTotal = data[IHF.totalInspections] ?? 0;
-  //     final currentAvg = (data[IHF.avgScore] ?? 0.0).toDouble();
-  //     final newTotal = currentTotal + 1;
+  //   final data = branchDoc.data()!;
+  //   final currentTotal = data[BranchFields.totalInspections] ?? 0;
+  //   final currentAverage = (data[BranchFields.averageRating] ?? 0.0).toDouble();
+  //   final newTotal = currentTotal + 1;
 
-  //     // Extract the numeric part from "3/12"
-  //     final inspectionParts = inspectionScore.split('/');
-  //     final numericScore = double.tryParse(inspectionParts.first) ?? 0.0;
+  //   // Extract numeric part from "3/12"
+  //   final inspectionParts = inspectionScore.split('/');
+  //   final numericScore = double.tryParse(inspectionParts.first) ?? 0.0;
 
-  //     // Calculate new average
-  //     final newAvg = ((currentAvg * currentTotal) + numericScore) / newTotal;
+  //   // Calculate new average
+  //   final newAverage =
+  //       ((currentAverage * currentTotal) + numericScore) / newTotal;
 
-  //     // Get current recentScores and append new score
-  //     final recentScores = data[IHF.recentScores] != null
-  //         ? List<String>.from(
-  //             (data[IHF.recentScores] as List<dynamic>).map(
-  //               (e) => e.toString(),
-  //             ),
-  //           )
-  //         : <String>[];
+  //   // ✅ Handle last 12 scores
+  //   final List<dynamic> currentScores = List<String>.from(
+  //     data[BranchFields.last12MonthsScores] ?? [],
+  //   );
 
-  //     recentScores.add(inspectionScore);
+  //   currentScores.add(inspectionScore);
 
-  //     // Keep only the last 10 scores
-  //     if (recentScores.length > 10) {
-  //       recentScores.removeRange(0, recentScores.length - 10);
-  //     }
+  //   // Keep only the last 12
+  //   final trimmedScores = currentScores.length > 12
+  //       ? currentScores.sublist(currentScores.length - 12)
+  //       : currentScores;
 
-  //     batch.update(inspectorRef, {
-  //       IHF.totalInspections: newTotal,
-  //       IHF.avgScore: newAvg,
-  //       IHF.recentScores: recentScores,
-  //       IHF.lastUpdated: FieldValue.serverTimestamp(),
-  //     });
-  //   } else {
-  //     // Create new inspector history doc if it does not exist
-  //     batch.set(inspectorRef, {
-  //       IHF.inspectorId: inspectorId,
-  //       IHF.totalInspections: 1,
-  //       IHF.avgScore: inspectionScore,
-  //       IHF.tasksTotal: 0,
-  //       IHF.tasksCompleted: 0,
-  //       IHF.recentScores: [inspectionScore],
-  //       IHF.vehicleIds: [],
-  //       IHF.branchesIds: [],
-  //       IHF.lastUpdated: FieldValue.serverTimestamp(),
-  //     });
-  //   }
+  //   // ✅ Update Firestore fields
+  //   batch.update(branchRef, {
+  //     BranchFields.totalInspections: newTotal,
+  //     BranchFields.lastInspectionDate: FieldValue.serverTimestamp(),
+  //     BranchFields.averageRating: newAverage,
+  //     BranchFields.stop: null,
+  //     BranchFields.lastInspectionScore: inspectionScore,
+  //     BranchFields.last12MonthsScores: trimmedScores, // ✅ trimmed list
+  //     BranchFields.updatedAt: FieldValue.serverTimestamp(),
+  //   });
   // }
+
+
 
   // Helper: adds route stop update to batch
   Future<void> _prepareStopCompletionBatch({

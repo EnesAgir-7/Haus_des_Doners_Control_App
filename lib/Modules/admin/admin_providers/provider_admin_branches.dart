@@ -188,11 +188,11 @@ class ProviderAdminBranches with ChangeNotifier {
         _setLoading(false);
         notifyListeners();
       },
-      onError: (error) {
-        _error = 'Branches stream error: $error';
-        _setLoading(false);
-        notifyListeners();
-      },
+      // onError: (error) {
+      //   _error = 'Branches stream error: $error';
+      //   _setLoading(false);
+      //   notifyListeners();
+      // },
     );
   }
 
@@ -217,7 +217,7 @@ class ProviderAdminBranches with ChangeNotifier {
     }
   }
 
-Future<void> deleteBranch({
+  Future<void> deleteBranch({
     required String branchId,
     required String? inspectorId,
   }) async {
