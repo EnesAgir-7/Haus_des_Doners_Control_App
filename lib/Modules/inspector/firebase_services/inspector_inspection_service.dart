@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../core/constants/app_constants.dart';
@@ -52,7 +53,10 @@ class InspectorInspectionService {
   }
 
   // Stream inspections by branch (real-time)
-  Stream<List<InspectionModel>> streamInspectionsByBranchAndInspector(String branchId, String inspectorId) {
+  Stream<List<InspectionModel>> streamInspectionsByBranchAndInspector(
+    String branchId,
+    String inspectorId,
+  ) {
     return _db
         .collection(_collection)
         .where(InspectionFields.branchId, isEqualTo: branchId)
@@ -216,6 +220,7 @@ class InspectorInspectionService {
     required String branchId,
     required String inspectionScore,
   }) async {
+    console(inspectionScore, tag: "///////////////////////////////////");
     final branchRef = _db.collection(_collectionBranches).doc(branchId);
     final branchDoc = await branchRef.get();
 
@@ -229,11 +234,12 @@ class InspectorInspectionService {
     final dynamic currentAverageData = data[BranchFields.averageScore];
     String currentAverageScoreStr = "0/0";
 
-    // Handle both old (double) and new (string) format
-    if (currentAverageData is String) {
+    // Handle both old (double), new (string), and null (first inspection) format
+    if (currentAverageData == null) {
+      currentAverageScoreStr = "0/0";
+    } else if (currentAverageData is String) {
       currentAverageScoreStr = currentAverageData;
     } else if (currentAverageData is double || currentAverageData is int) {
-      // Migration: if old format exists, keep it as is for now
       currentAverageScoreStr = "0/0";
     }
 
@@ -243,23 +249,20 @@ class InspectorInspectionService {
     final currentPossible =
         int.tryParse(currentParts.length > 1 ? currentParts[1] : "0") ?? 0;
 
-    // ✅ Parse new inspection score "8/16"
+    // ✅ Parse new inspection score "8.0/14" and convert to int
     final inspectionParts = inspectionScore.split('/');
-    final newPoints = int.tryParse(inspectionParts[0]) ?? 0;
+    final newPoints = (double.tryParse(inspectionParts[0]) ?? 0.0).toInt();
     final newPossible =
-        int.tryParse(inspectionParts.length > 1 ? inspectionParts[1] : "0") ??
-        0;
+        (double.tryParse(
+                  inspectionParts.length > 1 ? inspectionParts[1] : "0",
+                ) ??
+                0.0)
+            .toInt();
 
-    // ✅ Accumulate: 10/20 + 8/16 = 18/36
+    // ✅ Accumulate: 0/0 + 8/14 = 8/14
     final totalPoints = currentPoints + newPoints;
     final totalPossible = currentPossible + newPossible;
     final newAverageScore = "$totalPoints/$totalPossible";
-
-    // Calculate numeric average for averageRating field (for backward compatibility)
-    final numericScore = double.tryParse(inspectionParts.first) ?? 0.0;
-    final currentAverage = (data[BranchFields.averageRating] ?? 0.0).toDouble();
-    final newAverage =
-        ((currentAverage * currentTotal) + numericScore) / newTotal;
 
     // ✅ Handle last 12 scores
     final List<String> currentScores = List<String>.from(
@@ -277,8 +280,7 @@ class InspectorInspectionService {
     batch.update(branchRef, {
       BranchFields.totalInspections: newTotal,
       BranchFields.lastInspectionDate: FieldValue.serverTimestamp(),
-      BranchFields.averageRating: newAverage, // Keep for backward compatibility
-      BranchFields.averageScore: newAverageScore, 
+      BranchFields.averageScore: newAverageScore, // ✅ Only field for scoring
       BranchFields.stop: null,
       BranchFields.lastInspectionScore: inspectionScore,
       BranchFields.last12MonthsScores: trimmedScores,
@@ -333,8 +335,6 @@ class InspectorInspectionService {
   //     BranchFields.updatedAt: FieldValue.serverTimestamp(),
   //   });
   // }
-
-
 
   // Helper: adds route stop update to batch
   Future<void> _prepareStopCompletionBatch({
