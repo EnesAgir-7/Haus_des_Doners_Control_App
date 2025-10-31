@@ -26,9 +26,10 @@ class ScreenAdminSettings extends StatelessWidget {
         ),
         child: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(24),
             children: [
               _buildHeader(),
+              SizedBox(height: 12),
               _buildSectionTitle(context, 'Inspection Management'),
               _buildSettingsTile(
                 context,

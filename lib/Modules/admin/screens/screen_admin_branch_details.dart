@@ -21,10 +21,11 @@ import '../widgets/widgets_admin_branch_details.dart';
 import 'screen_admin_branch_edit.dart';
 import 'screen_admin_inspections.dart';
 
+// ignore: must_be_immutable
 class ScreenAdminBranchDetails extends StatefulWidget {
-  final BranchModel branch;
+  BranchModel branch;
 
-  const ScreenAdminBranchDetails({super.key, required this.branch});
+  ScreenAdminBranchDetails({super.key, required this.branch});
 
   @override
   State<ScreenAdminBranchDetails> createState() =>
@@ -48,7 +49,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         _detailsError = null;
       });
 
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 300));
 
       if (mounted) {
         setState(() => _isLoadingDetails = false);
@@ -226,13 +227,18 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     }
   }
 
-  void _navigateToEditScreen() {
-    Navigator.push(
+  Future _navigateToEditScreen() async {
+    final BranchModel? newBranch = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ScreenAdminEditBranch(branch: widget.branch),
       ),
     );
+
+    if (newBranch != null) {
+      widget.branch = newBranch;
+      setState(() {});
+    }
   }
 
   @override

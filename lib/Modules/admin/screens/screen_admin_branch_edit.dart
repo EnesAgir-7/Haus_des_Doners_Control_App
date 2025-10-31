@@ -1126,9 +1126,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
       if (mounted) {
         setState(() => _isSubmitting = false);
         showSnakBarr(context, 'Branch updated successfully');
-
-        // Pop twice to go back to branch list or details
-        Navigator.of(context).pop(true); // Return true to indicate success
+        Navigator.of(context).pop(updatedBranch);
       }
     } catch (e) {
       if (mounted) {

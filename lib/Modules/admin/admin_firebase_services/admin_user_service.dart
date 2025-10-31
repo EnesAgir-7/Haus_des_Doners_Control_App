@@ -48,8 +48,6 @@ class AdminUserService {
 
         return InspectorHistoryModel.fromMap(data);
       }
-
-      console('⚠️ No stats found for $monthKey');
       return null;
     } catch (e) {
       console('❌ Error fetching month stats: $e');
