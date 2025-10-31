@@ -5,13 +5,12 @@ import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/user_selection_sheet.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../models/user_model.dart';
 import '../../../models/vehicle_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../admin_providers/provider_admin_fleet.dart';
-import '../admin_providers/provider_admin_users.dart';
 
 class ScreenAdminVehicleDetails extends StatefulWidget {
   final VehicleModel vehicle;
@@ -375,9 +374,18 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () {
-              final inspectors = context.read<ProviderAdminUsers>().inspectors;
-              _showInspectorSelectionSheet(inspectors);
+            onPressed: () async {
+              final inspector = await showInspectorPicker(
+                context: context,
+                selectedInspectorId: _selectedInspectorId,
+              );
+
+              if (inspector != null) {
+                setState(() {
+                  _selectedInspectorId = inspector.id;
+                  _selectedInspectorName = inspector.name;
+                });
+              }
             },
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primaryRed,
@@ -413,120 +421,6 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
           ),
         ],
       ],
-    );
-  }
-
-  void _showInspectorSelectionSheet(List<UserModel> inspectors) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.primaryDark,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.6,
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Select Inspector',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: inspectors.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.person_off,
-                              color: Colors.white.withValues(alpha: 0.3),
-                              size: 48,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No inspectors available',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: inspectors.length,
-                        itemBuilder: (context, index) {
-                          final inspector = inspectors[index];
-                          final inspectorId = inspector.id;
-                          final inspectorName = inspector.name;
-
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _selectedInspectorId == inspectorId
-                                    ? AppColors.primaryRed
-                                    : Colors.white.withValues(alpha: 0.1),
-                              ),
-                            ),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: AppColors.primaryRed
-                                    .withValues(alpha: 0.2),
-                                child: Icon(
-                                  Icons.person,
-                                  color: AppColors.primaryRed,
-                                ),
-                              ),
-                              title: Text(
-                                inspectorName,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              trailing: _selectedInspectorId == inspectorId
-                                  ? Icon(
-                                      Icons.check_circle,
-                                      color: AppColors.primaryRed,
-                                    )
-                                  : null,
-                              onTap: () {
-                                setState(() {
-                                  _selectedInspectorId = inspectorId;
-                                  _selectedInspectorName = inspectorName;
-                                });
-                                Navigator.pop(context);
-                              },
-                            ),
-                          );
-                        },
-                      ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 

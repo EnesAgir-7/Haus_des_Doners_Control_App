@@ -6,13 +6,47 @@ import 'package:haus_des_control/helpers/app_helpers.dart';
 import '../core/constants/firebase_constants.dart';
 import 'route_model.dart';
 
+// Add these helper classes at the top
+class ContactPerson {
+  final String name;
+  final String phone;
+
+  ContactPerson({required this.name, required this.phone});
+
+  factory ContactPerson.fromMap(Map<String, dynamic> map) {
+    return ContactPerson(name: map['name'] ?? '', phone: map['phone'] ?? '');
+  }
+
+  Map<String, dynamic> toMap() {
+    return {'name': name, 'phone': phone};
+  }
+}
+
+class OpeningHours {
+  final String openingTime;
+  final String closingTime;
+
+  OpeningHours({required this.openingTime, required this.closingTime});
+
+  factory OpeningHours.fromMap(Map<String, dynamic> map) {
+    return OpeningHours(
+      openingTime: map['openingTime'] ?? '',
+      closingTime: map['closingTime'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {'openingTime': openingTime, 'closingTime': closingTime};
+  }
+}
+
 class BranchModel {
   final String id;
   final String name;
   final String address;
+  final String? region;
   String templateId;
   String templateName;
-  final String? region;
   final GeoPoint gps;
   final String contactName;
   final String contactPhone;
@@ -24,9 +58,20 @@ class BranchModel {
   final String averageScore;
   final String status;
   final List<String>? last12MonthsScores;
-
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  // New fields
+  final OpeningHours? openingHours;
+  final List<String>? openingDays;
+  final List<ContactPerson>? suppliers;
+  final DateTime? openingDay;
+  final String? donerPrices;
+  final String? software;
+  final String? shopInformation;
+  final List<ContactPerson>? branchOwners;
+  final List<ContactPerson>? branchManagers;
+  final String? branchEmail;
 
   BranchModel({
     required this.id,
@@ -34,7 +79,7 @@ class BranchModel {
     required this.templateName,
     required this.name,
     required this.address,
-    this.region,
+    required this.region,
     required this.gps,
     required this.contactName,
     required this.contactPhone,
@@ -48,6 +93,17 @@ class BranchModel {
     required this.createdAt,
     required this.updatedAt,
     this.stop,
+    // New fields
+    this.suppliers,
+    this.openingHours,
+    this.openingDays,
+    this.openingDay,
+    this.donerPrices,
+    this.software,
+    this.shopInformation,
+    this.branchOwners,
+    this.branchManagers,
+    this.branchEmail,
   });
 
   factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
@@ -55,9 +111,9 @@ class BranchModel {
       id: id ?? '',
       name: data[BranchFields.name] ?? '',
       address: data[BranchFields.address] ?? '',
+      region: data[BranchFields.region] ?? '',
       templateId: data[BranchFields.templateId] ?? '',
       templateName: data[BranchFields.templateName] ?? '',
-      region: data[BranchFields.region],
       gps: data[BranchFields.gps] as GeoPoint,
       contactName: data[BranchFields.contactName] ?? '',
       contactPhone: data[BranchFields.contactPhone] ?? '',
@@ -107,66 +163,54 @@ class BranchModel {
               ),
             )
           : List.filled(12, '0'),
+      // New fields
+      openingHours: data['openingHours'] != null
+          ? OpeningHours.fromMap(
+              Map<String, dynamic>.from(data['openingHours']),
+            )
+          : null,
+      openingDays: data['openingDays'] != null
+          ? List<String>.from(data['openingDays'])
+          : null,
+      suppliers: data['suppliers'] != null
+          ? (data['suppliers'] as List)
+                .map((e) => ContactPerson.fromMap(Map<String, dynamic>.from(e)))
+                .toList()
+          : null,
+      openingDay: data['openingDay'] != null
+          ? (data['openingDay'] is Timestamp
+                ? (data['openingDay'] as Timestamp).toDate()
+                : DateTime.tryParse(data['openingDay'].toString()))
+          : null,
+      donerPrices: data['donerPrices'],
+      software: data['software'],
+      shopInformation: data['shopInformation'],
+      branchOwners: data['branchOwners'] != null
+          ? (data['branchOwners'] as List)
+                .map((e) => ContactPerson.fromMap(Map<String, dynamic>.from(e)))
+                .toList()
+          : null,
+      branchManagers: data['branchManagers'] != null
+          ? (data['branchManagers'] as List)
+                .map((e) => ContactPerson.fromMap(Map<String, dynamic>.from(e)))
+                .toList()
+          : null,
+      branchEmail: data['branchEmail'],
     );
   }
 
   factory BranchModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    return BranchModel(
-      id: doc.id,
-      name: data[BranchFields.name] ?? '',
-      address: data[BranchFields.address] ?? '',
-      templateId: data[BranchFields.templateId] ?? '',
-      templateName: data[BranchFields.templateName] ?? '',
-      region: data[BranchFields.region],
-      gps: data[BranchFields.gps] as GeoPoint,
-      contactName: data[BranchFields.contactName] ?? '',
-      contactPhone: data[BranchFields.contactPhone] ?? '',
-      assignedInspector: data[BranchFields.assignedInspector] != null
-          ? AssignedInspector(
-              id:
-                  data[BranchFields.assignedInspector][InspectorFields.id] ??
-                  '',
-              name:
-                  data[BranchFields.assignedInspector][InspectorFields.name] ??
-                  '',
-            )
-          : null,
-      lastInspectionDate: data[BranchFields.lastInspectionDate] != null
-          ? (data[BranchFields.lastInspectionDate] as Timestamp).toDate()
-          : null,
-      lastInspectionScore: data[BranchFields.lastInspectionScore],
-      totalInspections: data[BranchFields.totalInspections] ?? 0,
-      averageScore: (data[BranchFields.averageScore] ?? "0.0"),
-      status: data[BranchFields.status] ?? AppConstants.active,
-      createdAt: data[BranchFields.createdAt] != null
-          ? (data[BranchFields.createdAt] as Timestamp).toDate()
-          : DateTime.now(),
-      updatedAt: data[BranchFields.updatedAt] != null
-          ? (data[BranchFields.updatedAt] as Timestamp).toDate()
-          : DateTime.now(),
-      stop: data[BranchFields.stop] != null
-          ? RouteStopModel.fromMap(
-              Map<String, dynamic>.from(data[BranchFields.stop]),
-            )
-          : null,
-      last12MonthsScores: data[BranchFields.last12MonthsScores] != null
-          ? List<String>.from(
-              (data[BranchFields.last12MonthsScores] as List<dynamic>).map(
-                (e) => e.toString(),
-              ),
-            )
-          : List.filled(12, '0'),
-    );
+    return BranchModel.fromMap(data, id: doc.id);
   }
 
   BranchModel copyWith({
     String? id,
     String? name,
     String? address,
+    String? region,
     String? templateId,
     String? templateName,
-    String? region,
     GeoPoint? gps,
     String? contactName,
     String? contactPhone,
@@ -178,17 +222,26 @@ class BranchModel {
     String? status,
     DateTime? createdAt,
     List<String>? last12MonthsScores,
-
     DateTime? updatedAt,
     RouteStopModel? stop,
+    OpeningHours? openingHours,
+    List<String>? openingDays,
+    List<ContactPerson>? suppliers,
+    DateTime? openingDay,
+    String? donerPrices,
+    String? software,
+    String? shopInformation,
+    List<ContactPerson>? branchOwners,
+    List<ContactPerson>? branchManagers,
+    String? branchEmail,
   }) {
     return BranchModel(
       id: id ?? this.id,
       name: name ?? this.name,
       address: address ?? this.address,
+      region: region ?? this.region,
       templateId: templateId ?? this.templateId,
       templateName: templateName ?? this.templateName,
-      region: region ?? this.region,
       gps: gps ?? this.gps,
       contactName: contactName ?? this.contactName,
       contactPhone: contactPhone ?? this.contactPhone,
@@ -202,6 +255,16 @@ class BranchModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       stop: stop ?? this.stop,
+      openingHours: openingHours ?? this.openingHours,
+      openingDays: openingDays ?? this.openingDays,
+      suppliers: suppliers ?? this.suppliers,
+      openingDay: openingDay ?? this.openingDay,
+      donerPrices: donerPrices ?? this.donerPrices,
+      software: software ?? this.software,
+      shopInformation: shopInformation ?? this.shopInformation,
+      branchOwners: branchOwners ?? this.branchOwners,
+      branchManagers: branchManagers ?? this.branchManagers,
+      branchEmail: branchEmail ?? this.branchEmail,
     );
   }
 
@@ -215,10 +278,12 @@ class BranchModel {
       BranchFields.contactPhone: contactPhone,
       BranchFields.templateId: templateId,
       BranchFields.templateName: templateName,
-      BranchFields.assignedInspector: {
-        InspectorFields.id: assignedInspector?.id,
-        InspectorFields.name: assignedInspector?.name,
-      },
+      BranchFields.assignedInspector: assignedInspector != null
+          ? {
+              InspectorFields.id: assignedInspector?.id,
+              InspectorFields.name: assignedInspector?.name,
+            }
+          : null,
       BranchFields.lastInspectionDate: lastInspectionDate != null
           ? Timestamp.fromDate(lastInspectionDate!)
           : null,
@@ -230,6 +295,21 @@ class BranchModel {
       BranchFields.createdAt: Timestamp.fromDate(createdAt),
       BranchFields.updatedAt: Timestamp.fromDate(updatedAt),
       BranchFields.stop: stop?.toMap(),
+      // New fields
+      BranchFields.openingHours: openingHours?.toMap(),
+      BranchFields.openingDays: openingDays,
+      BranchFields.suppliers: suppliers?.map((e) => e.toMap()).toList(),
+      BranchFields.openingDay: openingDay != null
+          ? Timestamp.fromDate(openingDay!)
+          : null,
+      BranchFields.donerPrices: donerPrices,
+      BranchFields.software: software,
+      BranchFields.shopInformation: shopInformation,
+      BranchFields.branchOwners: branchOwners?.map((e) => e.toMap()).toList(),
+      BranchFields.branchManagers: branchManagers
+          ?.map((e) => e.toMap())
+          .toList(),
+      BranchFields.branchEmail: branchEmail,
     };
   }
 
@@ -246,12 +326,10 @@ class BranchModel {
       final difference = nextDate.difference(DateTime.now());
       return difference.inDays;
     } catch (e) {
-      // Parsing failed
       return null;
     }
   }
 
-  // Helper: Last inspection text (Turkish)
   String get lastInspectionText {
     if (lastInspectionDate == null) return 'Not inspected yet';
     final days = daysSinceLastInspection!;

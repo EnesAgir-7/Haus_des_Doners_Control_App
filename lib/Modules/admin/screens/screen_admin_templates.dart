@@ -250,9 +250,9 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
-  static const int _minScore = 3;
-  static const int _maxScore = 6;
-  static const int _scoreSteps = 3;
+  // static const int _minScore = 3;
+  // static const int _maxScore = 6;
+  // static const int _scoreSteps = 3;
 
   @override
   void initState() {
@@ -664,8 +664,8 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
           child: Column(
             children: [
               _buildCategoryTitleRow(index, category),
-              const SizedBox(height: 16),
-              _buildMaxScoreSlider(category),
+              // const SizedBox(height: 16),
+              // _buildMaxScoreSlider(category),
             ],
           ),
         ),
@@ -759,86 +759,86 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
     );
   }
 
-  Widget _buildMaxScoreSlider(CategoryInput category) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.primaryRed.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Text(
-              'Max Score',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: SliderTheme(
-              data: SliderThemeData(
-                activeTrackColor: AppColors.primaryRed,
-                inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
-                thumbColor: Colors.white,
-                overlayColor: AppColors.primaryRed.withValues(alpha: 0.2),
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                trackHeight: 6,
-              ),
-              child: Slider(
-                value: category.maxScore.toDouble(),
-                min: _minScore.toDouble(),
-                max: _maxScore.toDouble(),
-                divisions: _scoreSteps,
-                label: category.maxScore.toString(),
-                onChanged: (value) {
-                  setState(() => category.maxScore = value.toInt());
-                },
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primaryRed,
-                  AppColors.primaryRed.withValues(alpha: 0.8),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryRed.withValues(alpha: 0.3),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Text(
-              '${category.maxScore}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildMaxScoreSlider(CategoryInput category) {
+  //   return Container(
+  //     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white.withValues(alpha: 0.05),
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+  //     ),
+  //     child: Row(
+  //       children: [
+  //         Container(
+  //           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+  //           decoration: BoxDecoration(
+  //             color: AppColors.primaryRed.withValues(alpha: 0.2),
+  //             borderRadius: BorderRadius.circular(8),
+  //           ),
+  //           child: const Text(
+  //             'Max Score',
+  //             style: TextStyle(
+  //               color: Colors.white,
+  //               fontSize: 12,
+  //               fontWeight: FontWeight.w600,
+  //             ),
+  //           ),
+  //         ),
+  //         const SizedBox(width: 12),
+  //         Expanded(
+  //           child: SliderTheme(
+  //             data: SliderThemeData(
+  //               activeTrackColor: AppColors.primaryRed,
+  //               inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
+  //               thumbColor: Colors.white,
+  //               overlayColor: AppColors.primaryRed.withValues(alpha: 0.2),
+  //               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+  //               trackHeight: 6,
+  //             ),
+  //             child: Slider(
+  //               value: category.maxScore.toDouble(),
+  //               min: _minScore.toDouble(),
+  //               max: _maxScore.toDouble(),
+  //               divisions: _scoreSteps,
+  //               label: category.maxScore.toString(),
+  //               onChanged: (value) {
+  //                 setState(() => category.maxScore = value.toInt());
+  //               },
+  //             ),
+  //           ),
+  //         ),
+  //         const SizedBox(width: 8),
+  //         Container(
+  //           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  //           decoration: BoxDecoration(
+  //             gradient: LinearGradient(
+  //               colors: [
+  //                 AppColors.primaryRed,
+  //                 AppColors.primaryRed.withValues(alpha: 0.8),
+  //               ],
+  //             ),
+  //             borderRadius: BorderRadius.circular(8),
+  //             boxShadow: [
+  //               BoxShadow(
+  //                 color: AppColors.primaryRed.withValues(alpha: 0.3),
+  //                 blurRadius: 4,
+  //                 offset: const Offset(0, 2),
+  //               ),
+  //             ],
+  //           ),
+  //           child: Text(
+  //             '${category.maxScore}',
+  //             style: const TextStyle(
+  //               color: Colors.white,
+  //               fontWeight: FontWeight.bold,
+  //               fontSize: 16,
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildSubmitButton() {
     return AppButton(

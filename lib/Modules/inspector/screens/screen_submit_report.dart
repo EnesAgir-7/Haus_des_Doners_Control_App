@@ -374,6 +374,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     required Function(String) onNotesChanged,
     required Function(File) onPhotoRemoved,
   }) {
+    final bool isRequired = score >= 3;
     final List<Map<String, dynamic>> allRatings = [
       {
         'emoji': '😃',
@@ -644,7 +645,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                 maxLines: 3,
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 decoration: InputDecoration(
-                  hintText: '${LocaleKeys.add_notes_optional.tr()} 📝',
+                  hintText: isRequired
+                      ? '${LocaleKeys.add_notes_optional.tr()} 🛑 Required'
+                      : '${LocaleKeys.add_notes_optional.tr()}',
                   hintStyle: TextStyle(
                     color: Colors.white.withValues(alpha: 0.3),
                   ),
@@ -807,6 +810,13 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                       },
                     ),
                   ),
+                ] else ...[
+                  SizedBox(height: 10),
+                  if (isRequired && photos.isEmpty)
+                    Text(
+                      '🛑 At least 1 photo required',
+                      style: const TextStyle(color: Colors.red, fontSize: 12),
+                    ),
                 ],
               ],
             ),
@@ -1442,7 +1452,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         icon = Icons.send_outlined;
         break;
       default:
-        message = "Uploading"; // Fallback
+        message = "Uploading";
         icon = Icons.cloud_upload_outlined;
     }
 
@@ -1604,6 +1614,30 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   }
 
   Future<void> _submitInspection(ProviderControl provider) async {
+    for (var category in provider.selectedTemplate!.categories) {
+      final score = provider.getCategoryScore(category.categoryId);
+      final photos = provider.getCategoryPhotos(category.categoryId);
+      final notes = provider.getCategoryNotes(category.categoryId);
+
+      if (score >= 3) {
+        // Check what's missing
+        final missingNotes = notes.trim().isEmpty;
+        final missingPhotos = photos.isEmpty;
+
+        if (missingNotes || missingPhotos) {
+          final message = StringBuffer(
+            'Category "${category.title}" requires:',
+          );
+          if (missingNotes) message.write(' note');
+          if (missingNotes && missingPhotos) message.write(' and');
+          if (missingPhotos) message.write(' at least 1 photo');
+
+          showSnakBarr(context, message.toString());
+          return;
+        }
+      }
+    }
+
     final confirm = await showDialog<bool>(
       context: context,
       barrierColor: Colors.black.withValues(alpha: 0.7),

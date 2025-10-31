@@ -4,9 +4,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_template_service.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
-import 'package:haus_des_control/core/console.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/user_selection_sheet.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/branch_model.dart';
 import '../admin_providers/provider_admin_branches.dart';
@@ -24,11 +24,18 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
-  final _regionController = TextEditingController();
   final _contactNameController = TextEditingController();
   final _contactPhoneController = TextEditingController();
   final _latitudeController = TextEditingController();
   final _longitudeController = TextEditingController();
+
+  // New controllers
+  final _branchEmailController = TextEditingController();
+  final _openingTimeController = TextEditingController();
+  final _closingTimeController = TextEditingController();
+  final _donerPricesController = TextEditingController();
+  final _softwareController = TextEditingController();
+  final _shopInformationController = TextEditingController();
 
   String? _selectedTemplateId;
   String? _selectedTemplateName;
@@ -36,15 +43,37 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
   String? _selectedInspectorName;
   bool _isSubmitting = false;
 
+  // New fields
+  List<String> _selectedOpeningDays = [];
+  DateTime? _selectedOpeningDay;
+  List<ContactPerson> _branchOwners = [];
+  List<ContactPerson> _branchManagers = [];
+  List<ContactPerson> _suppliers = [];
+
+  final List<String> _daysOfWeek = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
+
   @override
   void dispose() {
     _nameController.dispose();
     _addressController.dispose();
-    _regionController.dispose();
     _contactNameController.dispose();
     _contactPhoneController.dispose();
     _latitudeController.dispose();
     _longitudeController.dispose();
+    _branchEmailController.dispose();
+    _openingTimeController.dispose();
+    _closingTimeController.dispose();
+    _donerPricesController.dispose();
+    _softwareController.dispose();
+    _shopInformationController.dispose();
     super.dispose();
   }
 
@@ -77,14 +106,91 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                         return null;
                       },
                     ),
-
                     const SizedBox(height: 16),
                     _buildTextField(
-                      controller: _regionController,
-                      label: 'Region (Optional)',
-                      hint: 'Enter region',
-                      icon: Icons.map,
+                      controller: _branchEmailController,
+                      label: 'Branch Email',
+                      hint: 'Enter branch email for invoices and reports',
+                      icon: Icons.email,
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Branch email is required';
+                        }
+                        if (!value.contains('@')) {
+                          return 'Enter a valid email';
+                        }
+                        return null;
+                      },
                     ),
+
+                    const SizedBox(height: 24),
+                    _buildSectionHeader('Location', Icons.location_on),
+                    const SizedBox(height: 16),
+                    InkWell(
+                      onTap: () async {
+                        final result = await showLocationPickerDialog(
+                          context,
+                          initialLatitude: double.tryParse(
+                            _latitudeController.text,
+                          ),
+                          initialLongitude: double.tryParse(
+                            _longitudeController.text,
+                          ),
+                          googleMapsApiKey: dotenv.env['GOOGLE_MAPS_KEY']!,
+                        );
+
+                        if (result != null) {
+                          setState(() {
+                            _latitudeController.text = result['latitude']
+                                .toString();
+                            _longitudeController.text = result['longitude']
+                                .toString();
+                            _addressController.text = result['address']
+                                .toString();
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryDark.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.map, color: AppColors.primaryRed),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _latitudeController.text.isEmpty
+                                    ? 'Pick location from map'
+                                    : '${_latitudeController.text}, ${_longitudeController.text}',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      controller: _addressController,
+                      label: 'Address',
+                      hint: 'Enter branch address',
+                      icon: Icons.location_on,
+                      maxLines: 3,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Address is required';
+                        }
+                        return null;
+                      },
+                    ),
+
                     const SizedBox(height: 24),
                     _buildSectionHeader(
                       'Contact Information',
@@ -117,77 +223,130 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 24),
-                    _buildSectionHeader('Location (GPS)', Icons.gps_fixed),
-                    const SizedBox(height: 16),
-                    // Replace the latitude/longitude fields with this:
-                    InkWell(
-                      onTap: () async {
-                        final result = await showLocationPickerDialog(
-                          context,
-                          initialLatitude: double.tryParse(
-                            _latitudeController.text,
-                          ),
-                          initialLongitude: double.tryParse(
-                            _longitudeController.text,
-                          ),
-                          googleMapsApiKey: dotenv.env['GOOGLE_MAPS_KEY']!,
-                        );
 
-                        if (result != null) {
-                          console(
-                            "${result["address"]}  ${result["latitude"]} ${result["longitude"]} ",
-                          );
-                          setState(() {
-                            _latitudeController.text = result['latitude']
-                                .toString();
-                            _longitudeController.text = result['longitude']
-                                .toString();
-                            _addressController.text = result['address']
-                                .toString();
-                          });
+                    const SizedBox(height: 24),
+                    _buildSectionHeader('Opening Hours & Days', Icons.schedule),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildTimeField(
+                            controller: _openingTimeController,
+                            label: 'Opening Time',
+                            hint: 'HH:MM',
+                            icon: Icons.access_time,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildTimeField(
+                            controller: _closingTimeController,
+                            label: 'Closing Time',
+                            hint: 'HH:MM',
+                            icon: Icons.access_time_filled,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    _buildOpeningDaysSelector(),
+                    const SizedBox(height: 16),
+                    _buildDateField(
+                      label: 'Opening Day',
+                      hint: 'Select opening day',
+                      icon: Icons.calendar_today,
+                      selectedDate: _selectedOpeningDay,
+                      onTap: () async {
+                        final date = await showDatePicker(
+                          context: context,
+                          initialDate: _selectedOpeningDay ?? DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (date != null) {
+                          setState(() => _selectedOpeningDay = date);
                         }
                       },
-                      child: Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryDark.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.map, color: AppColors.primaryRed),
-                            SizedBox(width: 12),
-                            Text(
-                              _latitudeController.text.isEmpty
-                                  ? 'Pick location from map'
-                                  : '${_latitudeController.text}, ${_longitudeController.text}',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ),
+                    ),
+
+                    const SizedBox(height: 24),
+                    _buildSectionHeader('Branch Owners', Icons.business_center),
+                    const SizedBox(height: 16),
+                    _buildContactPersonList(
+                      persons: _branchOwners,
+                      onAdd: () => _showAddContactPersonDialog(
+                        title: 'Add Branch Owner',
+                        onSave: (person) {
+                          setState(() => _branchOwners.add(person));
+                        },
                       ),
+                      onRemove: (index) {
+                        setState(() => _branchOwners.removeAt(index));
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+                    _buildSectionHeader(
+                      'Branch Managers',
+                      Icons.manage_accounts,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildContactPersonList(
+                      persons: _branchManagers,
+                      onAdd: () => _showAddContactPersonDialog(
+                        title: 'Add Branch Manager',
+                        onSave: (person) {
+                          setState(() => _branchManagers.add(person));
+                        },
+                      ),
+                      onRemove: (index) {
+                        setState(() => _branchManagers.removeAt(index));
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    _buildSectionHeader('Suppliers', Icons.local_shipping),
+                    const SizedBox(height: 16),
+                    _buildContactPersonList(
+                      persons: _suppliers,
+                      onAdd: () => _showAddContactPersonDialog(
+                        title: 'Add Supplier',
+                        onSave: (person) {
+                          setState(() => _suppliers.add(person));
+                        },
+                      ),
+                      onRemove: (index) {
+                        setState(() => _suppliers.removeAt(index));
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+                    _buildSectionHeader('Additional Information', Icons.info),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      controller: _donerPricesController,
+                      label: 'Döner Prices',
+                      hint: 'Enter döner prices',
+                      icon: Icons.attach_money,
                     ),
                     const SizedBox(height: 16),
                     _buildTextField(
-                      controller: _addressController,
-                      label: 'Address',
-                      hint: 'Enter branch address',
-                      icon: Icons.location_on,
-                      maxLines: 3,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Address is required';
-                        }
-                        return null;
-                      },
+                      controller: _softwareController,
+                      label: 'Software',
+                      hint: 'Enter software used',
+                      icon: Icons.computer,
                     ),
+                    const SizedBox(height: 16),
+                    _buildTextField(
+                      controller: _shopInformationController,
+                      label: 'Shop Information',
+                      hint: 'Enter additional shop information',
+                      icon: Icons.description,
+                      maxLines: 5,
+                    ),
+
                     const SizedBox(height: 24),
                     _buildSectionHeader(
-                      'Questionnaire.& Inspector',
+                      'Questionnaire & Inspector',
                       Icons.assignment,
                     ),
                     const SizedBox(height: 16),
@@ -297,6 +456,332 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
     );
   }
 
+  Widget _buildTimeField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required IconData icon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () async {
+            final time = await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.now(),
+            );
+            if (time != null) {
+              controller.text = time.format(context);
+              setState(() {});
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.primaryDark.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: AppColors.primaryRed, size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  controller.text.isEmpty ? hint : controller.text,
+                  style: TextStyle(
+                    color: controller.text.isEmpty
+                        ? Colors.white.withValues(alpha: 0.4)
+                        : Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateField({
+    required String label,
+    required String hint,
+    required IconData icon,
+    required DateTime? selectedDate,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.primaryDark.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: AppColors.primaryRed, size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  selectedDate == null
+                      ? hint
+                      : '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}',
+                  style: TextStyle(
+                    color: selectedDate == null
+                        ? Colors.white.withValues(alpha: 0.4)
+                        : Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOpeningDaysSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Opening Days',
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: _showOpeningDaysSheet,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppColors.primaryDark.withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_month,
+                  color: AppColors.primaryRed,
+                  size: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _selectedOpeningDays.isEmpty
+                        ? 'Select opening days'
+                        : _selectedOpeningDays.join(', '),
+                    style: TextStyle(
+                      color: _selectedOpeningDays.isEmpty
+                          ? Colors.white.withValues(alpha: 0.4)
+                          : Colors.white,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white.withValues(alpha: 0.5),
+                  size: 16,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContactPersonList({
+    required List<ContactPerson> persons,
+    required VoidCallback onAdd,
+    required Function(int) onRemove,
+  }) {
+    if (persons.isEmpty) {
+      // 🔹 No contact persons → show full-width “Add” card
+      return GestureDetector(
+        onTap: onAdd,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          margin: const EdgeInsets.only(bottom: 8),
+          decoration: BoxDecoration(
+            color: AppColors.primaryRed.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: AppColors.primaryRed.withValues(alpha: 0.4),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.add_circle_outline,
+                color: AppColors.primaryRed,
+                size: 36,
+              ),
+              const SizedBox(height: 8),
+              const Text(
+                'Please click to add a contact person',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 🔹 When persons are available → show scrollable list with small “+” button
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              ...persons.asMap().entries.map((entry) {
+                final person = entry.value;
+                return Container(
+                  width: 200,
+                  margin: const EdgeInsets.only(right: 12, bottom: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryDark.withValues(alpha: 0.4),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CircleAvatar(
+                        radius: 18,
+                        backgroundColor: AppColors.primaryRed.withValues(
+                          alpha: 0.2,
+                        ),
+                        child: const Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              person.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.phone,
+                                  size: 14,
+                                  color: Colors.white60,
+                                ),
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    person.phone,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white60,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete,
+                          color: Colors.redAccent,
+                          size: 18,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onPressed: () => onRemove(entry.key),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+
+              // 🔹 Small “Add” card at the end
+              GestureDetector(
+                onTap: onAdd,
+                child: Container(
+                  width: 70,
+                  height: 70,
+                  margin: const EdgeInsets.only(right: 12, bottom: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryRed.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.primaryRed.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.add,
+                      color: AppColors.primaryRed,
+                      size: 30,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildTemplateSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -362,8 +847,6 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
   Widget _buildInspectorSelector() {
     return Consumer<ProviderAdminUsers>(
       builder: (context, userProvider, _) {
-        final inspectors = userProvider.inspectors;
-
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -377,7 +860,18 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
             ),
             const SizedBox(height: 8),
             InkWell(
-              onTap: () => _showInspectorSelectionSheet(inspectors),
+              onTap: () async {
+                final inspector = await showInspectorPicker(
+                  context: context,
+                );
+
+                if (inspector != null) {
+                  setState(() {
+                    _selectedInspectorId = inspector.id;
+                    _selectedInspectorName = inspector.name;
+                  });
+                }
+              },
               borderRadius: BorderRadius.circular(12),
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -441,6 +935,7 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
       },
     );
   }
+
 
   Widget _buildBottomBar() {
     return Container(
@@ -536,82 +1031,164 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
     );
   }
 
-  void _showInspectorSelectionSheet(List<dynamic> inspectors) {
+  void _showOpeningDaysSheet() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.primaryDark,
       builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.6,
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.6,
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Select Inspector',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Select Opening Days',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _daysOfWeek.length,
+                      itemBuilder: (context, index) {
+                        final day = _daysOfWeek[index];
+                        final isSelected = _selectedOpeningDays.contains(day);
+
+                        return CheckboxListTile(
+                          title: Text(
+                            day,
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          value: isSelected,
+                          activeColor: AppColors.primaryRed,
+                          checkColor: Colors.white,
+                          onChanged: (bool? value) {
+                            setModalState(() {
+                              if (value == true) {
+                                _selectedOpeningDays.add(day);
+                              } else {
+                                _selectedOpeningDays.remove(day);
+                              }
+                            });
+                            setState(() {});
+                          },
+                        );
+                      },
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                  ElevatedButton(
                     onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryRed,
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                    child: const Text('Done'),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: inspectors.isEmpty
-                    ? Center(
-                        child: Text(
-                          'No inspectors available',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                          ),
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: inspectors.length,
-                        itemBuilder: (context, index) {
-                          final inspector = inspectors[index];
-                          // Adjust these field names based on your inspector model
-                          final inspectorId = inspector.id ?? inspector['id'];
-                          final inspectorName =
-                              inspector.name ?? inspector['name'] ?? 'Unknown';
+            );
+          },
+        );
+      },
+    );
+  }
 
-                          return ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: AppColors.primaryRed.withValues(
-                                alpha: 0.2,
-                              ),
-                              child: Icon(
-                                Icons.person,
-                                color: AppColors.primaryRed,
-                              ),
-                            ),
-                            title: Text(
-                              inspectorName,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            onTap: () {
-                              setState(() {
-                                _selectedInspectorId = inspectorId;
-                                _selectedInspectorName = inspectorName;
-                              });
-                              Navigator.pop(context);
-                            },
-                          );
-                        },
-                      ),
+  void _showAddContactPersonDialog({
+    required String title,
+    required Function(ContactPerson) onSave,
+  }) {
+    final nameController = TextEditingController();
+    final phoneController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColors.primaryDark,
+          title: Text(title, style: const TextStyle(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'Name',
+                  labelStyle: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primaryRed),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: phoneController,
+                style: const TextStyle(color: Colors.white),
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  labelText: 'Phone',
+                  labelStyle: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.primaryRed),
+                  ),
+                ),
               ),
             ],
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (nameController.text.isNotEmpty &&
+                    phoneController.text.isNotEmpty) {
+                  onSave(
+                    ContactPerson(
+                      name: nameController.text,
+                      phone: phoneController.text,
+                    ),
+                  );
+                  Navigator.pop(context);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryRed,
+              ),
+              child: const Text('Save'),
+            ),
+          ],
         );
       },
     );
@@ -633,6 +1210,17 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
       return;
     }
 
+    if (_latitudeController.text.isEmpty || _longitudeController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please select a location from the map'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isSubmitting = true);
 
     try {
@@ -640,18 +1228,16 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
       final longitude = double.parse(_longitudeController.text.trim());
 
       final branch = BranchModel(
-        id: '', // leave empty to generate automatically in Firestore
+        id: '',
         name: _nameController.text.trim(),
+        region: "",
         address: _addressController.text.trim(),
         templateId: _selectedTemplateId!,
         templateName: _selectedTemplateName!,
-        region: _regionController.text.trim().isEmpty
-            ? null
-            : _regionController.text.trim(),
         gps: GeoPoint(latitude, longitude),
         contactName: _contactNameController.text.trim(),
         contactPhone: _contactPhoneController.text.trim(),
-        stop: null, // optional, assign if you have a stop
+        stop: null,
         assignedInspector: _selectedInspectorId != null
             ? AssignedInspector(
                 id: _selectedInspectorId!,
@@ -666,10 +1252,37 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
         last12MonthsScores: [],
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
+        // New fields
+        branchEmail: _branchEmailController.text.trim().isNotEmpty
+            ? _branchEmailController.text.trim()
+            : null,
+        openingHours:
+            _openingTimeController.text.isNotEmpty &&
+                _closingTimeController.text.isNotEmpty
+            ? OpeningHours(
+                openingTime: _openingTimeController.text,
+                closingTime: _closingTimeController.text,
+              )
+            : null,
+        openingDays: _selectedOpeningDays.isNotEmpty
+            ? _selectedOpeningDays
+            : null,
+        openingDay: _selectedOpeningDay,
+        suppliers: _suppliers.isNotEmpty ? _suppliers : null,
+        donerPrices: _donerPricesController.text.trim().isNotEmpty
+            ? _donerPricesController.text.trim()
+            : null,
+        software: _softwareController.text.trim().isNotEmpty
+            ? _softwareController.text.trim()
+            : null,
+        shopInformation: _shopInformationController.text.trim().isNotEmpty
+            ? _shopInformationController.text.trim()
+            : null,
+        branchOwners: _branchOwners.isNotEmpty ? _branchOwners : null,
+        branchManagers: _branchManagers.isNotEmpty ? _branchManagers : null,
       );
 
       final provider = context.read<ProviderAdminBranches>();
-      // You'll need to implement this method in your provider
       final success = await provider.addBranch(branch: branch);
 
       if (mounted) {

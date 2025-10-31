@@ -1,26 +1,22 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
-import 'package:haus_des_control/Modules/admin/widgets/admin_location_picker.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/extensions.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
+import '../../../common_services/user_selection_sheet.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../helpers/app_helpers.dart';
 import '../../../models/branch_model.dart';
 import '../../../models/route_model.dart';
-import '../../../models/user_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/app_button.dart';
 import '../../inspector/widgets/custom_toast.dart';
-import '../admin_firebase_services/admin_template_service.dart';
 import '../admin_providers/provider_admin_branches.dart';
 import '../widgets/admin_branch_chart.dart';
-import '../widgets/admin_template_selection_sheet.dart';
 import '../widgets/widgets_admin_branch_details.dart';
 import 'screen_admin_inspections.dart';
 
@@ -35,39 +31,12 @@ class ScreenAdminBranchDetails extends StatefulWidget {
 }
 
 class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
-  late TextEditingController _nameController;
-  late TextEditingController _addressController;
-  late TextEditingController _regionController;
-  late TextEditingController _contactNameController;
-  late TextEditingController _contactPhoneController;
-
-  bool _isEditing = false;
   bool _isLoadingDetails = true;
   String? _detailsError;
-
-  // Location data
-  double? _latitude;
-  double? _longitude;
-
-  final TemplateHelper _templateHelper = TemplateHelper();
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.branch.name);
-    _addressController = TextEditingController(text: widget.branch.address);
-    _regionController = TextEditingController(text: widget.branch.region ?? '');
-    _contactNameController = TextEditingController(
-      text: widget.branch.contactName,
-    );
-    _contactPhoneController = TextEditingController(
-      text: widget.branch.contactPhone,
-    );
-
-    // Initialize lat/lng if available
-    _latitude = widget.branch.gps.latitude;
-    _longitude = widget.branch.gps.longitude;
-
     _loadBranchDetails();
   }
 
@@ -93,75 +62,10 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     }
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _addressController.dispose();
-    _regionController.dispose();
-    _contactNameController.dispose();
-    _contactPhoneController.dispose();
-    super.dispose();
-  }
-
-  void _toggleEdit() {
-    if (_isEditing) {
-      _nameController.text = widget.branch.name;
-      _addressController.text = widget.branch.address;
-      _regionController.text = widget.branch.region ?? '';
-      _contactNameController.text = widget.branch.contactName;
-      _contactPhoneController.text = widget.branch.contactPhone;
-      _latitude = widget.branch.gps.latitude;
-      _longitude = widget.branch.gps.longitude;
-    }
-    setState(() => _isEditing = !_isEditing);
-  }
-
-  Future<void> _saveChanges() async {
-    final provider = context.read<ProviderAdminBranches>();
-    try {
-      final updatedBranch = widget.branch.copyWith(
-        name: _nameController.text,
-        address: _addressController.text,
-        region: _regionController.text.isEmpty ? null : _regionController.text,
-        contactName: _contactNameController.text,
-        contactPhone: _contactPhoneController.text,
-        gps: (_latitude != null && _longitude != null)
-            ? GeoPoint(_latitude!, _longitude!)
-            : widget.branch.gps,
-      );
-
-      await provider.updateBranch(updatedBranch);
-
-      if (mounted) {
-        setState(() => _isEditing = false);
-        showSnakBarr(context, "Branch updated successfully");
-      }
-    } catch (e) {
-      if (mounted) showSnakBarr(context, 'Error: $e');
-    }
-  }
-
-  Future<void> _pickLocationFromMap() async {
-    final result = await showLocationPickerDialog(
-      context,
-      initialLatitude: _latitude,
-      initialLongitude: _longitude,
-      googleMapsApiKey: dotenv.env['GOOGLE_MAPS_KEY']!,
-    );
-
-    if (result != null) {
-      setState(() {
-        _latitude = result['latitude'];
-        _longitude = result['longitude'];
-        _regionController.text = result['address'].toString();
-      });
-    }
-  }
-
   Future<void> _deleteBranch() async {
     final nameController = TextEditingController();
 
-    // 🟡 Check if branch is already in inspector's route
+    // Check if branch is in inspector's route
     if (widget.branch.stop != null) {
       await showDialog(
         context: context,
@@ -196,7 +100,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
       return;
     }
 
-    // 🟢 Normal delete flow if branch.stop == null
+    // Normal delete flow
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -308,83 +212,63 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     }
   }
 
+  void _navigateToEditScreen() {
+    // TODO: Navigate to edit screen when it's created
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (_) => ScreenAdminEditBranch(branch: widget.branch),
+    //   ),
+    // );
+    showSnakBarr(context, 'Edit screen will be implemented next');
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isTablet = MediaQuery.of(context).size.width > 600;
+    final isTablet = ResponsiveBreakpoints.of(context).isTablet;
 
     return Scaffold(
       appBar: CustomAppBar(
         actions: [
-          if (!_isEditing)
-            PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, color: Colors.white),
-              color: AppColors.lightBlack,
-              onSelected: (value) {
-                if (value == 'delete') {
-                  _deleteBranch();
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Delete Branch',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ],
-                  ),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: Colors.white),
+            color: AppColors.lightBlack,
+            onSelected: (value) {
+              if (value == 'edit') {
+                _navigateToEditScreen();
+              } else if (value == 'delete') {
+                _deleteBranch();
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, color: AppColors.primaryRed, size: 20),
+                    const SizedBox(width: 12),
+                    Text('Edit Branch', style: TextStyle(color: Colors.white)),
+                  ],
                 ),
-              ],
-            ),
-          IconButton(
-            icon: Icon(
-              _isEditing ? Icons.close : Icons.edit,
-              color: Colors.white,
-            ),
-            onPressed: _toggleEdit,
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                    const SizedBox(width: 12),
+                    Text('Delete Branch', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
           ),
-          if (_isEditing)
-            Consumer<ProviderAdminBranches>(
-              builder: (context, provider, _) {
-                return IconButton(
-                  icon: provider.isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.check, color: Colors.white),
-                  onPressed: provider.isLoading ? null : _saveChanges,
-                );
-              },
-            ),
         ],
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primaryRed.withValues(alpha: 0.08),
-              AppColors.primaryDark,
-              AppColors.primaryDark,
-            ],
-            stops: const [0.0, 0.25, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: _isLoadingDetails
-              ? _buildLoadingState()
-              : _buildContent(isTablet),
-        ),
+      body: SafeArea(
+        child: _isLoadingDetails
+            ? _buildLoadingState()
+            : _buildContent(isTablet),
       ),
     );
   }
@@ -430,7 +314,49 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         const SizedBox(height: 16),
         _buildContactCard(),
         const SizedBox(height: 16),
-
+        if (widget.branch.branchEmail != null) ...[
+          _buildEmailCard(),
+          const SizedBox(height: 16),
+        ],
+        if (widget.branch.openingHours != null ||
+            widget.branch.openingDays != null ||
+            widget.branch.openingDay != null) ...[
+          _buildOperatingHoursCard(),
+          const SizedBox(height: 16),
+        ],
+        if (widget.branch.branchOwners != null &&
+            widget.branch.branchOwners!.isNotEmpty) ...[
+          _buildContactListCard(
+            title: 'Branch Owners',
+            icon: Icons.business_center,
+            contacts: widget.branch.branchOwners!,
+          ),
+          const SizedBox(height: 16),
+        ],
+        if (widget.branch.branchManagers != null &&
+            widget.branch.branchManagers!.isNotEmpty) ...[
+          _buildContactListCard(
+            title: 'Branch Managers',
+            icon: Icons.manage_accounts,
+            contacts: widget.branch.branchManagers!,
+          ),
+          const SizedBox(height: 16),
+        ],
+        if (widget.branch.suppliers != null &&
+            widget.branch.suppliers!.isNotEmpty) ...[
+          _buildContactListCard(
+            title: 'Suppliers',
+            icon: Icons.local_shipping,
+            contacts: widget.branch.suppliers!,
+          ),
+          const SizedBox(height: 16),
+        ],
+        if (widget.branch.donerPrices != null ||
+            widget.branch.software != null ||
+            widget.branch.shopInformation != null) ...[
+          _buildAdditionalInfoCard(),
+          const SizedBox(height: 16),
+        ],
         if (!widget.branch.haveNoScores) ...[
           _buildPerformanceSummary(),
           const SizedBox(height: 12),
@@ -443,9 +369,48 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     );
   }
 
+  Widget _buildTabletLayout() {
+    return Column(
+      children: [
+        _buildCompactHeader(),
+        const SizedBox(height: 20),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: Column(
+                children: [
+                  _buildStatsGrid(),
+                  const SizedBox(height: 20),
+                  if (!widget.branch.haveNoScores)
+                    buildBranchPerformanceChart(
+                      widget.branch.last12MonthsScores,
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 20),
+            Expanded(
+              flex: 2,
+              child: Column(
+                children: [
+                  _buildQuickInfoCard(),
+                  const SizedBox(height: 20),
+                  _buildContactCard(),
+                  const SizedBox(height: 20),
+                  _buildInspectorCard(),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 80),
+      ],
+    );
+  }
+
   Widget _buildPerformanceSummary() {
-    // Parse scores in "score/total" format
-    // Lower score = better (it's a defect count)
     final parsedScores = widget.branch.last12MonthsScores!
         .where((s) => s != '0' && s.contains('/'))
         .map((s) {
@@ -453,16 +418,6 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           if (parts.length == 2) {
             final score = double.tryParse(parts[0]) ?? 0;
             final total = double.tryParse(parts[1]) ?? 1;
-
-            // Calculate performance: 100% - (score/total * 100)
-            // Example: 1/6 = 100% - (16.67%) = 83.33%... wait, let me recalculate
-            // Actually: (total - score) / total * 100
-            // Example: 1/6 = (6-1)/6 * 100 = 83.33%
-            // But you said 1/6 should be 100%...
-
-            // So the formula should be:
-            // If score is minimum (1), show 100%
-            // If score is maximum (total), show 0%
             return ((total - score + 1) / total) * 100;
           }
           return 0.0;
@@ -472,22 +427,15 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
 
     if (parsedScores.isEmpty) return SizedBox.shrink();
 
-    // Best = highest percentage (lowest defect count)
     final bestScore = parsedScores.reduce((a, b) => a > b ? a : b);
-    // Worst = lowest percentage (highest defect count)
     final worstScore = parsedScores.reduce((a, b) => a < b ? a : b);
-    // Trend = last month vs first month (positive = improving)
     final trend = parsedScores.length >= 2
         ? (parsedScores.last - parsedScores.first)
         : 0.0;
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
-      ),
+      decoration: commonDeco.copyWith(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -573,60 +521,10 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     );
   }
 
-  Widget _buildTabletLayout() {
-    return Column(
-      children: [
-        _buildCompactHeader(),
-        const SizedBox(height: 20),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: Column(
-                children: [
-                  _buildStatsGrid(),
-                  const SizedBox(height: 20),
-                  if (!widget.branch.haveNoScores)
-                    buildBranchPerformanceChart(
-                      widget.branch.last12MonthsScores,
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              flex: 2,
-              child: Column(
-                children: [
-                  _buildQuickInfoCard(),
-                  const SizedBox(height: 20),
-                  _buildContactCard(),
-                  const SizedBox(height: 20),
-                  _buildInspectorCard(),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 80),
-      ],
-    );
-  }
-
   Widget _buildCompactHeader() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primaryRed.withValues(alpha: 0.15),
-            AppColors.lightBlack,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.primaryRed.withValues(alpha: 0.3)),
-      ),
+      decoration: commonDeco,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -776,11 +674,8 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.lightBlack,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
+        decoration: commonDeco,
+
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -812,11 +707,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   Widget _buildQuickInfoCard() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
-      ),
+      decoration: commonDeco,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -835,8 +726,6 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             ],
           ),
           const SizedBox(height: 16),
-
-          // Branch ID
           Row(
             children: [
               Expanded(
@@ -854,144 +743,34 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             ],
           ),
           const SizedBox(height: 12),
-
-          // Status with full display
           _buildInfoRow(
             'Status',
             widget.branch.status.toUpperCase(),
             Icons.circle,
           ),
           const SizedBox(height: 12),
-
-          _buildCompactField(
-            label: LocaleKeys.subsidiaries.tr(),
-            controller: _nameController,
-            enabled: _isEditing,
-            icon: Icons.business_outlined,
+          _buildInfoRow(
+            LocaleKeys.subsidiaries.tr(),
+            widget.branch.name,
+            Icons.business_outlined,
           ),
           const SizedBox(height: 12),
-          _buildCompactField(
-            label: LocaleKeys.region.tr(),
-            controller: _addressController,
-            enabled: _isEditing,
-            icon: Icons.location_city,
+          _buildInfoRow(
+            LocaleKeys.region.tr(),
+            widget.branch.address,
+            Icons.location_city,
           ),
           const SizedBox(height: 12),
-
-          // Show region even when not editing
-          if (!_isEditing && _regionController.text.isNotEmpty) ...[
-            _buildInfoRow('Location', _regionController.text, Icons.map),
-            const SizedBox(height: 12),
-          ],
-
-          // Location Picker (only in edit mode)
-          if (_isEditing) ...[
-            InkWell(
-              onTap: _pickLocationFromMap,
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryDark.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: AppColors.primaryRed.withValues(alpha: 0.4),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.map, color: AppColors.primaryRed, size: 20),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Location',
-                            style: TextStyle(
-                              color: Colors.white54,
-                              fontSize: 11,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            _regionController.text.isEmpty
-                                ? 'Tap to pick from map'
-                                : _regionController.text,
-                            style: TextStyle(color: Colors.white, fontSize: 13),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: AppColors.primaryRed,
-                      size: 20,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
-
-          // GPS Coordinates
           _buildInfoRow(
             'GPS',
             '${widget.branch.gps.latitude.toStringAsFixed(4)}, ${widget.branch.gps.longitude.toStringAsFixed(4)}',
             Icons.gps_fixed,
           ),
           const SizedBox(height: 12),
-
-          // Template Selection
-          InkWell(
-            onTap: _showTemplateSelectionSheet,
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.primaryDark.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.description_outlined,
-                    color: Colors.white54,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Questionnaire',
-                          style: TextStyle(color: Colors.white54, fontSize: 11),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          widget.branch.templateName,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: AppColors.primaryRed,
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
+          _buildInfoRow(
+            'Questionnaire',
+            widget.branch.templateName,
+            Icons.description_outlined,
           ),
         ],
       ),
@@ -1001,11 +780,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   Widget _buildContactCard() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
-      ),
+      decoration: commonDeco,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1024,19 +799,16 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             ],
           ),
           const SizedBox(height: 16),
-          _buildCompactField(
-            label: LocaleKeys.branch_representative.tr(),
-            controller: _contactNameController,
-            enabled: _isEditing,
-            icon: Icons.person_outline,
+          _buildInfoRow(
+            LocaleKeys.branch_representative.tr(),
+            widget.branch.contactName,
+            Icons.person_outline,
           ),
           const SizedBox(height: 12),
-          _buildCompactField(
-            label: 'Phone',
-            controller: _contactPhoneController,
-            enabled: _isEditing,
-            icon: Icons.phone_outlined,
-            keyboardType: TextInputType.phone,
+          _buildInfoRow(
+            'Phone',
+            widget.branch.contactPhone,
+            Icons.phone_outlined,
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
@@ -1055,14 +827,292 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     );
   }
 
+  Widget _buildEmailCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: commonDeco,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.email, color: AppColors.primaryRed, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Branch Email',
+                style: TextStyle(
+                  color: AppColors.primaryRed,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          _buildInfoRow(
+            'Email Address',
+            widget.branch.branchEmail!,
+            Icons.email_outlined,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOperatingHoursCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: commonDeco,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.schedule, color: AppColors.primaryRed, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Operating Hours',
+                style: TextStyle(
+                  color: AppColors.primaryRed,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (widget.branch.openingHours != null) ...[
+            _buildInfoRow(
+              'Opening Time',
+              widget.branch.openingHours!.openingTime,
+              Icons.access_time,
+            ),
+            const SizedBox(height: 12),
+            _buildInfoRow(
+              'Closing Time',
+              widget.branch.openingHours!.closingTime,
+              Icons.access_time_filled,
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (widget.branch.openingDays != null &&
+              widget.branch.openingDays!.isNotEmpty) ...[
+            _buildInfoRow('Opening Days', "", Icons.calendar_month),
+            Wrap(
+              spacing: 4,
+              runSpacing: 0,
+              children: widget.branch.openingDays!
+                  .map<Widget>(
+                    (day) => ChoiceChip(
+                      label: Text(day),
+                      selected: true,
+                      avatar: null,
+                      elevation: 3,
+                      // padding: EdgeInsets.zero,
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (widget.branch.openingDay != null) ...[
+            _buildInfoRow(
+              'Opening Day',
+              DateFormat('dd/MM/yyyy').format(widget.branch.openingDay!),
+              Icons.calendar_today,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactListCard({
+    required String title,
+    required IconData icon,
+    required List<ContactPerson> contacts,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: commonDeco,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 🔹 Title Row
+          Row(
+            children: [
+              Icon(icon, color: AppColors.primaryRed, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  color: AppColors.primaryRed,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // 🔹 Horizontal contact list
+          Scrollbar(
+            interactive: true,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: contacts.map((contact) {
+                  return Container(
+                    width: 200, // 👈 shrinked horizontal card width
+                    margin: const EdgeInsets.only(right: 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryDark.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: AppColors.primaryRed.withValues(
+                            alpha: 0.2,
+                          ),
+                          child: Icon(
+                            Icons.person,
+                            color: AppColors.primaryRed,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                contact.name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.phone,
+                                    color: Colors.white60,
+                                    size: 14,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      contact.phone,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Colors.white60,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAdditionalInfoCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: commonDeco,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.info, color: AppColors.primaryRed, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                'Additional Information',
+                style: TextStyle(
+                  color: AppColors.primaryRed,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (widget.branch.donerPrices != null) ...[
+            _buildInfoRow(
+              'Döner Prices',
+              widget.branch.donerPrices!,
+              Icons.attach_money,
+            ),
+            const SizedBox(height: 12),
+          ],
+          if (widget.branch.software != null) ...[
+            _buildInfoRow('Software', widget.branch.software!, Icons.computer),
+            const SizedBox(height: 12),
+          ],
+          if (widget.branch.shopInformation != null) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primaryDark.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.description, color: Colors.white38, size: 18),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Shop Information',
+                        style: const TextStyle(
+                          color: Colors.white60,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    widget.branch.shopInformation!,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildInspectorCard() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.lightBlack,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white12),
-      ),
+      decoration: commonDeco,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1219,76 +1269,40 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     );
   }
 
-  Widget _buildCompactField({
-    required String label,
-    required TextEditingController controller,
-    required bool enabled,
-    required IconData icon,
-    TextInputType? keyboardType,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: enabled
-            ? AppColors.primaryDark.withValues(alpha: 0.6)
-            : AppColors.primaryDark.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8),
-        // border: Border.all(
-        //   color: enabled
-        //       ? AppColors.primaryRed.withValues(alpha: 0.3)
-        //       : Colors.white.withValues(alpha: 0.1),
-        // ),
-      ),
-      child: TextField(
-        controller: controller,
-        enabled: enabled,
-        keyboardType: keyboardType,
-        style: TextStyle(
-          color: enabled ? Colors.white : Colors.white70,
-          fontSize: 14,
-        ),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: TextStyle(
-            color: enabled ? AppColors.primaryRed : Colors.white54,
-            fontSize: 12,
-          ),
-          prefixIcon: Icon(
-            icon,
-            color: enabled ? AppColors.primaryRed : Colors.white38,
-            size: 20,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 12,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildInfoRow(String label, String value, IconData icon) {
+    final isMobile = ResponsiveBreakpoints.of(context).isTablet;
+
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Flex(
+        direction: isMobile ? Axis.vertical : Axis.horizontal,
+        crossAxisAlignment: isMobile
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.white38, size: 18),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white60, fontSize: 12),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white38, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(color: Colors.white60, fontSize: 12),
+              ),
+            ],
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
+          SizedBox(width: isMobile ? 0 : 12, height: isMobile ? 4 : 0),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: isMobile ? 4 : 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: isMobile ? TextAlign.start : TextAlign.end,
             ),
           ),
         ],
@@ -1333,40 +1347,6 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     );
   }
 
-  void _showTemplateSelectionSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.primaryDark,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return TemplateSelectionSheet(
-          templateHelper: _templateHelper,
-          onTemplateSelected: (template) async {
-            final provider = context.read<ProviderAdminBranches>();
-
-            final bool done = await provider.updateBrachTemplate(
-              branchId: widget.branch.id,
-              templateId: template.id,
-              templateName: template.name,
-            );
-
-            if (mounted && done) {
-              widget.branch.templateId = template.id;
-              widget.branch.templateName = template.name;
-              setState(() {});
-              showSnakBarr(context, "Template updated successfully");
-            } else if (mounted) {
-              showSnakBarr(context, "Error updating template");
-            }
-          },
-        );
-      },
-    );
-  }
-
   void _showRouteStopInfo(RouteStopModel stop) {
     showModalBottomSheet(
       context: context,
@@ -1383,129 +1363,9 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     final provider = context.read<ProviderAdminBranches>();
 
     try {
-      final inspectors = context.read<ProviderAdminUsers>().inspectors;
-
-      if (!mounted) return;
-
-      if (inspectors.isEmpty) {
-        showSnakBarr(context, 'No available inspectors');
-        return;
-      }
-
-      final selected = await showModalBottomSheet<UserModel>(
+      final selected = await showInspectorPicker(
         context: context,
-        backgroundColor: AppColors.lightBlack,
-        isScrollControlled: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        builder: (context) => DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.3,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (context, scrollController) {
-            return Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Select Inspector',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: ListView.separated(
-                      controller: scrollController,
-                      itemCount: inspectors.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
-                      itemBuilder: (context, index) {
-                        final inspector = inspectors[index];
-                        return InkWell(
-                          onTap: () => Navigator.pop(context, inspector),
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryDark,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.white12),
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: AppColors.primaryRed,
-                                  child: Text(
-                                    inspector.name[0].toUpperCase(),
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        inspector.name,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Text(
-                                        inspector.serviceAccount,
-                                        style: const TextStyle(
-                                          color: Colors.white60,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (inspector.region != null)
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.withValues(alpha: 0.2),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      inspector.region!,
-                                      style: const TextStyle(
-                                        color: Colors.blue,
-                                        fontSize: 11,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+        selectedInspectorId: widget.branch.assignedInspector?.id,
       );
 
       if (selected != null && mounted) {
@@ -1523,24 +1383,16 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               name: selected.name,
             );
             setState(() {});
-            if (mounted) {
-              showSnakBarr(context, 'Inspector assigned successfully');
-            }
+            showSnakBarr(context, 'Inspector assigned successfully');
           } else {
-            if (mounted) {
-              showSnakBarr(context, 'Failed to assign inspector');
-            }
+            showSnakBarr(context, 'Failed to assign inspector');
           }
         } catch (e) {
-          if (mounted) {
-            showSnakBarr(context, 'Error: $e');
-          }
+          showSnakBarr(context, 'Error: $e');
         }
       }
     } catch (e) {
-      if (mounted) {
-        showSnakBarr(context, 'Error loading inspectors: $e');
-      }
+      showSnakBarr(context, 'Error loading inspectors: $e');
     }
   }
 

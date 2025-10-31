@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 
 import '../../../core/constants/app_colors.dart';
 
@@ -59,11 +60,7 @@ Widget buildBranchPerformanceChart(List<String>? last12MonthsScores) {
       const SizedBox(height: 16),
       Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.lightBlack,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white24),
-        ),
+        decoration: commonDeco,
         child: Column(
           children: [
             // Max score indicator
@@ -109,7 +106,9 @@ Widget buildBranchPerformanceChart(List<String>? last12MonthsScores) {
                       final height = (invertedPercentage / 100) * 160;
 
                       // Color based on percentage (lower score = green)
-                      final color = getBranchPerformanceColor(invertedPercentage);
+                      final color = getBranchPerformanceColor(
+                        invertedPercentage,
+                      );
 
                       // Calculate month number (1 = oldest, 12 = latest)
                       final monthNumber = index + 1;
@@ -217,6 +216,7 @@ Widget buildBranchPerformanceChart(List<String>? last12MonthsScores) {
     ],
   );
 }
+
 Widget _buildLegendItem(Color color, String label) {
   return Row(
     mainAxisSize: MainAxisSize.min,

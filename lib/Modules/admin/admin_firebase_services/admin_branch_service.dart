@@ -79,18 +79,21 @@ class AdminBranchService {
   /// Add a new branch
   Future<void> addBranch(BranchModel branch) async {
     try {
+      // Create a batch
+      final batch = _db.batch();
+
       // Use branch.id as doc id, or generate new one if empty
       final docRef = branch.id.isNotEmpty
           ? _db.collection(_collectionBranches).doc(branch.id)
           : _db.collection(_collectionBranches).doc();
 
-      await docRef.set({
+      // Add branch to batch
+      batch.set(docRef, {
         BranchFields.id: docRef.id,
         BranchFields.name: branch.name,
         BranchFields.address: branch.address,
         BranchFields.templateId: branch.templateId,
         BranchFields.templateName: branch.templateName,
-        BranchFields.region: branch.region,
         BranchFields.gps: branch.gps,
         BranchFields.contactName: branch.contactName,
         BranchFields.contactPhone: branch.contactPhone,
@@ -108,7 +111,40 @@ class AdminBranchService {
         BranchFields.last12MonthsScores: branch.last12MonthsScores ?? [],
         BranchFields.createdAt: Timestamp.now(),
         BranchFields.updatedAt: Timestamp.now(),
+        // New fields
+        BranchFields.branchEmail: branch.branchEmail,
+        BranchFields.openingHours: branch.openingHours?.toMap(),
+        BranchFields.openingDays: branch.openingDays,
+        BranchFields.openingDay: branch.openingDay != null
+            ? Timestamp.fromDate(branch.openingDay!)
+            : null,
+        BranchFields.suppliers: branch.suppliers
+            ?.map((e) => e.toMap())
+            .toList(),
+        BranchFields.donerPrices: branch.donerPrices,
+        BranchFields.software: branch.software,
+        BranchFields.shopInformation: branch.shopInformation,
+        BranchFields.branchOwners: branch.branchOwners
+            ?.map((e) => e.toMap())
+            .toList(),
+        BranchFields.branchManagers: branch.branchManagers
+            ?.map((e) => e.toMap())
+            .toList(),
       });
+
+      // If inspector is assigned, update their history
+      if (branch.assignedInspector != null) {
+        await _userService.updateInspectorHistoryBatch(
+          batch: batch,
+          inspectorId: branch.assignedInspector!.id,
+          updates: {
+            IHF.branchesIds: FieldValue.arrayUnion([docRef.id]),
+          },
+        );
+      }
+
+      // Commit the batch
+      await batch.commit();
 
       print('Branch added successfully with id: ${docRef.id}');
     } catch (e) {

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_branches.dart';
@@ -174,21 +175,34 @@ class DashboardCard extends StatelessWidget {
           // Header with admin info
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryRed.withValues(alpha: 0.2),
-                      AppColors.primaryRed.withValues(alpha: 0.1),
-                    ],
+              InkWell(
+                onTap: () async {
+                  await FirebaseFirestore.instance
+                      .collection('app_flags')
+                      .doc('flags')
+                      .set({
+                        'dynamic_score': true,
+                        'show_inspections': true,
+                        'show_tasks': false,
+                        'show_vehicles': true,
+                      });
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primaryRed.withValues(alpha: 0.2),
+                        AppColors.primaryRed.withValues(alpha: 0.1),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(
-                  Icons.admin_panel_settings,
-                  color: AppColors.primaryRed,
-                  size: 22,
+                  child: Icon(
+                    Icons.admin_panel_settings,
+                    color: AppColors.primaryRed,
+                    size: 22,
+                  ),
                 ),
               ),
               const SizedBox(width: 14),

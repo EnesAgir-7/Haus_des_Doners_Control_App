@@ -53,6 +53,16 @@ class BranchFields {
   static const String createdAt = 'createdAt';
   static const String updatedAt = 'updatedAt';
   static const String stop = 'stop'; // nested object
+  static const String branchEmail = 'branchEmail';
+  static const String openingHours = 'openingHours';
+  static const String openingDays = 'openingDays';
+  static const String openingDay = 'openingDay';
+  static const String suppliers = 'suppliers';
+  static const String donerPrices = 'donerPrices';
+  static const String software = 'software';
+  static const String shopInformation = 'shopInformation';
+  static const String branchOwners = 'branchOwners';
+  static const String branchManagers = 'branchManagers';
 }
 
 class InspectionFields {
