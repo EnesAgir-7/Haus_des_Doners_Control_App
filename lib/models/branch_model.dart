@@ -10,15 +10,16 @@ import 'route_model.dart';
 class ContactPerson {
   final String name;
   final String phone;
+  final String? role;
 
-  ContactPerson({required this.name, required this.phone});
+  ContactPerson({required this.name, required this.phone, this.role, });
 
   factory ContactPerson.fromMap(Map<String, dynamic> map) {
-    return ContactPerson(name: map['name'] ?? '', phone: map['phone'] ?? '');
+    return ContactPerson(name: map['name'] ?? '', phone: map['phone'] ?? '', role: map['role'] ?? '');
   }
 
   Map<String, dynamic> toMap() {
-    return {'name': name, 'phone': phone};
+    return {'name': name, 'phone': phone, 'role': role};
   }
 }
 

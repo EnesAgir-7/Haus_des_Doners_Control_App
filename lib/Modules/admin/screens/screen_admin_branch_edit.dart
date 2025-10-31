@@ -394,8 +394,10 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     _buildSectionHeader('Suppliers', Icons.local_shipping),
                     const SizedBox(height: 16),
                     _buildContactPersonList(
+                      showRole: true,
                       persons: _suppliers,
                       onAdd: () => _showAddContactPersonDialog(
+                        showRole: true,
                         title: 'Add Supplier',
                         onSave: (person) {
                           setState(() => _suppliers.add(person));
@@ -890,10 +892,12 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
 
   void _showAddContactPersonDialog({
     required String title,
+    bool showRole = false,
     required Function(ContactPerson) onSave,
   }) {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
+    final roleController = TextEditingController();
 
     showDialog(
       context: context,
@@ -942,6 +946,27 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              if (showRole)
+                TextField(
+                  controller: roleController,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'Role',
+                    labelStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primaryRed),
+                    ),
+                  ),
+                ),
             ],
           ),
           actions: [
@@ -952,11 +977,13 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
             ElevatedButton(
               onPressed: () {
                 if (nameController.text.isNotEmpty &&
-                    phoneController.text.isNotEmpty) {
+                    phoneController.text.isNotEmpty &&
+                    (!showRole || roleController.text.isNotEmpty)) {
                   onSave(
                     ContactPerson(
                       name: nameController.text,
                       phone: phoneController.text,
+                      role: roleController.text,
                     ),
                   );
                   Navigator.pop(context);
@@ -976,10 +1003,12 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
   void _showEditContactPersonDialog({
     required String title,
     required ContactPerson person,
+    bool showRole = false,
     required Function(ContactPerson) onSave,
   }) {
     final nameController = TextEditingController(text: person.name);
     final phoneController = TextEditingController(text: person.phone);
+    final roleController = TextEditingController(text: person.role);
 
     showDialog(
       context: context,
@@ -1028,6 +1057,27 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              if (showRole)
+                TextField(
+                  controller: roleController,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'Role',
+                    labelStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primaryRed),
+                    ),
+                  ),
+                ),
             ],
           ),
           actions: [
@@ -1043,6 +1093,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     ContactPerson(
                       name: nameController.text,
                       phone: phoneController.text,
+                      role: roleController.text,
                     ),
                   );
                   Navigator.pop(context);
@@ -1139,6 +1190,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
   Widget _buildContactPersonList({
     required List<ContactPerson> persons,
     required VoidCallback onAdd,
+    bool showRole = false,
     required Function(int) onRemove,
     required Function(int, ContactPerson) onEdit,
   }) {
@@ -1189,112 +1241,9 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
               ...persons.asMap().entries.map((entry) {
                 final person = entry.value;
                 final index = entry.key;
-                return Container(
-                  width: 200,
-                  margin: const EdgeInsets.only(right: 12, bottom: 8),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryDark.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: AppColors.primaryRed.withValues(
-                          alpha: 0.2,
-                        ),
-                        child: const Icon(
-                          Icons.person,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              person.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.phone,
-                                  size: 14,
-                                  color: Colors.white60,
-                                ),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    person.phone,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white60,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                InkWell(
-                                  onTap: () => _showEditContactPersonDialog(
-                                    title: 'Edit Contact',
-                                    person: person,
-                                    onSave: (updatedPerson) {
-                                      onEdit(index, updatedPerson);
-                                    },
-                                  ),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    child: Icon(
-                                      Icons.edit,
-                                      color: AppColors.primaryRed,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                InkWell(
-                                  onTap: () => onRemove(index),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    child: const Icon(
-                                      Icons.delete,
-                                      color: Colors.redAccent,
-                                      size: 16,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
+                return personCard(person, showRole, onEdit, index, onRemove);
               }),
 
-              // Add button
               GestureDetector(
                 onTap: onAdd,
                 child: Container(
@@ -1302,18 +1251,47 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                   height: 95,
                   margin: const EdgeInsets.only(right: 12, bottom: 8),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryRed.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
+                    gradient: LinearGradient(
+                      colors: [
+                        AppColors.primaryRed.withValues(alpha: 0.15),
+                        AppColors.primaryRed.withValues(alpha: 0.08),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: AppColors.primaryRed.withValues(alpha: 0.4),
+                      color: AppColors.primaryRed.withValues(alpha: 0.3),
+                      width: 1.5,
                     ),
                   ),
-                  child: Center(
-                    child: Icon(
-                      Icons.add,
-                      color: AppColors.primaryRed,
-                      size: 30,
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.primaryRed.withValues(alpha: 0.2),
+                          border: Border.all(
+                            color: AppColors.primaryRed.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.add,
+                          color: AppColors.primaryRed,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Add',
+                        style: TextStyle(
+                          color: AppColors.primaryRed,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -1321,6 +1299,236 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
           ),
         ),
       ],
+    );
+  }
+
+  Container personCard(
+    ContactPerson person,
+    bool showRole,
+    Function(int, ContactPerson) onEdit,
+    int index,
+    Function(int) onRemove,
+  ) {
+    return Container(
+      width: 220, // Slightly wider to accommodate role
+      margin: const EdgeInsets.only(right: 12, bottom: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primaryDark.withValues(alpha: 0.6),
+            AppColors.primaryDark.withValues(alpha: 0.3),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.15),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Avatar with better styling
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primaryRed.withValues(alpha: 0.8),
+                  AppColors.primaryRed.withValues(alpha: 0.4),
+                ],
+              ),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
+            ),
+            child: const Icon(Icons.person, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Name and Role section
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      person.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    if (person.role != null && person.role!.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryRed.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(3),
+                          border: Border.all(
+                            color: AppColors.primaryRed.withValues(alpha: 0.4),
+                          ),
+                        ),
+                        child: Text(
+                          person.role!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.phone,
+                        size: 12,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          person.phone,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // const SizedBox(height: 12),
+
+                // Action buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _showEditContactPersonDialog(
+                            showRole: showRole,
+                            title: 'Edit Contact',
+                            person: person,
+                            onSave: (updatedPerson) {
+                              onEdit(index, updatedPerson);
+                            },
+                          ),
+
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.edit_outlined,
+                                  color: AppColors.primaryRed,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Edit',
+                                  style: TextStyle(
+                                    color: AppColors.primaryRed,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // Divider
+                    Container(
+                      width: 1,
+                      height: 14,
+                      color: Colors.white.withValues(alpha: 0.2),
+                    ),
+
+                    // Delete button
+                    Expanded(
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => onRemove(index),
+                          borderRadius: const BorderRadius.only(
+                            topRight: Radius.circular(8),
+                            bottomRight: Radius.circular(8),
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.delete_outline,
+                                  color: Colors.redAccent,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Delete',
+                                  style: TextStyle(
+                                    color: Colors.redAccent,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

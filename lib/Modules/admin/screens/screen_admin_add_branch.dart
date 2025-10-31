@@ -309,6 +309,7 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                     _buildContactPersonList(
                       persons: _suppliers,
                       onAdd: () => _showAddContactPersonDialog(
+                        showRole: true,
                         title: 'Add Supplier',
                         onSave: (person) {
                           setState(() => _suppliers.add(person));
@@ -861,9 +862,7 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
             const SizedBox(height: 8),
             InkWell(
               onTap: () async {
-                final inspector = await showInspectorPicker(
-                  context: context,
-                );
+                final inspector = await showInspectorPicker(context: context);
 
                 if (inspector != null) {
                   setState(() {
@@ -935,7 +934,6 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
       },
     );
   }
-
 
   Widget _buildBottomBar() {
     return Container(
@@ -1111,10 +1109,12 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
 
   void _showAddContactPersonDialog({
     required String title,
+    bool showRole = false,
     required Function(ContactPerson) onSave,
   }) {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
+    final roleController = TextEditingController();
 
     showDialog(
       context: context,
@@ -1163,6 +1163,27 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              if (showRole)
+                TextField(
+                  controller: roleController,
+                  style: const TextStyle(color: Colors.white),
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: 'Role',
+                    labelStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.primaryRed),
+                    ),
+                  ),
+                ),
             ],
           ),
           actions: [
@@ -1173,11 +1194,13 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
             ElevatedButton(
               onPressed: () {
                 if (nameController.text.isNotEmpty &&
-                    phoneController.text.isNotEmpty) {
+                    phoneController.text.isNotEmpty &&
+                    (!showRole || roleController.text.isNotEmpty)) {
                   onSave(
                     ContactPerson(
                       name: nameController.text,
                       phone: phoneController.text,
+                      role: roleController.text,
                     ),
                   );
                   Navigator.pop(context);
