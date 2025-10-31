@@ -60,15 +60,10 @@ class AdminBranchService {
 
   Future<void> updateBranch(BranchModel branch) async {
     try {
-      await _db.collection(_collectionBranches).doc(branch.id).update({
-        BranchFields.name: branch.name,
-        BranchFields.address: branch.address,
-        BranchFields.contactName: branch.contactName,
-        BranchFields.contactPhone: branch.contactPhone,
-        BranchFields.region: branch.region,
-        BranchFields.gps: branch.gps,
-        BranchFields.updatedAt: Timestamp.now(),
-      });
+      await _db
+          .collection(_collectionBranches)
+          .doc(branch.id)
+          .update(branch.toMap());
       console('✅ Branch updated successfully');
     } catch (e) {
       print("❌ Error updating branch: $e");

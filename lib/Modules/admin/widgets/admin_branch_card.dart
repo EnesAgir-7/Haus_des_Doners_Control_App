@@ -101,27 +101,6 @@ class AdminBranchCard extends StatelessWidget {
             ],
           ),
         ),
-        _buildPerformancePercentage(),
-      ],
-    );
-  }
-
-  Widget _buildPerformancePercentage() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Icon(Icons.trending_up, color: Colors.green, size: 16.0),
-        const SizedBox(width: 4.0),
-        Text(
-          '${branch.averagePercent}%',
-          style: TextStyle(
-            color: _getAverageScoreColor(
-              double.tryParse(branch.averagePercent) ?? 0,
-            ),
-            fontSize: 14.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
       ],
     );
   }
@@ -338,13 +317,6 @@ class AdminBranchCard extends StatelessWidget {
     if (days == 0) return Colors.greenAccent;
     if (days <= 7) return Colors.greenAccent;
     if (days <= 30) return Colors.orangeAccent;
-    return Colors.redAccent;
-  }
-
-  Color _getAverageScoreColor(double percentage) {
-    if (percentage >= 80) return Colors.greenAccent;
-    if (percentage >= 60) return Colors.yellowAccent;
-    if (percentage >= 40) return Colors.orangeAccent;
     return Colors.redAccent;
   }
 }

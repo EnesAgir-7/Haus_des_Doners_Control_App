@@ -204,6 +204,7 @@ class ProviderAdminBranches with ChangeNotifier {
   }
 
   // Assign inspector to branch
+  // Update branch (complete update with all fields)
   Future<void> updateBranch(BranchModel branch) async {
     _setLoading(true);
     _error = null;
@@ -212,6 +213,7 @@ class ProviderAdminBranches with ChangeNotifier {
       await _branchService.updateBranch(branch);
     } catch (e) {
       _error = 'Error updating branch: $e';
+      rethrow;
     } finally {
       _setLoading(false);
     }

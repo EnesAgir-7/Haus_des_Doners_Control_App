@@ -18,6 +18,7 @@ import '../../inspector/widgets/custom_toast.dart';
 import '../admin_providers/provider_admin_branches.dart';
 import '../widgets/admin_branch_chart.dart';
 import '../widgets/widgets_admin_branch_details.dart';
+import 'screen_admin_branch_edit.dart';
 import 'screen_admin_inspections.dart';
 
 class ScreenAdminBranchDetails extends StatefulWidget {
@@ -122,13 +123,26 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               style: TextStyle(color: Colors.white70, fontSize: 14),
             ),
             const SizedBox(height: 8),
-            Text(
-              widget.branch.name,
-              style: TextStyle(
-                color: AppColors.primaryRed,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    widget.branch.name,
+                    style: TextStyle(
+                      color: AppColors.primaryRed,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+
+                IconButton(
+                  icon: Icon(Icons.content_copy, color: Colors.white),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: widget.branch.name));
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 16),
             TextField(
@@ -213,14 +227,12 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   }
 
   void _navigateToEditScreen() {
-    // TODO: Navigate to edit screen when it's created
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (_) => ScreenAdminEditBranch(branch: widget.branch),
-    //   ),
-    // );
-    showSnakBarr(context, 'Edit screen will be implemented next');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ScreenAdminEditBranch(branch: widget.branch),
+      ),
+    );
   }
 
   @override
@@ -416,13 +428,23 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         .map((s) {
           final parts = s.split('/');
           if (parts.length == 2) {
-            final score = double.tryParse(parts[0]) ?? 0;
-            final total = double.tryParse(parts[1]) ?? 1;
-            return ((total - score + 1) / total) * 100;
+            final totalScore = double.tryParse(parts[0]) ?? 0;
+            final maxScore = double.tryParse(parts[1]) ?? 1;
+
+            if (maxScore <= 0) return 0.0;
+
+            // Average score per question (scale to 1-4)
+            final avgScorePerQuestion = (totalScore / maxScore) * 4;
+
+            // Map to your 1-4 percentage
+            if (avgScorePerQuestion <= 1) return 100.0;
+            if (avgScorePerQuestion <= 2) return 75.0;
+            if (avgScorePerQuestion <= 3) return 25.0;
+            return 0.0;
           }
           return 0.0;
         })
-        .where((p) => p > 0)
+        .where((p) => p >= 0)
         .toList();
 
     if (parsedScores.isEmpty) return SizedBox.shrink();
@@ -459,7 +481,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               Expanded(
                 child: _buildSummaryItem(
                   'Best',
-                  '${bestScore.toStringAsFixed(1)}%',
+                  '${bestScore.toStringAsFixed(0)}%',
                   Icons.trending_up,
                   Colors.green,
                 ),
@@ -468,7 +490,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               Expanded(
                 child: _buildSummaryItem(
                   'Worst',
-                  '${worstScore.toStringAsFixed(1)}%',
+                  '${worstScore.toStringAsFixed(0)}%',
                   Icons.trending_down,
                   Colors.red,
                 ),
@@ -477,7 +499,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               Expanded(
                 child: _buildSummaryItem(
                   'Trend',
-                  '${trend >= 0 ? '+' : ''}${trend.toStringAsFixed(1)}%',
+                  '${trend >= 0 ? '+' : ''}${trend.toStringAsFixed(0)}%',
                   trend >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
                   trend >= 0 ? Colors.green : Colors.red,
                 ),

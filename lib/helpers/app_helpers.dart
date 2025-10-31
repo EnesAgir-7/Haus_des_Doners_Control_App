@@ -36,20 +36,48 @@ Color getScoreColor(String scoreString) {
   return Colors.red;
 }
 
-String calculatePerformancePercent(averageScoreStr) {
-  final parts = averageScoreStr.split('/');
-  double percentage = 0.0;
-  if (parts.length == 2) {
-    final points = double.tryParse(parts[0]) ?? 0.0;
-    final total = double.tryParse(parts[1]) ?? 1.0;
+// String calculatePerformancePercent(averageScoreStr) {
+//   final parts = averageScoreStr.split('/');
+//   double percentage = 0.0;
+//   if (parts.length == 2) {
+//     final points = double.tryParse(parts[0]) ?? 0.0;
+//     final total = double.tryParse(parts[1]) ?? 1.0;
 
-    if (total > 0) {
-      percentage = (points / total) * 100.0;
-    } else {
-      percentage = 0.0; // Avoid division by zero
-    }
+//     if (total > 0) {
+//       percentage = (points / total) * 100.0;
+//     } else {
+//       percentage = 0.0; // Avoid division by zero
+//     }
+//   } else {
+//     percentage = double.tryParse(averageScoreStr) ?? 0.0;
+//   }
+
+//   return '${percentage.toStringAsFixed(0)}';
+// }
+
+String calculatePerformancePercent(String totalScoreStr) {
+  // totalScoreStr example: "17/24" -> points / maxPoints
+  final parts = totalScoreStr.split('/');
+  if (parts.length != 2) return '100';
+
+  final points = double.tryParse(parts[0]) ?? 0.0;
+  final maxPoints = double.tryParse(parts[1]) ?? 1.0;
+
+  if (maxPoints <= 0) return '100';
+
+  // Calculate average score per question
+  final avgScorePerQuestion = points / maxPoints * 4; // scale to 1–4
+
+  // Map average score to your custom percentage
+  double percentage;
+  if (avgScorePerQuestion <= 1) {
+    percentage = 100;
+  } else if (avgScorePerQuestion <= 2) {
+    percentage = 75;
+  } else if (avgScorePerQuestion <= 3) {
+    percentage = 25;
   } else {
-    percentage = double.tryParse(averageScoreStr) ?? 0.0;
+    percentage = 0;
   }
 
   return '${percentage.toStringAsFixed(0)}';
