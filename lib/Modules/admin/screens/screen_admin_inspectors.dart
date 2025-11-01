@@ -84,7 +84,7 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
         Icon(Icons.people, color: Colors.lightBlueAccent),
         SizedBox(width: 6),
         Text(
-          'Inspectors',
+          LocaleKeys.inspectors.tr(), 
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
@@ -99,7 +99,7 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            '${provider.inspectors.length} Users',
+          '${provider.inspectors.length} ${LocaleKeys.users.tr()}', 
             style: TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
@@ -227,7 +227,7 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
             SizedBox(height: 16),
             Text(
               _searchController.text.isEmpty
-                  ? 'No users available'
+                  ? LocaleKeys.noUsersAvailable.tr()
                   : LocaleKeys.no_users_found.tr(),
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
@@ -420,7 +420,7 @@ class InspectorCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        inspector.active ? 'Active' : 'Inactive',
+                        inspector.active ? LocaleKeys.active.tr() : LocaleKeys.inactive.tr(),
                         style: TextStyle(
                           color: inspector.active ? Colors.green : Colors.red,
                           fontSize: 10,

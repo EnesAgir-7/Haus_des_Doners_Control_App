@@ -1,8 +1,10 @@
 // lib/screens/admin/widgets/template_selection_sheet.dart (New File)
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/inspection_template_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../admin_firebase_services/admin_template_service.dart';
 
 class TemplateSelectionSheet extends StatelessWidget {
@@ -35,7 +37,7 @@ class TemplateSelectionSheet extends StatelessWidget {
               _buildDragHandle(),
               SizedBox(height: 16),
               Text(
-                'Select Inspection Template',
+                LocaleKeys.selectInspectionTemplate.tr(),
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 18,
@@ -50,7 +52,7 @@ class TemplateSelectionSheet extends StatelessWidget {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Note: Updating the questionnaire may not be reflected in the branches already assigned in the inspectors\' routes. However, it will be updated for the new inspectors when they add this to their route.',
+                      LocaleKeys.templateUpdateNote.tr(),
                       style: TextStyle(
                         color: AppColors.white.withValues(alpha: 0.6),
                         fontSize: 12,
@@ -77,7 +79,7 @@ class TemplateSelectionSheet extends StatelessWidget {
                         snapshot.data!.isEmpty) {
                       return Center(
                         child: Text(
-                          'No templates available. Create one first.',
+                          LocaleKeys.noTemplatesAvailable.tr(),
                           style: TextStyle(color: Colors.white54),
                         ),
                       );
@@ -178,7 +180,7 @@ class TemplateSelectionSheet extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        '${template.categories.length} Categories',
+                        '${template.categories.length} ${LocaleKeys.categories.tr()}',
                         style: TextStyle(color: Colors.white54, fontSize: 12),
                       ),
                     ],

@@ -2,13 +2,14 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/core/extensions.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../common_services/user_selection_sheet.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../helpers/app_helpers.dart';
 import '../../../models/branch_model.dart';
 import '../../../models/route_model.dart';
@@ -80,21 +81,26 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             children: [
               Icon(Icons.info_outline, color: Colors.amber, size: 28),
               const SizedBox(width: 12),
-              const Text(
-                'Branch in Route',
+              Text(
+                LocaleKeys.branchInRoute.tr(),
                 style: TextStyle(color: Colors.white),
               ),
             ],
           ),
           content: Text(
-            'This branch is currently part of ${widget.branch.assignedInspector!.name} route.\n\n'
-            'It cannot be deleted until the route is completed or removed.',
+            LocaleKeys.branchInRouteMessage.tr().replaceAll(
+              '{inspectorName}',
+              widget.branch.assignedInspector!.name,
+            ),
             style: TextStyle(color: Colors.white70, fontSize: 14),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK', style: TextStyle(color: Colors.white70)),
+              child: Text(
+                LocaleKeys.ok.tr(),
+                style: TextStyle(color: Colors.white70),
+              ),
             ),
           ],
         ),
@@ -112,15 +118,18 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
             const SizedBox(width: 12),
-            const Text('Delete Branch', style: TextStyle(color: Colors.white)),
+            Text(
+              LocaleKeys.deleteBranch.tr(),
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'This action cannot be undone. To confirm, please type the branch name:',
+            Text(
+              LocaleKeys.deleteConfirmationMessage.tr(),
               style: TextStyle(color: Colors.white70, fontSize: 14),
             ),
             const SizedBox(height: 8),
@@ -150,7 +159,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               controller: nameController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Enter branch name',
+                hintText: LocaleKeys.enterBranchName.tr(),
                 hintStyle: const TextStyle(color: Colors.white38),
                 filled: true,
                 fillColor: AppColors.primaryDark,
@@ -173,8 +182,8 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'Cancel',
+            child: Text(
+              LocaleKeys.cancel.tr(),
               style: TextStyle(color: Colors.white70),
             ),
           ),
@@ -188,7 +197,10 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                             widget.branch.name.trim()) {
                           Navigator.pop(context, true);
                         } else {
-                          showSnakBarr(context, 'Branch name does not match');
+                          showSnakBarr(
+                            context,
+                            LocaleKeys.branchNameNotMatch.tr(),
+                          );
                         }
                       },
                 child: provider.isLoading
@@ -200,7 +212,10 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                           color: Colors.red,
                         ),
                       )
-                    : const Text('Delete', style: TextStyle(color: Colors.red)),
+                    : Text(
+                        LocaleKeys.delete.tr(),
+                        style: TextStyle(color: Colors.red),
+                      ),
               );
             },
           ),
@@ -217,11 +232,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         );
         if (mounted) {
           Navigator.pop(context);
-          showSnakBarr(context, 'Branch deleted successfully');
+          showSnakBarr(context, LocaleKeys.branchDeletedSuccess.tr());
         }
       } catch (e) {
         if (mounted) {
-          showSnakBarr(context, 'Error deleting branch: $e');
+          showSnakBarr(context, '${LocaleKeys.errorDeletingBranch.tr()}: $e');
         }
       }
     }
@@ -252,30 +267,36 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             icon: Icon(Icons.more_vert, color: Colors.white),
             color: AppColors.lightBlack,
             onSelected: (value) {
-              if (value == 'edit') {
+              if (value == AppConstants.edit) {
                 _navigateToEditScreen();
-              } else if (value == 'delete') {
+              } else if (value == AppConstants.delete) {
                 _deleteBranch();
               }
             },
             itemBuilder: (context) => [
               PopupMenuItem(
-                value: 'edit',
+                value: AppConstants.edit,
                 child: Row(
                   children: [
                     Icon(Icons.edit, color: AppColors.primaryRed, size: 20),
                     const SizedBox(width: 12),
-                    Text('Edit Branch', style: TextStyle(color: Colors.white)),
+                    Text(
+                      LocaleKeys.editBranch.tr(),
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ],
                 ),
               ),
               PopupMenuItem(
-                value: 'delete',
+                value: AppConstants.delete,
                 child: Row(
                   children: [
                     Icon(Icons.delete_outline, color: Colors.red, size: 20),
                     const SizedBox(width: 12),
-                    Text('Delete Branch', style: TextStyle(color: Colors.red)),
+                    Text(
+                      LocaleKeys.deleteBranch.tr() + '',
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ],
                 ),
               ),
@@ -345,7 +366,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         if (widget.branch.branchOwners != null &&
             widget.branch.branchOwners!.isNotEmpty) ...[
           _buildContactListCard(
-            title: 'Branch Owners',
+            title: LocaleKeys.branchOwners.tr(),
             icon: Icons.business_center,
             contacts: widget.branch.branchOwners!,
           ),
@@ -354,7 +375,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         if (widget.branch.branchManagers != null &&
             widget.branch.branchManagers!.isNotEmpty) ...[
           _buildContactListCard(
-            title: 'Branch Managers',
+            title: LocaleKeys.branchManagers.tr(),
             icon: Icons.manage_accounts,
             contacts: widget.branch.branchManagers!,
           ),
@@ -363,7 +384,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         if (widget.branch.suppliers != null &&
             widget.branch.suppliers!.isNotEmpty) ...[
           _buildContactListCard(
-            title: 'Suppliers',
+            title: LocaleKeys.suppliers.tr(),
             icon: Icons.local_shipping,
             contacts: widget.branch.suppliers!,
           ),
@@ -472,7 +493,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               Icon(Icons.analytics, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
-                '12-Month Summary',
+                LocaleKeys.twelveMonthSummary.tr(),
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
@@ -486,7 +507,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             children: [
               Expanded(
                 child: _buildSummaryItem(
-                  'Best',
+                  LocaleKeys.best.tr(),
                   '${bestScore.toStringAsFixed(0)}%',
                   Icons.trending_up,
                   Colors.green,
@@ -495,7 +516,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildSummaryItem(
-                  'Worst',
+                  LocaleKeys.worst.tr(),
                   '${worstScore.toStringAsFixed(0)}%',
                   Icons.trending_down,
                   Colors.red,
@@ -504,7 +525,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildSummaryItem(
-                  'Trend',
+                  LocaleKeys.trend.tr(),
                   '${trend >= 0 ? '+' : ''}${trend.toStringAsFixed(0)}%',
                   trend >= 0 ? Icons.arrow_upward : Icons.arrow_downward,
                   trend >= 0 ? Colors.green : Colors.red,
@@ -611,15 +632,15 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     IconData icon;
 
     switch (widget.branch.status.toLowerCase()) {
-      case 'active':
+      case AppConstants.active:
         color = Colors.green;
         icon = Icons.check_circle;
         break;
-      case 'inactive':
+      case AppConstants.inactive:
         color = Colors.grey;
         icon = Icons.cancel;
         break;
-      case 'pending':
+      case AppConstants.pending:
         color = Colors.orange;
         icon = Icons.access_time;
         break;
@@ -661,7 +682,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ),
         ),
         _buildCompactStatCard(
-          label: 'Performance',
+          label: LocaleKeys.performance.tr(),
           value: '${widget.branch.averagePercent}%',
           icon: Icons.trending_up,
           color: getBranchPerformanceColor(
@@ -669,18 +690,19 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ),
         ),
         _buildCompactStatCard(
-          label: 'Last Inspection',
+          label: LocaleKeys.lastInspection.tr(),
           value: widget.branch.daysSinceLastInspection != null
               ? '${widget.branch.daysSinceLastInspection}d'
-              : 'Never',
+              : LocaleKeys.never.tr(),
           icon: Icons.schedule,
           color: widget.branch.daysSinceLastInspection != null
               ? _getUrgencyColor(widget.branch.daysSinceLastInspection!)
               : Colors.grey,
         ),
         _buildCompactStatCard(
-          label: 'Last Score',
-          value: widget.branch.lastInspectionScore ?? 'N/A',
+          label: LocaleKeys.lastScore.tr(),
+          value:
+              widget.branch.lastInspectionScore ?? LocaleKeys.notAvailable.tr(),
           icon: Icons.star,
           color: widget.branch.lastInspectionScore != null
               ? getScoreColor(widget.branch.lastInspectionScore!)
@@ -744,7 +766,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               Icon(Icons.info_outline, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Branch Info',
+                LocaleKeys.branchInfo.tr(),
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
@@ -757,20 +779,24 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           Row(
             children: [
               Expanded(
-                child: _buildInfoRow('Branch ID', widget.branch.id, Icons.tag),
+                child: _buildInfoRow(
+                  LocaleKeys.branchId.tr(),
+                  widget.branch.id,
+                  Icons.tag,
+                ),
               ),
               IconButton(
                 icon: Icon(Icons.content_copy, color: AppColors.primaryRed),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: widget.branch.id));
-                  showSnakBarr(context, 'Copied to clipboard');
+                  showSnakBarr(context, LocaleKeys.copiedToClipboard.tr());
                 },
               ),
             ],
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
-            'Status',
+            LocaleKeys.status.tr(),
             widget.branch.status.toUpperCase(),
             Icons.circle,
           ),
@@ -788,13 +814,13 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
-            'GPS',
+            LocaleKeys.gps.tr(),
             '${widget.branch.gps.latitude.toStringAsFixed(4)}, ${widget.branch.gps.longitude.toStringAsFixed(4)}',
             Icons.gps_fixed,
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
-            'Questionnaire',
+            LocaleKeys.questionnaire.tr(),
             widget.branch.templateName,
             Icons.description_outlined,
           ),
@@ -815,7 +841,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               Icon(Icons.contact_phone, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Contact',
+                LocaleKeys.contact.tr(),
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
@@ -832,19 +858,19 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
-            'Phone',
+            LocaleKeys.phone.tr(),
             widget.branch.contactPhone,
             Icons.phone_outlined,
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
-            'Created',
+            LocaleKeys.created.tr(),
             widget.branch.createdAt.getFormattedDateTime(),
             Icons.event,
           ),
           const SizedBox(height: 8),
           _buildInfoRow(
-            'Last Updated',
+            LocaleKeys.lastUpdated.tr(),
             widget.branch.updatedAt.getFormattedDateTime(),
             Icons.update,
           ),
@@ -865,7 +891,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               Icon(Icons.email, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Branch Email',
+                LocaleKeys.branchEmail.tr(),
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
@@ -876,7 +902,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ),
           const SizedBox(height: 16),
           _buildInfoRow(
-            'Email Address',
+            LocaleKeys.emailAddress.tr(),
             widget.branch.branchEmail!,
             Icons.email_outlined,
           ),
@@ -897,7 +923,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               Icon(Icons.schedule, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Operating Hours',
+                LocaleKeys.operatingHours.tr(),
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
@@ -909,13 +935,13 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           const SizedBox(height: 16),
           if (widget.branch.openingHours != null) ...[
             _buildInfoRow(
-              'Opening Time',
+              LocaleKeys.openingTime.tr(),
               widget.branch.openingHours!.openingTime,
               Icons.access_time,
             ),
             const SizedBox(height: 12),
             _buildInfoRow(
-              'Closing Time',
+              LocaleKeys.closingTime.tr(),
               widget.branch.openingHours!.closingTime,
               Icons.access_time_filled,
             ),
@@ -923,7 +949,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ],
           if (widget.branch.openingDays != null &&
               widget.branch.openingDays!.isNotEmpty) ...[
-            _buildInfoRow('Opening Days', "", Icons.calendar_month),
+            _buildInfoRow(
+              '${LocaleKeys.openingDays.tr()}',
+              "",
+              Icons.calendar_month,
+            ),
             Wrap(
               spacing: 4,
               runSpacing: 0,
@@ -943,7 +973,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ],
           if (widget.branch.openingDay != null) ...[
             _buildInfoRow(
-              'Opening Day',
+              LocaleKeys.openingDay.tr(),
               DateFormat('dd/MM/yyyy').format(widget.branch.openingDay!),
               Icons.calendar_today,
             ),
@@ -1109,8 +1139,13 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                       GestureDetector(
                         onTap: () {
                           Clipboard.setData(ClipboardData(text: contact.phone));
-                          // Optional: Show a snackbar or toast
-                          showSnakBarr(context, 'Copied: ${contact.phone}');
+                          showSnakBarr(
+                            context,
+                            LocaleKeys.copiedPhone.tr().replaceAll(
+                              "{phone}",
+                              contact.phone,
+                            ),
+                          );
                         },
                         child: Container(
                           width: 20,
@@ -1154,7 +1189,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               Icon(Icons.info, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Additional Information',
+                LocaleKeys.additionalInformation.tr(),
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
@@ -1166,14 +1201,15 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           const SizedBox(height: 16),
           if (widget.branch.donerPrices != null) ...[
             _buildInfoRow(
-              'Döner Prices',
+              LocaleKeys.donerPrices.tr(),
               widget.branch.donerPrices!,
               Icons.attach_money,
             ),
             const SizedBox(height: 12),
           ],
           if (widget.branch.software != null) ...[
-            _buildInfoRow('Software', widget.branch.software!, Icons.computer),
+            _buildInfoRow(
+              LocaleKeys.software.tr(), widget.branch.software!, Icons.computer),
             const SizedBox(height: 12),
           ],
           if (widget.branch.shopInformation != null) ...[
@@ -1191,7 +1227,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                       Icon(Icons.description, color: Colors.white38, size: 18),
                       const SizedBox(width: 12),
                       Text(
-                        'Shop Information',
+                        LocaleKeys.shopInformation.tr(),
                         style: const TextStyle(
                           color: Colors.white60,
                           fontSize: 12,
@@ -1273,7 +1309,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         SizedBox(
           width: double.infinity,
           child: AppButton(
-            text: 'Assign Inspector',
+            text: LocaleKeys.assignInspector.tr(),
             onPressed: _showAssignInspectorDialog,
             padding: const EdgeInsets.symmetric(vertical: 12),
             borderRadius: 10,
@@ -1318,7 +1354,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               ),
               if (widget.branch.stop != null)
                 Tooltip(
-                  message: 'In Route',
+                  message: LocaleKeys.branchInRoute.tr(),
                   child: Icon(Icons.route, color: Colors.green, size: 20),
                 )
               else
@@ -1336,7 +1372,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           SizedBox(
             width: double.infinity,
             child: AppButton(
-              text: 'Change Inspector',
+              text:LocaleKeys.changeInspector.tr(),
               onPressed: _showAssignInspectorDialog,
               padding: const EdgeInsets.symmetric(vertical: 12),
               borderRadius: 10,
@@ -1346,7 +1382,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           Column(
             children: [
               Text(
-                '⚠️ Branch is in an active route',
+               LocaleKeys.branchInActiveRoute.tr(), 
                 style: TextStyle(
                   color: Colors.orange,
                   fontSize: 12,
@@ -1360,7 +1396,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 child: OutlinedButton.icon(
                   onPressed: () => _showRouteStopInfo(widget.branch.stop!),
                   icon: Icon(Icons.route, size: 18),
-                  label: Text('View Route'),
+                  label: Text(LocaleKeys.viewRoute.tr()),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white70,
                     side: BorderSide(color: Colors.white24),
@@ -1491,16 +1527,16 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               name: selected.name,
             );
             setState(() {});
-            showSnakBarr(context, 'Inspector assigned successfully');
+            showSnakBarr(context, LocaleKeys.inspectorAssignedSuccess.tr());
           } else {
-            showSnakBarr(context, 'Failed to assign inspector');
+            showSnakBarr(context, LocaleKeys.failedToAssignInspector.tr());
           }
         } catch (e) {
-          showSnakBarr(context, 'Error: $e');
+          showSnakBarr(context, '$e');
         }
       }
     } catch (e) {
-      showSnakBarr(context, 'Error loading inspectors: $e');
+      showSnakBarr(context, '${LocaleKeys.errorLoadingInspectors.tr()} $e');
     }
   }
 
@@ -1510,26 +1546,26 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.lightBlack,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'Unassign Inspector',
+        title: Text(
+          LocaleKeys.unassignInspector.tr(),
           style: TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'Are you sure you want to unassign this inspector?',
+        content: Text(
+          LocaleKeys.unassignInspectorConfirm.tr(), 
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'Cancel',
+            child:  Text(
+              LocaleKeys.cancel.tr(),
               style: TextStyle(color: Colors.white70),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
-              'Unassign',
+              LocaleKeys.unassign.tr(),
               style: TextStyle(color: AppColors.primaryRed),
             ),
           ),
@@ -1550,16 +1586,16 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           widget.branch.assignedInspector = null;
           setState(() {});
           if (mounted) {
-            showSnakBarr(context, 'Inspector unassigned successfully');
+            showSnakBarr(context, LocaleKeys.inspectorUnassignedSuccess.tr());
           }
         } else {
           if (mounted) {
-            showSnakBarr(context, 'Failed to unassign inspector');
+            showSnakBarr(context, LocaleKeys.failedToUnassignInspector.tr());
           }
         }
       } catch (e) {
         if (mounted) {
-          showSnakBarr(context, 'Error: $e');
+          showSnakBarr(context, '$e');
         }
       }
     }

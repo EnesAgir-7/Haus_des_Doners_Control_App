@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../models/inspection_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../inspector/screens/screen_inspection_details.dart';
 import '../admin_firebase_services/admin_inspection_service.dart';
 import '../screens/screen_admin_inspections.dart';
@@ -58,8 +59,8 @@ class _InspectionSectionState extends State<InspectionSection> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Recent Inspections",
+               Text(
+               LocaleKeys.recentInspections.tr(), 
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -98,7 +99,7 @@ class _InspectionSectionState extends State<InspectionSection> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        "View All",
+                        LocaleKeys.viewAll.tr(), 
                         style: TextStyle(
                           color: AppColors.primaryRed,
                           fontWeight: FontWeight.w600,
@@ -130,7 +131,7 @@ class _InspectionSectionState extends State<InspectionSection> {
                 return Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    "Failed to load inspections.",
+                    LocaleKeys.failedToLoadInspections.tr(), 
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 13,
@@ -145,7 +146,7 @@ class _InspectionSectionState extends State<InspectionSection> {
                 return Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    "No recent inspections yet.",
+                   LocaleKeys.noRecentInspections.tr(), 
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 13,

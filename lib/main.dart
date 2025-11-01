@@ -9,7 +9,6 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/firebase_options.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_branches.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_fleet.dart';
-import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_stats.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_auth.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_vehicle.dart';
@@ -89,7 +88,6 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BranchMapController()),
         ChangeNotifierProvider(create: (_) => ProviderAdminBranches()),
         ChangeNotifierProvider(create: (_) => ProviderAdminVehicles()),
-        ChangeNotifierProvider(create: (_) => ProviderAdminStats()),
         ChangeNotifierProvider(create: (_) => ProviderAdminUsers()),
         ChangeNotifierProvider(create: (_) => ProviderBottomNavBar()),
         ChangeNotifierProvider(create: (_) => ProviderInspection()),

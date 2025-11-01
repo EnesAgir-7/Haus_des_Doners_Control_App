@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+
 
 class AppConstants {
   static const inspector = "inspector";
@@ -25,14 +25,10 @@ class AppConstants {
   static const assigned = "assigned";
   static const available = "available";
   static const active = "active";
+  static const inactive = "inactive";
   static const scheduled = "scheduled";
   static const branch = "branch";
+  static const delete = "delete";
+  static const edit = "edit";
 }
 
-BoxDecoration commonDeco = BoxDecoration(
-  color: const Color(0xFF212121),
-  borderRadius: BorderRadius.circular(16.0),
-  boxShadow: const [
-    BoxShadow(color: Colors.black26, blurRadius: 10.0, offset: Offset(0, 4)),
-  ],
-);

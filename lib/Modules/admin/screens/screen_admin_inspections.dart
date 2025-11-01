@@ -100,7 +100,7 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
         Icon(Icons.fact_check, color: Colors.lightBlueAccent),
         SizedBox(width: 6),
         Text(
-          "Inspections",
+          LocaleKeys.inspections.tr(),
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
@@ -108,7 +108,7 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
           ),
         ),
         Text(
-          " (Page-${provider.pageNo.toString()})",
+          " ${LocaleKeys.page.tr()}-${provider.pageNo.toString()}",
           style: TextStyle(fontSize: 10),
         ),
         Spacer(),
@@ -119,7 +119,7 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            "${provider.inspections.length} Total",
+            "${provider.inspections.length} ${LocaleKeys.total.tr()}",
             style: TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
@@ -136,7 +136,7 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
       onChanged: provider.setSearchQuery,
       style: TextStyle(color: Colors.white),
       decoration: InputDecoration(
-        hintText: "${LocaleKeys.search.tr()} by branch name...",
+        hintText: "${LocaleKeys.search.tr()} ${LocaleKeys.byBranchName.tr()}",
         hintStyle: TextStyle(color: Colors.white54),
         prefixIcon: Icon(Icons.search, color: Colors.white54),
         suffixIcon: provider.searchQuery.isNotEmpty
@@ -171,7 +171,7 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
         spacing: 6,
         children: [
           _buildSortChip(
-            label: "By Date",
+            label: LocaleKeys.byDate.tr(),
             value: AppConstants.date,
             icon: Icons.calendar_today,
             provider: provider,
@@ -184,7 +184,7 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
           ),
           if (widget.branch == null)
             _buildSortChip(
-              label: "By Branch",
+              label: LocaleKeys.byBranch.tr(),
               value: AppConstants.branch,
               icon: Icons.apartment,
               provider: provider,
@@ -340,7 +340,7 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
             SizedBox(height: 16),
             Text(
               provider.searchQuery.isNotEmpty
-                  ? "No Inspections found"
+                  ? LocaleKeys.noInspectionsFound.tr()
                   : LocaleKeys.no_inspections_yet.tr(),
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),

@@ -1,10 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../generated/lib/translations/locale_keys.g.dart';
 import '../../../models/user_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/app_button.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../../inspector/widgets/custom_toast.dart';
@@ -62,7 +63,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
     final roleChanged = _selectedRole != widget.user.role;
 
     if (!nameChanged && !regionChanged && !roleChanged) {
-      showSnakBarr(context, 'No changes detected');
+      showSnakBarr(context, LocaleKeys.noChangesDetected.tr());
       setState(() => _isEditing = false);
       return;
     }
@@ -77,7 +78,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
 
       if (!mounted) return;
 
-      showSnakBarr(context, 'User updated successfully');
+      showSnakBarr(context, LocaleKeys.userUpdatedSuccess.tr());
       setState(() => _isEditing = false);
       Navigator.pop(context, true);
     } catch (e) {
@@ -121,7 +122,10 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildSectionHeader('User Information', Icons.person_outline),
+                  _buildSectionHeader(
+                    LocaleKeys.userInformation.tr(),
+                    Icons.person_outline,
+                  ),
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _nameController,
@@ -155,7 +159,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                   ),
                   const SizedBox(height: 32),
                   _buildSectionHeader(
-                    'Role & Region',
+                    LocaleKeys.roleAndRegion.tr(),
                     Icons.admin_panel_settings,
                   ),
                   const SizedBox(height: 16),
@@ -306,9 +310,12 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
         ),
       ),
       items: [
-        DropdownMenuItem(value: 'admin', child: Text(LocaleKeys.admin.tr())),
         DropdownMenuItem(
-          value: 'inspector',
+          value: AppConstants.admin,
+          child: Text(LocaleKeys.admin.tr()),
+        ),
+        DropdownMenuItem(
+          value: AppConstants.inspector,
           child: Text(LocaleKeys.inspector.tr()),
         ),
       ],
@@ -343,7 +350,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Account Status',
+                  LocaleKeys.accountStatus.tr(),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 12,
@@ -351,7 +358,9 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  widget.user.active ? 'Active' : 'Inactive',
+                  widget.user.active
+                      ? LocaleKeys.active.tr()
+                      : LocaleKeys.inactive.tr(),
                   style: TextStyle(
                     color: widget.user.active ? Colors.green : Colors.red,
                     fontSize: 16,
@@ -370,7 +379,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
     return AppButton(
       onPressed: provider.isLoading ? null : _saveChanges,
       isLoading: provider.isLoading,
-      text: 'Save Changes',
+      text: LocaleKeys.saveChanges.tr(),
       backgroundColor: AppColors.primaryRed,
       icon: Icons.save,
     );
@@ -380,7 +389,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
     return AppButton(
       onPressed: () => _showDeleteAccountDialog(provider, widget.user, context),
       isLoading: provider.isLoading,
-      text: 'Delete Account',
+      text: LocaleKeys.deleteAccount.tr(),
       backgroundColor: AppColors.primaryRed,
       icon: Icons.delete,
     );
@@ -394,7 +403,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
       ),
       backgroundColor: AppColors.green,
       isLoading: provider.isLoading,
-      text: 'Update Password',
+      text: LocaleKeys.updatePassword.tr(),
       icon: Icons.delete,
     );
   }
@@ -418,7 +427,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                'Update Inspector Password',
+                LocaleKeys.updateInspectorPassword.tr(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 16,
@@ -440,7 +449,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                 obscureText: true,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Enter new password',
+                  hintText: LocaleKeys.enterNewPassword.tr(),
                   hintStyle: TextStyle(color: Colors.white38),
                   filled: true,
                   fillColor: AppColors.primaryDark,
@@ -450,10 +459,10 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a password';
+                    return LocaleKeys.pleaseEnterPassword.tr();
                   }
                   if (value.length < 6) {
-                    return 'Password must be at least 6 characters';
+                    return LocaleKeys.passwordMinLength.tr();
                   }
                   return null;
                 },
@@ -464,7 +473,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                 obscureText: true,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Confirm password',
+                  hintText: LocaleKeys.confirmPassword.tr(),
                   hintStyle: TextStyle(color: Colors.white38),
                   filled: true,
                   fillColor: AppColors.primaryDark,
@@ -474,7 +483,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                 ),
                 validator: (value) {
                   if (value != _passwordController.text) {
-                    return 'Passwords do not match';
+                    return LocaleKeys.passwordsNotMatch.tr();
                   }
                   return null;
                 },
@@ -485,8 +494,8 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
+            child: Text(
+              LocaleKeys.cancel.tr(),
               style: TextStyle(color: Colors.white70),
             ),
           ),
@@ -503,7 +512,10 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                 );
               }
             },
-            child: const Text('Update', style: TextStyle(color: Colors.blue)),
+            child: Text(
+              LocaleKeys.update.tr(),
+              style: TextStyle(color: Colors.blue),
+            ),
           ),
         ],
       ),
@@ -520,33 +532,33 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Inspector Account'),
+          title: Text(LocaleKeys.deleteInspectorAccount.tr()),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Are you sure you want to delete this inspector account?',
+              Text(
+                LocaleKeys.deleteInspectorConfirm.tr(),
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              Text('Inspector: ${inspectorUser.name}'),
-              Text('Email: ${inspectorUser.serviceAccount}'),
+              Text('${LocaleKeys.inspector.tr()}: ${inspectorUser.name}'),
+              Text('${LocaleKeys.email.tr()}: ${inspectorUser.serviceAccount}'),
               const SizedBox(height: 12),
-              const Text(
-                'This action cannot be undone. This will permanently delete:',
+              Text(
+                LocaleKeys.deleteActionIrreversible.tr(),
                 style: TextStyle(color: Colors.red),
               ),
               const SizedBox(height: 8),
-              const Text('• Inspector authentication account'),
-              const Text('• Inspector user data'),
-              const Text('• Inspector route (if empty)'),
+              Text(LocaleKeys.inspectorAuthAccount.tr()),
+              Text(LocaleKeys.inspectorUserData.tr()),
+              Text(LocaleKeys.inspectorRouteIfEmpty.tr()),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
+              child: Text(LocaleKeys.cancel.tr()),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -558,7 +570,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                   parentContext: parentContext, // pass the screen context here
                 );
               },
-              child: const Text('Delete'),
+              child: Text(LocaleKeys.delete.tr()),
             ),
           ],
         );

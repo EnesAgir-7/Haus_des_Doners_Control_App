@@ -4,6 +4,7 @@ import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/helpers/app_helpers.dart';
 
 import '../core/constants/firebase_constants.dart';
+import '../translations/locale_keys.g.dart';
 import 'route_model.dart';
 
 // Add these helper classes at the top
@@ -12,10 +13,14 @@ class ContactPerson {
   final String phone;
   final String? role;
 
-  ContactPerson({required this.name, required this.phone, this.role, });
+  ContactPerson({required this.name, required this.phone, this.role});
 
   factory ContactPerson.fromMap(Map<String, dynamic> map) {
-    return ContactPerson(name: map['name'] ?? '', phone: map['phone'] ?? '', role: map['role'] ?? '');
+    return ContactPerson(
+      name: map['name'] ?? '',
+      phone: map['phone'] ?? '',
+      role: map['role'] ?? '',
+    );
   }
 
   Map<String, dynamic> toMap() {
@@ -165,38 +170,38 @@ class BranchModel {
             )
           : List.filled(12, '0'),
       // New fields
-      openingHours: data['openingHours'] != null
+      openingHours: data[BranchFields.openingHours] != null
           ? OpeningHours.fromMap(
-              Map<String, dynamic>.from(data['openingHours']),
+              Map<String, dynamic>.from(data[BranchFields.openingHours]),
             )
           : null,
-      openingDays: data['openingDays'] != null
-          ? List<String>.from(data['openingDays'])
+      openingDays: data[BranchFields.openingDays] != null
+          ? List<String>.from(data[BranchFields.openingDays])
           : null,
-      suppliers: data['suppliers'] != null
-          ? (data['suppliers'] as List)
+      suppliers: data[BranchFields.suppliers] != null
+          ? (data[BranchFields.suppliers] as List)
                 .map((e) => ContactPerson.fromMap(Map<String, dynamic>.from(e)))
                 .toList()
           : null,
-      openingDay: data['openingDay'] != null
-          ? (data['openingDay'] is Timestamp
-                ? (data['openingDay'] as Timestamp).toDate()
-                : DateTime.tryParse(data['openingDay'].toString()))
+      openingDay: data[BranchFields.openingDay] != null
+          ? (data[BranchFields.openingDay] is Timestamp
+                ? (data[BranchFields.openingDay] as Timestamp).toDate()
+                : DateTime.tryParse(data[BranchFields.openingDay].toString()))
           : null,
-      donerPrices: data['donerPrices'],
-      software: data['software'],
-      shopInformation: data['shopInformation'],
-      branchOwners: data['branchOwners'] != null
-          ? (data['branchOwners'] as List)
+      donerPrices: data[BranchFields.donerPrices],
+      software: data[BranchFields.software],
+      shopInformation: data[BranchFields.shopInformation],
+      branchOwners: data[BranchFields.branchOwners] != null
+          ? (data[BranchFields.branchOwners] as List)
                 .map((e) => ContactPerson.fromMap(Map<String, dynamic>.from(e)))
                 .toList()
           : null,
-      branchManagers: data['branchManagers'] != null
-          ? (data['branchManagers'] as List)
+      branchManagers: data[BranchFields.branchManagers] != null
+          ? (data[BranchFields.branchManagers] as List)
                 .map((e) => ContactPerson.fromMap(Map<String, dynamic>.from(e)))
                 .toList()
           : null,
-      branchEmail: data['branchEmail'],
+      branchEmail: data[BranchFields.branchEmail],
     );
   }
 
@@ -332,13 +337,13 @@ class BranchModel {
   }
 
   String get lastInspectionText {
-    if (lastInspectionDate == null) return 'Not inspected yet';
+    if (lastInspectionDate == null) return LocaleKeys.not_inspected_yet.tr();
     final days = daysSinceLastInspection!;
-    if (days == 0) return 'Inspected today';
-    if (days == 1) return 'Inspected yesterday';
-    if (days < 7) return '$days days ago';
-    if (days < 30) return '${(days / 7).floor()} weeks ago';
-    return '${(days / 30).floor()} months ago';
+    if (days == 0) return LocaleKeys.inspected_today.tr();
+    if (days == 1) return LocaleKeys.inspected_yesterday.tr();
+    if (days < 7) return "${days} ${LocaleKeys.days_ago.tr()}";
+    if (days < 30) return "${(days / 7).floor()} ${LocaleKeys.weeks_ago.tr()}";
+    return "${(days / 30).floor()} ${LocaleKeys.months_ago.tr()}";
   }
 
   bool get isNextInspectionToday {

@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/core/constants/app_constants.dart';
 
+import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../translations/locale_keys.g.dart';
 
 Widget buildBranchPerformanceChart(List<String>? last12MonthsScores) {
   // Parse scores and extract actual values
@@ -45,7 +47,7 @@ Widget buildBranchPerformanceChart(List<String>? last12MonthsScores) {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Last 12 Inspections',
+              LocaleKeys.last12Inspections.tr(),
               style: TextStyle(
                 color: AppColors.primaryRed,
                 fontSize: 16,
@@ -71,7 +73,7 @@ Widget buildBranchPerformanceChart(List<String>? last12MonthsScores) {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Oldest ← → Latest',
+                      LocaleKeys.oldestToLatest.tr(),
                       style: TextStyle(
                         color: Colors.white54,
                         fontSize: 10,
@@ -79,7 +81,10 @@ Widget buildBranchPerformanceChart(List<String>? last12MonthsScores) {
                       ),
                     ),
                     Text(
-                      'Scale: 0-${maxActualScore.toStringAsFixed(0)}',
+                      LocaleKeys.scale.tr().replaceAll(
+                        '{maxScore}',
+                        maxActualScore.toStringAsFixed(0),
+                      ),
                       style: TextStyle(color: Colors.white54, fontSize: 11),
                     ),
                   ],
@@ -204,10 +209,10 @@ Widget buildBranchPerformanceChart(List<String>? last12MonthsScores) {
               runSpacing: 8,
               alignment: WrapAlignment.center,
               children: [
-                _buildLegendItem(Colors.green, 'Excellent'),
-                _buildLegendItem(Colors.lightGreen, 'Good'),
-                _buildLegendItem(Colors.orange, 'Average'),
-                _buildLegendItem(Colors.red, 'Poor'),
+                _buildLegendItem(Colors.green, LocaleKeys.excellent.tr()),
+                _buildLegendItem(Colors.lightGreen, LocaleKeys.good.tr()),
+                _buildLegendItem(Colors.orange, LocaleKeys.average.tr()),
+                _buildLegendItem(Colors.red, LocaleKeys.poor.tr()),
               ],
             ),
           ],

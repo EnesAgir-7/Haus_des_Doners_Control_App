@@ -16,3 +16,11 @@ final shadowDeco = BoxDecoration(
     ),
   ],
 );
+
+BoxDecoration commonDeco = BoxDecoration(
+  color: const Color(0xFF212121),
+  borderRadius: BorderRadius.circular(16.0),
+  boxShadow: const [
+    BoxShadow(color: Colors.black26, blurRadius: 10.0, offset: Offset(0, 4)),
+  ],
+);

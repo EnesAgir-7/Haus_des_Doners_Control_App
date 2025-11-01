@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../inspector/providers/provider_auth.dart';
 import '../../inspector/widgets/language_button.dart';
 
@@ -99,7 +101,7 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
                   _showLogoutDialog(context);
                 },
                 icon: const Icon(Icons.logout_rounded, color: Colors.white),
-                tooltip: 'Logout',
+                tooltip: LocaleKeys.logout.tr(),
               ),
             ),
         ],
@@ -140,9 +142,9 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Confirm Logout',
+                LocaleKeys.confirmLogout.tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -153,7 +155,7 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
           ],
         ),
         content: Text(
-          'Are you sure you want to logout?',
+          LocaleKeys.confirmLogoutMessage.tr(), 
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.7),
             fontSize: 14,
@@ -166,7 +168,7 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             child: Text(
-              'Cancel',
+              LocaleKeys.cancel.tr(), 
               style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
             ),
           ),

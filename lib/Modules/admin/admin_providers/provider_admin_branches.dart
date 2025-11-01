@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/console.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../models/branch_model.dart';
 import '../../../models/user_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../admin_firebase_services/admin_branch_service.dart';
 
 class ProviderAdminBranches with ChangeNotifier {
@@ -212,7 +214,7 @@ class ProviderAdminBranches with ChangeNotifier {
     try {
       await _branchService.updateBranch(branch);
     } catch (e) {
-      _error = 'Error updating branch: $e';
+      _error = "${LocaleKeys.error_updating_branch.tr()}: $e";
       rethrow;
     } finally {
       _setLoading(false);
@@ -232,7 +234,7 @@ class ProviderAdminBranches with ChangeNotifier {
         inspectorId: inspectorId,
       );
     } catch (e) {
-      _error = 'Error deleting branch: $e';
+      _error = "${LocaleKeys.error_deleting_branch.tr()}: $e";
     } finally {
       _setLoading(false);
     }

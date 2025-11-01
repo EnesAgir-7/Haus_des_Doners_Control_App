@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/firebase_constants.dart';
 import '../../../models/inspection_model.dart';
 import '../admin_firebase_services/admin_inspection_service.dart';
 
@@ -78,7 +81,7 @@ class ProviderAdminInspections extends ChangeNotifier {
       );
 
       final List<InspectionModel> newInspections =
-          response['inspections'] as List<InspectionModel>;
+          response[Collections.inspections] as List<InspectionModel>;
 
       _lastDocument = response['lastDocument'] as DocumentSnapshot?;
       _hasMore = response['hasMore'] as bool;
@@ -87,7 +90,8 @@ class ProviderAdminInspections extends ChangeNotifier {
       _currentPage++;
       _errorMessage = null;
     } catch (e) {
-      _errorMessage = "Failed to load inspections: ${e.toString()}";
+      _errorMessage =
+          '${LocaleKeys.failed_to_load_inspections.tr()}: ${e.toString()}';
       rethrow;
     } finally {
       notifyListeners();

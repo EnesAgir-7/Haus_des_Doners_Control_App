@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/app_button.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
@@ -77,7 +78,8 @@ class _ScreenAdminCreateUserState extends State<ScreenAdminCreateUser> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildSectionHeader('User Information', Icons.person_outline),
+                  _buildSectionHeader(
+                    LocaleKeys.userInformation.tr(), Icons.person_outline),
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _nameController,
@@ -107,7 +109,8 @@ class _ScreenAdminCreateUserState extends State<ScreenAdminCreateUser> {
                     },
                   ),
                   const SizedBox(height: 32),
-                  _buildSectionHeader('Security', Icons.lock_outline),
+                  _buildSectionHeader(
+                    LocaleKeys.security.tr(), Icons.lock_outline),
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _passwordController,
@@ -164,7 +167,7 @@ class _ScreenAdminCreateUserState extends State<ScreenAdminCreateUser> {
                   ),
                   const SizedBox(height: 32),
                   _buildSectionHeader(
-                    'Role & Region',
+                   LocaleKeys.roleAndRegion.tr(), 
                     Icons.admin_panel_settings,
                   ),
                   const SizedBox(height: 16),
@@ -277,9 +280,9 @@ class _ScreenAdminCreateUserState extends State<ScreenAdminCreateUser> {
         ),
       ),
       items: [
-        DropdownMenuItem(value: 'admin', child: Text(LocaleKeys.admin.tr())),
+        DropdownMenuItem(value: AppConstants.admin, child: Text(LocaleKeys.admin.tr())),
         DropdownMenuItem(
-          value: 'inspector',
+          value: AppConstants.inspector,
           child: Text(LocaleKeys.inspector.tr()),
         ),
       ],

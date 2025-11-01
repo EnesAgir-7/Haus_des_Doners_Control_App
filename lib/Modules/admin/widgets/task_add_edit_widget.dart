@@ -1,15 +1,18 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/models/task_model.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common_services/user_selection_sheet.dart';
 import '../../../core/constants/firebase_constants.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../admin_providers/provider_admin_tasks.dart';
 
 class TaskAddEditSheet extends StatefulWidget {
@@ -97,17 +100,17 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
 
     // Validation
     if (title.isEmpty) {
-      showSnakBarr(context, 'Please enter a title');
+      showSnakBarr(context, LocaleKeys.pleaseEnterTitle.tr());
       return;
     }
 
     if (description.isEmpty) {
-      showSnakBarr(context, 'Please enter a description');
+      showSnakBarr(context, LocaleKeys.pleaseEnterDescription.tr());
       return;
     }
 
     if (_selectedInspectorId == null) {
-      showSnakBarr(context, 'Please select an inspector');
+      showSnakBarr(context, LocaleKeys.pleaseSelectInspector.tr());
       return;
     }
 
@@ -149,18 +152,20 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
         showSnakBarr(
           context,
           isUpdateMode
-              ? 'Task updated successfully'
-              : 'Task created successfully',
+              ? LocaleKeys.taskUpdatedSuccess.tr()
+              : LocaleKeys.taskCreatedSuccess.tr(),
         );
         widget.onSuccess?.call();
       } else {
         showSnakBarr(
           context,
-          isUpdateMode ? 'Failed to update task' : 'Failed to create task',
+          isUpdateMode
+              ? LocaleKeys.failedToUpdateTask.tr()
+              : LocaleKeys.failedToCreateTask.tr(),
         );
       }
     } catch (e) {
-      showSnakBarr(context, 'Error: ${e.toString()}');
+      showSnakBarr(context, '${LocaleKeys.error.tr()}: ${e.toString()}');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -197,7 +202,9 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              isUpdateMode ? 'Edit Task' : 'Create Task',
+              isUpdateMode
+                  ? LocaleKeys.editTask.tr()
+                  : LocaleKeys.createTask.tr(),
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -216,18 +223,18 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
                 children: [
                   // Title field
                   _buildInputField(
-                    label: 'Task Title',
+                    label: LocaleKeys.taskTitle.tr(),
                     controller: _titleController,
-                    hint: 'Enter task title',
+                    hint: LocaleKeys.enterTaskTitle.tr(),
                     icon: Icons.title_rounded,
                   ),
                   const SizedBox(height: 16),
 
                   // Description field
                   _buildInputField(
-                    label: 'Description',
+                    label: LocaleKeys.description.tr(),
                     controller: _descriptionController,
-                    hint: 'Enter task description',
+                    hint: LocaleKeys.enterTaskDescription.tr(),
                     icon: Icons.description_rounded,
                     maxLines: 4,
                   ),
@@ -235,7 +242,7 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
 
                   // Priority Selection
                   Text(
-                    'Priority',
+                    LocaleKeys.priority.tr(),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 13,
@@ -246,18 +253,24 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      _buildPriorityChip('Low', 'low'),
+                      _buildPriorityChip(LocaleKeys.low.tr(), AppConstants.low),
                       const SizedBox(width: 8),
-                      _buildPriorityChip('Medium', 'medium'),
+                      _buildPriorityChip(
+                        LocaleKeys.medium.tr(),
+                        AppConstants.medium,
+                      ),
                       const SizedBox(width: 8),
-                      _buildPriorityChip('High', 'high'),
+                      _buildPriorityChip(
+                        LocaleKeys.high.tr(),
+                        AppConstants.high,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
 
                   // Due Date
                   Text(
-                    'Due Date (Optional)',
+                    LocaleKeys.dueDateOptional.tr(),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 13,
@@ -291,7 +304,7 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
                           Text(
                             _dueDate != null
                                 ? DateFormat('MMM dd, yyyy').format(_dueDate!)
-                                : 'Select due date',
+                                : LocaleKeys.selectDueDate.tr(),
                             style: TextStyle(
                               color: _dueDate != null
                                   ? Colors.white.withValues(alpha: 0.9)
@@ -320,7 +333,7 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
 
                   // Assigned Inspector
                   Text(
-                    'Assigned Inspector',
+                    LocaleKeys.assignedInspector.tr(),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 13,
@@ -333,8 +346,7 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
                     onTap: () async {
                       final inspector = await showInspectorPicker(
                         context: context,
-                        selectedInspectorId:
-                            _selectedInspectorId, 
+                        selectedInspectorId: _selectedInspectorId,
                       );
 
                       if (inspector != null) {
@@ -378,7 +390,8 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              _selectedInspectorName ?? 'Select inspector',
+                              _selectedInspectorName ??
+                                  LocaleKeys.selectInspector.tr(),
                               style: TextStyle(
                                 color: _selectedInspectorId != null
                                     ? Colors.white.withValues(alpha: 0.9)
@@ -404,7 +417,7 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
                   if (isUpdateMode) ...[
                     const SizedBox(height: 20),
                     Text(
-                      'Status',
+                      LocaleKeys.status.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 13,
@@ -415,11 +428,20 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        _buildStatusChip('Pending', 'pending'),
+                        _buildStatusChip(
+                          LocaleKeys.pending.tr(),
+                          AppConstants.pending,
+                        ),
                         const SizedBox(width: 8),
-                        _buildStatusChip('In Progress', 'in_progress'),
+                        _buildStatusChip(
+                          LocaleKeys.inProgress.tr(),
+                          AppConstants.inProgress,
+                        ),
                         const SizedBox(width: 8),
-                        _buildStatusChip('Completed', 'completed'),
+                        _buildStatusChip(
+                          LocaleKeys.completed.tr(),
+                          AppConstants.completed,
+                        ),
                       ],
                     ),
                   ],
@@ -446,8 +468,8 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text(
-                            'Cancel',
+                          child: Text(
+                            LocaleKeys.cancel.tr(),
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -481,7 +503,9 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
                                   ),
                                 )
                               : Text(
-                                  isUpdateMode ? 'Update Task' : 'Create Task',
+                                  isUpdateMode
+                                      ? LocaleKeys.updateTask.tr()
+                                      : LocaleKeys.createTask.tr(),
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
@@ -602,13 +626,13 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
     final isSelected = _status == value;
     Color color;
     switch (value) {
-      case 'pending':
+      case AppConstants.pending:
         color = const Color(0xFFFF9800);
         break;
-      case 'in_progress':
+      case AppConstants.inProgress:
         color = const Color(0xFF2196F3);
         break;
-      case 'completed':
+      case AppConstants.completed:
         color = const Color(0xFF4CAF50);
         break;
       default:

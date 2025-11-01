@@ -1,6 +1,9 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:haus_des_control/core/console.dart';
+import 'package:easy_localization/easy_localization.dart';
+
+import '../translations/locale_keys.g.dart';
 
 class FirebaseAuthHelper {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -17,7 +20,7 @@ class FirebaseAuthHelper {
       );
       return result.user;
     } on FirebaseAuthException catch (e) {
-      throw e.message ?? 'An error occurred';
+      throw e.message ?? LocaleKeys.error_occurred.tr();
     }
   }
 
@@ -37,7 +40,7 @@ class FirebaseAuthHelper {
         password: password,
       );
     } on FirebaseAuthException catch (e) {
-      throw Exception(e.message ?? 'Auth creation failed');
+      throw Exception(e.message ?? LocaleKeys.auth_creation_failed.tr());
     }
   }
 
@@ -50,23 +53,23 @@ class FirebaseAuthHelper {
       final result = await callable.call({'uid': inspectorUid});
 
       if (result.data['success'] != true) {
-        // Fail silently with message
-        throw Exception(result.data['message'] ?? 'Failed to delete inspector');
+        throw Exception(
+          result.data['message'] ?? LocaleKeys.failed_to_delete_inspector.tr(),
+        );
       }
     } on FirebaseFunctionsException catch (e) {
-      // Convert known codes into friendly messages
       String errorMessage = switch (e.code) {
-        'failed-precondition' => e.message ?? 'Inspector has active routes',
-        'permission-denied' => e.message ?? 'Permission denied',
-        'unauthenticated' => 'You must be logged in',
-        'not-found' => 'Inspector not found',
-        _ => 'Failed to delete: ${e.message}',
+        'failed-precondition' =>
+          e.message ?? LocaleKeys.inspector_has_active_routes.tr(),
+        'permission-denied' => e.message ?? LocaleKeys.permission_denied.tr(),
+        'unauthenticated' => LocaleKeys.must_be_logged_in.tr(),
+        'not-found' => LocaleKeys.inspector_not_found.tr(),
+        _ => '${LocaleKeys.failed_to_delete.tr()}: ${e.message}',
       };
 
-      throw Exception(errorMessage); // will be shown in UI
+      throw Exception(errorMessage);
     } catch (e) {
-      // Catch all other errors
-      throw Exception('Failed to delete inspector: $e');
+      throw Exception('${LocaleKeys.failed_to_delete_inspector.tr()}: $e');
     }
   }
 
@@ -86,10 +89,12 @@ class FirebaseAuthHelper {
       });
 
       if (result.data['success'] != true) {
-        throw Exception(result.data['message'] ?? 'Failed to update password');
+        throw Exception(
+          result.data['message'] ?? LocaleKeys.failed_to_update_password.tr(),
+        );
       }
     } on FirebaseFunctionsException catch (e) {
-      throw Exception(e.message ?? 'Failed to update password');
+      throw Exception(e.message ?? LocaleKeys.failed_to_update_password.tr());
     }
   }
 

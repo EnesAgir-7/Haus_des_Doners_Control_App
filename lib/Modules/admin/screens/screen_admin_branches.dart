@@ -123,14 +123,14 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
           children: [
             _buildStatCard(
               icon: Icons.store,
-              label: 'Total Branches',
+              label: LocaleKeys.totalBranches.tr(), 
               value: allBranches.toString(),
               color: AppColors.primaryRed,
             ),
             const SizedBox(width: 12),
             _buildStatCard(
               icon: Icons.filter_list,
-              label: 'Showing',
+              label: LocaleKeys.showing.tr(),
               value: totalBranches.toString(),
               color: Colors.blue,
             ),
@@ -223,7 +223,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
           ),
           const SizedBox(width: 8),
           _buildSortChip(
-            label: "Next Inspection",
+            label: LocaleKeys.nextInspection.tr(), 
             value: AppConstants.nextInspection,
             icon: Icons.event,
             provider: provider,
@@ -237,14 +237,14 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
           ),
           const SizedBox(width: 8),
           _buildSortChip(
-            label: "Region",
+            label: LocaleKeys.region.tr(), 
             value: AppConstants.region,
             icon: Icons.location_on,
             provider: provider,
           ),
           const SizedBox(width: 8),
           _buildSortChip(
-            label: "Inspector",
+            label: LocaleKeys.inspector.tr(),
             value: AppConstants.inspector,
             icon: Icons.person,
             provider: provider,
@@ -332,7 +332,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
                 CircularProgressIndicator(color: AppColors.primaryRed),
                 const SizedBox(height: 16),
                 Text(
-                  'Loading branches...',
+                  LocaleKeys.loadingBranches.tr(),
                   style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
                 ),
               ],
@@ -356,7 +356,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
                   Icon(Icons.error_outline, color: Colors.red, size: 48),
                   const SizedBox(height: 16),
                   Text(
-                    'Error: ${provider.error}',
+                   '${LocaleKeys.error.tr()}: ${provider.error}', 
                     style: const TextStyle(color: Colors.red),
                     textAlign: TextAlign.center,
                   ),

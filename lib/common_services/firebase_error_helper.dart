@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:easy_localization/easy_localization.dart';
+
+import '../translations/locale_keys.g.dart';
 
 class FirebaseSafeRunner {
   /// Runs an async Firebase operation safely
@@ -8,10 +11,13 @@ class FirebaseSafeRunner {
     try {
       return await operation();
     } on FirebaseException catch (e, st) {
-      _log("FirebaseException: ${_mapFirebaseError(e)}", st);
+      _log(
+        "${LocaleKeys.firebase_exception.tr()}: ${_mapFirebaseError(e)}",
+        st,
+      );
       return null;
     } catch (e, st) {
-      _log("Generic error: $e", st);
+      _log("${LocaleKeys.generic_error.tr()}: $e", st);
       return null;
     }
   }
@@ -20,19 +26,19 @@ class FirebaseSafeRunner {
   static String _mapFirebaseError(FirebaseException e) {
     switch (e.code) {
       case 'permission-denied':
-        return "You don’t have permission to access this data.";
+        return LocaleKeys.no_permission_access.tr();
       case 'unavailable':
-        return "Service is currently unavailable. Try again later.";
+        return LocaleKeys.service_unavailable.tr();
       case 'not-found':
-        return "The requested document was not found.";
+        return LocaleKeys.document_not_found.tr();
       case 'cancelled':
-        return "The operation was cancelled.";
+        return LocaleKeys.operation_cancelled.tr();
       case 'deadline-exceeded':
-        return "The operation took too long. Please retry.";
+        return LocaleKeys.operation_too_long.tr();
       case 'unauthenticated':
-        return "You must be logged in to perform this action.";
+        return LocaleKeys.must_be_logged_in_action.tr();
       default:
-        return "Unexpected Firestore error: ${e.message}";
+        return "${LocaleKeys.unexpected_firestore_error.tr()}: ${e.message}";
     }
   }
 

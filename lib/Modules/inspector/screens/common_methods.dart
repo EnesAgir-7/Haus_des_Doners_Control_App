@@ -2,8 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../generated/lib/translations/locale_keys.g.dart';
 import '../../../models/route_model.dart';
+import '../../../translations/locale_keys.g.dart';
 
 class StatusInfo {
   final Color color;

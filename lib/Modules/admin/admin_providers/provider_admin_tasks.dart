@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
@@ -10,6 +11,7 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../models/task_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../admin/admin_firebase_services/admin_tasks_service.dart';
 
 /// Provider for Tasks screen
@@ -150,7 +152,7 @@ class ProviderAdminTasks extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = 'Error updating task: $e';
+      _errorMessage = '${LocaleKeys.error_updating_task.tr()}: $e';
       _isUpdating = false;
       notifyListeners();
       return false;
@@ -193,7 +195,7 @@ class ProviderAdminTasks extends ChangeNotifier {
     final commentText = commentController.text.trim();
 
     if (commentText.isEmpty && _commentPhotos.isEmpty) {
-      showSnakBarr(context, 'Please add a comment or photo');
+      showSnakBarr(context, LocaleKeys.failed_to_add_comment.tr());
       return null;
     }
 
@@ -236,7 +238,7 @@ class ProviderAdminTasks extends ChangeNotifier {
       // ✅ Return the created comment so the UI can append it locally
       return comment;
     } catch (e) {
-      showSnakBarr(context, 'Failed to add comment: $e');
+      showSnakBarr(context, '${LocaleKeys.failed_to_add_comment.tr()}: $e');
       _isAddingComment = false;
       notifyListeners();
       return null;
@@ -250,8 +252,8 @@ class ProviderAdminTasks extends ChangeNotifier {
     required String assignedInspectorName,
     String? relatedBranchId,
     String? relatedInspectionId,
-    String status = 'pending',
-    String priority = 'medium',
+    String status = AppConstants.pending,
+    String priority = AppConstants.medium,
     DateTime? dueDate,
   }) async {
     try {
@@ -283,7 +285,7 @@ class ProviderAdminTasks extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = 'Error creating task: $e';
+      _errorMessage = '${LocaleKeys.error_creating_task.tr()}: $e';
       _isUpdating = false;
       notifyListeners();
       return false;

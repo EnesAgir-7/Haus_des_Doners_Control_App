@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 
 import '../../../core/console.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/vehicle_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../admin_firebase_services/admin_vehicle_service.dart';
 
 class ProviderAdminVehicles extends ChangeNotifier {
@@ -59,20 +61,18 @@ class ProviderAdminVehicles extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-     try {
-      _vehiclesSubscription = _vehicleService
-          .streamAllVehicles()
-          .listen(
-            (tasks) {
-              _vehicles = tasks;
-              _isLoading = false;
-              notifyListeners();
-            },
-            onError: (error) {
-              _isLoading = false;
-              notifyListeners();
-            },
-          );
+    try {
+      _vehiclesSubscription = _vehicleService.streamAllVehicles().listen(
+        (tasks) {
+          _vehicles = tasks;
+          _isLoading = false;
+          notifyListeners();
+        },
+        onError: (error) {
+          _isLoading = false;
+          notifyListeners();
+        },
+      );
     } catch (e) {
       _isLoading = false;
       notifyListeners();
@@ -153,8 +153,8 @@ class ProviderAdminVehicles extends ChangeNotifier {
 
       if (context.mounted) {
         final msg = (inspectorId != null && inspectorId.isNotEmpty)
-            ? '✅ Vehicle deleted successfully and unassigned from inspector "$inspectorName".'
-            : '✅ Vehicle deleted successfully';
+            ? '${LocaleKeys.vehicle_deleted_and_unassigned.tr(args: [inspectorName ?? ""])}'
+            : LocaleKeys.vehicle_deleted.tr();
 
         showSnakBarr(context, msg);
 
@@ -162,7 +162,7 @@ class ProviderAdminVehicles extends ChangeNotifier {
         Navigator.pop(context);
       }
     } catch (e) {
-      _error = 'Error deleting vehicle: $e';
+      _error = '${LocaleKeys.error_deleting_vehicle.tr()}: $e';
       if (context.mounted) {
         showSnakBarr(context, '❌ $_error');
       }

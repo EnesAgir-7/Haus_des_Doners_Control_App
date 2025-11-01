@@ -63,9 +63,6 @@ class AdminVehicleService {
         final remainingKm = maxKm - kmToUse;
         final usagePercent = ((kmToUse / maxKm) * 100).clamp(0, 100).toInt();
 
-        console(remainingKm, tag: "Remaining km");
-        console(maxKm, tag: "Max km");
-        console(kmToUse, tag: "Current km");
 
         if (newKm != null) {
           vehicleUpdates[VehicleFields.currentKm] = newKm;

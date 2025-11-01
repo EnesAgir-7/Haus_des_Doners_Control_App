@@ -87,8 +87,8 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Vehicle Management',
+                Text(
+                  LocaleKeys.vehicleManagement.tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 24,
@@ -99,7 +99,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                 Consumer<ProviderAdminVehicles>(
                   builder: (context, provider, child) {
                     return Text(
-                      '${provider.vehicles.length} vehicles',
+                      '${provider.vehicles.length} ${LocaleKeys.vehicles.tr()}',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 14,
@@ -166,7 +166,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'Loading vehicles...',
+                  LocaleKeys.loadingVehicles.tr(), 
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 14,
@@ -193,7 +193,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                   Icon(Icons.error_outline, color: Colors.red, size: 48),
                   const SizedBox(height: 16),
                   Text(
-                    'Error Loading Vehicles',
+                  LocaleKeys.errorLoadingVehicles.tr(), 
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -256,8 +256,8 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                   const SizedBox(height: 16),
                   Text(
                     _searchController.text.isNotEmpty
-                        ? 'No vehicles found'
-                        : 'No vehicles available',
+                        ? LocaleKeys.noVehiclesFound.tr()
+                        : LocaleKeys.noVehiclesAvailable.tr(), 
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
@@ -267,8 +267,8 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                   const SizedBox(height: 8),
                   Text(
                     _searchController.text.isNotEmpty
-                        ? 'Try adjusting your search'
-                        : 'Create your first vehicle',
+                        ? LocaleKeys.tryAdjustingSearch.tr()
+                        : LocaleKeys.createFirstVehicle.tr(), 
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 14,
@@ -290,7 +290,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
                         ),
                       ),
                       icon: const Icon(Icons.add),
-                      label: const Text('Create Vehicle'),
+                      label: Text(LocaleKeys.createVehicle.tr()),
                     ),
                   ],
                 ],
@@ -329,8 +329,8 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
       onPressed: _navigateToCreateVehicle,
       backgroundColor: AppColors.primaryRed,
       icon: const Icon(Icons.add, color: Colors.white),
-      label: const Text(
-        'Create Vehicle',
+      label:  Text(
+       LocaleKeys.createVehicle.tr(), 
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
       elevation: 8,

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../widgets/widgets_admin_branch_details.dart';
 import 'screen_admin_inspector_branches.dart';
@@ -104,7 +105,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
       appBar: CustomAppBar(
-        title: "${widget.inspector.name}'s Statistics",
+        title: "${widget.inspector.name} ${LocaleKeys.statistics.tr()}",
         actions: [
           IconButton.filled(
             visualDensity: VisualDensity.comfortable,
@@ -135,7 +136,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   CircularProgressIndicator(color: AppColors.primaryRed),
                   const SizedBox(height: 16),
                   Text(
-                    'Loading statistics...',
+                    LocaleKeys.loadingStatistics.tr(),
                     style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
@@ -158,7 +159,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Error Loading Statistics',
+                      LocaleKeys.errorLoadingStatistics.tr(),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -177,7 +178,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                         provider.getInspectorStatistics(widget.inspector.id);
                       },
                       icon: const Icon(Icons.refresh),
-                      label: const Text('Retry'),
+                      label: Text(LocaleKeys.retry.tr()),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryRed,
                         foregroundColor: Colors.white,
@@ -198,7 +199,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   Icon(Icons.inbox_outlined, size: 64, color: Colors.white38),
                   const SizedBox(height: 16),
                   Text(
-                    'No statistics available',
+                    LocaleKeys.noStatisticsAvailable.tr(),
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
@@ -237,7 +238,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'No data for selected month',
+                            LocaleKeys.noDataForSelectedMonth.tr(),
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 16,
@@ -391,7 +392,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                               if (!isAvailable) ...[
                                 SizedBox(width: 6),
                                 Text(
-                                  '(No data)',
+                                  LocaleKeys.noData.tr(),
                                   style: TextStyle(
                                     color: Colors.white30,
                                     fontSize: 11,
@@ -452,7 +453,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             children: [
               Expanded(
                 child: _buildCompactStatCard(
-                  label: "Branches Visited & Reported",
+                  label: LocaleKeys.branchesVisitedReported.tr(),
                   value: stats.totalInspections.toString(),
                   icon: Icons.assignment_turned_in_outlined,
                   gradientColors: [Color(0xFF4A5568), Color(0xFF2D3748)],
@@ -461,7 +462,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildCompactStatCard(
-                  label: "Assigned Vehicles",
+                  label: LocaleKeys.assignedVehicles.tr(),
                   value: stats.vehicleIds.length.toString(),
                   icon: Icons.star_outline,
                   gradientColors: [
@@ -478,7 +479,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             children: [
               Expanded(
                 child: _buildCompactStatCard(
-                  label: "Tasks Completed",
+                  label: LocaleKeys.tasksCompleted.tr(),
                   value: "${stats.tasksCompleted}/${stats.tasksTotal}",
                   icon: Icons.check_circle_outline,
                   gradientColors: [Color(0xFF0F766E), Color(0xFF115E59)],
@@ -499,7 +500,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                       ),
                     );
                   },
-                  label: "Branches Assigned",
+                  label: LocaleKeys.branchesAssigned.tr(),
                   value: stats.branchesIds.length.toString(),
                   icon: Icons.store_outlined,
                   gradientColors: [Color(0xFF9333EA), Color(0xFF7E22CE)],
@@ -611,7 +612,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
         Icon(Icons.update, size: 16, color: Colors.white54),
         const SizedBox(width: 8),
         Text(
-          'Last updated: ',
+          '${LocaleKeys.lastUpdated.tr()} ',
           style: TextStyle(color: Colors.white54, fontSize: 12),
         ),
         Text(

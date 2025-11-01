@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../helpers/app_helpers.dart';
 import '../../../models/branch_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../screens/screen_admin_branch_details.dart';
 
 class AdminBranchCard extends StatelessWidget {
@@ -126,12 +128,12 @@ class AdminBranchCard extends StatelessWidget {
               ),
               const SizedBox(width: 8.0),
               Text(
-                'Assigned Inspector',
+                LocaleKeys.assignedInspector.tr(),
                 style: TextStyle(color: Colors.grey.shade500, fontSize: 13.0),
               ),
               const Spacer(),
               Text(
-                branch.assignedInspector?.name ?? 'Unassigned',
+                branch.assignedInspector?.name ?? LocaleKeys.unassigned.tr(),
                 style: TextStyle(
                   color: branch.assignedInspector != null
                       ? Colors.white70
@@ -152,7 +154,7 @@ class AdminBranchCard extends StatelessWidget {
               ),
               const SizedBox(width: 8.0),
               Text(
-                'Total Inspections',
+                LocaleKeys.totalInspections.tr(),
                 style: TextStyle(color: Colors.grey.shade500, fontSize: 13.0),
               ),
               const Spacer(),
@@ -179,7 +181,7 @@ class AdminBranchCard extends StatelessWidget {
           Icon(Icons.info_outline, color: Colors.grey.shade600, size: 18.0),
           const SizedBox(width: 8.0),
           Text(
-            'No inspection yet',
+            LocaleKeys.noInspectionYet.tr(),
             style: TextStyle(
               color: Colors.grey.shade600,
               fontSize: 13.0,
@@ -205,7 +207,7 @@ class AdminBranchCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Last Inspection: ${branch.lastInspectionText}',
+                '${LocaleKeys.lastInspection.tr()}: ${branch.lastInspectionText}',
                 style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 13.0,
@@ -215,7 +217,7 @@ class AdminBranchCard extends StatelessWidget {
               if (days > 30) ...[
                 const SizedBox(height: 2.0),
                 Text(
-                  '⚠️ Overdue by ${days - 30} days',
+                  '⚠️ ${LocaleKeys.overdueBy.tr()} ${days - 30} ${LocaleKeys.days.tr()}',
                   style: const TextStyle(
                     color: Colors.redAccent,
                     fontSize: 11.0,
@@ -260,31 +262,40 @@ class AdminBranchCard extends StatelessWidget {
     IconData icon;
 
     if (isToday) {
-      statusText = 'Scheduled TODAY';
+      statusText = LocaleKeys.scheduledToday.tr();
       color = Colors.orangeAccent;
       icon = Icons.today;
     } else if (daysUntil == null) {
-      statusText = 'In route - scheduled soon';
+      statusText = LocaleKeys.inRouteScheduledSoon.tr();
       color = Colors.blueAccent;
       icon = Icons.route;
     } else if (daysUntil < 0) {
-      statusText = '${daysUntil.abs()} days overdue';
+      statusText = LocaleKeys.daysOverdue.tr().replaceAll(
+        '{days}',
+        daysUntil.abs().toString(),
+      );
       color = Colors.redAccent;
       icon = Icons.warning;
     } else if (daysUntil == 0) {
-      statusText = 'Due today';
+      statusText = LocaleKeys.dueToday.tr();
       color = Colors.orangeAccent;
       icon = Icons.today;
     } else if (daysUntil == 1) {
-      statusText = 'Tomorrow';
+      statusText = LocaleKeys.tomorrow.tr();
       color = Colors.greenAccent;
       icon = Icons.schedule;
     } else if (daysUntil <= 7) {
-      statusText = 'In $daysUntil days';
+      statusText = LocaleKeys.inDays.tr().replaceAll(
+        '{days}',
+        daysUntil.toString(),
+      );
       color = Colors.greenAccent;
       icon = Icons.schedule;
     } else {
-      statusText = 'In ${(daysUntil / 7).ceil()} weeks';
+      statusText = LocaleKeys.inWeeks.tr().replaceAll(
+        '{weeks}',
+        (daysUntil / 7).ceil().toString(),
+      );
       color = Colors.blueAccent;
       icon = Icons.schedule;
     }
@@ -301,7 +312,7 @@ class AdminBranchCard extends StatelessWidget {
           Icon(icon, color: color, size: 18.0),
           const SizedBox(width: 8.0),
           Text(
-            'Next Inspection: $statusText',
+            '${LocaleKeys.nextInspection.tr()}: $statusText',
             style: TextStyle(
               color: color,
               fontSize: 13.0,

@@ -1,11 +1,13 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/core/extensions.dart';
 import 'package:haus_des_control/models/task_model.dart';
 import 'package:provider/provider.dart';
 
+import '../../../translations/locale_keys.g.dart';
 import '../admin_providers/provider_admin_tasks.dart';
 import '../widgets/admin_task_card.dart';
 import '../widgets/task_add_edit_widget.dart';
@@ -90,7 +92,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
         Icon(Icons.task_alt, color: Colors.lightBlueAccent),
         SizedBox(width: 6),
         Text(
-          "Task Management",
+          LocaleKeys.taskManagement.tr(),
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
@@ -105,7 +107,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            "${provider.allTasks.length} Tasks",
+            "${provider.allTasks.length} ${LocaleKeys.tasks.tr()}",
             style: TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
@@ -224,7 +226,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
             SizedBox(height: 16),
             Text(
               _selectedFilter == 'all'
-                  ? 'No tasks available'
+                  ? LocaleKeys.noTasksAvailable.tr()
                   : 'No ${_selectedFilter.replaceAll('_', ' ')} tasks',
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
@@ -233,7 +235,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
               TextButton(
                 onPressed: () => setState(() => _selectedFilter = 'all'),
                 child: Text(
-                  'View all tasks',
+                  LocaleKeys.viewAllTasks.tr(), 
                   style: TextStyle(color: AppColors.primaryRed),
                 ),
               ),
@@ -273,7 +275,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
       backgroundColor: AppColors.primaryRed,
       icon: Icon(Icons.add, color: Colors.white),
       label: Text(
-        "Add Task",
+       LocaleKeys.addTask.tr(), 
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     );

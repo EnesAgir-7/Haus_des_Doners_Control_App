@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../core/constants/app_constants.dart';
 import '../core/constants/firebase_constants.dart';
+import '../translations/locale_keys.g.dart';
 import 'branch_model.dart';
 
 class VehicleModel {
@@ -126,10 +128,12 @@ class VehicleModel {
   // Helper to get service due status in English
   String get serviceDueText {
     final daysUntilService = nextServiceDue.difference(DateTime.now()).inDays;
-    if (daysUntilService < 0) return '${daysUntilService.abs()} days overdue';
-    if (daysUntilService == 0) return 'Due today';
-    if (daysUntilService <= 5) return '$daysUntilService days remaining';
-    return '${(daysUntilService / 7).floor()} weeks remaining';
+    if (daysUntilService < 0)
+      return "${daysUntilService.abs()} ${LocaleKeys.days_overdue.tr()}";
+    if (daysUntilService == 0) return LocaleKeys.due_today.tr();
+    if (daysUntilService <= 5)
+      return "${daysUntilService} ${LocaleKeys.days_remaining.tr()}";
+    return "${(daysUntilService / 7).floor()} ${LocaleKeys.weeks_remaining.tr()}";
   }
 
   // Helper for KM progress color

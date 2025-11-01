@@ -71,7 +71,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
-      appBar: CustomAppBar(title: 'Create Vehicle'),
+      appBar: CustomAppBar(title: LocaleKeys.createVehicle.tr()),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -79,7 +79,10 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildSectionHeader('Vehicle Information', Icons.info_outline),
+              _buildSectionHeader(
+                LocaleKeys.vehicleInformation.tr(),
+                Icons.info_outline,
+              ),
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _plateController,
@@ -87,7 +90,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
                 icon: Icons.confirmation_number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Plate is required';
+                    return LocaleKeys.plateRequired.tr();
                   }
                   return null;
                 },
@@ -95,27 +98,27 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _modelController,
-                label: 'Model',
+                label: LocaleKeys.model.tr(),
                 icon: Icons.directions_car,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Model is required';
+                    return LocaleKeys.modelRequired.tr();
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 20),
-              _buildSectionHeader('Mileage Details', Icons.speed),
+              _buildSectionHeader(LocaleKeys.mileageDetails.tr(), Icons.speed),
               const SizedBox(height: 16),
               _buildTextField(
                 controller: _currentKmController,
                 label: LocaleKeys.current_km.tr(),
                 icon: Icons.my_location,
-                suffix: 'km',
+                suffix: LocaleKeys.km.tr(),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Current kilometer is required';
+                    return LocaleKeys.currentKmRequired.tr();
                   }
                   final km = int.tryParse(value);
                   if (km == null || km < 0) {
@@ -129,11 +132,11 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
                 controller: _maxKmController,
                 label: LocaleKeys.max_km.tr(),
                 icon: Icons.flag,
-                suffix: 'km',
+                suffix: LocaleKeys.km.tr(),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Maximum kilometer is required';
+                    return LocaleKeys.maxKmRequired.tr();
                   }
                   final maxKm = int.tryParse(value);
                   if (maxKm == null || maxKm < 0) {
@@ -142,22 +145,22 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
                   final currentKm =
                       int.tryParse(_currentKmController.text) ?? 0;
                   if (maxKm <= currentKm) {
-                    return 'Maximum kilometer must be greater than current';
+                    return LocaleKeys.maxKmMustBeGreater.tr();
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 20),
-              _buildSectionHeader('Service Schedule', Icons.build),
+              _buildSectionHeader(LocaleKeys.serviceSchedule.tr(), Icons.build),
               const SizedBox(height: 16),
               _buildDateTile(
-                title: 'Last Service',
+                title: LocaleKeys.lastService.tr(),
                 date: _lastServiceDate,
                 onTap: () => _selectDate(context, true),
               ),
               const SizedBox(height: 12),
               _buildDateTile(
-                title: 'Next Service',
+                title: LocaleKeys.nextService.tr(),
                 date: _nextServiceDue,
                 onTap: () => _selectDate(context, false),
               ),
@@ -308,7 +311,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
       onPressed: _isCreating ? null : _createVehicle,
       isLoading: _isCreating,
       icon: Icons.check_circle,
-      text: 'Create Vehicle',
+      text: LocaleKeys.createVehicle.tr()
     );
   }
 
@@ -336,7 +339,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
 
       if (!mounted) return;
 
-      showSnakBarr(context, 'Vehicle created successfully');
+      showSnakBarr(context, LocaleKeys.vehicleCreatedSuccess.tr());
 
       Navigator.pop(context, true);
     } catch (e) {

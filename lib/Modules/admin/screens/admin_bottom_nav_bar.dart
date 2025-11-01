@@ -29,7 +29,7 @@ class AdminBottomNavBar extends StatelessWidget {
                   now.difference(lastBackPressed!) >
                       const Duration(seconds: 2)) {
                 lastBackPressed = now;
-                showSnakBarr(context, "Click again to exit");
+                showSnakBarr(context, LocaleKeys.click_again_to_exit.tr());
               } else {
                 SystemNavigator.pop();
               }
@@ -86,7 +86,7 @@ class AdminBottomNavBar extends StatelessWidget {
                       Icons.people,
                       color: AppColors.primaryRed,
                     ),
-                    label: "Users",
+                    label: LocaleKeys.users_label.tr(),
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.apartment, color: Colors.white70),
@@ -94,7 +94,7 @@ class AdminBottomNavBar extends StatelessWidget {
                       Icons.apartment,
                       color: AppColors.primaryRed,
                     ),
-                    label: "Branches",
+                    label: LocaleKeys.branches_label.tr(),
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.car_rental, color: Colors.white70),
@@ -116,7 +116,7 @@ class AdminBottomNavBar extends StatelessWidget {
                       Icons.settings,
                       color: AppColors.primaryRed,
                     ),
-                    label: "Settings",
+                    label: LocaleKeys.settings_label.tr(),
                   ),
                 ],
               ),

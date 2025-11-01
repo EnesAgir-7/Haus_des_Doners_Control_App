@@ -8,9 +8,9 @@ class AdminInspectionService {
   final String _collection = Collections.inspections;
 
   Stream<List<InspectionModel>> recentInspectionsStream() {
-    return FirebaseFirestore.instance
-        .collection('inspections')
-        .orderBy('updatedAt', descending: true)
+    return _db
+        .collection(Collections.inspections)
+        .orderBy(InspectionFields.updatedAt, descending: true)
         .limit(4)
         .snapshots()
         .map(

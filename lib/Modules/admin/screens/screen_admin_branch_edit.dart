@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_template_service.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart'
+    show LocaleKeys;
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -50,13 +53,13 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
   List<ContactPerson> _suppliers = [];
 
   final List<String> _daysOfWeek = [
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
+    LocaleKeys.monday.tr(),
+    LocaleKeys.tuesday.tr(),
+    LocaleKeys.wednesday.tr(),
+    LocaleKeys.thursday.tr(),
+    LocaleKeys.friday.tr(),
+    LocaleKeys.saturday.tr(),
+    LocaleKeys.sunday.tr(),
   ];
 
   @override
@@ -131,7 +134,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
-      appBar: CustomAppBar(title: 'Edit Branch'),
+      appBar: CustomAppBar(title: LocaleKeys.editBranch.tr()),
       body: Form(
         key: _formKey,
         child: Column(
@@ -162,7 +165,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Inspector assignment is managed from the branch details screen',
+                            LocaleKeys.inspectorAssignmentManaged.tr(), 
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 13,
@@ -174,16 +177,19 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     ),
                     const SizedBox(height: 24),
 
-                    _buildSectionHeader('Branch Information', Icons.store),
+                    _buildSectionHeader(
+                      LocaleKeys.branchInformation.tr(),
+                      Icons.store,
+                    ),
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _nameController,
-                      label: 'Branch Name',
-                      hint: 'Enter branch name',
+                      label: LocaleKeys.branchName.tr(),
+                      hint: LocaleKeys.enterBranchName.tr(),
                       icon: Icons.business,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Branch name is required';
+                          return LocaleKeys.branchNameRequired.tr();
                         }
                         return null;
                       },
@@ -191,23 +197,26 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _branchEmailController,
-                      label: 'Branch Email',
-                      hint: 'Enter branch email for invoices and reports',
+                      label: LocaleKeys.branchEmail.tr(),
+                      hint: LocaleKeys.enterBranchEmail.tr(),
                       icon: Icons.email,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Branch email is required';
+                          return LocaleKeys.branchEmailRequired.tr();
                         }
                         if (!value.contains('@')) {
-                          return 'Enter a valid email';
+                          return LocaleKeys.enterValidEmail.tr();
                         }
                         return null;
                       },
                     ),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Location', Icons.location_on),
+                    _buildSectionHeader(
+                      LocaleKeys.location.tr(),
+                      Icons.location_on,
+                    ),
                     const SizedBox(height: 16),
                     InkWell(
                       onTap: () async {
@@ -259,13 +268,13 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _addressController,
-                      label: 'Address',
-                      hint: 'Enter branch address',
+                      label: LocaleKeys.address.tr(),
+                      hint: LocaleKeys.enterBranchAddress.tr(),
                       icon: Icons.location_on,
                       maxLines: 3,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Address is required';
+                          return LocaleKeys.addressRequired.tr();
                         }
                         return null;
                       },
@@ -273,18 +282,18 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
 
                     const SizedBox(height: 24),
                     _buildSectionHeader(
-                      'Contact Information',
+                      LocaleKeys.contactInformation.tr(),
                       Icons.contact_phone,
                     ),
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _contactNameController,
-                      label: 'Contact Name',
-                      hint: 'Enter contact person name',
+                      label: LocaleKeys.contactName.tr(),
+                      hint: LocaleKeys.enterContactPersonName.tr(),
                       icon: Icons.person,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Contact name is required';
+                          return LocaleKeys.contactNameRequired.tr();
                         }
                         return null;
                       },
@@ -292,27 +301,30 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _contactPhoneController,
-                      label: 'Contact Phone',
-                      hint: 'Enter contact phone number',
+                      label: LocaleKeys.contactPhone.tr(),
+                      hint: LocaleKeys.enterContactPhoneNumber.tr(),
                       icon: Icons.phone,
                       keyboardType: TextInputType.phone,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
-                          return 'Contact phone is required';
+                          return LocaleKeys.contactPhoneRequired.tr();
                         }
                         return null;
                       },
                     ),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Opening Hours & Days', Icons.schedule),
+                    _buildSectionHeader(
+                      LocaleKeys.openingHoursDays.tr(),
+                      Icons.schedule,
+                    ),
                     const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
                           child: _buildTimeField(
                             controller: _openingTimeController,
-                            label: 'Opening Time',
+                            label: LocaleKeys.openingTime.tr(),
                             hint: 'HH:MM',
                             icon: Icons.access_time,
                           ),
@@ -321,7 +333,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                         Expanded(
                           child: _buildTimeField(
                             controller: _closingTimeController,
-                            label: 'Closing Time',
+                            label: LocaleKeys.closingTime.tr(),
                             hint: 'HH:MM',
                             icon: Icons.access_time_filled,
                           ),
@@ -332,8 +344,8 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     _buildOpeningDaysSelector(),
                     const SizedBox(height: 16),
                     _buildDateField(
-                      label: 'Opening Day',
-                      hint: 'Select opening day',
+                      label: LocaleKeys.openingDay.tr(),
+                      hint: LocaleKeys.selectOpeningDay.tr(),
                       icon: Icons.calendar_today,
                       selectedDate: _selectedOpeningDay,
                       onTap: () async {
@@ -350,12 +362,15 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     ),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Branch Owners', Icons.business_center),
+                    _buildSectionHeader(
+                      LocaleKeys.branchOwners.tr(),
+                      Icons.business_center,
+                    ),
                     const SizedBox(height: 16),
                     _buildContactPersonList(
                       persons: _branchOwners,
                       onAdd: () => _showAddContactPersonDialog(
-                        title: 'Add Branch Owner',
+                        title: LocaleKeys.addBranchOwner.tr(),
                         onSave: (person) {
                           setState(() => _branchOwners.add(person));
                         },
@@ -370,14 +385,14 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
 
                     const SizedBox(height: 24),
                     _buildSectionHeader(
-                      'Branch Managers',
+                      LocaleKeys.branchManagers.tr(),
                       Icons.manage_accounts,
                     ),
                     const SizedBox(height: 16),
                     _buildContactPersonList(
                       persons: _branchManagers,
                       onAdd: () => _showAddContactPersonDialog(
-                        title: 'Add Branch Manager',
+                        title: LocaleKeys.addBranchManager.tr(),
                         onSave: (person) {
                           setState(() => _branchManagers.add(person));
                         },
@@ -391,14 +406,17 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     ),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Suppliers', Icons.local_shipping),
+                    _buildSectionHeader(
+                      LocaleKeys.suppliers.tr(),
+                      Icons.local_shipping,
+                    ),
                     const SizedBox(height: 16),
                     _buildContactPersonList(
                       showRole: true,
                       persons: _suppliers,
                       onAdd: () => _showAddContactPersonDialog(
                         showRole: true,
-                        title: 'Add Supplier',
+                        title: LocaleKeys.addSupplier.tr(),
                         onSave: (person) {
                           setState(() => _suppliers.add(person));
                         },
@@ -412,32 +430,38 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     ),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Additional Information', Icons.info),
+                    _buildSectionHeader(
+                      LocaleKeys.additionalInformation.tr(),
+                      Icons.info,
+                    ),
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _donerPricesController,
-                      label: 'Döner Prices',
-                      hint: 'Enter döner prices',
+                      label: LocaleKeys.donerPrices.tr(),
+                      hint: LocaleKeys.enterDonerPrices.tr(),
                       icon: Icons.attach_money,
                     ),
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _softwareController,
-                      label: 'Software',
-                      hint: 'Enter software used',
+                      label: LocaleKeys.software.tr(),
+                      hint: LocaleKeys.enterSoftwareUsed.tr(),
                       icon: Icons.computer,
                     ),
                     const SizedBox(height: 16),
                     _buildTextField(
                       controller: _shopInformationController,
-                      label: 'Shop Information',
-                      hint: 'Enter additional shop information',
+                      label: LocaleKeys.shopInformation.tr(),
+                      hint: LocaleKeys.enterShopInformation.tr(),
                       icon: Icons.description,
                       maxLines: 5,
                     ),
 
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Questionnaire', Icons.assignment),
+                    _buildSectionHeader(
+                      LocaleKeys.questionnaire.tr(),
+                      Icons.assignment,
+                    ),
                     const SizedBox(height: 16),
                     _buildTemplateSelector(),
                     const SizedBox(height: 32),
@@ -654,7 +678,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Opening Days',
+          LocaleKeys.openingDays.tr(),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.9),
             fontSize: 14,
@@ -683,7 +707,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 Expanded(
                   child: Text(
                     _selectedOpeningDays.isEmpty
-                        ? 'Select opening days'
+                        ? LocaleKeys.selectOpeningDays.tr()
                         : _selectedOpeningDays.join(', '),
                     style: TextStyle(
                       color: _selectedOpeningDays.isEmpty
@@ -706,7 +730,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 4),
             child: Text(
-              'Template is required',
+              LocaleKeys.templateRequired.tr(),
               style: TextStyle(
                 color: Colors.red.withValues(alpha: 0.8),
                 fontSize: 12,
@@ -749,8 +773,8 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
-                  'Cancel',
+                child: Text(
+                  LocaleKeys.cancel.tr(),
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
@@ -778,8 +802,8 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text(
-                        'Update Branch',
+                    : Text(
+                        LocaleKeys.updateBranch.tr(), 
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -829,8 +853,8 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Select Opening Days',
+                      Text(
+                        LocaleKeys.selectOpeningDays.tr(),
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -879,7 +903,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                       backgroundColor: AppColors.primaryRed,
                       minimumSize: const Size(double.infinity, 48),
                     ),
-                    child: const Text('Done'),
+                    child: Text(LocaleKeys.done.tr()),
                   ),
                 ],
               ),
@@ -912,7 +936,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 controller: nameController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: 'Name',
+                  labelText: LocaleKeys.name.tr(),
                   labelStyle: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                   ),
@@ -932,7 +956,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                  labelText: 'Phone',
+                  labelText: LocaleKeys.phone.tr(),
                   labelStyle: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                   ),
@@ -953,7 +977,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                   style: const TextStyle(color: Colors.white),
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    labelText: 'Role',
+                    labelText: LocaleKeys.role.tr(),
                     labelStyle: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                     ),
@@ -972,7 +996,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(LocaleKeys.cancel.tr()),
             ),
             ElevatedButton(
               onPressed: () {
@@ -992,7 +1016,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryRed,
               ),
-              child: const Text('Save'),
+              child: Text(LocaleKeys.save.tr()),
             ),
           ],
         );
@@ -1023,7 +1047,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 controller: nameController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  labelText: 'Name',
+                  labelText: LocaleKeys.name.tr(),
                   labelStyle: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                   ),
@@ -1043,7 +1067,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                  labelText: 'Phone',
+                  labelText: LocaleKeys.phone.tr(),
                   labelStyle: TextStyle(
                     color: Colors.white.withValues(alpha: 0.7),
                   ),
@@ -1064,7 +1088,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                   style: const TextStyle(color: Colors.white),
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    labelText: 'Role',
+                    labelText: LocaleKeys.role.tr(),
                     labelStyle: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                     ),
@@ -1083,7 +1107,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: Text(LocaleKeys.cancel.tr()),
             ),
             ElevatedButton(
               onPressed: () {
@@ -1102,7 +1126,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryRed,
               ),
-              child: const Text('Update'),
+              child: Text(LocaleKeys.update.tr()),
             ),
           ],
         );
@@ -1116,13 +1140,13 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
     }
 
     if (_selectedTemplateId == null) {
-      showSnakBarr(context, 'Please select an inspection template');
+      showSnakBarr(context, LocaleKeys.pleaseSelectTemplate.tr());
 
       return;
     }
 
     if (_latitudeController.text.isEmpty || _longitudeController.text.isEmpty) {
-      showSnakBarr(context, 'Please select a location from the map');
+      showSnakBarr(context, LocaleKeys.pleaseSelectLocation.tr());
       return;
     }
 
@@ -1176,13 +1200,13 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
 
       if (mounted) {
         setState(() => _isSubmitting = false);
-        showSnakBarr(context, 'Branch updated successfully');
+        showSnakBarr(context, LocaleKeys.branchUpdatedSuccess.tr());
         Navigator.of(context).pop(updatedBranch);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSubmitting = false);
-        showSnakBarr(context, e.toString().replaceAll('Exception: ', ''));
+        showSnakBarr(context, e.toString());
       }
     }
   }
@@ -1217,8 +1241,8 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 size: 36,
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Tap to add a contact person',
+              Text(
+                LocaleKeys.tapToAddContact.tr(),
                 style: TextStyle(
                   color: Colors.white70,
                   fontSize: 14,
@@ -1284,7 +1308,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Add',
+                       LocaleKeys.add.tr(), 
                         style: TextStyle(
                           color: AppColors.primaryRed,
                           fontSize: 12,
@@ -1447,7 +1471,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                         child: InkWell(
                           onTap: () => _showEditContactPersonDialog(
                             showRole: showRole,
-                            title: 'Edit Contact',
+                            title: LocaleKeys.editContact.tr(),
                             person: person,
                             onSave: (updatedPerson) {
                               onEdit(index, updatedPerson);
@@ -1466,7 +1490,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Edit',
+                                  LocaleKeys.edit.tr(),
                                   style: TextStyle(
                                     color: AppColors.primaryRed,
                                     fontSize: 11,
@@ -1509,7 +1533,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  'Delete',
+                                  LocaleKeys.delete.tr(),
                                   style: TextStyle(
                                     color: Colors.redAccent,
                                     fontSize: 11,
@@ -1537,7 +1561,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Inspection Template',
+          LocaleKeys.inspectionTemplate.tr(),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.9),
             fontSize: 14,
@@ -1561,7 +1585,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    _selectedTemplateName ?? 'Select inspection template',
+                    _selectedTemplateName ?? LocaleKeys.selectInspectionTemplate.tr(),
                     style: TextStyle(
                       color: _selectedTemplateName != null
                           ? Colors.white
@@ -1583,7 +1607,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 4),
             child: Text(
-              'Template is required',
+              LocaleKeys.templateRequired.tr(),
               style: TextStyle(
                 color: Colors.red.withValues(alpha: 0.8),
                 fontSize: 12,

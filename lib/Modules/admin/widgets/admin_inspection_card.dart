@@ -139,7 +139,7 @@ class AdminInspectionCard extends StatelessWidget {
         Icon(Icons.person, size: 16.0, color: Colors.grey.shade500),
         const SizedBox(width: 6.0),
         Text(
-          inspection.inspectorName ?? "Unknown",
+          inspection.inspectorName ?? LocaleKeys.unknown.tr(),
           style: TextStyle(
             color: Colors.grey.shade500,
             fontSize: 13.0,
@@ -170,8 +170,8 @@ class AdminInspectionCard extends StatelessWidget {
     final prefix = inspection.status == AppConstants.completed
         ? "${LocaleKeys.completed.tr()}: "
         : inspection.status == AppConstants.scheduled
-        ? "Scheduled"
-        : "Created: ";
+        ? LocaleKeys.scheduled.tr()
+        : LocaleKeys.created.tr();
 
     return Row(
       children: [
@@ -201,7 +201,7 @@ class AdminInspectionCard extends StatelessWidget {
         Icon(Icons.category_outlined, size: 14.0, color: Colors.grey.shade600),
         const SizedBox(width: 6.0),
         Text(
-          "${inspection.categories.length} Categories",
+          "${inspection.categories.length} ${LocaleKeys.categories.tr()}",
           style: TextStyle(
             color: Colors.grey.shade600,
             fontSize: 12.0,
@@ -211,5 +211,4 @@ class AdminInspectionCard extends StatelessWidget {
       ],
     );
   }
-
 }

@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admin_branch_details.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 
 import '../../../models/branch_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../admin_firebase_services/admin_branch_service.dart';
 
@@ -68,7 +70,8 @@ class _ScreenAdminInspectorBranchesState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: "${widget.inspectorName}'s Branches"),
+      appBar: CustomAppBar(title: "${widget.inspectorName} ${LocaleKeys.branches.tr()}",
+      ),
       body: Column(
         children: [
           _buildSearchBar(),
@@ -81,18 +84,18 @@ class _ScreenAdminInspectorBranchesState
                 }
 
                 if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
+                  return Center(child: Text('${LocaleKeys.error.tr()}: ${snapshot.error}'));
                 }
 
                 _allBranches = snapshot.data ?? [];
                 _filteredBranches = _filterBranches(_allBranches);
 
                 if (_allBranches.isEmpty) {
-                  return const Center(child: Text('No branches assigned'));
+                  return  Center(child: Text(LocaleKeys.noBranchesAssigned.tr()));
                 }
 
                 if (_filteredBranches.isEmpty) {
-                  return const Center(child: Text('No branches found'));
+                  return  Center(child: Text(LocaleKeys.noBranchesFound.tr()));
                 }
 
                 return ListView.separated(
@@ -133,7 +136,7 @@ class _ScreenAdminInspectorBranchesState
                 enabledBorder: InputBorder.none,
                 errorBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
-                hintText: 'Search branches...',
+                hintText:  LocaleKeys.searchBranches.tr(),
                 hintStyle: TextStyle(color: Colors.white38, fontSize: 15),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.symmetric(vertical: 14),

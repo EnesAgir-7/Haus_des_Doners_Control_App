@@ -122,7 +122,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
         const Icon(Icons.admin_panel_settings, color: Colors.lightBlueAccent),
         const SizedBox(width: 6),
         Text(
-          'Admins',
+          LocaleKeys.admins.tr(), 
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
@@ -137,7 +137,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            '$totalCount Users',
+            '$totalCount ${LocaleKeys.users.tr()}', 
             style: TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
@@ -242,7 +242,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              errorMessage ?? 'Unknown error occurred',
+              errorMessage ?? LocaleKeys.unknownError.tr(), 
               style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
@@ -276,7 +276,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
             const SizedBox(height: 16),
             Text(
               _searchController.text.isEmpty
-                  ? 'No admins available'
+                  ? LocaleKeys.noAdminsAvailable.tr()
                   : LocaleKeys.no_users_found.tr(),
               style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),

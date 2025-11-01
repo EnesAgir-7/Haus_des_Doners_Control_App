@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../models/inspection_template_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/app_button.dart';
 import '../../inspector/widgets/custom_toast.dart';
 import '../admin_firebase_services/admin_template_service.dart';
@@ -28,7 +30,7 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
         backgroundColor: AppColors.primaryRed,
         icon: Icon(Icons.add, color: Colors.white),
         label: Text(
-          'Create Questionnaire',
+          LocaleKeys.createQuestionnaire.tr(),
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
       ),
@@ -70,7 +72,7 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
         Icon(Icons.description, color: Colors.lightBlueAccent),
         SizedBox(width: 6),
         Text(
-          'Inspection Questionnaires',
+          LocaleKeys.inspectionQuestionnaires.tr(),
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
@@ -142,7 +144,7 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    '${template.categories.length} Categories',
+                    '${template.categories.length} ${LocaleKeys.categories.tr()}',
                     style: TextStyle(
                       color: AppColors.primaryRed,
                       fontSize: 12,
@@ -185,7 +187,7 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
           Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
           SizedBox(height: 16),
           Text(
-            'Error Loading Questionnaires',
+            LocaleKeys.errorLoadingQuestionnaires.tr(),
             style: TextStyle(
               color: Colors.white,
               fontSize: 18,
@@ -324,7 +326,7 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
   Future<void> _saveTemplate() async {
     if (!_formKey.currentState!.validate() || _categories.isEmpty) {
       if (_categories.isEmpty) {
-        showSnakBarr(context, 'At least one category is required');
+        showSnakBarr(context, LocaleKeys.atLeastOneCategoryRequired.tr());
       }
       return;
     }
@@ -438,8 +440,8 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
               children: [
                 Text(
                   widget.template != null
-                      ? 'Edit Questionnaire'
-                      : 'Create Questionnaire',
+                      ? LocaleKeys.editQuestionnaire.tr()
+                      : LocaleKeys.createQuestionnaire.tr(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -450,8 +452,8 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
                 const SizedBox(height: 2),
                 Text(
                   widget.template != null
-                      ? 'Update your template details'
-                      : 'Build a new inspection template',
+                      ? LocaleKeys.updateTemplateDetails.tr()
+                      : LocaleKeys.buildNewTemplate.tr(),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 12,
@@ -491,7 +493,7 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
         controller: _nameController,
         style: const TextStyle(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
-          labelText: 'Questionnaire Name',
+          labelText: LocaleKeys.questionnaireName.tr(),
           labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
           prefixIcon: Icon(Icons.edit_note, color: AppColors.primaryRed),
           filled: true,
@@ -503,7 +505,7 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
           focusedErrorBorder: _buildBorder(error: true, focused: true),
         ),
         validator: (value) => value?.trim().isEmpty ?? true
-            ? 'Questionnaire name is required'
+            ? LocaleKeys.questionnaireNameRequired.tr()
             : null,
       ),
     );
@@ -543,8 +545,8 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
               children: [
                 Icon(Icons.category, color: AppColors.primaryRed, size: 18),
                 const SizedBox(width: 8),
-                const Text(
-                  'Categories',
+                Text(
+                  LocaleKeys.categories.tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -594,15 +596,15 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
                   padding: const EdgeInsets.all(8),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(
+                    children: [
+                      const Icon(
                         Icons.add_circle_outline,
                         color: Colors.white,
                         size: 20,
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
-                        'Add',
+                        LocaleKeys.add.tr(),
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
@@ -697,7 +699,7 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
             controller: category.titleController,
             style: const TextStyle(color: Colors.white, fontSize: 15),
             decoration: InputDecoration(
-              hintText: 'Enter category name',
+              hintText: LocaleKeys.enterCategoryName.tr(),
               hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
               isDense: true,
               contentPadding: const EdgeInsets.symmetric(
@@ -712,7 +714,7 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
               errorBorder: _buildCategoryBorder(error: true),
             ),
             validator: (value) =>
-                value?.trim().isEmpty ?? true ? 'Required' : null,
+                value?.trim().isEmpty ?? true ? LocaleKeys.required.tr() : null,
           ),
         ),
         if (_categories.length > 1) ...[
@@ -844,8 +846,8 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
     return AppButton(
       isLoading: _isLoading,
       text: widget.template != null
-          ? 'Update Questionnaire'
-          : 'Create Questionnaire',
+          ? LocaleKeys.updateQuestionnaire.tr()
+          : LocaleKeys.createQuestionnaire.tr(),
       onPressed: _saveTemplate,
       padding: const EdgeInsets.symmetric(vertical: 16),
     );
@@ -894,7 +896,7 @@ class TemplateDetailsSheet extends StatelessWidget {
               Divider(color: Colors.white24),
               SizedBox(height: 12),
               Text(
-                'Categories (${questionnaire.categories.length})',
+                '${LocaleKeys.categories.tr()} (${questionnaire.categories.length})',
                 style: TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
@@ -961,7 +963,7 @@ class TemplateDetailsSheet extends StatelessWidget {
                                 Icon(Icons.star, size: 12, color: Colors.amber),
                                 SizedBox(width: 4),
                                 Text(
-                                  'Max: ${category.maxScore}',
+                                  '${LocaleKeys.max.tr()}: ${category.maxScore}',
                                   style: TextStyle(
                                     color: Colors.amber,
                                     fontSize: 11,
@@ -1016,7 +1018,7 @@ class TemplateDetailsSheet extends StatelessWidget {
               ),
               SizedBox(height: 4),
               Text(
-                'Questionnaire ID: ${questionnaire.id}',
+                '${LocaleKeys.questionnaireId.tr()}: ${questionnaire.id}',
                 style: TextStyle(color: Colors.white54, fontSize: 11),
               ),
             ],
@@ -1035,7 +1037,7 @@ class TemplateDetailsSheet extends StatelessWidget {
       children: [
         Expanded(
           child: AppButton(
-            text: 'Edit',
+            text: LocaleKeys.edit.tr(),
             onPressed: () {
               Navigator.pop(context);
               showDialog(
@@ -1060,7 +1062,7 @@ class TemplateDetailsSheet extends StatelessWidget {
         // ADD THE DELETE BUTTON AND LOGIC HERE
         Expanded(
           child: AppButton(
-            text: 'Delete',
+            text: LocaleKeys.delete.tr(),
             onPressed: () => _showDeleteConfirmationDialog(context),
             backgroundColor: AppColors.primaryDark,
 
@@ -1078,17 +1080,23 @@ class TemplateDetailsSheet extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.lightBlack,
         title: Text(
-          'Confirm Deletion',
+          LocaleKeys.confirmDeletion.tr(),
           style: TextStyle(color: AppColors.primaryRed),
         ),
         content: Text(
-          'Are you sure you want to delete the Questionnaire "${questionnaire.name}"? This action cannot be undone.',
+          LocaleKeys.deleteQuestionnaireConfirm.tr().replaceAll(
+            '{questionnaireName}',
+            questionnaire.name,
+          ),
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text('Cancel', style: TextStyle(color: Colors.white54)),
+            child: Text(
+              LocaleKeys.cancel.tr(),
+              style: TextStyle(color: Colors.white54),
+            ),
           ),
           TextButton(
             onPressed: () async {
@@ -1100,7 +1108,7 @@ class TemplateDetailsSheet extends StatelessWidget {
               );
             },
             child: Text(
-              'Delete',
+              LocaleKeys.delete.tr(),
               style: TextStyle(
                 color: AppColors.primaryRed,
                 fontWeight: FontWeight.bold,

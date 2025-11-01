@@ -1,8 +1,10 @@
 // lib/screens/admin/screen_admin_settings.dart
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admins_listing.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../translations/locale_keys.g.dart';
 import 'screen_admin_templates.dart'; // Import the screen we just completed
 
 class ScreenAdminSettings extends StatelessWidget {
@@ -30,12 +32,12 @@ class ScreenAdminSettings extends StatelessWidget {
             children: [
               _buildHeader(),
               SizedBox(height: 12),
-              _buildSectionTitle(context, 'Inspection Management'),
+              _buildSectionTitle(context, LocaleKeys.inspectionManagement.tr()),
               _buildSettingsTile(
                 context,
                 icon: Icons.description,
-                title: 'Inspection Questionnaire',
-                subtitle: 'Create, modify, and delete inspection forms.',
+                title: LocaleKeys.inspectionQuestionnaire.tr(),
+                subtitle: LocaleKeys.createModifyDeleteForms.tr(), 
                 onTap: () {
                   Navigator.push(
                     context,
@@ -49,8 +51,8 @@ class ScreenAdminSettings extends StatelessWidget {
               _buildSettingsTile(
                 context,
                 icon: Icons.admin_panel_settings,
-                title: 'Manage Admins',
-                subtitle: 'Add, edit, or remove admin accounts.',
+                title: LocaleKeys.manageAdmins.tr(), 
+                subtitle: LocaleKeys.addEditRemoveAdmins.tr(), 
 
                 color: AppColors.primaryRed,
                 onTap: () {
@@ -107,7 +109,7 @@ class ScreenAdminSettings extends StatelessWidget {
         Icon(Icons.settings, color: Colors.lightBlueAccent),
         SizedBox(width: 6),
         Text(
-          "Admin Settings",
+         LocaleKeys.adminSettings.tr(), 
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,

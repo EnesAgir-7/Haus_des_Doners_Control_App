@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 
 import '../../../common_services/firebase_auth_service.dart';
 import '../../../models/branch_model.dart';
@@ -70,7 +72,9 @@ class ProviderAdminUsers extends ChangeNotifier {
         notifyListeners();
       },
       onError: (error) {
-        _error = 'Inspectors stream error: $error';
+        _error = LocaleKeys.inspectors_stream_error.tr(
+          args: [error.toString()],
+        );
         notifyListeners();
       },
     );
@@ -224,7 +228,11 @@ class ProviderAdminUsers extends ChangeNotifier {
         await _userService.createUser(userId, user);
       } catch (firestoreError) {
         await userCredential.user!.delete();
-        throw Exception('Failed to save user data: $firestoreError');
+        throw Exception(
+          LocaleKeys.failed_to_save_user_data.tr(
+            args: [firestoreError.toString()],
+          ),
+        );
       }
 
       notifyListeners();
@@ -255,14 +263,17 @@ class ProviderAdminUsers extends ChangeNotifier {
       notifyListeners();
 
       if (parentContext.mounted) {
-        showSnakBarr(parentContext, 'Password updated successfully ✅');
+        showSnakBarr(parentContext, LocaleKeys.password_updated_success.tr());
       }
     } catch (e) {
       _isLoading = false;
       notifyListeners();
       console(e);
       if (parentContext.mounted) {
-        showSnakBarr(parentContext, 'Error updating password: $e');
+        showSnakBarr(
+          parentContext,
+          LocaleKeys.error_updating_password.tr(args: [e.toString()]),
+        );
       }
     }
   }
@@ -281,7 +292,7 @@ class ProviderAdminUsers extends ChangeNotifier {
       notifyListeners();
 
       if (parentContext.mounted) {
-        showSnakBarr(parentContext, "Inspector deleted successfully ✅");
+        showSnakBarr(parentContext, LocaleKeys.inspector_deleted_success.tr());
         Navigator.of(parentContext).pop(); // go back only on success
       }
     } catch (e) {

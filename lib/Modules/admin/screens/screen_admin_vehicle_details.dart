@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/app_button.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
-import 'package:haus_des_control/core/console.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common_services/user_selection_sheet.dart';
@@ -152,7 +151,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
 
   Widget _buildVehicleInfoSection() {
     return _buildSection(
-      title: 'Vehicle Information',
+      title: LocaleKeys.vehicleInformation.tr(),
       icon: Icons.directions_car,
       children: [
         _buildEditableField(
@@ -162,20 +161,20 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
           enabled: _isEditing,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Plate is required';
+              return LocaleKeys.plateRequired.tr();
             }
             return null;
           },
         ),
         const SizedBox(height: 16),
         _buildEditableField(
-          label: 'Model',
+          label: LocaleKeys.model.tr(),
           controller: _modelController,
           icon: Icons.car_rental,
           enabled: _isEditing,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Model is required';
+              return LocaleKeys.modelRequired.tr();
             }
             return null;
           },
@@ -192,26 +191,26 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
     final usagePercent = ((currentKm / maxKm) * 100).clamp(0, 100).toInt();
 
     return _buildSection(
-      title: 'Mileage Details',
+      title: LocaleKeys.mileageDetails.tr(),
       icon: Icons.speed,
       children: [
         _buildEditableField(
           label: LocaleKeys.current_km.tr(),
           controller: _kmController,
           icon: Icons.my_location,
-          suffix: 'km',
+          suffix: LocaleKeys.km.tr(),
           enabled: _isEditing,
           keyboardType: TextInputType.number,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Current kilometer is required';
+              return LocaleKeys.currentKmRequired.tr();
             }
             final km = int.tryParse(value);
             if (km == null || km < 0) {
               return LocaleKeys.invalid_km_value.tr();
             }
             if (km > maxKm) {
-              return 'Cannot exceed maximum kilometer';
+              return LocaleKeys.cannotExceedMaxKm.tr();
             }
             return null;
           },
@@ -221,12 +220,12 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
           controller: _maxController,
           label: LocaleKeys.max_km.tr(),
           icon: Icons.flag,
-          suffix: 'km',
+          suffix: LocaleKeys.km.tr(),
           enabled: _isEditing,
           keyboardType: TextInputType.number,
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Maximum kilometer is required';
+              return LocaleKeys.maxKmRequired.tr();
             }
             final km = int.tryParse(value);
             if (km == null || km < 0) {
@@ -236,7 +235,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
             // ✅ Ensure max >= current
             final currentKm = int.tryParse(_kmController.text);
             if (currentKm != null && km < currentKm) {
-              return 'Maximum kilometer cannot be less than current kilometer';
+              return LocaleKeys.maxKmCannotBeLess.tr();
             }
 
             return null; // ✅ Valid case
@@ -245,7 +244,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
         const SizedBox(height: 12),
         _buildInfoCard(
           label: LocaleKeys.remaining_km.tr(),
-          value: '$remainingKm km',
+          value: '$remainingKm ${LocaleKeys.km.tr()}',
           icon: Icons.trending_down,
           color: remainingKm < 1000 ? Colors.red : Colors.orange,
         ),
@@ -264,11 +263,11 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
     final daysUntilService = nextService.difference(DateTime.now()).inDays;
 
     return _buildSection(
-      title: 'Service Schedule',
+      title: LocaleKeys.serviceSchedule.tr(),
       icon: Icons.build,
       children: [
         _buildDateField(
-          label: 'Last Service',
+          label: LocaleKeys.lastService.tr(),
           date: lastService,
           icon: Icons.history,
           enabled: _isEditing,
@@ -276,14 +275,14 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
         ),
         const SizedBox(height: 16),
         _buildDateField(
-          label: 'Next Service Due',
+          label: LocaleKeys.nextServiceDue.tr(),
           date: nextService,
           icon: Icons.event,
           enabled: _isEditing,
           onTap: _isEditing ? () => _selectDate(context, false) : null,
           subtitle: daysUntilService > 0
-              ? '$daysUntilService days remaining'
-              : 'Service overdue!',
+              ? '$daysUntilService ${LocaleKeys.daysRemaining.tr()}'
+              : LocaleKeys.serviceOverdue.tr(),
           subtitleColor: daysUntilService > 7 ? Colors.green : Colors.red,
         ),
       ],
@@ -292,7 +291,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
 
   Widget _buildInspectorSection() {
     return _buildSection(
-      title: 'Inspector Assignment',
+      title: LocaleKeys.inspectorAssignment.tr(),
       icon: Icons.person,
       children: [
         _buildInspectorCard(),
@@ -341,7 +340,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Assigned Inspector',
+                  LocaleKeys.assignedInspector.tr(),
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.6),
                     fontSize: 12,
@@ -349,7 +348,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _selectedInspectorName ?? 'Unassigned',
+                  _selectedInspectorName ?? LocaleKeys.unassigned.tr(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -396,7 +395,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
               ),
             ),
             icon: const Icon(Icons.person_search, size: 20),
-            label: const Text('Select Inspector'),
+            label: Text(LocaleKeys.selectInspector.tr()),
           ),
         ),
         if (_selectedInspectorId != null &&
@@ -688,7 +687,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       onPressed: _isSaving ? null : _saveChanges,
       isLoading: _isSaving,
       icon: Icons.save,
-      text: 'Save Changes',
+      text: LocaleKeys.saveChanges.tr(),
     );
   }
 
@@ -727,7 +726,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
           !modelChanged &&
           !datesChanged) {
         if (!mounted) return;
-        showSnakBarr(context, "No changes detected");
+        showSnakBarr(context, LocaleKeys.noChangesDetected.tr());
         setState(() => _isSaving = false);
         return;
       }
@@ -742,11 +741,6 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
           inspectorIdToPass = _selectedInspectorId; // New inspector ID
         }
       }
-
-      console('Inspector Changed: $inspectorChanged');
-      console('Old Inspector: $oldInspectorId');
-      console('New Inspector: $_selectedInspectorId');
-      console('Passing Inspector ID: $inspectorIdToPass');
 
       // Call the batch update method
       await context.read<ProviderAdminVehicles>().updateVehicleWithBatch(
@@ -763,7 +757,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       );
 
       if (!mounted) return;
-      showSnakBarr(context, "Vehicle updated successfully");
+      showSnakBarr(context, LocaleKeys.vehicleUpdatedSuccess.tr());
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
@@ -789,23 +783,26 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
             const SizedBox(width: 12),
-            const Text('Delete Vehicle', style: TextStyle(color: Colors.white)),
+            Text(
+              LocaleKeys.deleteVehicle.tr(),
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
         content: Text(
           hasInspector
-              ? 'This vehicle is currently assigned to inspector "$inspectorName".\n\n'
-                    'Deleting it will also remove it from the inspector’s history.\n\n'
-                    'Are you sure you want to proceed?'
-              : 'Are you sure you want to delete this vehicle?\n\n'
-                    'This action cannot be undone.',
+              ? LocaleKeys.deleteVehicleWithInspector.tr().replaceAll(
+                  '{inspectorName}',
+                  inspectorName,
+                )
+              : LocaleKeys.deleteVehicleConfirm.tr(),
           style: const TextStyle(color: Colors.white70, fontSize: 14),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text(
-              'Cancel',
+            child: Text(
+              LocaleKeys.cancel.tr(),
               style: TextStyle(color: Colors.white70),
             ),
           ),
@@ -824,7 +821,10 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
                           color: Colors.red,
                         ),
                       )
-                    : const Text('Delete', style: TextStyle(color: Colors.red)),
+                    : Text(
+                        LocaleKeys.delete.tr(),
+                        style: TextStyle(color: Colors.red),
+                      ),
               );
             },
           ),

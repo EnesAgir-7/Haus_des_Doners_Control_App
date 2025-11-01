@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -7,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/app_button.dart';
 
 class LocationPickerDialog extends StatefulWidget {
@@ -250,12 +252,12 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Pick Location',
+                  LocaleKeys.pickLocation.tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -263,7 +265,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                   ),
                 ),
                 Text(
-                  'Search or tap on the map',
+                  LocaleKeys.searchOrTapOnMap.tr(),
                   style: TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
@@ -295,7 +297,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 isDense: true,
-                hintText: 'Search location...',
+                hintText: LocaleKeys.searchLocation.tr(),
                 hintStyle: TextStyle(
                   color: Colors.white.withValues(alpha: 0.5),
                 ),
@@ -441,9 +443,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              _address.isEmpty
-                  ? 'Tap on the map to select a location'
-                  : _address,
+              _address.isEmpty ? LocaleKeys.tapOnMapToSelect.tr() : _address,
               style: TextStyle(
                 color: _address.isEmpty
                     ? Colors.white.withValues(alpha: 0.5)
@@ -470,7 +470,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
         ),
       ),
       child: AppButton(
-        text: 'Confirm Location',
+        text: LocaleKeys.confirmLocation.tr(),
         icon: Icons.check,
         onPressed: _address.isNotEmpty ? _confirmLocation : null,
       ),

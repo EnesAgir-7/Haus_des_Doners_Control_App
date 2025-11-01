@@ -8,9 +8,9 @@ import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
-import '../../../generated/lib/translations/locale_keys.g.dart';
 import '../../../helpers/app_helpers.dart';
 import '../../../models/inspection_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../providers/provider_inspections.dart';
 import 'screen_pdf_viewer.dart';
 

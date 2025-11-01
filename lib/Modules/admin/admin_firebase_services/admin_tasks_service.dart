@@ -145,7 +145,7 @@ class AdminTaskService {
       final snapshot = await _db
           .collection(_collection)
           .where(TaskFields.assignedInspectorId, isEqualTo: inspectorId)
-          .orderBy('createdAt', descending: true)
+          .orderBy(TaskFields.createdAt, descending: true)
           .get();
 
       return snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();

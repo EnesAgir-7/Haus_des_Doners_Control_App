@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../models/task_model.dart';
+import '../../../translations/locale_keys.g.dart';
 
 class AdminTaskCard extends StatelessWidget {
   final TaskModel task;
@@ -26,13 +27,13 @@ class AdminTaskCard extends StatelessWidget {
   String _getStatusText() {
     switch (task.status) {
       case 'pending':
-        return 'Pending';
+        return LocaleKeys.pending.tr();
       case 'in_progress':
-        return 'In Progress';
+        return LocaleKeys.inProgress.tr();
       case 'completed':
-        return 'Completed';
+        return LocaleKeys.completed.tr();
       default:
-        return 'Unknown';
+        return LocaleKeys.unknown.tr();
     }
   }
 
