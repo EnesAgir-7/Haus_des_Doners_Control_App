@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
-import '../admin_providers/provider_admin_fleet.dart';
+import '../admin_providers/provider_admin_vehicle.dart';
 
 class ScreenAdminCreateVehicle extends StatefulWidget {
   const ScreenAdminCreateVehicle({super.key});
@@ -311,7 +311,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
       onPressed: _isCreating ? null : _createVehicle,
       isLoading: _isCreating,
       icon: Icons.check_circle,
-      text: LocaleKeys.createVehicle.tr()
+      text: LocaleKeys.createVehicle.tr(),
     );
   }
 
@@ -323,7 +323,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
     final currentKm = int.parse(_currentKmController.text);
     final maxKm = int.parse(_maxKmController.text);
     final remainingKm = maxKm - currentKm;
-    final usagePercent = ((currentKm / maxKm) * 100).round();
+    final remainingPercent = ((remainingKm / maxKm) * 100).round();
 
     try {
       await context.read<ProviderAdminVehicles>().createVehicle(
@@ -332,7 +332,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
         currentKm: currentKm,
         maxKm: maxKm,
         remainingKm: remainingKm,
-        usagePercent: usagePercent,
+        remainingPercent: remainingPercent,
         lastServiceDate: _lastServiceDate,
         nextServiceDue: _nextServiceDue,
       );

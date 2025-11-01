@@ -20,9 +20,9 @@ class VehicleFields {
   static const String assignedInspectorId = 'assignedInspector.id';
   static const String assignedInspectorName = 'assignedInspector.name';
   static const String currentKm = 'currentKm';
+  static const String remainingPercent = 'remainingPercent';
   static const String maxKm = 'maxKm';
   static const String remainingKm = 'remainingKm';
-  static const String usagePercent = 'usagePercent';
   static const String lastServiceDate = 'lastServiceDate';
   static const String nextServiceDue = 'nextServiceDue';
   static const String status = 'status';

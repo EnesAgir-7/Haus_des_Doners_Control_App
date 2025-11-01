@@ -116,6 +116,9 @@ class VehicleListCard extends StatelessWidget {
 
   /// Displays KM details and usage percentage
   Widget _buildKmAndUsage() {
+    // ✅ Calculate the USED percentage (inverse of remaining)
+    final usedPercent = 100 - vehicle.remainingPercent;
+
     return Container(
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
@@ -128,26 +131,46 @@ class VehicleListCard extends StatelessWidget {
           _buildKmRow(
             icon: Icons.speed,
             label: LocaleKeys.current_km.tr(),
-            value: '${vehicle.currentKm} ${LocaleKeys.km.tr()}',
+            value:
+                '${NumberFormat('#,###').format(vehicle.currentKm)} ${LocaleKeys.km.tr()}',
           ),
           const SizedBox(height: 8.0),
           _buildKmRow(
             icon: Icons.linear_scale,
             label: LocaleKeys.remaining_km.tr(),
-            value: '${vehicle.remainingKm}  ${LocaleKeys.km.tr()}',
+            value:
+                '${NumberFormat('#,###').format(vehicle.remainingKm)} ${LocaleKeys.km.tr()}',
           ),
-          const SizedBox(height: 8.0),
+          const SizedBox(height: 12.0),
+          // ✅ FIXED: Progress bar shows USED percentage
           LinearProgressIndicator(
-            value: vehicle.usagePercent / 100,
+            value: usedPercent / 100, // Convert to 0.0-1.0 range
             backgroundColor: Colors.grey.shade800,
             valueColor: AlwaysStoppedAnimation<Color>(
-              _getUsageColor(vehicle.usagePercent),
+              _getUsageColor(usedPercent), // Pass used percentage, not km
             ),
+            minHeight: 6.0,
           ),
-          const SizedBox(height: 6.0),
-          Text(
-            '${vehicle.usagePercent}%  ${LocaleKeys.used.tr()}',
-            style: TextStyle(color: Colors.grey.shade400, fontSize: 12.0),
+          const SizedBox(height: 8.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // ✅ Show USED percentage
+              Text(
+                '${usedPercent}% ${LocaleKeys.used.tr()}',
+                style: TextStyle(
+                  color: _getUsageColor(usedPercent),
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              // ✅ Show REMAINING percentage
+              Text(
+                //TODO: locale
+                '${vehicle.remainingPercent}% Remaining',
+                style: TextStyle(color: Colors.grey.shade400, fontSize: 12.0),
+              ),
+            ],
           ),
         ],
       ),
@@ -181,7 +204,7 @@ class VehicleListCard extends StatelessWidget {
   }
 
   /// Shows service due info
-Widget _buildServiceInfo() {
+  Widget _buildServiceInfo() {
     final now = DateTime.now();
     final daysUntilNext = vehicle.nextServiceDue.difference(now).inDays;
 
@@ -260,9 +283,9 @@ Widget _buildServiceInfo() {
     );
   }
 
-  Color _getUsageColor(int percent) {
-    if (percent >= 95) return Colors.redAccent;
-    if (percent >= 70) return Colors.orangeAccent;
-    return Colors.greenAccent;
+  Color _getUsageColor(int usedPercent) {
+    if (usedPercent >= 90) return Colors.redAccent; // 90%+ used = CRITICAL
+    if (usedPercent >= 70) return Colors.orangeAccent; // 70-89% used = WARNING
+    return Colors.greenAccent; // <70% used = GOOD
   }
 }

@@ -10,7 +10,7 @@ import '../../../core/constants/firebase_constants.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/providers/provider_tasks.dart';
 import '../admin_providers/provider_admin_bottombar.dart';
-import '../admin_providers/provider_admin_fleet.dart';
+import '../admin_providers/provider_admin_vehicle.dart';
 import '../widgets/admin_recent_inspections_section.dart';
 
 class ScreenAdminHome extends StatefulWidget {

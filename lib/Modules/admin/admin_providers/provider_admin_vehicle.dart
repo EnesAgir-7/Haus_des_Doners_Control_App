@@ -117,7 +117,7 @@ class ProviderAdminVehicles extends ChangeNotifier {
     required int currentKm,
     required int maxKm,
     required int remainingKm,
-    required int usagePercent,
+    required int remainingPercent,
     required DateTime lastServiceDate,
     required DateTime nextServiceDue,
   }) async {
@@ -128,7 +128,7 @@ class ProviderAdminVehicles extends ChangeNotifier {
         currentKm: currentKm,
         maxKm: maxKm,
         remainingKm: remainingKm,
-        usagePercent: usagePercent,
+        remainingPercent: remainingPercent,
         lastServiceDate: lastServiceDate,
         nextServiceDue: nextServiceDue,
       );

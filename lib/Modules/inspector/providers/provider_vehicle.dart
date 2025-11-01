@@ -37,7 +37,7 @@ class ProviderVehicle extends ChangeNotifier {
   int get currentKm => _assignedVehiclee?.currentKm ?? 0;
   int get maxKm => _assignedVehiclee?.maxKm ?? 0;
   int get remainingKm => _assignedVehiclee?.remainingKm ?? 0;
-  int get usagePercent => _assignedVehiclee?.usagePercent ?? 0;
+  int get remainingPercent => _assignedVehiclee?.remainingPercent ?? 0;
   bool get isServiceDueSoon => _assignedVehiclee?.isServiceDueSoon ?? false;
   String get serviceDueText => _assignedVehiclee?.serviceDueText ?? '';
   String get kmProgressColor => _assignedVehiclee?.kmProgressColor ?? 'green';
@@ -96,18 +96,31 @@ class ProviderVehicle extends ChangeNotifier {
   Future<bool> updateVehicleKm(int newKm, BuildContext context) async {
     if (_assignedVehiclee == null) {
       showSnakBarr(context, LocaleKeys.no_vehicle_assigned.tr());
-      notifyListeners();
       return false;
     }
 
+    // ✅ Enhanced validation messages
     if (newKm < _assignedVehiclee!.currentKm) {
-      showSnakBarr(context, LocaleKeys.km_less_than_current.tr());
+      showSnakBarr(
+        context,
+        '${LocaleKeys.km_less_than_current.tr()}\nCurrent: ${_assignedVehiclee!.currentKm} km',
+      );
       return false;
     }
 
     if (newKm > _assignedVehiclee!.maxKm) {
-      showSnakBarr(context, LocaleKeys.km_exceeds_limit.tr());
+      showSnakBarr(
+        context,
+        '${LocaleKeys.km_exceeds_limit.tr()}\nMax: ${_assignedVehiclee!.maxKm} km',
+      );
       return false;
+    }
+
+    // ✅ Optional: Warn if update is too large (e.g., >1000km jump)
+    final kmDifference = newKm - _assignedVehiclee!.currentKm;
+    if (kmDifference > 1000) {
+      // You can add a confirmation dialog here if needed
+      print('⚠️ Large KM update detected: +$kmDifference km');
     }
 
     try {
@@ -116,28 +129,31 @@ class ProviderVehicle extends ChangeNotifier {
 
       await _vehicleService.updateVehicleKm(_assignedVehiclee!.id, newKm);
 
+      // ✅ Calculate updated values locally for immediate UI update
       final updatedRemainingKm = _assignedVehiclee!.maxKm - newKm;
-      final updatedUsagePercent = ((newKm / _assignedVehiclee!.maxKm) * 100)
-          .clamp(0, 100)
-          .round();
+      final updatedRemainingPercent = _assignedVehiclee!.maxKm > 0
+          ? ((updatedRemainingKm / _assignedVehiclee!.maxKm) * 100)
+                .clamp(0, 100)
+                .round()
+          : 0;
 
       _assignedVehiclee = _assignedVehiclee!.copyWith(
         currentKm: newKm,
         remainingKm: updatedRemainingKm,
-        usagePercent: updatedUsagePercent,
+        remainingPercent: updatedRemainingPercent,
       );
 
       _isUpdating = false;
-      showSnakBarr(context, LocaleKeys.km_update_success.tr());
-
-      notifyListeners();
-
-      return true;
-    } catch (e) {
       showSnakBarr(
         context,
-        '${LocaleKeys.km_update_error.tr(args: [e.toString()])}',
+        '${LocaleKeys.km_update_success.tr()}\n+${kmDifference} km',
       );
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      final errorMsg = e.toString().replaceAll('Exception: ', '');
+      showSnakBarr(context, '${LocaleKeys.km_update_error.tr()}\n$errorMsg');
       _isUpdating = false;
       notifyListeners();
       return false;

@@ -14,7 +14,7 @@ class VehicleModel {
   int currentKm;
   final int maxKm;
   final int remainingKm;
-  final int usagePercent;
+  final int remainingPercent;
   final DateTime lastServiceDate;
   final DateTime nextServiceDue;
   final String status;
@@ -29,7 +29,7 @@ class VehicleModel {
     this.assignedInspector,
     required this.maxKm,
     required this.remainingKm,
-    required this.usagePercent,
+    required this.remainingPercent,
     required this.lastServiceDate,
     required this.nextServiceDue,
     required this.status,
@@ -56,7 +56,10 @@ class VehicleModel {
       currentKm: data[VehicleFields.currentKm] ?? 0,
       maxKm: data[VehicleFields.maxKm] ?? 0,
       remainingKm: data[VehicleFields.remainingKm] ?? 0,
-      usagePercent: data[VehicleFields.usagePercent] ?? 0,
+      remainingPercent:
+          data[VehicleFields.remainingPercent] ??
+          100, // ✅ Changed, default 100%
+
       lastServiceDate: (data[VehicleFields.lastServiceDate] as Timestamp)
           .toDate(),
       nextServiceDue: (data[VehicleFields.nextServiceDue] as Timestamp)
@@ -78,7 +81,8 @@ class VehicleModel {
       VehicleFields.currentKm: currentKm,
       VehicleFields.maxKm: maxKm,
       VehicleFields.remainingKm: remainingKm,
-      VehicleFields.usagePercent: usagePercent,
+      VehicleFields.remainingPercent: remainingPercent,
+
       VehicleFields.lastServiceDate: Timestamp.fromDate(lastServiceDate),
       VehicleFields.nextServiceDue: Timestamp.fromDate(nextServiceDue),
       VehicleFields.status: status,
@@ -94,8 +98,9 @@ class VehicleModel {
     AssignedInspector? assignedInspector,
     int? currentKm,
     int? maxKm,
+    int? remainingPercent,
+
     int? remainingKm,
-    int? usagePercent,
     DateTime? lastServiceDate,
     DateTime? nextServiceDue,
     String? status,
@@ -108,9 +113,10 @@ class VehicleModel {
       model: model ?? this.model,
       assignedInspector: assignedInspector ?? this.assignedInspector,
       currentKm: currentKm ?? this.currentKm,
+      remainingPercent: remainingPercent ?? this.remainingPercent,
+
       maxKm: maxKm ?? this.maxKm,
       remainingKm: remainingKm ?? this.remainingKm,
-      usagePercent: usagePercent ?? this.usagePercent,
       lastServiceDate: lastServiceDate ?? this.lastServiceDate,
       nextServiceDue: nextServiceDue ?? this.nextServiceDue,
       status: status ?? this.status,
@@ -119,7 +125,6 @@ class VehicleModel {
     );
   }
 
-  // Helper to check if service is due soon
   bool get isServiceDueSoon {
     final daysUntilService = nextServiceDue.difference(DateTime.now()).inDays;
     return daysUntilService <= 5;
@@ -138,8 +143,8 @@ class VehicleModel {
 
   // Helper for KM progress color
   String get kmProgressColor {
-    if (usagePercent >= 95) return 'red';
-    if (usagePercent >= 70) return 'orange';
+    if (remainingPercent >= 95) return 'red';
+    if (remainingPercent >= 70) return 'orange';
     return 'green';
   }
 }

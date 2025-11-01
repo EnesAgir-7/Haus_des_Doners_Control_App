@@ -36,7 +36,7 @@ class AdminBottomNavBar extends StatelessWidget {
             }
           },
           child: Scaffold(
-            appBar: const CustomAppBar(),
+            appBar: const CustomAppBar(showLang: true, showLogout: true),
             body: IndexedStack(
               key: Key("admin_stack_${context.locale.languageCode}"),
               index: provider.selectedIndex,

@@ -10,7 +10,7 @@ class InspectorVehicleService {
   final String _collectionVehicles = Collections.vehicles;
 
   // Get vehicle assigned to inspector
-Stream<List<VehicleModel>> streamVehiclesByInspector(String inspectorId) {
+  Stream<List<VehicleModel>> streamVehiclesByInspector(String inspectorId) {
     return _db
         .collection(_collectionVehicles)
         .where(VehicleFields.assignedInspectorId, isEqualTo: inspectorId)
@@ -37,27 +37,51 @@ Stream<List<VehicleModel>> streamVehiclesByInspector(String inspectorId) {
   }
 
   // Update vehicle kilometers
+// Fixed Inspector updateVehicleKm method for InspectorVehicleService
+
   Future<void> updateVehicleKm(String vehicleId, int newKm) async {
     try {
-      final vehicle = await _db
-          .collection(_collectionVehicles)
-          .doc(vehicleId)
-          .get();
-      if (!vehicle.exists) throw Exception(LocaleKeys.vehicle_not_found.tr());
+      final vehicleRef = _db.collection(_collectionVehicles).doc(vehicleId);
 
-      final data = vehicle.data() as Map<String, dynamic>;
-      final maxKm = data[VehicleFields.maxKm] as int;
+      // Get current vehicle data
+      final vehicleDoc = await vehicleRef.get();
+      if (!vehicleDoc.exists) {
+        throw Exception(LocaleKeys.vehicle_not_found.tr());
+      }
+
+      final vehicleData = vehicleDoc.data()!;
+      final maxKm = vehicleData[VehicleFields.maxKm] as int? ?? 0;
+      final currentKmInDb = vehicleData[VehicleFields.currentKm] as int? ?? 0;
+
+      // Validate: new KM should be >= current (allow same value)
+      if (newKm < currentKmInDb) {
+        throw Exception(LocaleKeys.km_less_than_current.tr());
+      }
+
+      // Validate: new KM should not exceed max
+      if (newKm > maxKm) {
+        throw Exception(LocaleKeys.km_exceeds_limit.tr());
+      }
+
+      // ✅ Calculate new remaining values
       final remainingKm = maxKm - newKm;
-      final usagePercent = ((newKm / maxKm) * 100).round();
+      final remainingPercent = maxKm > 0
+          ? ((remainingKm / maxKm) * 100).clamp(0, 100).toInt()
+          : 0;
 
-      await _db.collection(_collectionVehicles).doc(vehicleId).update({
+      // Update vehicle
+      await vehicleRef.update({
         VehicleFields.currentKm: newKm,
         VehicleFields.remainingKm: remainingKm,
-        VehicleFields.usagePercent: usagePercent,
+        VehicleFields.remainingPercent: remainingPercent,
         VehicleFields.updatedAt: FieldValue.serverTimestamp(),
       });
-    } catch (e) {
-      print('Error updating vehicle KM: $e');
+
+      print(
+        '✅ Vehicle $vehicleId kilometers updated to $newKm km by inspector',
+      );
+    } catch (e, st) {
+      print("❌ Error updating vehicle kilometers: $e\n$st");
       rethrow;
     }
   }

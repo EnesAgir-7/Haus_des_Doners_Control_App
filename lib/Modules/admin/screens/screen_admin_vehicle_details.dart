@@ -9,7 +9,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../models/vehicle_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
-import '../admin_providers/provider_admin_fleet.dart';
+import '../admin_providers/provider_admin_vehicle.dart';
 
 class ScreenAdminVehicleDetails extends StatefulWidget {
   final VehicleModel vehicle;
@@ -183,12 +183,16 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
     );
   }
 
-  Widget _buildMileageSection() {
+Widget _buildMileageSection() {
     final currentKm =
         int.tryParse(_kmController.text) ?? widget.vehicle.currentKm;
-    final maxKm = widget.vehicle.maxKm;
+    final maxKm = int.tryParse(_maxController.text) ?? widget.vehicle.maxKm;
     final remainingKm = maxKm - currentKm;
-    final usagePercent = ((currentKm / maxKm) * 100).clamp(0, 100).toInt();
+
+    // ✅ FIXED: Calculate remaining percentage correctly
+    final remainingPercent = maxKm > 0
+        ? ((remainingKm / maxKm) * 100).clamp(0, 100).toInt()
+        : 0;
 
     return _buildSection(
       title: LocaleKeys.mileageDetails.tr(),
@@ -209,7 +213,8 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
             if (km == null || km < 0) {
               return LocaleKeys.invalid_km_value.tr();
             }
-            if (km > maxKm) {
+            final max = int.tryParse(_maxController.text) ?? maxKm;
+            if (km > max) {
               return LocaleKeys.cannotExceedMaxKm.tr();
             }
             return null;
@@ -238,7 +243,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
               return LocaleKeys.maxKmCannotBeLess.tr();
             }
 
-            return null; // ✅ Valid case
+            return null;
           },
         ),
         const SizedBox(height: 12),
@@ -250,8 +255,8 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
         ),
         const SizedBox(height: 16),
         _buildProgressCard(
-          label: LocaleKeys.used_percentage.tr(),
-          percent: usagePercent,
+          label: "Remaining %", 
+          percent: remainingPercent,
         ),
       ],
     );

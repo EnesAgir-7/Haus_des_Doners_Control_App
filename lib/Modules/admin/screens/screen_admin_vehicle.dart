@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../common/widget_vehicle_common.dart';
-import '../admin_providers/provider_admin_fleet.dart';
+import '../admin_providers/provider_admin_vehicle.dart';
 import 'screen_admin_create_vehicle.dart';
 
 class ScreenAdminVehicle extends StatefulWidget {

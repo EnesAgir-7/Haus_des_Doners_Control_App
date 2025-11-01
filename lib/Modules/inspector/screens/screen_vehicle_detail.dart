@@ -8,15 +8,17 @@ import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../providers/provider_vehicle.dart';
 
-class ScreenVehicleDetail extends StatefulWidget {
+class ScreenInspectorVehicleDetail extends StatefulWidget {
   final VehicleModel vehicle;
-  const ScreenVehicleDetail({super.key, required this.vehicle});
+  const ScreenInspectorVehicleDetail({super.key, required this.vehicle});
 
   @override
-  State<ScreenVehicleDetail> createState() => _ScreenVehicleDetailState();
+  State<ScreenInspectorVehicleDetail> createState() =>
+      _ScreenInspectorVehicleDetailState();
 }
 
-class _ScreenVehicleDetailState extends State<ScreenVehicleDetail>
+class _ScreenInspectorVehicleDetailState
+    extends State<ScreenInspectorVehicleDetail>
     with TickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
@@ -411,14 +413,14 @@ class _EnhancedStatBox extends StatelessWidget {
 }
 
 class _EnhancedRemainingKm extends StatelessWidget {
-  final dynamic vehicle;
+  final VehicleModel vehicle;
   final ProviderVehicle provider;
   const _EnhancedRemainingKm({required this.vehicle, required this.provider});
 
   @override
   Widget build(BuildContext context) {
-    final progress = vehicle.usagePercent / 100.0;
-    final progressColor = _getProgressColor(vehicle.usagePercent);
+    final progress = vehicle.remainingPercent / 100.0;
+    final progressColor = _getProgressColor(vehicle.remainingPercent);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -549,7 +551,9 @@ class _EnhancedRemainingKm extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    "${vehicle.usagePercent}% ${LocaleKeys.used.tr()}",
+                    // ✅ FIXED: Show remaining percentage correctly
+                    //TODO: locale
+                    "${vehicle.remainingPercent}% Remaining",
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
@@ -558,7 +562,8 @@ class _EnhancedRemainingKm extends StatelessWidget {
                   ),
                 ],
               ),
-              if (vehicle.usagePercent >= 90)
+              // ✅ FIXED: Warning when remaining is LOW (≤10%)
+              if (vehicle.remainingPercent <= 10)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -588,16 +593,17 @@ class _EnhancedRemainingKm extends StatelessWidget {
                   ),
                 ),
             ],
-          ),
+          )
         ],
       ),
     );
   }
 
-  Color _getProgressColor(int percent) {
-    if (percent >= 95) return Colors.red;
-    if (percent >= 70) return Colors.amber;
-    return Colors.green;
+Color _getProgressColor(int remainingPercent) {
+
+    if (remainingPercent <= 10) return Colors.red; // ≤10% remaining = CRITICAL
+    if (remainingPercent <= 30) return Colors.amber; // ≤30% remaining = WARNING
+    return Colors.green; // >30% remaining = GOOD
   }
 }
 

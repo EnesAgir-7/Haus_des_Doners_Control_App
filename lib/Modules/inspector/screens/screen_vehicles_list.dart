@@ -180,7 +180,8 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
   ) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => ScreenVehicleDetail(vehicle: vehicleModel),
+        builder: (context) =>
+            ScreenInspectorVehicleDetail(vehicle: vehicleModel),
       ),
     );
   }

@@ -8,7 +8,7 @@ import 'package:haus_des_control/Modules/admin/screens/admin_bottom_nav_bar.dart
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/firebase_options.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_branches.dart';
-import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_fleet.dart';
+import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_vehicle.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_auth.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_vehicle.dart';

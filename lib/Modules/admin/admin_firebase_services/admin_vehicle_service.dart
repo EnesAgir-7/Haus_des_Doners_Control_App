@@ -25,7 +25,7 @@ class AdminVehicleService {
         );
   }
 
-  Future<void> updateVehicleWithBatch({
+Future<void> updateVehicleWithBatch({
     required String vehicleId,
     int? newKm,
     String? newPlate,
@@ -60,18 +60,17 @@ class AdminVehicleService {
       // IMPORTANT: Use newKm if provided, otherwise use current km from database
       final kmToUse = newKm ?? currentKmInDb;
 
-      // Always recalculate remaining and usage when maxKm changes OR when newKm is provided
-      if (newKm != null || maxKm != vehicleData[VehicleFields.maxKm]) {
-        final remainingKm = maxKm - kmToUse;
-        final usagePercent = ((kmToUse / maxKm) * 100).clamp(0, 100).toInt();
+      // ✅ FIXED: Always recalculate remaining and percentage
+      final remainingKm = maxKm - kmToUse;
+      final remainingPercent = ((remainingKm / maxKm) * 100)
+          .clamp(0, 100)
+          .toInt();
 
-
-        if (newKm != null) {
-          vehicleUpdates[VehicleFields.currentKm] = newKm;
-        }
-        vehicleUpdates[VehicleFields.remainingKm] = remainingKm;
-        vehicleUpdates[VehicleFields.usagePercent] = usagePercent;
+      if (newKm != null) {
+        vehicleUpdates[VehicleFields.currentKm] = newKm;
       }
+      vehicleUpdates[VehicleFields.remainingKm] = remainingKm;
+      vehicleUpdates[VehicleFields.remainingPercent] = remainingPercent;
 
       // 2️⃣ Handle basic field updates
       if (newPlate != null) {
@@ -197,7 +196,7 @@ class AdminVehicleService {
     required int currentKm,
     required int maxKm,
     required int remainingKm,
-    required int usagePercent,
+    required int remainingPercent,
     required DateTime lastServiceDate,
     required DateTime nextServiceDue,
   }) async {
@@ -208,7 +207,7 @@ class AdminVehicleService {
         VehicleFields.currentKm: currentKm,
         VehicleFields.maxKm: maxKm,
         VehicleFields.remainingKm: remainingKm,
-        VehicleFields.usagePercent: usagePercent,
+        VehicleFields.remainingPercent: remainingPercent,
         VehicleFields.lastServiceDate: Timestamp.fromDate(lastServiceDate),
         VehicleFields.nextServiceDue: Timestamp.fromDate(nextServiceDue),
         VehicleFields.status: AppConstants.available,
