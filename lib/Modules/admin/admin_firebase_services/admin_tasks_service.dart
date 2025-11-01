@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/task_model.dart';
+import '../../../translations/locale_keys.g.dart';
 
 class AdminTaskService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -73,7 +75,7 @@ class AdminTaskService {
       final taskDoc = await taskRef.get();
 
       if (!taskDoc.exists) {
-        throw Exception('Task not found');
+        throw Exception(LocaleKeys.no_tasks_found.tr());
       }
 
       final data = taskDoc.data() as Map<String, dynamic>;
@@ -193,7 +195,7 @@ class AdminTaskService {
     // Get current task state
     final currentTask = await getTaskById(taskId);
     if (currentTask == null) {
-      throw Exception('Task not found');
+      throw Exception(LocaleKeys.no_tasks_found.tr());
     }
 
     final batch = _db.batch();

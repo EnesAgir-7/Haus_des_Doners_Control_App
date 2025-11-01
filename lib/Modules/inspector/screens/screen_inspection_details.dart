@@ -40,15 +40,6 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(showLogout: false, showLang: false),
-
-      // AppBar(
-      //   title: Text(
-      //     LocaleKeys.inspection_details.tr(),
-      //     style: const TextStyle(color: Colors.white),
-      //   ),
-      //   backgroundColor: AppColors.primaryDark,
-      //   iconTheme: const IconThemeData(color: Colors.white),
-      // ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -75,7 +66,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
             }
 
             if (provider.inspection == null) {
-              return _buildErrorState("Inspection Not found");
+              return _buildErrorState(LocaleKeys.inspectionNotFound.tr());
             }
 
             return _buildDetailsBody(context, provider, provider.inspection!);
@@ -199,14 +190,18 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
           _infoRow(
             Icons.person_outline,
             LocaleKeys.inspector.tr(),
-            inspection.inspectorName ?? 'N/A',
+            inspection.inspectorName ?? LocaleKeys.notAvailable.tr(),
           ),
           const SizedBox(height: 12),
-          _infoRow(Icons.calendar_today, "Scheduled", inspection.scheduledTime),
+          _infoRow(
+            Icons.calendar_today,
+            LocaleKeys.scheduled.tr(),
+            inspection.scheduledTime,
+          ),
           const SizedBox(height: 12),
           _infoRow(
             Icons.done_all,
-            "Completed On",
+            LocaleKeys.completedOn.tr(),
             inspection.completedTime != null
                 ? formatDate(inspection.completedTime!)
                 : LocaleKeys.in_progress.tr(),
@@ -216,7 +211,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
             Padding(
               padding: const EdgeInsets.only(top: 12),
               child: AppButton(
-                text: "View pdf report",
+                text: LocaleKeys.viewPdfReport.tr(),
                 // onPressed: () => openInBrowser(inspection.pdfReportUrl!, context),
                 onPressed: () {
                   Navigator.push(
@@ -285,7 +280,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
           child: Text(
             inspection.overallNotes.isNotEmpty
                 ? inspection.overallNotes
-                : "No Overall notes",
+                : LocaleKeys.noOverallNotes.tr(),
             style: const TextStyle(color: Colors.white70),
           ),
         ),
@@ -302,7 +297,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Category Breakdown",
+          LocaleKeys.categoryBreakdown.tr(),
           style: TextStyle(
             color: AppColors.primaryRed,
             fontSize: 18,
@@ -390,7 +385,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
 
             // Notes
             Text(
-              "Notes",
+              LocaleKeys.notes.tr(),
               style: const TextStyle(
                 color: Colors.white70,
                 fontWeight: FontWeight.w600,
@@ -399,7 +394,9 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
             ),
             const SizedBox(height: 4),
             Text(
-              data.notes.isNotEmpty ? data.notes : "No Note Provided",
+              data.notes.isNotEmpty
+                  ? data.notes
+                  : LocaleKeys.noNoteProvided.tr(),
               style: const TextStyle(color: Colors.white54, fontSize: 13),
             ),
 
@@ -407,7 +404,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
             if (data.photos.isNotEmpty) ...[
               const SizedBox(height: 12),
               Text(
-                "Photoes",
+                LocaleKeys.photos.tr(),
                 style: const TextStyle(
                   color: Colors.white70,
                   fontWeight: FontWeight.w600,

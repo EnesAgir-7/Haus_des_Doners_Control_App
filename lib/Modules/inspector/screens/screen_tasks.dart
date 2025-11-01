@@ -603,8 +603,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
 
                     _buildInfoRow(
                       icon: Icons.person,
-                      //TODO: locale
-                      label: "Assigned Inspector",
+                      label: LocaleKeys.assignInspector.tr(),
                       value: widget.task.assignedInspectorName,
                     ),
 
@@ -686,7 +685,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                   maxLines: null,
                   decoration: InputDecoration(
                     hintText:
-                        "Add comment", // TODO: Add this to your locale keys
+                        LocaleKeys.addComment.tr(),
                     hintStyle: TextStyle(
                       color: Color(0xFF606060),
                       fontSize: 14,

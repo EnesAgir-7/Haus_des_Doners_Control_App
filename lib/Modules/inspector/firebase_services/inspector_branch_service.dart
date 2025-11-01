@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/core/console.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_model.dart';
 import '../../../models/route_model.dart';
+import '../../../translations/locale_keys.g.dart';
 
 class InspectorBranchService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -121,14 +123,16 @@ class InspectorBranchService {
 
       final docSnap = await routeDocRef.get();
       if (!docSnap.exists) {
-        throw Exception("No route found for inspectorId: $inspectorId");
+        throw Exception(LocaleKeys.noRouteFound.tr());
       }
 
       final route = RouteModel.fromFirestore(docSnap);
 
       final stopIndex = route.stops.indexWhere((s) => s.order == order);
       if (stopIndex == -1) {
-        throw Exception("No stop found with order: $order");
+        throw Exception(
+          LocaleKeys.noStopFound.tr().replaceFirst('{order}', order.toString()),
+        );
       }
 
       final updatedStop = route.stops[stopIndex].copyWith(
@@ -214,7 +218,7 @@ class InspectorBranchService {
           (s) => s[RouteStopFields.branchId] == branchId,
         );
         if (alreadyAssigned) {
-          throw Exception('Branch already assigned in route');
+          throw Exception(LocaleKeys.branchAlreadyAssigned.tr());
         }
 
         final orderNumber = stops.length + 1;

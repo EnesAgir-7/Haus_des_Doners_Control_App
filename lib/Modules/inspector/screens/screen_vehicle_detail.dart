@@ -577,7 +577,7 @@ class _EnhancedRemainingKm extends StatelessWidget {
                       Icon(Icons.warning, size: 12, color: Colors.red),
                       const SizedBox(width: 4),
                       Text(
-                        'Critical',
+                        LocaleKeys.critical.tr(),
                         style: TextStyle(
                           color: Colors.red,
                           fontSize: 10,
@@ -822,7 +822,7 @@ void _showEnhancedUpdateKmDialog(
                         Icons.close,
                         color: Colors.white.withValues(alpha: 0.7),
                       ),
-                      tooltip: 'Close',
+                      tooltip: LocaleKeys.close.tr(),
                     ),
                   ),
                 ],

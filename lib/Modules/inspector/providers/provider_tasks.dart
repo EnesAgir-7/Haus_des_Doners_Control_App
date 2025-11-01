@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
@@ -10,6 +11,7 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../models/task_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../firebase_services/inspector_tasks_service.dart';
 
 /// Provider for Tasks screen
@@ -213,7 +215,7 @@ class ProviderTasks extends ChangeNotifier {
     final commentText = commentController.text.trim();
 
     if (commentText.isEmpty && _commentPhotos.isEmpty) {
-      showSnakBarr(context, 'Please add a comment or photo');
+      showSnakBarr(context, LocaleKeys.pleaseAddCommentOrPhoto.tr());
       return null;
     }
 
@@ -236,7 +238,7 @@ class ProviderTasks extends ChangeNotifier {
       final comment = TaskCommentModel(
         id: commentId, // ✅ UPDATED: Use generated unique ID instead of taskId
         userId: loggedInUser!.id,
-        userName: loggedInUser?.name ?? 'Inspector',
+        userName: loggedInUser?.name ?? LocaleKeys.inspector.tr(),
         text: commentText,
         timestamp: DateTime.now(),
         photos: photoUrls,
@@ -256,7 +258,7 @@ class ProviderTasks extends ChangeNotifier {
       // ✅ Return the created comment so the UI can append it locally
       return comment;
     } catch (e) {
-      showSnakBarr(context, 'Failed to add comment: $e');
+      showSnakBarr(context, '$e');
       _isAddingComment = false;
       notifyListeners();
       return null;

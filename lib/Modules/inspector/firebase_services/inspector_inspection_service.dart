@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
-import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../models/inspection_model.dart';
@@ -199,13 +199,6 @@ class InspectorInspectionService {
         },
       );
 
-      // // Update inspector history
-      // await _prepareInspectorHistoryBatch(
-      //   batch: batch,
-      //   inspectorId: inspection.inspectorId,
-      //   inspectionScore: inspection.score,
-      // );
-
       await batch.commit();
 
       return docRef.id;
@@ -220,11 +213,10 @@ class InspectorInspectionService {
     required String branchId,
     required String inspectionScore,
   }) async {
-    console(inspectionScore, tag: "///////////////////////////////////");
     final branchRef = _db.collection(_collectionBranches).doc(branchId);
     final branchDoc = await branchRef.get();
 
-    if (!branchDoc.exists) throw Exception('Branch not found');
+    if (!branchDoc.exists) throw Exception(LocaleKeys.branch_not_found);
 
     final data = branchDoc.data()!;
     final currentTotal = data[BranchFields.totalInspections] ?? 0;
@@ -287,54 +279,6 @@ class InspectorInspectionService {
       BranchFields.updatedAt: FieldValue.serverTimestamp(),
     });
   }
-
-  // Helper: adds branch statistics update to batch
-  // Future<void> _prepareBranchStatisticsBatch({
-  //   required WriteBatch batch,
-  //   required String branchId,
-  //   required String inspectionScore,
-  // }) async {
-  //   final branchRef = _db.collection(_collectionBranches).doc(branchId);
-  //   final branchDoc = await branchRef.get();
-
-  //   if (!branchDoc.exists) throw Exception('Branch not found');
-
-  //   final data = branchDoc.data()!;
-  //   final currentTotal = data[BranchFields.totalInspections] ?? 0;
-  //   final currentAverage = (data[BranchFields.averageRating] ?? 0.0).toDouble();
-  //   final newTotal = currentTotal + 1;
-
-  //   // Extract numeric part from "3/12"
-  //   final inspectionParts = inspectionScore.split('/');
-  //   final numericScore = double.tryParse(inspectionParts.first) ?? 0.0;
-
-  //   // Calculate new average
-  //   final newAverage =
-  //       ((currentAverage * currentTotal) + numericScore) / newTotal;
-
-  //   // ✅ Handle last 12 scores
-  //   final List<dynamic> currentScores = List<String>.from(
-  //     data[BranchFields.last12MonthsScores] ?? [],
-  //   );
-
-  //   currentScores.add(inspectionScore);
-
-  //   // Keep only the last 12
-  //   final trimmedScores = currentScores.length > 12
-  //       ? currentScores.sublist(currentScores.length - 12)
-  //       : currentScores;
-
-  //   // ✅ Update Firestore fields
-  //   batch.update(branchRef, {
-  //     BranchFields.totalInspections: newTotal,
-  //     BranchFields.lastInspectionDate: FieldValue.serverTimestamp(),
-  //     BranchFields.averageRating: newAverage,
-  //     BranchFields.stop: null,
-  //     BranchFields.lastInspectionScore: inspectionScore,
-  //     BranchFields.last12MonthsScores: trimmedScores, // ✅ trimmed list
-  //     BranchFields.updatedAt: FieldValue.serverTimestamp(),
-  //   });
-  // }
 
   // Helper: adds route stop update to batch
   Future<void> _prepareStopCompletionBatch({

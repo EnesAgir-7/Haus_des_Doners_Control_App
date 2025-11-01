@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_assets.dart';
@@ -112,7 +114,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   _showLogoutDialog(context);
                 },
                 icon: const Icon(Icons.logout_rounded, color: Colors.white),
-                tooltip: 'Logout',
+                    tooltip: LocaleKeys.logout.tr(),
               ),
             ),
         ],
@@ -153,9 +155,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+             Expanded(
               child: Text(
-                'Confirm Logout',
+                LocaleKeys.confirmLogout.tr(),
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -166,7 +168,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ],
         ),
         content: Text(
-          'Are you sure you want to logout?',
+          LocaleKeys.confirmLogoutMessage.tr(), 
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.7),
             fontSize: 14,
@@ -179,7 +181,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             child: Text(
-              'Cancel',
+              LocaleKeys.cancel.tr(), 
               style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
             ),
           ),
@@ -217,8 +219,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
-                'Logout',
+              child: Text(
+                LocaleKeys.logout.tr(),
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
@@ -228,32 +230,3 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 }
-
-// class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-//   final bool showLogout;
-//   final bool showLang;
-//   const CustomAppBar({super.key, this.showLogout = true, this.showLang = true});
-
-//   @override
-//   Size get preferredSize => const Size.fromHeight(60);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return AppBar(
-//       backgroundColor: AppColors.primaryRed,
-//       elevation: 0,
-//       title: Image.asset(kAppLogo, height: 32),
-//       centerTitle: true,
-//       actions: [
-//         if (showLang) const LanguageButton(),
-//         if (showLogout)
-//           IconButton(
-//             onPressed: () {
-//               context.read<ProviderAuth>().logout();
-//             },
-//             icon: const Icon(Icons.logout, color: AppColors.white),
-//           ),
-//       ],
-//     );
-//   }
-// }

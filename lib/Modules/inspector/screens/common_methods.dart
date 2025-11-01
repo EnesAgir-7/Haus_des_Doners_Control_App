@@ -55,7 +55,7 @@ StatusInfo getStatusInfo(RouteStopModel stop, bool isCompleted) {
     // Completed earlier than today = expired
     color = Colors.deepOrange;
     icon = Icons.warning_amber_rounded;
-    label = "Expired";
+    label = LocaleKeys.expired.tr();
   } else if (isCompleted) {
     // Completed today (or not expired)
     color = Colors.green;
@@ -64,7 +64,7 @@ StatusInfo getStatusInfo(RouteStopModel stop, bool isCompleted) {
   } else if (isOverdue) {
     color = Colors.deepOrange;
     icon = Icons.warning_amber_rounded;
-    label = "Overdue";
+    label = LocaleKeys.overdue.tr();
   } else if (isToday) {
     color = AppColors.primaryRed;
     icon = Icons.hourglass_bottom;

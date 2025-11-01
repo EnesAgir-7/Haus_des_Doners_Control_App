@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/inspector_history_model.dart';
 import '../../../models/route_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/app_button.dart';
 
 class AdminStopInfoSheet extends StatelessWidget {
@@ -33,7 +34,7 @@ class AdminStopInfoSheet extends StatelessWidget {
               const SizedBox(height: 16),
               Center(
                 child: AppButton(
-                  text: 'Close',
+                  text: LocaleKeys.cancel.tr(),
                   onPressed: () => Navigator.pop(context),
                   padding: const EdgeInsets.symmetric(
                     vertical: 12,
@@ -128,25 +129,28 @@ class AdminStopInfoSheet extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _infoRow('Branch Name', stop.branchName),
-        _infoRow('Branch Address', stop.branchAddress ?? 'N/A'),
-        _infoRow('Time Slot', formatTimeSlot(stop.timeSlot)),
-        _infoRow('Status', stop.status),
+        _infoRow(LocaleKeys.branchName.tr(), stop.branchName),
+        _infoRow(
+          LocaleKeys.branchAddress.tr(),
+          stop.branchAddress ?? LocaleKeys.notAvailable.tr(),
+        ),
+        _infoRow(LocaleKeys.timeSlot.tr(), formatTimeSlot(stop.timeSlot)),
+        _infoRow(LocaleKeys.status.tr(), stop.status),
         if (stop.inspectionScore != null)
-          _infoRow('Inspection Score', stop.inspectionScore!),
+          _infoRow(LocaleKeys.inspectionScore.tr(), stop.inspectionScore!),
         if (stop.createdAt != null)
           _infoRow(
-            'Created At',
+            LocaleKeys.createdAt.tr(),
             DateFormat("MMMM d, yyyy 'at' h:mm a").format(stop.createdAt!),
           ),
         if (stop.completedAt != null)
           _infoRow(
-            'Completed At',
+            LocaleKeys.completedAt.tr(),
             DateFormat("MMMM d, yyyy 'at' h:mm a").format(stop.completedAt!),
           ),
         if (stop.expiryDate != null)
           _infoRow(
-            'Expiry Date',
+            LocaleKeys.expiryDate.tr(),
             DateFormat(
               "MMMM d, yyyy 'at' h:mm a",
             ).format(stop.expiryDate!.toDate()),
@@ -203,7 +207,7 @@ class AdminStopInfoSheet extends StatelessWidget {
 
     if (stop.isExpired) {
       return _StopStatusInfo(
-        label: "Expired",
+        label: LocaleKeys.expired.tr(),
         icon: Icons.warning_amber_rounded,
         color: Colors.deepOrange,
         gradientColors: [Colors.deepOrange, Colors.red],
@@ -211,7 +215,7 @@ class AdminStopInfoSheet extends StatelessWidget {
     }
     if (stop.isCompleted) {
       return _StopStatusInfo(
-        label: "Completed",
+        label: LocaleKeys.completed.tr(),
         icon: Icons.check_circle,
         color: Colors.green,
         gradientColors: [Colors.green, const Color(0xFF2E7D32)],
@@ -224,7 +228,7 @@ class AdminStopInfoSheet extends StatelessWidget {
 
     if (isOverdue) {
       return _StopStatusInfo(
-        label: "Overdue",
+        label: LocaleKeys.overdue.tr(),
         icon: Icons.error_outline,
         color: Colors.red,
         gradientColors: [Colors.red.shade700, Colors.red.shade900],
@@ -233,21 +237,21 @@ class AdminStopInfoSheet extends StatelessWidget {
     if (isToday) {
       if (stop.isCurrent) {
         return _StopStatusInfo(
-          label: "In Progress",
+          label: LocaleKeys.inProgress.tr(),
           icon: Icons.play_circle_outline,
           color: Colors.amber,
           gradientColors: [Colors.amber, Colors.orange],
         );
       }
       return _StopStatusInfo(
-        label: "Today",
+        label: LocaleKeys.today.tr(),
         icon: Icons.today,
         color: Colors.green,
         gradientColors: [const Color(0xFF4CAF50), const Color(0xFF2E7D32)],
       );
     }
     return _StopStatusInfo(
-      label: "Scheduled",
+      label: LocaleKeys.scheduled.tr(),
       icon: Icons.schedule,
       color: Colors.blue,
       gradientColors: [AppColors.primaryRed, AppColors.primaryDark],
@@ -321,7 +325,7 @@ Widget buildScoresChart(InspectorHistoryModel stats) {
           Icon(Icons.show_chart, color: AppColors.primaryRed, size: 20),
           const SizedBox(width: 8),
           Text(
-            "Recent Performance",
+            LocaleKeys.recentPerformance.tr(),
             style: TextStyle(
               color: AppColors.primaryRed,
               fontSize: 16,
@@ -343,11 +347,14 @@ Widget buildScoresChart(InspectorHistoryModel stats) {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildLegendItem(Colors.green, 'Excellent (0-3)'),
+                _buildLegendItem(Colors.green, LocaleKeys.excellent_score.tr()),
                 const SizedBox(width: 12),
-                _buildLegendItem(AppColors.amber, 'Good (4-6)'),
+                _buildLegendItem(AppColors.amber, LocaleKeys.good_score.tr()),
                 const SizedBox(width: 12),
-                _buildLegendItem(AppColors.primaryRed, 'Poor (7+)'),
+                _buildLegendItem(
+                  AppColors.primaryRed,
+                  LocaleKeys.poor_score.tr(),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -456,7 +463,7 @@ Widget buildScoresChart(InspectorHistoryModel stats) {
       const SizedBox(height: 8),
       Center(
         child: Text(
-          'Last ${parsedScores.length} inspection${parsedScores.length > 1 ? 's' : ''}',
+          '${LocaleKeys.lastInspections.tr().replaceFirst('{count}', parsedScores.length.toString()).replaceFirst('{s}', parsedScores.length > 1 ? 's' : '')}',
           style: TextStyle(
             color: Colors.white54,
             fontSize: 11,

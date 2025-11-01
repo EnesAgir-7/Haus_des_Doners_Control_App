@@ -73,8 +73,7 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
         const Icon(Icons.car_rental, color: Colors.lightBlueAccent),
         const SizedBox(width: 6),
         Text(
-          // Placeholder translation key for 'My Vehicles'
-          'My Vehicles',
+          LocaleKeys.myVehicles.tr(),
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
@@ -90,7 +89,7 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
           ),
           child: Text(
             // Placeholder: Assuming the provider has a vehicleCount property
-            'Count: ${provider.vehicleCount.toString()}',
+            '${LocaleKeys.count.tr()}: ${provider.vehicleCount.toString()}',
             style: TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
@@ -172,7 +171,7 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
   }
 
   Widget _buildEmptyState(ProviderVehicle provider) {
-    return Center(child: Text('No vehicles assigned to you.'));
+    return Center(child: Text(LocaleKeys.noVehiclesAssigned.tr()));
   }
 
   void _navigateToVehicleDetails(

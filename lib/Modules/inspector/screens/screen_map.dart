@@ -12,7 +12,6 @@ import '../widgets/app_button.dart';
 import '../widgets/custom_app_bar.dart';
 import 'screen_submit_report.dart';
 
-//TODO: locale
 class BranchMapScreen extends StatefulWidget {
   // final List<BranchModel> branches;
 
@@ -162,7 +161,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                             ),
                             if (branch.stop?.timeSlot != null)
                               Text(
-                                "Next Inspection: ${branch.isNextInspectionToday ? "Today" : branch.stop?.timeSlot.toString()} (${branch.daysUntilNextInspection} days left)",
+                                "${LocaleKeys.nextInspection.tr()}: ${branch.isNextInspectionToday ? LocaleKeys.today.tr() : branch.stop?.timeSlot.toString()} (${branch.daysUntilNextInspection} ${LocaleKeys.daysLeft.tr()})",
                                 style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 11,
@@ -197,8 +196,8 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                               return AppButton(
                                 isLoading: branchContr.isLoading,
                                 text: updatedBranch.stop != null
-                                    ? "Remove from Route"
-                                    : "Add to Route",
+                                    ? LocaleKeys.removeFromRoute.tr()
+                                    : LocaleKeys.addToRoute.tr(),
                                 onPressed: () async {
                                   if (updatedBranch.stop != null) {
                                     // Unassign

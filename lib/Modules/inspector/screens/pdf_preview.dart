@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -8,6 +9,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:printing/printing.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../widgets/custom_toast.dart';
 
 class PDFPreviewScreen extends StatelessWidget {
@@ -25,7 +27,7 @@ class PDFPreviewScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'PDF Preview - $branchName',
+          '${LocaleKeys.pdfPreview.tr()} - $branchName',
           style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
         actions: [
@@ -90,7 +92,7 @@ class PDFPreviewScreen extends StatelessWidget {
 
         if (!hasPermission) {
           if (context.mounted) {
-            showSnakBarr(context, 'Storage permission denied');
+            showSnakBarr(context, LocaleKeys.storagePermissionDenied.tr());
           }
           return;
         }
@@ -113,12 +115,12 @@ class PDFPreviewScreen extends StatelessWidget {
       await file.writeAsBytes(bytes);
 
       if (context.mounted) {
-        showSnakBarr(context, 'PDF saved to Downloads');
+        showSnakBarr(context, LocaleKeys.pdfSavedToDownloads.tr());
       }
     } catch (e) {
       debugPrint('Download error: $e');
       if (context.mounted) {
-        showSnakBarr(context, 'Error: $e');
+        showSnakBarr(context, '${LocaleKeys.error.tr()}: $e');
       }
     }
   }

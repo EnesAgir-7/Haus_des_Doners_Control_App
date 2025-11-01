@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/firebase_services/inspector_branch_service.dart';
@@ -13,6 +14,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../models/branch_model.dart';
 import '../../../models/inspection_model.dart';
 import '../../../models/inspection_template_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../firebase_services/inspection_pdf_generator.dart';
 import '../firebase_services/inspector_inspection_service.dart';
 import '../firebase_services/inspector_onedrive_service.dart';
@@ -213,12 +215,16 @@ class ProviderControl extends ChangeNotifier {
       final template = await _inspectionService.getTemplateById(id);
 
       if (template == null) {
-        _errorMessage = 'Template with ID $id not found.';
+        _errorMessage = LocaleKeys.templateNotFound.tr().replaceFirst(
+          '{id}',
+          id,
+        );
       } else {
         setTemplate(template);
       }
     } catch (e) {
-      _errorMessage = 'Error loading branches: ${e.toString()}';
+      _errorMessage =
+          '${LocaleKeys.errorLoadingBranches.tr()}: ${e.toString()}';
       console(_errorMessage);
     } finally {
       _isLoading = false;
@@ -234,12 +240,13 @@ class ProviderControl extends ChangeNotifier {
       final branch = await _branchService.getBranchById(branchId);
 
       if (branch == null) {
-        _errorMessage = 'Branch not found';
+        _errorMessage = LocaleKeys.branchNotFound.tr();
       } else {
         setBranch(branch);
       }
     } catch (e) {
-      _errorMessage = 'Error loading branches: ${e.toString()}';
+      _errorMessage =
+          '${LocaleKeys.errorLoadingBranches.tr()}: ${e.toString()}';
       console(_errorMessage);
     } finally {
       _isLoading = false;
@@ -250,7 +257,7 @@ class ProviderControl extends ChangeNotifier {
   // Update submitInspection method:
   Future<bool> submitInspection(BuildContext context) async {
     if (selectedTemplate == null) {
-      _errorMessage = 'No template selected.';
+      _errorMessage = LocaleKeys.noTemplateSelected.tr();
       notifyListeners();
       return false;
     }
@@ -404,15 +411,16 @@ class ProviderControl extends ChangeNotifier {
       _isUploading = false;
       _isSubmitting = false;
       _currentUploadStage = null;
-      _successMessage =
-          'Inspection saved successfully to OneDrive, Firebase, and Firestore.';
+      _successMessage = LocaleKeys.inspectionSavedSuccess.tr();
+
       notifyListeners();
 
       resetForm();
       return true;
     } catch (e, st) {
       _errorMessage =
-          'An error occurred while saving inspection: ${e.toString()}';
+          '${LocaleKeys.errorSavingInspection.tr()}: ${e.toString()}';
+
       _isSubmitting = false;
       _isUploading = false;
       _currentUploadStage = null;
@@ -564,7 +572,8 @@ class ProviderControl extends ChangeNotifier {
     } catch (e) {
       console('Error generating PDF: $e');
       if (context.mounted) {
-        showSnakBarr(context, 'Error generating PDF preview');
+       showSnakBarr(context, LocaleKeys.errorGeneratingPDF.tr());
+
       }
     }
   }

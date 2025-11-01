@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:haus_des_control/Modules/admin/widgets/admin_app_bar.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:provider/provider.dart';
 
@@ -36,7 +36,7 @@ class AdminBottomNavBar extends StatelessWidget {
             }
           },
           child: Scaffold(
-            appBar: const AdminAppBar(),
+            appBar: const CustomAppBar(),
             body: IndexedStack(
               key: Key("admin_stack_${context.locale.languageCode}"),
               index: provider.selectedIndex,

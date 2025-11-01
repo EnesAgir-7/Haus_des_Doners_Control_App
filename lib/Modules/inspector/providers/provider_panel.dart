@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/constants/firebase_constants.dart';
 import '../../../core/enums.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../firebase_services/inspector_stats_service.dart';
 import '../../../models/dashboard_statistics.dart';
 
@@ -57,7 +58,7 @@ class ProviderPanel extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading dashboard stats: $e');
-      _errorMessage = 'Error loading dashboard: ${e.toString()}';
+      _errorMessage = '${LocaleKeys.errorLoadingStatistics} ${e.toString()}';
       _isLoading = false;
       notifyListeners();
       print(_errorMessage);

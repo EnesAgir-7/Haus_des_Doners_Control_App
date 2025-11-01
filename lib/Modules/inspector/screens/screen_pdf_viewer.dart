@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -115,7 +117,7 @@ class _ScreenPdfViewerState extends State<ScreenPdfViewer> {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
       appBar: CustomAppBar(
-        title: "Inspection Report",
+        title: LocaleKeys.inspection_report.tr(),
         showLang: false,
         showLogout: false,
       ),
@@ -149,7 +151,7 @@ class _ScreenPdfViewerState extends State<ScreenPdfViewer> {
       body: SfPdfViewer.network(
         widget.pdfUrl,
         onDocumentLoadFailed: (details) {
-          showSnakBarr(context, 'Failed to load PDF: ${details.description}');
+          showSnakBarr(context, '${LocaleKeys.error.tr()}: ${details.description}');
         },
       ),
     );

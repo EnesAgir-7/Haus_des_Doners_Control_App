@@ -72,7 +72,7 @@ class ProviderBranches extends ChangeNotifier {
             notifyListeners();
           },
           onError: (error) {
-            _errorMessage = 'Stream error: $error';
+            _errorMessage = '${LocaleKeys.streamError.tr()}: $error';
             notifyListeners();
           },
         );
@@ -200,12 +200,15 @@ class ProviderBranches extends ChangeNotifier {
 
       _isLoading = false;
       notifyListeners();
-      showSnakBarr(context, "Stop time slot updated successfully");
+      showSnakBarr(context, LocaleKeys.stopTimeSlotUpdatedSuccess.tr());
       return true;
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      showSnakBarr(context, "Failed to update stop time slot: $e");
+      showSnakBarr(
+        context,
+        '${LocaleKeys.failedToUpdateStopTimeSlot.tr()}: $e',
+      );
       return false;
     }
   }
@@ -239,7 +242,10 @@ class ProviderBranches extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      showCustomSnackBar(context, "Failed to assign branch: $e");
+      showCustomSnackBar(
+        context,
+        '${LocaleKeys.failedToAssignBranch.tr()}: $e',
+      );
       return false;
     }
   }
@@ -264,7 +270,7 @@ class ProviderBranches extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      showSnakBarr(context, "Failed to unassign branch: $e");
+      showSnakBarr(context, '${LocaleKeys.failedToUnassignBranch.tr()}: $e');
       return false;
     }
   }

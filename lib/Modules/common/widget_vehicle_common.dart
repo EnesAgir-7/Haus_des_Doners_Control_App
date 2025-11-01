@@ -128,13 +128,13 @@ class VehicleListCard extends StatelessWidget {
           _buildKmRow(
             icon: Icons.speed,
             label: LocaleKeys.current_km.tr(),
-            value: '${vehicle.currentKm} km',
+            value: '${vehicle.currentKm} ${LocaleKeys.km.tr()}',
           ),
           const SizedBox(height: 8.0),
           _buildKmRow(
             icon: Icons.linear_scale,
             label: LocaleKeys.remaining_km.tr(),
-            value: '${vehicle.remainingKm} km',
+            value: '${vehicle.remainingKm}  ${LocaleKeys.km.tr()}',
           ),
           const SizedBox(height: 8.0),
           LinearProgressIndicator(
@@ -146,7 +146,7 @@ class VehicleListCard extends StatelessWidget {
           ),
           const SizedBox(height: 6.0),
           Text(
-            '${vehicle.usagePercent}% used',
+            '${vehicle.usagePercent}%  ${LocaleKeys.used.tr()}',
             style: TextStyle(color: Colors.grey.shade400, fontSize: 12.0),
           ),
         ],
@@ -181,7 +181,7 @@ class VehicleListCard extends StatelessWidget {
   }
 
   /// Shows service due info
-  Widget _buildServiceInfo() {
+Widget _buildServiceInfo() {
     final now = DateTime.now();
     final daysUntilNext = vehicle.nextServiceDue.difference(now).inDays;
 
@@ -189,16 +189,25 @@ class VehicleListCard extends StatelessWidget {
     Color color;
 
     if (daysUntilNext < 0) {
-      statusText = '${daysUntilNext.abs()} days overdue';
+      statusText = LocaleKeys.daysOverdue.tr().replaceFirst(
+        '{days}',
+        daysUntilNext.abs().toString(),
+      );
       color = Colors.redAccent;
     } else if (daysUntilNext == 0) {
-      statusText = "Due today";
+      statusText = LocaleKeys.dueToday.tr();
       color = Colors.orangeAccent;
     } else if (daysUntilNext <= 5) {
-      statusText = "In $daysUntilNext days";
+      statusText = LocaleKeys.inDays.tr().replaceFirst(
+        '{days}',
+        daysUntilNext.toString(),
+      );
       color = Colors.yellowAccent;
     } else {
-      statusText = "In ${daysUntilNext ~/ 7} weeks";
+      statusText = LocaleKeys.inWeeks.tr().replaceFirst(
+        '{weeks}',
+        (daysUntilNext ~/ 7).toString(),
+      );
       color = Colors.greenAccent;
     }
 
@@ -207,7 +216,7 @@ class VehicleListCard extends StatelessWidget {
         Icon(Icons.build_circle_outlined, color: color, size: 18.0),
         const SizedBox(width: 8.0),
         Text(
-          "Next Service: ${formatDate(vehicle.nextServiceDue)} ($statusText)",
+          "${LocaleKeys.nextService.tr()}: ${formatDate(vehicle.nextServiceDue)} ($statusText)",
           style: TextStyle(
             color: Colors.white70,
             fontSize: 13.0,
@@ -232,8 +241,8 @@ class VehicleListCard extends StatelessWidget {
             const SizedBox(width: 6.0),
             Text(
               isUnassigned
-                  ? "Unassigned"
-                  : vehicle.assignedInspector?.name ?? "Unknown",
+                  ? LocaleKeys.unassigned.tr()
+                  : vehicle.assignedInspector?.name ?? LocaleKeys.unknown.tr(),
               style: TextStyle(
                 color: isUnassigned
                     ? AppColors.primaryRed
@@ -244,7 +253,7 @@ class VehicleListCard extends StatelessWidget {
           ],
         ),
         Text(
-          "Last Serviced: ${formatDate(vehicle.lastServiceDate)}",
+          "${LocaleKeys.lastServiced.tr()}: ${formatDate(vehicle.lastServiceDate)}",
           style: TextStyle(color: Colors.grey.shade600, fontSize: 12.0),
         ),
       ],

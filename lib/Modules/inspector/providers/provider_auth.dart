@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../common_services/firebase_auth_service.dart';
 import '../../../helpers/local_storage_helper.dart';
 import '../../../models/user_model.dart';
+import '../../../translations/locale_keys.g.dart';
 
 class ProviderAuth extends ChangeNotifier {
   final FirebaseAuthHelper _authHelper = FirebaseAuthHelper();
@@ -54,7 +56,7 @@ class ProviderAuth extends ChangeNotifier {
     try {
       final user = await _authHelper.signIn(email: email, password: password);
       if (user == null) {
-        _error = "Login failed";
+        _error = LocaleKeys.loginFailed.tr();
         return false;
       }
 
@@ -71,7 +73,7 @@ class ProviderAuth extends ChangeNotifier {
       }
 
       if (!doc.exists) {
-        _error = "User profile not found";
+        _error = LocaleKeys.userProfileNotFound.tr();
         await _authHelper.signOut();
         return false;
       }

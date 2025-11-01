@@ -975,7 +975,6 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 TextField(
                   controller: roleController,
                   style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     labelText: LocaleKeys.role.tr(),
                     labelStyle: TextStyle(
@@ -1086,7 +1085,6 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 TextField(
                   controller: roleController,
                   style: const TextStyle(color: Colors.white),
-                  keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
                     labelText: LocaleKeys.role.tr(),
                     labelStyle: TextStyle(

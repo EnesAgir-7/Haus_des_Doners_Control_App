@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../core/config/onedrive_config.dart';
+import '../../../translations/locale_keys.g.dart';
 
 class InspectorOneDriveService {
   static final InspectorOneDriveService _instance =
@@ -50,7 +52,7 @@ class InspectorOneDriveService {
       } else {
         final error = jsonDecode(response.body);
         throw Exception(
-          'Failed to get access token: ${error['error_description'] ?? response.body}',
+          '${LocaleKeys.failedToGetAccessToken.tr()}: ${error['error_description'] ?? response.body}',
         );
       }
     } catch (e) {
@@ -185,12 +187,14 @@ class InspectorOneDriveService {
           return;
         }
 
-        throw Exception('Failed to create folder "$folderPath": $errorMessage');
+        throw Exception(
+          '${LocaleKeys.failedToCreateFolder.tr()} "$folderPath": $errorMessage',
+        );
       }
     } else {
       final error = jsonDecode(checkResponse.body);
       throw Exception(
-        'Error checking folder "$folderPath": ${error['error']?['message'] ?? checkResponse.body}',
+        '${LocaleKeys.errorCheckingFolder.tr()} "$folderPath": ${error['error']?['message'] ?? checkResponse.body}',
       );
     }
   }
@@ -243,7 +247,7 @@ class InspectorOneDriveService {
     } else {
       final error = jsonDecode(response.body);
       throw Exception(
-        'Upload failed for "$fileName": ${error['error']?['message'] ?? response.body}',
+        '${LocaleKeys.uploadFailed.tr()} "$fileName": ${error['error']?['message'] ?? response.body}',
       );
     }
   }
@@ -276,7 +280,7 @@ class InspectorOneDriveService {
         sessionResponse.statusCode != 201) {
       final error = jsonDecode(sessionResponse.body);
       throw Exception(
-        'Failed to create upload session: ${error['error']?['message'] ?? sessionResponse.body}',
+        '${LocaleKeys.failedToCreateUploadSession.tr()}: ${error['error']?['message'] ?? sessionResponse.body}',
       );
     }
 
@@ -321,12 +325,12 @@ class InspectorOneDriveService {
       } else if (uploadResponse.statusCode != 202) {
         final error = jsonDecode(uploadResponse.body);
         throw Exception(
-          'Upload chunk failed: ${error['error']?['message'] ?? uploadResponse.body}',
+          '${LocaleKeys.uploadChunkFailed.tr()}: ${error['error']?['message'] ?? uploadResponse.body}',
         );
       }
     }
 
-    throw Exception('Upload failed unexpectedly');
+    throw Exception(LocaleKeys.uploadFailedUnexpectedly.tr());
   }
 
   // Upload PDF Report - no return value

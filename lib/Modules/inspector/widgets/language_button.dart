@@ -333,7 +333,7 @@ class LanguageButton extends StatelessWidget {
                                           if (isSelected) ...[
                                             const SizedBox(height: 4),
                                             Text(
-                                              'Currently selected',
+                                              LocaleKeys.currentlySelected.tr(),
                                               style: TextStyle(
                                                 color: AppColors.primaryRed
                                                     .withValues(alpha: 0.8),
@@ -429,7 +429,7 @@ class LanguageButton extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Language will be applied immediately',
+                            LocaleKeys.languageAppliedImmediately.tr(),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 11,

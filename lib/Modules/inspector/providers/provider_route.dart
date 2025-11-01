@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../firebase_services/inspector_route_service.dart';
@@ -167,7 +168,7 @@ class ProviderRoute extends ChangeNotifier {
             notifyListeners();
           },
           onError: (error) {
-            _errorMessage = 'Stream error: $error';
+            _errorMessage = '${LocaleKeys.streamError}: $error';
             _isLoading = false;
             notifyListeners();
             console(_errorMessage);
@@ -205,7 +206,7 @@ class ProviderRoute extends ChangeNotifier {
       calculateTodaysData();
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Error updating stop status: ${e.toString()}';
+      _errorMessage = '${LocaleKeys.error}: ${e.toString()}';
       notifyListeners();
       console(_errorMessage);
     }

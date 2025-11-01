@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 
 import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
@@ -42,7 +44,7 @@ class AdminVehicleService {
       // Get current vehicle to access currentKm if needed
       final vehicleDoc = await vehicleRef.get();
       if (!vehicleDoc.exists) {
-        throw Exception('Vehicle not found');
+        throw Exception(LocaleKeys.vehicle_not_found.tr());
       }
 
       final vehicleData = vehicleDoc.data()!;

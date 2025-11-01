@@ -169,7 +169,7 @@ class _ScreenBranchesState extends State<ScreenBranches> {
             provider: provider,
           ),
           _buildSortChip(
-            label: "By Next Inspection",
+            label: LocaleKeys.byNextInspection.tr(),
             value: AppConstants.nextInspection,
             icon: Icons.access_time,
             provider: provider,
@@ -545,7 +545,7 @@ class BranchDetailsSheet extends StatelessWidget {
               Icon(Icons.next_plan, color: Colors.white),
               SizedBox(width: 8),
               Text(
-                "Your Next Inspection",
+                LocaleKeys.yourNextInspection.tr(),
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -560,7 +560,7 @@ class BranchDetailsSheet extends StatelessWidget {
             ),
             child: Text(
               branch.isNextInspectionToday
-                  ? "Today"
+                  ? LocaleKeys.today.tr()
                   : formatTimeSlot(branch.stop!.timeSlot.toString()),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
@@ -572,7 +572,7 @@ class BranchDetailsSheet extends StatelessWidget {
 
   Widget _buildInspectionHistoryHeader() {
     return Text(
-      "Last 10 Inspections by you",
+      LocaleKeys.last10Inspections.tr(),
       style: TextStyle(
         color: AppColors.primaryRed,
         fontSize: 16,
@@ -640,7 +640,7 @@ class BranchDetailsSheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Inspected by You",
+                            LocaleKeys.inspectedByYou.tr(),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -720,7 +720,7 @@ class BranchDetailsSheet extends StatelessWidget {
             children: [
               Expanded(
                 child: AppButton(
-                  text: "Start Inspection",
+                  text: LocaleKeys.startInspection.tr(),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -747,7 +747,7 @@ class BranchDetailsSheet extends StatelessWidget {
               SizedBox(width: 10),
               Expanded(
                 child: AppButton(
-                  text: "Manage Route",
+                  text: LocaleKeys.manageRoute.tr(),
                   onPressed: () => _showRouteManagementSheet(context, prod),
                   backgroundColor: AppColors.primaryRed,
                   textStyle: TextStyle(
@@ -766,7 +766,9 @@ class BranchDetailsSheet extends StatelessWidget {
         // Show Edit Route or Add to Route
         return AppButton(
           isLoading: prod.isLoading,
-          text: branch.stop != null ? "Manage Route" : "Add to Route",
+          text: branch.stop != null
+              ? LocaleKeys.manageRoute.tr()
+              : LocaleKeys.addToRoute.tr(),
           onPressed: () async {
             if (branch.stop != null) {
               _showRouteManagementSheet(context, prod);
@@ -861,7 +863,7 @@ class RouteManagementSheet extends StatelessWidget {
           Icon(Icons.route, size: 48, color: AppColors.primaryRed),
           SizedBox(height: 16),
           Text(
-            "Manage Route",
+            LocaleKeys.manageRoute.tr(),
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -883,7 +885,7 @@ class RouteManagementSheet extends StatelessWidget {
                       branch.stop?.status != AppConstants.completed)
                     AppButton(
                       isLoading: provider.isLoading,
-                      text: "Update Schedule",
+                      text: LocaleKeys.updateSchedule.tr(),
                       onPressed: () async {
                         DateTime? initialDate;
                         try {
@@ -936,7 +938,7 @@ class RouteManagementSheet extends StatelessWidget {
                   SizedBox(height: 12),
                   AppButton(
                     isLoading: prod.isLoading,
-                    text: "Remove from Route",
+                    text: LocaleKeys.removeFromRoute.tr(),
                     onPressed: () async {
                       final success = await prod.unAssignMyRoute(
                         branchId: branch.id,
@@ -961,7 +963,7 @@ class RouteManagementSheet extends StatelessWidget {
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
-                      "Cancel",
+                      LocaleKeys.cancel.tr(),
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ),

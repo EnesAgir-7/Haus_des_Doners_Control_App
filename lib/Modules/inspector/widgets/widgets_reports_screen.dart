@@ -1,9 +1,11 @@
 import 'dart:typed_data';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart'
     show showSnakBarr;
 
 import '../../../core/constants/app_colors.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../firebase_services/inspector_signature_service.dart';
 
 Future<void> showAskToSaveSignatureDialog({
@@ -24,15 +26,18 @@ Future<void> showAskToSaveSignatureDialog({
         children: [
           Icon(Icons.draw, color: AppColors.primaryRed),
           const SizedBox(width: 12),
-          const Text('Save Signature?', style: TextStyle(color: Colors.white)),
+          Text(
+            LocaleKeys.saveSignature.tr(),
+            style: TextStyle(color: Colors.white),
+          ),
         ],
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Would you like to save this signature for future inspections?',
+          Text(
+            LocaleKeys.saveSignaturePrompt.tr(),
             style: TextStyle(color: Colors.white70),
           ),
           const SizedBox(height: 16),
@@ -44,12 +49,12 @@ Future<void> showAskToSaveSignatureDialog({
               border: Border.all(color: Colors.white24),
             ),
             child: Row(
-              children: const [
-                Icon(Icons.info_outline, color: Colors.blue, size: 20),
-                SizedBox(width: 8),
+              children: [
+                const Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'You can remove it later',
+                    LocaleKeys.canRemoveLater.tr(),
                     style: TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ),
@@ -61,15 +66,18 @@ Future<void> showAskToSaveSignatureDialog({
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Not Now', style: TextStyle(color: Colors.white70)),
+          child: Text(
+            LocaleKeys.notNow.tr(),
+            style: TextStyle(color: Colors.white70),
+          ),
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(context, true),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryRed,
           ),
-          child: const Text(
-            'Yes, Save It',
+          child: Text(
+            LocaleKeys.yesSaveIt.tr(),
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -81,7 +89,7 @@ Future<void> showAskToSaveSignatureDialog({
     final success = await signatureStorage.saveSignature(inspectorSignature);
 
     if (success && context.mounted) {
-      showSnakBarr(context, 'Signature saved successfully!');
+      showSnakBarr(context, LocaleKeys.signatureSaved.tr());
     }
   }
 }
@@ -98,11 +106,11 @@ Future<void> showDeleteSavedSignatureDialog({
       backgroundColor: AppColors.lightBlack,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
-        children: const [
-          Icon(Icons.warning_amber, color: Colors.orange),
-          SizedBox(width: 12),
+        children: [
+          const Icon(Icons.warning_amber, color: Colors.orange),
+          const SizedBox(width: 12),
           Text(
-            'Delete Saved Signature?',
+            LocaleKeys.deleteSavedSignature.tr(),
             style: TextStyle(color: Colors.white, fontSize: 18),
           ),
         ],
@@ -111,8 +119,8 @@ Future<void> showDeleteSavedSignatureDialog({
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'This will permanently delete your saved signature. You\'ll need to sign again in future inspections.',
+          Text(
+            LocaleKeys.deleteSignatureWarning.tr(),
             style: TextStyle(color: Colors.white70),
           ),
           const SizedBox(height: 16),
@@ -124,12 +132,12 @@ Future<void> showDeleteSavedSignatureDialog({
               border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
             ),
             child: Row(
-              children: const [
-                Icon(Icons.info_outline, color: Colors.orange, size: 20),
-                SizedBox(width: 8),
+              children: [
+                const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'This action cannot be undone.',
+                    LocaleKeys.actionCannotUndone.tr(),
                     style: TextStyle(
                       color: Colors.orange,
                       fontSize: 12,
@@ -145,13 +153,16 @@ Future<void> showDeleteSavedSignatureDialog({
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel', style: TextStyle(color: Colors.white70)),
+          child: Text(
+            LocaleKeys.cancel.tr(),
+            style: TextStyle(color: Colors.white70),
+          ),
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(context, true),
           style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-          child: const Text(
-            'Delete Permanently',
+          child: Text(
+            LocaleKeys.deletePermanently.tr(),
             style: TextStyle(color: Colors.white),
           ),
         ),
@@ -166,7 +177,7 @@ Future<void> showDeleteSavedSignatureDialog({
       onSignatureDeleted(); // Perform UI/local cleanup
 
       if (context.mounted) {
-        showSnakBarr(context, "Saved signature deleted permanently");
+        showSnakBarr(context, LocaleKeys.signatureDeleted.tr());
       }
     }
   }

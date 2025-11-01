@@ -218,7 +218,7 @@ class ProviderAdminTasks extends ChangeNotifier {
       final comment = TaskCommentModel(
         id: commentId, // ✅ UPDATED: Use generated unique ID instead of taskId
         userId: loggedInUser!.id,
-        userName: loggedInUser?.name ?? 'Inspector',
+        userName: loggedInUser?.name ?? LocaleKeys.inspector.tr() ,
         text: commentText,
         timestamp: DateTime.now(),
         photos: photoUrls,

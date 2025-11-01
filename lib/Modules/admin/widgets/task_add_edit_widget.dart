@@ -7,7 +7,6 @@ import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/models/task_model.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common_services/user_selection_sheet.dart';
@@ -31,11 +30,11 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
   late final TextEditingController _descriptionController;
 
   // Form state
-  String _priority = 'medium';
+  String _priority = AppConstants.medium;
   DateTime? _dueDate;
   String? _selectedInspectorId;
   String? _selectedInspectorName;
-  String _status = 'pending';
+  String _status = AppConstants.pending;
 
   // Loading state
   bool _isLoading = false;
@@ -173,11 +172,11 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
 
   Color _getPriorityColor(String priority) {
     switch (priority) {
-      case 'high':
+      case AppConstants.high:
         return const Color(0xFFEF5350);
-      case 'medium':
+      case AppConstants.medium:
         return const Color(0xFFFFA726);
-      case 'low':
+      case AppConstants.low:
         return const Color(0xFF66BB6A);
       default:
         return Colors.grey;

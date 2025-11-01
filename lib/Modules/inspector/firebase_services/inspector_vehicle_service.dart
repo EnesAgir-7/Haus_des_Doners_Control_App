@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/vehicle_model.dart';
+import '../../../translations/locale_keys.g.dart';
 
 class InspectorVehicleService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -41,7 +43,7 @@ Stream<List<VehicleModel>> streamVehiclesByInspector(String inspectorId) {
           .collection(_collectionVehicles)
           .doc(vehicleId)
           .get();
-      if (!vehicle.exists) throw Exception('Vehicle not found');
+      if (!vehicle.exists) throw Exception(LocaleKeys.vehicle_not_found.tr());
 
       final data = vehicle.data() as Map<String, dynamic>;
       final maxKm = data[VehicleFields.maxKm] as int;

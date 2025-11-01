@@ -236,7 +236,8 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
                         if (provider.filteredOverdueCount > 0)
                           _buildStatChip(
                             icon: Icons.alarm,
-                            label: '${provider.filteredOverdueCount} Overdue',
+                            label:
+                                '${provider.filteredOverdueCount} ${LocaleKeys.overdue.tr()}',
                             color: Colors.orange.shade300,
                           ),
                       ],
@@ -539,7 +540,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
         ),
         if (statusInfo.isOverdue)
           _buildBadge(
-            "Missed",
+            LocaleKeys.missed.tr(),
             Icons.warning_amber_rounded,
             Colors.deepOrange,
             Colors.red,
@@ -665,7 +666,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
                   color: AppColors.white,
                 ),
                 const SizedBox(width: 4),
-                Text("Submitted"),
+                Text(LocaleKeys.submitted.tr()),
               ],
             ),
           ),
@@ -699,7 +700,9 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
         },
         icon: const Icon(Icons.arrow_forward),
         label: Text(
-          isOverdue ? "Inspect now" : LocaleKeys.start_inspection.tr(),
+          isOverdue
+              ? LocaleKeys.inspect_now.tr()
+              : LocaleKeys.start_inspection.tr(),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: isOverdue ? Colors.deepOrange : AppColors.primaryRed,

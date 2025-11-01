@@ -96,7 +96,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         if (mounted) {
           showSnakBarr(
             context,
-            "You can only upload a total of $maxPhotos photos per category.",
+            LocaleKeys.youCanOnlyUpload.tr().replaceFirst(
+              '{maxPhotos}',
+              maxPhotos.toString(),
+            ),
           );
         }
       }
@@ -112,7 +115,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     } catch (e, st) {
       debugPrint('Error picking from gallery: $e\n$st');
       if (mounted) {
-        showSnakBarr(context, "Error Picking from Gallery");
+        showSnakBarr(context, LocaleKeys.errorPickingFromGallery.tr());
       }
     }
   }
@@ -170,7 +173,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Loading inspection...',
+                    LocaleKeys.loadingInspection.tr(),
                     style: TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
@@ -378,18 +381,26 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     final List<Map<String, dynamic>> allRatings = [
       {
         'emoji': '😃',
-        'label': 'Excellent',
+        'label': LocaleKeys.excellent.tr(),
         'color': Colors.green,
-      }, // lowest score
-      {'emoji': '🙂', 'label': 'Good', 'color': Colors.lightGreen},
-      {'emoji': '😐', 'label': 'Fair', 'color': Colors.orange},
-      {'emoji': '😕', 'label': 'Below Average', 'color': Colors.deepOrange},
-      {'emoji': '😞', 'label': 'Poor', 'color': Colors.red},
+      },
+      {
+        'emoji': '🙂',
+        'label': LocaleKeys.good.tr(),
+        'color': Colors.lightGreen,
+      },
+      {'emoji': '😐', 'label': LocaleKeys.fair.tr(), 'color': Colors.orange},
+      {
+        'emoji': '😕',
+        'label': LocaleKeys.belowAverage.tr(),
+        'color': Colors.deepOrange,
+      },
+      {'emoji': '😞', 'label': LocaleKeys.poor.tr(), 'color': Colors.red},
       {
         'emoji': '😢',
-        'label': 'Very Poor',
+        'label': LocaleKeys.veryPoor.tr(),
         'color': Colors.red.shade900,
-      }, // highest score
+      },
     ];
 
     // Get only the ratings needed based on maxScore
@@ -646,7 +657,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                 style: const TextStyle(color: Colors.white, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: isRequired
-                      ? '${LocaleKeys.add_notes_optional.tr()} 🛑 Required'
+                      ? '${LocaleKeys.add_notes_optional.tr()} 🛑 ${LocaleKeys.required.tr()}'
                       : '${LocaleKeys.add_notes_optional.tr()}',
                   hintStyle: TextStyle(
                     color: Colors.white.withValues(alpha: 0.3),
@@ -708,7 +719,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                     ),
                     Expanded(
                       child: AppButton(
-                        text: 'Browse (${photos.length}/4)',
+                        text: '${LocaleKeys.browse.tr()} (${photos.length}/4)',
                         textStyle: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -814,7 +825,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                   SizedBox(height: 10),
                   if (isRequired && photos.isEmpty)
                     Text(
-                      '🛑 At least 1 photo required',
+                      '${LocaleKeys.atLeast1PhotoRequired.tr()}',
                       style: const TextStyle(color: Colors.red, fontSize: 12),
                     ),
                 ],
@@ -1241,7 +1252,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                         ),
                         const SizedBox(width: 3),
                         Text(
-                          'Saved',
+                          LocaleKeys.saved.tr(),
                           style: TextStyle(
                             color: Colors.green.shade300,
                             fontSize: 9,
@@ -1279,7 +1290,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                               color: Colors.orange,
                               size: 16,
                             ),
-                            tooltip: "Delete Saved",
+                            tooltip: LocaleKeys.deleteSaved.tr(),
                           ),
                         ),
                       Container(
@@ -1300,7 +1311,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                             color: Colors.red,
                             size: 16,
                           ),
-                          tooltip: "Clear",
+                          tooltip: LocaleKeys.clear.tr(),
                         ),
                       ),
                     ],
@@ -1382,7 +1393,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             ),
             child: AppButton(
               // isLoading: provider.isSubmittingOrUploading,
-              text: "Preview PDF",
+              text: LocaleKeys.previewPDF.tr(),
               icon: Icons.preview_outlined,
               onPressed: isEnabled ? () => provider.previewPDF(context) : null,
               backgroundColor: isEnabled
@@ -1444,15 +1455,15 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         icon = Icons.photo_library_outlined;
         break;
       case UploadStage.uploadingPDF:
-        message = "Uploading PDF";
+        message = LocaleKeys.uploadingPDF.tr();
         icon = Icons.picture_as_pdf_outlined;
         break;
       case UploadStage.submitting:
-        message = "Submitting Inspection";
+        message = LocaleKeys.submittingInspection.tr();
         icon = Icons.send_outlined;
         break;
       default:
-        message = "Uploading";
+        message = LocaleKeys.uploading.tr();
         icon = Icons.cloud_upload_outlined;
     }
 
@@ -1557,7 +1568,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
               ),
               const SizedBox(height: 16),
               Text(
-                'Please wait...',
+                LocaleKeys.pleaseWait.tr(),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.5),
                   fontSize: 13,
@@ -1626,11 +1637,15 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
         if (missingNotes || missingPhotos) {
           final message = StringBuffer(
-            'Category "${category.title}" requires:',
+            LocaleKeys.categoryRequires.tr().replaceFirst(
+              '{categoryName}',
+              category.title,
+            ),
           );
-          if (missingNotes) message.write(' note');
-          if (missingNotes && missingPhotos) message.write(' and');
-          if (missingPhotos) message.write(' at least 1 photo');
+          if (missingNotes) message.write(' ${LocaleKeys.note.tr()}');
+          if (missingNotes && missingPhotos)
+            message.write(' ${LocaleKeys.and.tr()}');
+          if (missingPhotos) message.write(' ${LocaleKeys.atLeast1Photo.tr()}');
 
           showSnakBarr(context, message.toString());
           return;

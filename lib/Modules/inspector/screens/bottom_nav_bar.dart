@@ -29,7 +29,7 @@ class ScreenBottomNavBar extends StatelessWidget {
                   now.difference(lastBackPressed!) >
                       const Duration(seconds: 2)) {
                 lastBackPressed = now;
-                showSnakBarr(context, "Click again to exit");
+                showSnakBarr(context, LocaleKeys.click_again_to_exit.tr());
               } else {
                 SystemNavigator.pop();
               }
@@ -114,36 +114,6 @@ class ScreenBottomNavBar extends StatelessWidget {
               ),
             ),
 
-            // BottomNavigationBar(
-            //   currentIndex: controller.selectedIndex,
-            //   onTap: controller.onItemTapped,
-            //   backgroundColor: AppColors.primaryDark,
-            //   selectedItemColor: AppColors.primaryRed,
-            //   unselectedItemColor: Colors.white70,
-            //   type: BottomNavigationBarType.fixed,
-            //   items: [
-            //     BottomNavigationBarItem(
-            //       icon: const Icon(Icons.dashboard),
-            //       label: LocaleKeys.panel.tr(),
-            //     ),
-            //     BottomNavigationBarItem(
-            //       icon: const Icon(Icons.apartment),
-            //       label: LocaleKeys.my_branches.tr(),
-            //     ),
-            //     BottomNavigationBarItem(
-            //       icon: const Icon(Icons.alt_route),
-            //       label: LocaleKeys.route.tr(),
-            //     ),
-            //     BottomNavigationBarItem(
-            //       icon: const Icon(Icons.car_rental),
-            //       label: LocaleKeys.fleet.tr(),
-            //     ),
-            //     BottomNavigationBarItem(
-            //       icon: const Icon(Icons.task),
-            //       label: LocaleKeys.tasks.tr(),
-            //     ),
-            //   ],
-            // ),
           ),
         );
       },

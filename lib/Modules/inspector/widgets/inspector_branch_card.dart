@@ -104,7 +104,7 @@ class InspectorBranchCard extends StatelessWidget {
           ),
           const SizedBox(width: 5.0),
           Text(
-            "In your route",
+            LocaleKeys.inYourRoute.tr(),
             style: TextStyle(
               color: Colors.grey.shade300,
               fontSize: 11.0,
@@ -188,10 +188,10 @@ class InspectorBranchCard extends StatelessWidget {
         const SizedBox(width: 6.0),
         Text(
           branch.isNextInspectionToday
-              ? "Today"
+              ? LocaleKeys.today.tr()
               : branch.daysUntilNextInspection == 0
-              ? "Tomorrow"
-              : "${branch.daysUntilNextInspection} days left",
+              ? LocaleKeys.tomorrow.tr()
+              : "${branch.daysUntilNextInspection} ${LocaleKeys.daysLeft.tr()}",
           style: const TextStyle(fontSize: 12.0, color: Colors.white70),
         ),
       ],

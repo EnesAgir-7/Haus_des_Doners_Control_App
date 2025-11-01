@@ -8,6 +8,7 @@ import '../../../models/route_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../widgets/app_button.dart';
 import '../screens/screen_submit_report.dart';
+
 void showStopInfoBottomSheet(RouteStopModel stop, BuildContext context) {
   showModalBottomSheet(
     context: context,
@@ -147,14 +148,14 @@ class CompactStopInfoSheet extends StatelessWidget {
             children: [
               _buildCompactInfoItem(
                 icon: Icons.calendar_today,
-                label: "Scheduled Date",
+                label: LocaleKeys.scheduledDate.tr(),
                 value: formatTimeSlot(stop.timeSlot),
               ),
               if ((stop.isCompleted || stop.isExpired) &&
                   stop.completedAt != null)
                 _buildCompactInfoItem(
                   icon: Icons.check_circle,
-                  label: "Completed At",
+                  label: LocaleKeys.completedAt.tr(),
                   value: DateFormat(
                     "MMMM d, yyyy 'at' h:mm a",
                   ).format(stop.completedAt!),
@@ -227,8 +228,9 @@ class CompactStopInfoSheet extends StatelessWidget {
                       children: [
                         Text(
                           stop.isExpired
-                              ? "Route Expired"
-                              : "Inspection Completed",
+                              ? LocaleKeys.routeExpired.tr()
+                              : LocaleKeys.inspectionCompleted.tr(),
+
                           style: TextStyle(
                             color: statusInfo.color,
                             fontSize: 15,
@@ -237,10 +239,10 @@ class CompactStopInfoSheet extends StatelessWidget {
                         ),
                         Text(
                           stop.isExpired
-                              ? "This route is expired. You can remove it from your routes."
+                              ? LocaleKeys.routeExpiredDesc.tr()
                               : stop.isCompleted
-                              ? "This inspection is already completed. You can remove it from your routes."
-                              : "Inspection Completed",
+                              ? LocaleKeys.inspectionCompletedDesc.tr()
+                              : LocaleKeys.inspectionCompleted.tr(),
                           style: TextStyle(fontSize: 10),
                         ),
                       ],
@@ -305,7 +307,7 @@ class CompactStopInfoSheet extends StatelessWidget {
           // Case 3: Stop is in the future (and not completed)
           if (!stop.isCompleted && !statusInfo.isToday && !statusInfo.isOverdue)
             AppButton(
-              text: "Edit Route",
+              text: LocaleKeys.editRoute.tr(),
               onPressed: () => _showRouteManagementSheet(context),
               backgroundColor: AppColors.primaryRed,
               textStyle: const TextStyle(
@@ -344,8 +346,8 @@ class CompactStopInfoSheet extends StatelessWidget {
   }
 
   String _getActionButtonText(_StopStatusInfo statusInfo) {
-    if (statusInfo.isOverdue) return "Inspect Now";
-    if (stop.isCurrent) return "Continue";
+    if (statusInfo.isOverdue) return LocaleKeys.inspectNow.tr();
+    if (stop.isCurrent) return LocaleKeys.continue_key.tr();
     return LocaleKeys.start_inspection.tr();
   }
 
@@ -363,7 +365,7 @@ class CompactStopInfoSheet extends StatelessWidget {
     // Corrected Logic: Check for Expired BEFORE Completed, as an expired stop is a subset of completed.
     if (stop.isExpired) {
       return _StopStatusInfo(
-        label: "Expired",
+        label: LocaleKeys.expired.tr(),
         icon: Icons.warning_amber_rounded,
         color: Colors.deepOrange,
         gradientColors: [Colors.deepOrange, Colors.red],
@@ -371,7 +373,7 @@ class CompactStopInfoSheet extends StatelessWidget {
     }
     if (stop.isCompleted) {
       return _StopStatusInfo(
-        label: "Completed",
+        label: LocaleKeys.completed.tr(),
         icon: Icons.check_circle,
         color: Colors.green,
         gradientColors: [Colors.green, const Color(0xFF2E7D32)],
@@ -384,7 +386,7 @@ class CompactStopInfoSheet extends StatelessWidget {
 
     if (isOverdue) {
       return _StopStatusInfo(
-        label: "Overdue",
+        label: LocaleKeys.overdue.tr(),
         icon: Icons.error_outline,
         color: Colors.red,
         gradientColors: [Colors.red.shade700, Colors.red.shade900],
@@ -394,7 +396,7 @@ class CompactStopInfoSheet extends StatelessWidget {
     if (isToday) {
       if (stop.isCurrent) {
         return _StopStatusInfo(
-          label: "In Progress",
+          label: LocaleKeys.inProgress.tr(),
           icon: Icons.play_circle_outline,
           color: Colors.amber,
           gradientColors: [Colors.amber, Colors.orange],
@@ -402,7 +404,7 @@ class CompactStopInfoSheet extends StatelessWidget {
         );
       }
       return _StopStatusInfo(
-        label: "Today",
+        label: LocaleKeys.today.tr(),
         icon: Icons.today,
         color: Colors.green,
         gradientColors: [const Color(0xFF4CAF50), const Color(0xFF2E7D32)],
@@ -410,7 +412,7 @@ class CompactStopInfoSheet extends StatelessWidget {
       );
     }
     return _StopStatusInfo(
-      label: "Scheduled",
+      label: LocaleKeys.scheduled.tr(),
       icon: Icons.schedule,
       color: Colors.blue,
       gradientColors: [AppColors.primaryRed, AppColors.primaryDark],
@@ -472,7 +474,7 @@ class StopRouteManagementSheet extends StatelessWidget {
           Icon(Icons.route, size: 48, color: AppColors.primaryRed),
           SizedBox(height: 16),
           Text(
-            "Manage Stop",
+            LocaleKeys.manageStop.tr(),
             style: TextStyle(
               color: Colors.white,
               fontSize: 20,
@@ -494,7 +496,7 @@ class StopRouteManagementSheet extends StatelessWidget {
                   if (!stop.isCompleted)
                     AppButton(
                       isLoading: provider.isLoading,
-                      text: "Update Schedule",
+                      text: LocaleKeys.updateSchedule.tr(),
                       onPressed: () async {
                         // Parse existing timeSlot (e.g. "2025-10-23") to DateTime
                         DateTime? initialDate;
@@ -547,7 +549,7 @@ class StopRouteManagementSheet extends StatelessWidget {
                   SizedBox(height: 12),
                   AppButton(
                     isLoading: provider.isLoading,
-                    text: "Remove from Route",
+                    text: LocaleKeys.removeFromRoute.tr(),
                     onPressed: () async {
                       // Show confirmation dialog
                       final confirm = await showDialog<bool>(
@@ -555,25 +557,28 @@ class StopRouteManagementSheet extends StatelessWidget {
                         builder: (context) => AlertDialog(
                           backgroundColor: AppColors.lightBlack,
                           title: Text(
-                            "Remove Stop",
+                            LocaleKeys.removeStop.tr(),
                             style: TextStyle(color: Colors.white),
                           ),
                           content: Text(
-                            "Are you sure you want to remove ${stop.branchName} from your route?",
+                            LocaleKeys.removeStopConfirmation.tr().replaceFirst(
+                              '{branchName}',
+                              stop.branchName,
+                            ),
                             style: TextStyle(color: Colors.white70),
                           ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
                               child: Text(
-                                "Cancel",
+                                LocaleKeys.cancel.tr(),
                                 style: TextStyle(color: Colors.white70),
                               ),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
                               child: Text(
-                                "Remove",
+                                LocaleKeys.remove.tr(),
                                 style: TextStyle(color: AppColors.primaryRed),
                               ),
                             ),
@@ -609,7 +614,7 @@ class StopRouteManagementSheet extends StatelessWidget {
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
-                      "Cancel",
+                      LocaleKeys.cancel.tr(),
                       style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ),

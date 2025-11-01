@@ -105,7 +105,7 @@ class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'Loading dashboard...',
+                        LocaleKeys.loadingDashboard.tr(),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 14,
@@ -365,7 +365,7 @@ class DashboardCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Time Period',
+                    LocaleKeys.timePeriod.tr(),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 13,
@@ -791,7 +791,7 @@ class DailySummarySection extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Loading routes...',
+                    LocaleKeys.loadingRoutes.tr(),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 13,
@@ -978,7 +978,7 @@ class DailySummarySection extends StatelessWidget {
                       if (entry.value.status == AppConstants.completed) {
                         showSnakBarr(
                           context,
-                          "You have already completed this stop.",
+                          LocaleKeys.youHaveAlreadyCompleted.tr(),
                         );
                         return;
                       }

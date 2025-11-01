@@ -1,8 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
+
+import '../../../translations/locale_keys.g.dart';
 
 class FullScreenImageViewer extends StatefulWidget {
   final List<String> images;
@@ -42,7 +45,10 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
       appBar: CustomAppBar(
         showLang: false,
         showLogout: false,
-        title: 'Photo ${_currentIndex + 1} of ${widget.images.length}',
+        title: LocaleKeys.photoCounter
+            .tr()
+            .replaceAll('{current}', (_currentIndex + 1).toString())
+            .replaceAll('{total}', widget.images.length.toString()),
       ),
 
       body: PhotoViewGallery.builder(

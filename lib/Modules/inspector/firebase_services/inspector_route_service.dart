@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 
 import '../../../core/console.dart';
 import '../../../core/constants/firebase_constants.dart';
@@ -100,7 +102,7 @@ class InspectorRouteService {
   ) async {
     try {
       final doc = await _db.collection(_collection).doc(routeId).get();
-      if (!doc.exists) throw Exception('Route not found');
+      if (!doc.exists) throw Exception(LocaleKeys.noRouteFound.tr());
 
       final route = RouteModel.fromFirestore(doc);
       if (stopIndex >= route.stops.length) {

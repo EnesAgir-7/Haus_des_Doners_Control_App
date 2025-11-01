@@ -14,7 +14,7 @@ class InspectorTaskService {
     return _db
         .collection(_collection)
         .where(TaskFields.assignedInspectorId, isEqualTo: inspectorId)
-        .orderBy('createdAt', descending: true)
+        .orderBy(TaskFields.createdAt, descending: true)
         .snapshots()
         .map(
           (snapshot) =>
@@ -59,7 +59,6 @@ class InspectorTaskService {
 
   // Add comment to task
   Future<void> addTaskComment(String taskId, TaskCommentModel comment) async {
-    console("Adding comnet");
     try {
       await _db.collection(_collection).doc(taskId).update({
         TaskFields.comments: FieldValue.arrayUnion([comment.toMap()]),

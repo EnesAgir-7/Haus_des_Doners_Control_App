@@ -5,8 +5,6 @@ import '../Modules/admin/admin_providers/provider_admin_users.dart';
 import '../core/constants/app_colors.dart';
 import '../translations/locale_keys.g.dart';
 
-//TODO: locale,
-
 Future<dynamic> showInspectorPicker({
   required BuildContext context,
   String? selectedInspectorId, // pass currently selected inspector if any
