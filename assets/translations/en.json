@@ -769,5 +769,6 @@
   "deleteSignatureWarning": "This will permanently delete your saved signature. You'll need to sign again in future inspections.",
   "actionCannotUndone": "This action cannot be undone.",
   "deletePermanently": "Delete Permanently",
-  "signatureDeleted": "Saved signature deleted permanently"
+  "signatureDeleted": "Saved signature deleted permanently", 
+  "remaining": "Remaining"
 }

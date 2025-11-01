@@ -757,5 +757,6 @@ abstract class  LocaleKeys {
   static const actionCannotUndone = 'actionCannotUndone';
   static const deletePermanently = 'deletePermanently';
   static const signatureDeleted = 'signatureDeleted';
+  static const remaining = 'remaining';
 
 }

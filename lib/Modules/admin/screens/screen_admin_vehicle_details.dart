@@ -183,7 +183,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
     );
   }
 
-Widget _buildMileageSection() {
+  Widget _buildMileageSection() {
     final currentKm =
         int.tryParse(_kmController.text) ?? widget.vehicle.currentKm;
     final maxKm = int.tryParse(_maxController.text) ?? widget.vehicle.maxKm;
@@ -255,7 +255,7 @@ Widget _buildMileageSection() {
         ),
         const SizedBox(height: 16),
         _buildProgressCard(
-          label: "Remaining %", 
+          label: "${LocaleKeys.remaining.toString()} %",
           percent: remainingPercent,
         ),
       ],

@@ -752,5 +752,6 @@
   "deleteSignatureWarning": "Dies löscht Ihre gespeicherte Unterschrift dauerhaft. Sie müssen bei zukünftigen Inspektionen erneut unterschreiben.",
   "actionCannotUndone": "Diese Aktion kann nicht rückgängig gemacht werden.",
   "deletePermanently": "Dauerhaft löschen",
-  "signatureDeleted": "Gespeicherte Unterschrift dauerhaft gelöscht"
+  "signatureDeleted": "Gespeicherte Unterschrift dauerhaft gelöscht", 
+  "remaining": "Verbleibend"
 }

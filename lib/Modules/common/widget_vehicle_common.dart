@@ -166,8 +166,7 @@ class VehicleListCard extends StatelessWidget {
               ),
               // ✅ Show REMAINING percentage
               Text(
-                //TODO: locale
-                '${vehicle.remainingPercent}% Remaining',
+                '${vehicle.remainingPercent}% ${LocaleKeys.remaining.toString()}',
                 style: TextStyle(color: Colors.grey.shade400, fontSize: 12.0),
               ),
             ],

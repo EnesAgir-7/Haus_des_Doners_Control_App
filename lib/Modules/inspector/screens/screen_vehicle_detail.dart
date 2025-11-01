@@ -552,8 +552,7 @@ class _EnhancedRemainingKm extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     // ✅ FIXED: Show remaining percentage correctly
-                    //TODO: locale
-                    "${vehicle.remainingPercent}% Remaining",
+                    "${vehicle.remainingPercent}% ${LocaleKeys.remaining.toString()}",
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
@@ -593,14 +592,13 @@ class _EnhancedRemainingKm extends StatelessWidget {
                   ),
                 ),
             ],
-          )
+          ),
         ],
       ),
     );
   }
 
-Color _getProgressColor(int remainingPercent) {
-
+  Color _getProgressColor(int remainingPercent) {
     if (remainingPercent <= 10) return Colors.red; // ≤10% remaining = CRITICAL
     if (remainingPercent <= 30) return Colors.amber; // ≤30% remaining = WARNING
     return Colors.green; // >30% remaining = GOOD

@@ -768,7 +768,8 @@ class CodegenLoader extends AssetLoader{
   "deleteSignatureWarning": "Dies löscht Ihre gespeicherte Unterschrift dauerhaft. Sie müssen bei zukünftigen Inspektionen erneut unterschreiben.",
   "actionCannotUndone": "Diese Aktion kann nicht rückgängig gemacht werden.",
   "deletePermanently": "Dauerhaft löschen",
-  "signatureDeleted": "Gespeicherte Unterschrift dauerhaft gelöscht"
+  "signatureDeleted": "Gespeicherte Unterschrift dauerhaft gelöscht",
+  "remaining": "Verbleibend"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -1541,7 +1542,8 @@ static const Map<String,dynamic> _en = {
   "deleteSignatureWarning": "This will permanently delete your saved signature. You'll need to sign again in future inspections.",
   "actionCannotUndone": "This action cannot be undone.",
   "deletePermanently": "Delete Permanently",
-  "signatureDeleted": "Saved signature deleted permanently"
+  "signatureDeleted": "Saved signature deleted permanently",
+  "remaining": "Remaining"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2280,7 +2282,8 @@ static const Map<String,dynamic> _tr = {
   "deleteSignatureWarning": "Bu, kayıtlı imzanızı kalıcı olarak silecektir. Gelecekteki denetimlerde tekrar imza atmanız gerekecek.",
   "actionCannotUndone": "Bu işlem geri alınamaz.",
   "deletePermanently": "Kalıcı Olarak Sil",
-  "signatureDeleted": "Kayıtlı imza kalıcı olarak silindi"
+  "signatureDeleted": "Kayıtlı imza kalıcı olarak silindi",
+  "remaining": "Kalan"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

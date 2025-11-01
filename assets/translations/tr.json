@@ -735,5 +735,6 @@
     "deleteSignatureWarning": "Bu, kayıtlı imzanızı kalıcı olarak silecektir. Gelecekteki denetimlerde tekrar imza atmanız gerekecek.",
     "actionCannotUndone": "Bu işlem geri alınamaz.",
     "deletePermanently": "Kalıcı Olarak Sil",
-    "signatureDeleted": "Kayıtlı imza kalıcı olarak silindi"
+    "signatureDeleted": "Kayıtlı imza kalıcı olarak silindi",
+    "remaining": "Kalan"
 }
