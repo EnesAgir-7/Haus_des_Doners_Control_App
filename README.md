@@ -55,3 +55,46 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 
 Text(LocaleKeys.welcome.tr()); // ✅ Translated text
+
+
+
+
+For Building APKs: 
+# Android
+flutter build apk --dart-define=environment=prod --dart-define-from-file=config/prod.json
+# iOS
+flutter build ios --dart-define=environment=prod --dart-define-from-file=config/prod.json
+
+
+For App Run: 
+flutter run --dart-define=environment=dev --dart-define-from-file=config/dev.json
+flutter run --dart-define=environment=prod --dart-define-from-file=config/prod.json
+
+
+Using Make CLI:
+
+make dev
+make prod
+make build-dev-android
+make build-prod-android
+make build-prod-ios
+
+
+
+Setup Firebase CLI Aliases
+Make sure your Firebase CLI is configured with aliases:
+bash# Navigate to your project root
+cd /path/to/your/flutter/project
+
+# Add dev project with alias
+firebase use --add
+# Select: controlapp-23df2
+# Alias: dev
+
+# Add prod project with alias
+firebase use --add
+# Select: controlapp-production
+# Alias: prod
+
+# Verify aliases
+firebase projects:list

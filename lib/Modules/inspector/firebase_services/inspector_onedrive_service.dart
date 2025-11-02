@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
 
+import '../../../app_env.dart';
 import '../../../core/config/onedrive_config.dart';
 import '../../../translations/locale_keys.g.dart';
 
@@ -20,6 +21,14 @@ class InspectorOneDriveService {
   DateTime? _tokenExpiry;
 
   // Get app-only access token with expiry tracking
+
+  // ✅ ADD THIS: Get root folder based on environment
+  String get _rootFolder {
+    return AppEnvironment.isProd
+        ? 'RestaurantInspections' // Production folder
+        : 'RestaurantInspections_DEV'; // Development folder
+  }
+
   Future<void> _getAppAccessToken() async {
     console("Getting token");
     final url = Uri.parse(
@@ -81,6 +90,31 @@ class InspectorOneDriveService {
   }
 
   // Create folder structure: RestaurantInspections/{branchName}/{month}/Images
+  // Future<String> createImagesFolder(
+  //   String branchName,
+  //   DateTime timestamp,
+  // ) async {
+  //   await _ensureToken();
+
+  //   try {
+  //     final monthFolder = _getMonthFolder(timestamp);
+
+  //     await _createFolderIfNotExists('RestaurantInspections');
+  //     await _createFolderIfNotExists('RestaurantInspections/$branchName');
+  //     await _createFolderIfNotExists(
+  //       'RestaurantInspections/$branchName/$monthFolder',
+  //     );
+  //     final folderPath =
+  //         'RestaurantInspections/$branchName/$monthFolder/Images';
+  //     await _createFolderIfNotExists(folderPath);
+
+  //     print('✅ Images folder structure created: $folderPath');
+  //     return folderPath;
+  //   } catch (e) {
+  //     print('❌ Error creating images folder structure: $e');
+  //     rethrow;
+  //   }
+  // }
   Future<String> createImagesFolder(
     String branchName,
     DateTime timestamp,
@@ -90,13 +124,13 @@ class InspectorOneDriveService {
     try {
       final monthFolder = _getMonthFolder(timestamp);
 
-      await _createFolderIfNotExists('RestaurantInspections');
-      await _createFolderIfNotExists('RestaurantInspections/$branchName');
+      await _createFolderIfNotExists(_rootFolder); // ← Changed
+      await _createFolderIfNotExists('$_rootFolder/$branchName'); // ← Changed
       await _createFolderIfNotExists(
-        'RestaurantInspections/$branchName/$monthFolder',
+        '$_rootFolder/$branchName/$monthFolder', // ← Changed
       );
       final folderPath =
-          'RestaurantInspections/$branchName/$monthFolder/Images';
+          '$_rootFolder/$branchName/$monthFolder/Images'; // ← Changed
       await _createFolderIfNotExists(folderPath);
 
       print('✅ Images folder structure created: $folderPath');
@@ -108,18 +142,41 @@ class InspectorOneDriveService {
   }
 
   // Create folder structure: RestaurantInspections/{branchName}/{month}/PDFs
+  // Future<String> createPDFFolder(String branchName, DateTime timestamp) async {
+  //   await _ensureToken();
+
+  //   try {
+  //     final monthFolder = _getMonthFolder(timestamp);
+
+  //     await _createFolderIfNotExists('RestaurantInspections');
+  //     await _createFolderIfNotExists('RestaurantInspections/$branchName');
+  //     await _createFolderIfNotExists(
+  //       'RestaurantInspections/$branchName/$monthFolder',
+  //     );
+  //     final folderPath = 'RestaurantInspections/$branchName/$monthFolder/PDFs';
+  //     await _createFolderIfNotExists(folderPath);
+
+  //     print('✅ PDF folder structure created: $folderPath');
+  //     return folderPath;
+  //   } catch (e) {
+  //     print('❌ Error creating PDF folder structure: $e');
+  //     rethrow;
+  //   }
+  // }
+
   Future<String> createPDFFolder(String branchName, DateTime timestamp) async {
     await _ensureToken();
 
     try {
       final monthFolder = _getMonthFolder(timestamp);
 
-      await _createFolderIfNotExists('RestaurantInspections');
-      await _createFolderIfNotExists('RestaurantInspections/$branchName');
+      await _createFolderIfNotExists(_rootFolder); // ← Changed
+      await _createFolderIfNotExists('$_rootFolder/$branchName'); // ← Changed
       await _createFolderIfNotExists(
-        'RestaurantInspections/$branchName/$monthFolder',
+        '$_rootFolder/$branchName/$monthFolder', // ← Changed
       );
-      final folderPath = 'RestaurantInspections/$branchName/$monthFolder/PDFs';
+      final folderPath =
+          '$_rootFolder/$branchName/$monthFolder/PDFs'; // ← Changed
       await _createFolderIfNotExists(folderPath);
 
       print('✅ PDF folder structure created: $folderPath');
@@ -390,6 +447,10 @@ class InspectorOneDriveService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         print('✅ OneDrive connection successful');
+        print(
+          '🔥 Environment: ${AppEnvironment.current.toUpperCase()}',
+        ); // ← Add this
+        print('📁 Root folder: $_rootFolder'); // ← Add this
         print('Drive owner: ${data['owner']?['user']?['displayName']}');
         return true;
       } else {

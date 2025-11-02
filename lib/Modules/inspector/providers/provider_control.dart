@@ -11,6 +11,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/enums.dart';
 import '../../../models/branch_model.dart';
 import '../../../models/inspection_model.dart';
 import '../../../models/inspection_template_model.dart';
@@ -23,7 +24,6 @@ import '../screens/pdf_preview.dart';
 import '../widgets/custom_toast.dart';
 import '../widgets/widgets_reports_screen.dart';
 
-enum UploadStage { uploadingPhotos, uploadingPDF, submitting }
 
 /// Provider for Control (Inspection Form) screen
 /// Handles creating and submitting inspections with photo uploads

@@ -14,6 +14,19 @@ initializeApp();
 const db = getFirestore();
 const auth = getAuth();
 
+// ✅ Detect environment (for logging only)
+const projectId = process.env.GCLOUD_PROJECT || process.env.PROJECT_ID;
+const isProd = projectId === "controlapp-production";
+const isDev = projectId === "controlapp-23df2";
+
+console.log(`🔥 Functions initialized`);
+console.log(`🔥 Project ID: ${projectId}`);
+console.log(`🔥 ENV: ${isProd ? "PROD" : isDev ? "DEV" : "UNKNOWN"}`);
+
+if (!isProd && !isDev) {
+  console.warn(`⚠️ WARNING: Unknown project ID: ${projectId}`);
+}
+
 /**
  * Parse an expiry value to a JavaScript Date.
  * Accepts Firestore Timestamp, ISO strings, or Date objects.
@@ -41,7 +54,7 @@ function parseExpiry(expiry) {
 
 /**
  * Scheduled function that removes expired stops from each route doc.
- * Runs every 5 minutes for testing (change to daily in production).
+ * Runs daily at 8 AM Pakistan time.
  */
 exports.cleanupExpiredStops = onSchedule(
     {
@@ -116,7 +129,6 @@ exports.updatePassword = functions.https.onCall(async (request) => {
   const insUid = request.data && request.data.uid;
   const newPassword = request.data && request.data.newPassword;
   const callerUid = request.auth && request.auth.uid;
-
 
   // Validate input
   if (!insUid) {
@@ -203,8 +215,7 @@ exports.deleteInspector = onCall(async (request) => {
 
     const callerData = callerDoc.data();
 
-    // Check if caller is admin (adjust field name based on your schema)
-    // Common field names: role, userType, type, etc.
+    // Check if caller is admin
     const isAdmin =
       callerData.role === "admin" ||
       callerData.userType === "admin" ||

@@ -10,6 +10,7 @@ import 'package:signature/signature.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/enums.dart';
 import '../../../models/branch_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../providers/provider_control.dart';

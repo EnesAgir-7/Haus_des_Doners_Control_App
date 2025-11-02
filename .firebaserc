@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "controlapp-23df2"
-  }
+    "dev": "controlapp-23df2",
+    "prod": "controlapp-production"
+  },
+  "targets": {},
+  "etags": {}
 }

@@ -4,16 +4,16 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:haus_des_control/Modules/admin/screens/admin_bottom_nav_bar.dart';
-import 'package:haus_des_control/core/constants/firebase_constants.dart';
-import 'package:haus_des_control/firebase_options.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_branches.dart';
-import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_vehicle.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
+import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_vehicle.dart';
+import 'package:haus_des_control/Modules/admin/screens/admin_bottom_nav_bar.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_auth.dart';
-import 'package:haus_des_control/Modules/inspector/providers/provider_vehicle.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_route.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
+import 'package:haus_des_control/Modules/inspector/providers/provider_vehicle.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -21,10 +21,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'Modules/admin/admin_providers/provider_admin_bottombar.dart';
 import 'Modules/admin/admin_providers/provider_admin_inspections.dart';
 import 'Modules/admin/admin_providers/provider_admin_tasks.dart';
-import 'core/constants/app_colors.dart';
-import 'core/global_focus_manager.dart';
-import 'core/theme/app_theme.dart';
-import 'Modules/inspector/screens/bottom_nav_bar.dart';
 import 'Modules/inspector/providers/provider_bottom_nav_bar.dart';
 import 'Modules/inspector/providers/provider_branches.dart';
 import 'Modules/inspector/providers/provider_control.dart';
@@ -32,15 +28,24 @@ import 'Modules/inspector/providers/provider_inspections.dart';
 import 'Modules/inspector/providers/provider_map.dart';
 import 'Modules/inspector/providers/provider_panel.dart';
 import 'Modules/inspector/providers/provider_report_photo.dart';
-import 'routes/app_routes.dart';
+import 'Modules/inspector/screens/bottom_nav_bar.dart';
 import 'Modules/inspector/screens/screen_auth.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'core/constants/app_colors.dart';
+import 'core/global_focus_manager.dart';
+import 'core/theme/app_theme.dart';
+import 'app_env.dart';
+import 'routes/app_routes.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  AppEnvironment.printEnvironment();
+
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(options: AppEnvironment.firebaseOptions);
+  }
+
   await EasyLocalization.ensureInitialized();
   await dotenv.load(fileName: ".env");
   // Initialize OneDrive
@@ -105,7 +110,7 @@ class MyApp extends StatelessWidget {
           supportedLocales: context.supportedLocales,
           locale: context.locale,
           debugShowCheckedModeBanner: false,
-          title: 'Haus des Control',
+          title: AppEnvironment.appName,
           theme: AppTheme.light,
           navigatorKey: navigatorKey,
           navigatorObservers: [GlobalFocusManager()],
