@@ -769,7 +769,12 @@ class CodegenLoader extends AssetLoader{
   "actionCannotUndone": "Diese Aktion kann nicht rückgängig gemacht werden.",
   "deletePermanently": "Dauerhaft löschen",
   "signatureDeleted": "Gespeicherte Unterschrift dauerhaft gelöscht",
-  "remaining": "Verbleibend"
+  "remaining": "Verbleibend",
+  "branch": "Filiale",
+  "overall_score": "Gesamtpunktzahl",
+  "category": "Kategorie",
+  "not_signed": "Nicht unterschrieben",
+  "of": "von"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -1543,7 +1548,12 @@ static const Map<String,dynamic> _en = {
   "actionCannotUndone": "This action cannot be undone.",
   "deletePermanently": "Delete Permanently",
   "signatureDeleted": "Saved signature deleted permanently",
-  "remaining": "Remaining"
+  "remaining": "Remaining",
+  "branch": "Branch",
+  "overall_score": "Overall Score",
+  "category": "Category",
+  "not_signed": "Not Signed",
+  "of": "of"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2283,7 +2293,12 @@ static const Map<String,dynamic> _tr = {
   "actionCannotUndone": "Bu işlem geri alınamaz.",
   "deletePermanently": "Kalıcı Olarak Sil",
   "signatureDeleted": "Kayıtlı imza kalıcı olarak silindi",
-  "remaining": "Kalan"
+  "remaining": "Kalan",
+  "branch": "Şube",
+  "overall_score": "Genel Puan",
+  "category": "Kategori",
+  "not_signed": "İmzalanmamış",
+  "of": "/"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

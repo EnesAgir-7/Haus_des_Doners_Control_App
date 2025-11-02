@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 String formatDate(DateTime date) {
@@ -89,6 +90,7 @@ Future<String?> pickRouteDate(
   DateTime? initialDate,
   int maxDaysAhead = 7,
 }) async {
+  // Parse the current time slot if provided
   DateTime? parsedInitialDate;
 
   if (currentTimeSlot != null && currentTimeSlot.isNotEmpty) {
@@ -102,37 +104,80 @@ Future<String?> pickRouteDate(
         parsedInitialDate = DateTime(year, month, day);
       }
     } catch (_) {
-      // Fallback to now if parsing fails
       parsedInitialDate = null;
     }
   }
 
-  // Use priority: currentTimeSlot > initialDate > now
+  // Determine which date to use as initial
   final dateToUse = parsedInitialDate ?? initialDate ?? DateTime.now();
+  DateTime selectedDate = dateToUse;
 
-  // Show date picker
-  final DateTime? pickedDate = await showDatePicker(
+  return await showDialog<String>(
     context: context,
-    initialDate: dateToUse,
-    firstDate: DateTime.now(),
-    lastDate: DateTime.now().add(Duration(days: maxDaysAhead)),
-    builder: (context, child) {
-      return Theme(
-        data: Theme.of(context).copyWith(
-          colorScheme: ColorScheme.dark(
-            primary: Theme.of(context).primaryColor,
-            onPrimary: Colors.white,
-            surface: const Color(0xFF212121),
-            onSurface: Colors.white,
+    barrierDismissible: false,
+    builder: (context) {
+      return AlertDialog(
+        backgroundColor: const Color(0xFF212121),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          LocaleKeys.select_date.tr(),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
           ),
         ),
-        child: child!,
+        content: StatefulBuilder(
+          builder: (context, setState) {
+            return SizedBox(
+              width: 400,
+              height: 400,
+              child: CalendarDatePicker(
+                initialDate: selectedDate,
+                firstDate: DateTime.now(),
+                lastDate: DateTime.now().add(Duration(days: maxDaysAhead)),
+                onDateChanged: (date) {
+                  setState(() {
+                    selectedDate = date;
+                  });
+                },
+              ),
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, null),
+            child: Text(
+              LocaleKeys.cancel.tr(),
+              style: TextStyle(color: Colors.grey, fontSize: 16),
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+            onPressed: () {
+              final formattedDate = DateFormat(
+                'yyyy-MM-dd',
+              ).format(selectedDate);
+              Navigator.pop(context, formattedDate);
+            },
+            child: Text(
+              LocaleKeys.ok.tr(),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ],
       );
     },
   );
-
-  if (pickedDate == null) return null;
-
-  // ✅ Return formatted date string
-  return DateFormat('yyyy-MM-dd').format(pickedDate);
 }

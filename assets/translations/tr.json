@@ -736,5 +736,10 @@
   "actionCannotUndone": "Bu işlem geri alınamaz.",
   "deletePermanently": "Kalıcı Olarak Sil",
   "signatureDeleted": "Kayıtlı imza kalıcı olarak silindi",
-  "remaining": "Kalan"
+  "remaining": "Kalan",
+  "branch": "Şube",
+  "overall_score": "Genel Puan",
+  "category": "Kategori",
+  "not_signed": "İmzalanmamış", 
+  "of": "/"
 }

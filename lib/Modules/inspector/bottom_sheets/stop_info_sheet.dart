@@ -4,6 +4,7 @@ import 'package:haus_des_control/Modules/inspector/providers/provider_branches.d
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../helpers/app_helpers.dart';
 import '../../../models/route_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../widgets/app_button.dart';
@@ -498,8 +499,8 @@ class StopRouteManagementSheet extends StatelessWidget {
                       isLoading: provider.isLoading,
                       text: LocaleKeys.updateSchedule.tr(),
                       onPressed: () async {
-                        // Parse existing timeSlot (e.g. "2025-10-23") to DateTime
                         DateTime? initialDate;
+
                         try {
                           if (stop.timeSlot.isNotEmpty) {
                             initialDate = DateTime.parse(stop.timeSlot);
@@ -508,24 +509,21 @@ class StopRouteManagementSheet extends StatelessWidget {
                           initialDate = DateTime.now();
                         }
 
-                        final DateTime? pickedDate = await showDatePicker(
-                          locale: context.locale,
-                          context: context,
-                          initialDate: initialDate ?? DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 7)),
+                        // 🗓️ Use the enhanced date picker
+                        final String? pickedDate = await pickRouteDate(
+                          context,
+                          currentTimeSlot: stop.timeSlot,
+                          initialDate: initialDate,
+                          maxDaysAhead: 7,
                         );
 
                         if (pickedDate != null) {
-                          final String newTimeSlot =
-                              "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
-
                           // Call your provider method to update the stop schedule
                           final success = await provider
                               .updateStopTimeSlotForMe(
                                 branchId: stop.branchId,
                                 context: context,
-                                newTimeSlot: newTimeSlot,
+                                newTimeSlot: pickedDate,
                                 order: stop.order,
                               );
 

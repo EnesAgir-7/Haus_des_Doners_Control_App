@@ -770,5 +770,10 @@
   "actionCannotUndone": "This action cannot be undone.",
   "deletePermanently": "Delete Permanently",
   "signatureDeleted": "Saved signature deleted permanently", 
-  "remaining": "Remaining"
+  "remaining": "Remaining", 
+  "branch": "Branch",
+  "overall_score": "Overall Score",
+  "category": "Category",
+  "not_signed": "Not Signed", 
+  "of": "of"
 }

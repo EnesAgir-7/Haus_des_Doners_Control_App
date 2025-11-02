@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -107,7 +108,7 @@ class InspectionPDFGenerator {
             pw.Header(
               level: 0,
               child: pw.Text(
-                'Inspection Photos',
+                LocaleKeys.inspection_photos.tr(),
                 style: pw.TextStyle(
                   fontSize: 20,
                   fontWeight: pw.FontWeight.bold,
@@ -160,7 +161,7 @@ class InspectionPDFGenerator {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    'INSPECTION REPORT',
+                    LocaleKeys.inspection_report.tr(),
                     style: pw.TextStyle(
                       fontSize: 18,
                       fontWeight: pw.FontWeight.bold,
@@ -230,7 +231,7 @@ class InspectionPDFGenerator {
                     ),
                     pw.SizedBox(width: 6),
                     pw.Text(
-                      'Branch',
+                      LocaleKeys.branch.tr(),
                       style: pw.TextStyle(
                         fontSize: 10,
                         fontWeight: pw.FontWeight.bold,
@@ -274,7 +275,7 @@ class InspectionPDFGenerator {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text(
-                  'Inspector',
+                  LocaleKeys.inspector.tr(),
                   style: const pw.TextStyle(
                     fontSize: 9,
                     color: PdfColors.grey700,
@@ -290,7 +291,7 @@ class InspectionPDFGenerator {
                 ),
                 pw.SizedBox(height: 8),
                 pw.Text(
-                  'Template',
+                  LocaleKeys.questionnaire.tr(),
                   style: const pw.TextStyle(
                     fontSize: 9,
                     color: PdfColors.grey700,
@@ -298,7 +299,7 @@ class InspectionPDFGenerator {
                 ),
                 pw.SizedBox(height: 4),
                 pw.Text(
-                  templateName ?? 'N/A',
+                  templateName ?? LocaleKeys.notAvailable.tr(),
                   style: pw.TextStyle(
                     fontSize: 11,
                     fontWeight: pw.FontWeight.bold,
@@ -313,9 +314,13 @@ class InspectionPDFGenerator {
   }
 
   pw.Widget _buildOverallScoreCompact() {
-    // final percentage = (totalScore / maxPossibleScore * 100).round();
-    // final performanceLevel = _getPerformanceLevel(percentage);
-    final percentage = ((1 - (totalScore / maxPossibleScore)) * 100).round();
+    // Calculate average score per question
+    final numberOfQuestions =
+        maxPossibleScore / 4; // Since max per question is 4
+    final averageScore = totalScore / numberOfQuestions;
+
+    // Map average score to percentage using fixed mapping
+    final percentage = _scoreToPercentage(averageScore);
     final performanceLevel = _getPerformanceLevel(percentage);
 
     return pw.Container(
@@ -336,7 +341,7 @@ class InspectionPDFGenerator {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                'Overall Score',
+                LocaleKeys.overall_score.tr(),
                 style: const pw.TextStyle(fontSize: 11, color: PdfColors.white),
               ),
               pw.SizedBox(height: 4),
@@ -402,7 +407,7 @@ class InspectionPDFGenerator {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          'Category Breakdown',
+          LocaleKeys.categoryBreakdown.tr(),
           style: pw.TextStyle(
             fontSize: 14,
             fontWeight: pw.FontWeight.bold,
@@ -422,14 +427,14 @@ class InspectionPDFGenerator {
             pw.TableRow(
               decoration: const pw.BoxDecoration(color: PdfColors.grey200),
               children: [
-                _buildTableCell('Category', isHeader: true),
+                _buildTableCell(LocaleKeys.category.tr(), isHeader: true),
                 _buildTableCell(
-                  'Score',
+                  LocaleKeys.score.tr(),
                   isHeader: true,
                   align: pw.Alignment.center,
                 ),
                 _buildTableCell(
-                  'Status',
+                  LocaleKeys.status.tr(),
                   isHeader: true,
                   align: pw.Alignment.center,
                 ),
@@ -437,8 +442,12 @@ class InspectionPDFGenerator {
             ),
             // Data Rows
             ...categories.map((category) {
-              final percentage =
-                  ((1 - (category.score / category.maxScore)) * 100).round();
+              // Calculate average score for this category
+              final numberOfQuestions = category.maxScore / 4;
+              final averageScore = category.score / numberOfQuestions;
+
+              // Map to percentage using fixed mapping
+              final percentage = _scoreToPercentage(averageScore);
               final performanceLevel = _getPerformanceLevel(percentage);
 
               return pw.TableRow(
@@ -484,6 +493,30 @@ class InspectionPDFGenerator {
         ),
       ],
     );
+  }
+
+  // Helper method to convert score to percentage using fixed mapping
+  int _scoreToPercentage(double averageScore) {
+    // Fixed mapping:
+    // 1.0 = 100%
+    // 2.0 = 75%
+    // 3.0 = 25%
+    // 4.0 = 0%
+
+    if (averageScore <= 1.0) return 100;
+    if (averageScore <= 2.0) {
+      // Linear interpolation between 100% and 75%
+      return (100 - ((averageScore - 1.0) * 25)).round();
+    }
+    if (averageScore <= 3.0) {
+      // Linear interpolation between 75% and 25%
+      return (75 - ((averageScore - 2.0) * 50)).round();
+    }
+    if (averageScore < 4.0) {
+      // Linear interpolation between 25% and 0%
+      return (25 - ((averageScore - 3.0) * 25)).round();
+    }
+    return 0;
   }
 
   pw.Widget _buildTableCell(
@@ -538,7 +571,7 @@ class InspectionPDFGenerator {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          'Additional Notes',
+          LocaleKeys.additionalInformation.tr(),
           style: pw.TextStyle(
             fontSize: 12,
             fontWeight: pw.FontWeight.bold,
@@ -564,9 +597,15 @@ class InspectionPDFGenerator {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        _buildSignatureBox('Inspector Signature', inspectorSignature),
+        _buildSignatureBox(
+          LocaleKeys.inspectorSignature.tr(),
+          inspectorSignature,
+        ),
         pw.SizedBox(width: 16),
-        _buildSignatureBox('Branch Representative', branchSignature),
+        _buildSignatureBox(
+          LocaleKeys.branchRepresentative.tr(),
+          branchSignature,
+        ),
       ],
     );
   }
@@ -602,7 +641,7 @@ class InspectionPDFGenerator {
                   )
                 : pw.Center(
                     child: pw.Text(
-                      'Not Signed',
+                      LocaleKeys.not_signed.tr(),
                       style: const pw.TextStyle(
                         fontSize: 9,
                         color: PdfColors.grey500,
@@ -626,7 +665,7 @@ class InspectionPDFGenerator {
         ),
       ),
       child: pw.Text(
-        'Page ${context.pageNumber} of ${context.pagesCount}',
+        '${LocaleKeys.page.tr()} ${context.pageNumber} ${LocaleKeys.of.tr()} ${context.pagesCount}',
         style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
       ),
     );
@@ -700,21 +739,41 @@ class InspectionPDFGenerator {
   // Determine performance based on reversed percentage
   Map<String, dynamic> _getPerformanceLevel(int percentage) {
     if (percentage >= 90) {
-      return {'label': 'Excellent', 'emoji': '😃', 'color': PdfColors.green700};
+      return {
+        'label': LocaleKeys.excellent.tr(),
+        'emoji': '😃',
+        'color': PdfColors.green700,
+      };
     } else if (percentage >= 75) {
-      return {'label': 'Good', 'emoji': '🙂', 'color': PdfColors.lightGreen700};
+      return {
+        'label': LocaleKeys.good.tr(),
+        'emoji': '🙂',
+        'color': PdfColors.lightGreen700,
+      };
     } else if (percentage >= 60) {
-      return {'label': 'Fair', 'emoji': '😐', 'color': PdfColors.orange700};
+      return {
+        'label': LocaleKeys.fair.tr(),
+        'emoji': '😐',
+        'color': PdfColors.orange700,
+      };
     } else if (percentage >= 40) {
       return {
-        'label': 'Below Avg',
+        'label': LocaleKeys.belowAverage.tr(),
         'emoji': '😕',
         'color': PdfColors.deepOrange700,
       };
     } else if (percentage >= 20) {
-      return {'label': 'Poor', 'emoji': '😞', 'color': PdfColors.red700};
+      return {
+        'label': LocaleKeys.poor.tr(),
+        'emoji': '😞',
+        'color': PdfColors.red700,
+      };
     } else {
-      return {'label': 'Very Poor', 'emoji': '😢', 'color': PdfColors.red900};
+      return {
+        'label': LocaleKeys.veryPoor.tr(),
+        'emoji': '😢',
+        'color': PdfColors.red900,
+      };
     }
   }
 }

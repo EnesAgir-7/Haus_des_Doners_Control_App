@@ -1,7 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/inspector/screens/screen_pdf_viewer.dart';
 import 'package:haus_des_control/models/branch_model.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
@@ -11,7 +13,6 @@ import '../providers/provider_branches.dart';
 import '../widgets/app_button.dart';
 import '../widgets/inspector_branch_card.dart';
 import 'common_methods.dart';
-import 'screen_inspection_details.dart';
 import 'screen_map.dart';
 import 'screen_submit_report.dart';
 
@@ -612,10 +613,11 @@ class BranchDetailsSheet extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
+            if (inspection.pdfReportUrl == null) return;
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) =>
-                    ScreenInspectionDetails(inspectionId: inspection.id),
+                    ScreenPdfViewer(pdfUrl: inspection.pdfReportUrl ?? ""),
               ),
             );
           },
@@ -640,7 +642,10 @@ class BranchDetailsSheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            LocaleKeys.inspectedByYou.tr(),
+                            LocaleKeys.inspectedByYou.tr().replaceAll(
+                              "You",
+                              inspection.inspectorName ?? "",
+                            ),
                             style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
@@ -795,29 +800,24 @@ class BranchDetailsSheet extends StatelessWidget {
     BuildContext context,
     ProviderBranches prod,
   ) async {
-    final DateTime? pickedDate = await showDatePicker(
-      locale: context.locale,
-      context: context,
+    final String? pickedDate = await pickRouteDate(
+      context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 7)),
+      maxDaysAhead: 7,
     );
 
     if (pickedDate != null) {
-      final String timeSlot =
-          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-
       final success = await prod.assignBranchToMe(
         branchId: branch.id,
         branchName: branch.name,
         branchAddress: branch.address,
-        timeSlot: timeSlot,
+        timeSlot: pickedDate, // formatted yyyy-MM-dd string
         context: context,
         branchTemplateId: branch.templateId,
       );
 
       if (success && context.mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context); // close bottom sheet or dialog
       }
     }
   }
@@ -888,6 +888,7 @@ class RouteManagementSheet extends StatelessWidget {
                       text: LocaleKeys.updateSchedule.tr(),
                       onPressed: () async {
                         DateTime? initialDate;
+
                         try {
                           if (branch.stop?.timeSlot != null &&
                               branch.stop!.timeSlot.isNotEmpty) {
@@ -897,24 +898,21 @@ class RouteManagementSheet extends StatelessWidget {
                           initialDate = DateTime.now();
                         }
 
-                        final DateTime? pickedDate = await showDatePicker(
-                          locale: context.locale,
-                          context: context,
-                          initialDate: initialDate ?? DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 7)),
+                        // 🗓️ Use the enhanced date picker
+                        final String? pickedDate = await pickRouteDate(
+                          context,
+                          currentTimeSlot: branch.stop?.timeSlot,
+                          initialDate: initialDate,
+                          maxDaysAhead: 7,
                         );
 
                         if (pickedDate != null) {
-                          final String newTimeSlot =
-                              "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-
                           // Call your provider method to update the stop schedule
                           final success = await provider
                               .updateStopTimeSlotForMe(
                                 branchId: branch.stop!.branchId,
                                 context: context,
-                                newTimeSlot: newTimeSlot,
+                                newTimeSlot: pickedDate,
                                 order: branch.stop!.order,
                               );
 

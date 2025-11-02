@@ -27,24 +27,42 @@ StatusInfo getStatusInfo(RouteStopModel stop, bool isCompleted) {
   final today = DateTime.now();
   final todayDate = DateTime(today.year, today.month, today.day);
 
-  // Parse stop date from timeSlot (format: yyyy-MM-dd)
-  final stopParts = stop.timeSlot.split('-');
-  final stopDate = DateTime(
-    int.parse(stopParts[0]),
-    int.parse(stopParts[1]),
-    int.parse(stopParts[2]),
-  );
+  DateTime? stopDate;
 
-  final todayKey = "${today.year}-${today.month}-${today.day}";
+  // Safely parse stop.timeSlot (expected format: yyyy-MM-dd)
+  try {
+    final parts = stop.timeSlot.split('-');
+    if (parts.length == 3) {
+      final year = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final day = int.parse(parts[2]);
+      stopDate = DateTime(year, month, day);
+    }
+  } catch (_) {
+    stopDate = null;
+  }
+
+  if (stopDate == null) {
+    // fallback if invalid
+    return StatusInfo(
+      Colors.grey,
+      Icons.error_outline,
+      'Invalid date',
+      false,
+      false,
+      false,
+    );
+  }
+
+  final todayKey =
+      "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
   final isToday = stop.timeSlot == todayKey;
 
-  // Expired if completed before today
   final bool isExpired =
       stop.isCompleted &&
       stop.completedAt != null &&
       stop.completedAt!.isBefore(todayDate);
 
-  // Overdue if the stop date is before today and not completed
   final bool isOverdue = stopDate.isBefore(todayDate) && !isCompleted;
 
   Color color;
@@ -52,12 +70,10 @@ StatusInfo getStatusInfo(RouteStopModel stop, bool isCompleted) {
   String label;
 
   if (isExpired) {
-    // Completed earlier than today = expired
     color = Colors.deepOrange;
     icon = Icons.warning_amber_rounded;
     label = LocaleKeys.expired.tr();
   } else if (isCompleted) {
-    // Completed today (or not expired)
     color = Colors.green;
     icon = Icons.check_circle;
     label = LocaleKeys.completed.tr();
@@ -86,12 +102,10 @@ String formatTimeSlot(String timeSlot) {
       final month = int.parse(parts[1]);
       final day = int.parse(parts[2]);
       final date = DateTime(year, month, day);
-
-      // Format: "Monday, Oct 7"
-      return DateFormat('EEEE, MMM d yyyy').format(date);
+      return DateFormat(
+        'EEEE, MMM d yyyy',
+      ).format(date); // e.g. "Thursday, Oct 2 2025"
     }
-  } catch (e) {
-    // If parsing fails, return original
-  }
+  } catch (_) {}
   return timeSlot;
 }

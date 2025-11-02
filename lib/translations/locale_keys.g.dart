@@ -758,5 +758,10 @@ abstract class  LocaleKeys {
   static const deletePermanently = 'deletePermanently';
   static const signatureDeleted = 'signatureDeleted';
   static const remaining = 'remaining';
+  static const branch = 'branch';
+  static const overall_score = 'overall_score';
+  static const category = 'category';
+  static const not_signed = 'not_signed';
+  static const of = 'of';
 
 }

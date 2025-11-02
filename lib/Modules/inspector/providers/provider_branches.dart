@@ -90,10 +90,7 @@ class ProviderBranches extends ChangeNotifier {
     _inspectionsSubscription?.cancel();
 
     _inspectionsSubscription = _inspectionService
-        .streamInspectionsByBranchAndInspector(
-          branch.id,
-          branch.assignedInspector!.id,
-        )
+        .streamLast10Inspections(branch.id, branch.assignedInspector!.id)
         .listen(
           (inspections) {
             _branchInspections = inspections;

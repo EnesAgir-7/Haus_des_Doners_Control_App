@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../helpers/app_helpers.dart';
 import '../../../models/route_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../bottom_sheets/stop_info_sheet.dart';
@@ -20,19 +21,21 @@ class ScreenRoutes extends StatefulWidget {
 
 class _ScreenRoutesState extends State<ScreenRoutes> {
   Future<void> _selectDate(BuildContext context, ProviderRoute provider) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      locale: context.locale,
+    final String? picked = await pickRouteDate(
+      context,
       initialDate: provider.filterDate ?? DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 7)),
-      builder: (context, child) {
-        return child!;
-      },
+      maxDaysAhead: 7,
     );
 
     if (picked != null) {
-      provider.setDateFilter(picked);
+      // Convert the string "yyyy-MM-dd" back to DateTime for the provider
+      try {
+        final DateTime selectedDate = DateTime.parse(picked);
+        provider.setDateFilter(selectedDate);
+      } catch (e) {
+        // Handle parsing error if needed
+        debugPrint('Error parsing selected date: $e');
+      }
     }
   }
 

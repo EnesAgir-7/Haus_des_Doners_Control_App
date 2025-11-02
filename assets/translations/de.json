@@ -753,5 +753,10 @@
   "actionCannotUndone": "Diese Aktion kann nicht rückgängig gemacht werden.",
   "deletePermanently": "Dauerhaft löschen",
   "signatureDeleted": "Gespeicherte Unterschrift dauerhaft gelöscht",
-  "remaining": "Verbleibend"
+  "remaining": "Verbleibend",
+  "branch": "Filiale",
+  "overall_score": "Gesamtpunktzahl",
+  "category": "Kategorie",
+  "not_signed": "Nicht unterschrieben", 
+  "of": "von"
 }

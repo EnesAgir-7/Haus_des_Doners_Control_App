@@ -6,6 +6,7 @@ import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../helpers/app_helpers.dart';
 import '../../../models/branch_model.dart';
 import '../providers/provider_map.dart';
 import '../widgets/app_button.dart';
@@ -226,28 +227,22 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                                     } catch (_) {
                                       initialDate = DateTime.now();
                                     }
-                                    // Show date picker before assigning
-                                    final DateTime? pickedDate =
-                                        await showDatePicker(
-                                          locale: context.locale,
-                                          context: context,
-                                          initialDate:
-                                              initialDate ?? DateTime.now(),
-                                          firstDate: DateTime.now(),
-                                          lastDate: DateTime.now().add(
-                                            const Duration(days: 7),
-                                          ),
+
+                                    final String? pickedDate =
+                                        await pickRouteDate(
+                                          context,
+                                          currentTimeSlot:
+                                              branch.stop?.timeSlot,
+                                          initialDate: initialDate,
+                                          maxDaysAhead: 7,
                                         );
 
                                     if (pickedDate != null) {
-                                      final String timeSlot =
-                                          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-
                                       final success = await branchContr
                                           .assignBranchToMe(
                                             branchId: branch.id,
                                             branchName: branch.name,
-                                            timeSlot: timeSlot,
+                                            timeSlot: pickedDate,
                                             context: context,
                                             branchTemplateId: branch.templateId,
                                             branchAddress: branch.address,
