@@ -805,7 +805,7 @@ class BranchDetailsSheet extends StatelessWidget {
 
     if (pickedDate != null) {
       final String timeSlot =
-          "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
 
       final success = await prod.assignBranchToMe(
         branchId: branch.id,
@@ -907,7 +907,7 @@ class RouteManagementSheet extends StatelessWidget {
 
                         if (pickedDate != null) {
                           final String newTimeSlot =
-                              "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+                              "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
 
                           // Call your provider method to update the stop schedule
                           final success = await provider

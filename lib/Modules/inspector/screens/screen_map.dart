@@ -241,7 +241,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
 
                                     if (pickedDate != null) {
                                       final String timeSlot =
-                                          "${pickedDate.year}-${pickedDate.month}-${pickedDate.day}";
+                                          "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
 
                                       final success = await branchContr
                                           .assignBranchToMe(

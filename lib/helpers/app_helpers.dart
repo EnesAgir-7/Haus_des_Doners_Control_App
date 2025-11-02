@@ -82,3 +82,57 @@ String calculatePerformancePercent(String totalScoreStr) {
 
   return '${percentage.toStringAsFixed(0)}';
 }
+
+Future<String?> pickRouteDate(
+  BuildContext context, {
+  String? currentTimeSlot,
+  DateTime? initialDate,
+  int maxDaysAhead = 7,
+}) async {
+  DateTime? parsedInitialDate;
+
+  if (currentTimeSlot != null && currentTimeSlot.isNotEmpty) {
+    try {
+      // Handle both formats: "2025-11-2" and "2025-11-02"
+      final parts = currentTimeSlot.split('-');
+      if (parts.length == 3) {
+        final year = int.parse(parts[0]);
+        final month = int.parse(parts[1]);
+        final day = int.parse(parts[2]);
+        parsedInitialDate = DateTime(year, month, day);
+      }
+    } catch (_) {
+      // Fallback to now if parsing fails
+      parsedInitialDate = null;
+    }
+  }
+
+  // Use priority: currentTimeSlot > initialDate > now
+  final dateToUse = parsedInitialDate ?? initialDate ?? DateTime.now();
+
+  // Show date picker
+  final DateTime? pickedDate = await showDatePicker(
+    context: context,
+    initialDate: dateToUse,
+    firstDate: DateTime.now(),
+    lastDate: DateTime.now().add(Duration(days: maxDaysAhead)),
+    builder: (context, child) {
+      return Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.dark(
+            primary: Theme.of(context).primaryColor,
+            onPrimary: Colors.white,
+            surface: const Color(0xFF212121),
+            onSurface: Colors.white,
+          ),
+        ),
+        child: child!,
+      );
+    },
+  );
+
+  if (pickedDate == null) return null;
+
+  // ✅ Return formatted date string
+  return DateFormat('yyyy-MM-dd').format(pickedDate);
+}
