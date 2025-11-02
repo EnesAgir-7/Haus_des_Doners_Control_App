@@ -255,7 +255,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
         ),
         const SizedBox(height: 16),
         _buildProgressCard(
-          label: "${LocaleKeys.remaining.toString()} %",
+          label: "${LocaleKeys.remaining.tr()} %",
           percent: remainingPercent,
         ),
       ],

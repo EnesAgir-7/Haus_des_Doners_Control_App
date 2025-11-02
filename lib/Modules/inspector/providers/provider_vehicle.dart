@@ -103,7 +103,7 @@ class ProviderVehicle extends ChangeNotifier {
     if (newKm < _assignedVehiclee!.currentKm) {
       showSnakBarr(
         context,
-        '${LocaleKeys.km_less_than_current.tr()}\nCurrent: ${_assignedVehiclee!.currentKm} km',
+        '${LocaleKeys.km_less_than_current.tr()}\nCurrent: ${_assignedVehiclee!.currentKm} ${LocaleKeys.km.tr()}',
       );
       return false;
     }

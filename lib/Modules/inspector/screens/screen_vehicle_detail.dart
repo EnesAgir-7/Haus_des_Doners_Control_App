@@ -552,7 +552,7 @@ class _EnhancedRemainingKm extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     // ✅ FIXED: Show remaining percentage correctly
-                    "${vehicle.remainingPercent}% ${LocaleKeys.remaining.toString()}",
+                    "${vehicle.remainingPercent}% ${LocaleKeys.remaining.tr()}",
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 12,
