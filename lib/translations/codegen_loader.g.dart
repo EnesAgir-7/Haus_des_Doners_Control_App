@@ -1553,7 +1553,8 @@ static const Map<String,dynamic> _en = {
   "overall_score": "Overall Score",
   "category": "Category",
   "not_signed": "Not Signed",
-  "of": "of"
+  "of": "of",
+  "photoes": "photo(s)"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2298,7 +2299,8 @@ static const Map<String,dynamic> _tr = {
   "overall_score": "Genel Puan",
   "category": "Kategori",
   "not_signed": "İmzalanmamış",
-  "of": "/"
+  "of": "/",
+  "photoes": "fotoğraf(lar)"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

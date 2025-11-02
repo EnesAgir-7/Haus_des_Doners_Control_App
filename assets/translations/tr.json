@@ -740,6 +740,7 @@
   "branch": "Şube",
   "overall_score": "Genel Puan",
   "category": "Kategori",
-  "not_signed": "İmzalanmamış", 
-  "of": "/"
+  "not_signed": "İmzalanmamış",
+  "of": "/",
+  "photoes": "fotoğraf(lar)"
 }

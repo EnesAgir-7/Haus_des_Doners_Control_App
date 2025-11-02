@@ -557,8 +557,8 @@ class InspectionPDFGenerator {
           if (photoCount > 0) ...[
             pw.SizedBox(height: 2),
             pw.Text(
-              '$photoCount photo(s)',
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey600),
+              '$photoCount ${LocaleKeys.photos.tr()}',
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
             ),
           ],
         ],
