@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/helpers/app_helpers.dart';
 
+import '../common_services/firebase_error_helper.dart';
 import '../core/constants/firebase_constants.dart';
 import '../translations/locale_keys.g.dart';
 import 'route_model.dart';
@@ -133,30 +134,23 @@ class BranchModel {
                   '',
             )
           : null,
-      lastInspectionDate: data[BranchFields.lastInspectionDate] != null
-          ? (data[BranchFields.lastInspectionDate] is Timestamp
-                ? (data[BranchFields.lastInspectionDate] as Timestamp).toDate()
-                : DateTime.tryParse(
-                        data[BranchFields.lastInspectionDate].toString(),
-                      ) ??
-                      DateTime.now())
-          : null,
+      // ✅ FIXED: Using FirestoreHelpers
+      lastInspectionDate: FirestoreHelpers.parseTimestampNullable(
+        data[BranchFields.lastInspectionDate],
+      ),
       lastInspectionScore: data[BranchFields.lastInspectionScore],
       totalInspections: data[BranchFields.totalInspections] ?? 0,
       averageScore: (data[BranchFields.averageScore] ?? "0/0"),
       status: data[BranchFields.status] ?? AppConstants.active,
-      createdAt: data[BranchFields.createdAt] != null
-          ? (data[BranchFields.createdAt] is Timestamp
-                ? (data[BranchFields.createdAt] as Timestamp).toDate()
-                : DateTime.tryParse(data[BranchFields.createdAt].toString()) ??
-                      DateTime.now())
-          : DateTime.now(),
-      updatedAt: data[BranchFields.updatedAt] != null
-          ? (data[BranchFields.updatedAt] is Timestamp
-                ? (data[BranchFields.updatedAt] as Timestamp).toDate()
-                : DateTime.tryParse(data[BranchFields.updatedAt].toString()) ??
-                      DateTime.now())
-          : DateTime.now(),
+      // ✅ FIXED: Using FirestoreHelpers
+      createdAt: FirestoreHelpers.parseTimestamp(
+        data[BranchFields.createdAt],
+        fallback: DateTime.now(),
+      ),
+      updatedAt: FirestoreHelpers.parseTimestamp(
+        data[BranchFields.updatedAt],
+        fallback: DateTime.now(),
+      ),
       stop: data[BranchFields.stop] != null
           ? RouteStopModel.fromMap(
               Map<String, dynamic>.from(data[BranchFields.stop]),
@@ -183,11 +177,10 @@ class BranchModel {
                 .map((e) => ContactPerson.fromMap(Map<String, dynamic>.from(e)))
                 .toList()
           : null,
-      openingDay: data[BranchFields.openingDay] != null
-          ? (data[BranchFields.openingDay] is Timestamp
-                ? (data[BranchFields.openingDay] as Timestamp).toDate()
-                : DateTime.tryParse(data[BranchFields.openingDay].toString()))
-          : null,
+      // ✅ FIXED: Using FirestoreHelpers
+      openingDay: FirestoreHelpers.parseTimestampNullable(
+        data[BranchFields.openingDay],
+      ),
       donerPrices: data[BranchFields.donerPrices],
       software: data[BranchFields.software],
       shopInformation: data[BranchFields.shopInformation],

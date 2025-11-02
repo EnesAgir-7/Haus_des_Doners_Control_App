@@ -37,7 +37,7 @@ class InspectorVehicleService {
   }
 
   // Update vehicle kilometers
-// Fixed Inspector updateVehicleKm method for InspectorVehicleService
+  // Fixed Inspector updateVehicleKm method for InspectorVehicleService
 
   Future<void> updateVehicleKm(String vehicleId, int newKm) async {
     try {

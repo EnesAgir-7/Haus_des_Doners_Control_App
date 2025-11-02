@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
+import '../common_services/firebase_error_helper.dart';
+
 class InspectorHistoryModel {
   final String inspectorId;
   final int totalInspections;
@@ -40,11 +42,11 @@ class InspectorHistoryModel {
       branchesIds: data[IHF.branchesIds] != null
           ? List<String>.from(data[IHF.branchesIds] as List)
           : [],
-      lastUpdated: data[IHF.lastUpdated] != null
-          ? (data[IHF.lastUpdated] is Timestamp
-                ? (data[IHF.lastUpdated] as Timestamp).toDate()
-                : DateTime.parse(data[IHF.lastUpdated].toString()))
-          : DateTime.now(),
+      // ✅ FIXED: Using FirestoreHelpers
+      lastUpdated: FirestoreHelpers.parseTimestamp(
+        data[IHF.lastUpdated],
+        fallback: DateTime.now(),
+      ),
     );
   }
 

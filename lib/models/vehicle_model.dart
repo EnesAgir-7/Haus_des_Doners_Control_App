@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import '../common_services/firebase_error_helper.dart';
 import '../core/constants/app_constants.dart';
 import '../core/constants/firebase_constants.dart';
 import '../translations/locale_keys.g.dart';
@@ -39,10 +40,29 @@ class VehicleModel {
 
   factory VehicleModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+
     return VehicleModel(
       id: doc.id,
       plate: data[VehicleFields.plate] ?? '',
       model: data[VehicleFields.model] ?? '',
+      currentKm: data[VehicleFields.currentKm] ?? 0,
+      maxKm: data[VehicleFields.maxKm] ?? 0,
+      remainingKm: data[VehicleFields.remainingKm] ?? 0,
+      remainingPercent: data[VehicleFields.remainingPercent] ?? 100,
+
+      // ✅ Use helper for all timestamps
+      lastServiceDate: FirestoreHelpers.parseTimestamp(
+        data[VehicleFields.lastServiceDate],
+        fallback: DateTime.now().subtract(const Duration(days: 30)),
+      ),
+      nextServiceDue: FirestoreHelpers.parseTimestamp(
+        data[VehicleFields.nextServiceDue],
+        fallback: DateTime.now().add(const Duration(days: 30)),
+      ),
+      createdAt: FirestoreHelpers.parseTimestamp(data[VehicleFields.createdAt]),
+      updatedAt: FirestoreHelpers.parseTimestamp(data[VehicleFields.updatedAt]),
+
+      status: data[VehicleFields.status] ?? AppConstants.available,
       assignedInspector: data[VehicleFields.assignedInspector] != null
           ? AssignedInspector(
               id:
@@ -53,20 +73,6 @@ class VehicleModel {
                   '',
             )
           : null,
-      currentKm: data[VehicleFields.currentKm] ?? 0,
-      maxKm: data[VehicleFields.maxKm] ?? 0,
-      remainingKm: data[VehicleFields.remainingKm] ?? 0,
-      remainingPercent:
-          data[VehicleFields.remainingPercent] ??
-          100, // ✅ Changed, default 100%
-
-      lastServiceDate: (data[VehicleFields.lastServiceDate] as Timestamp)
-          .toDate(),
-      nextServiceDue: (data[VehicleFields.nextServiceDue] as Timestamp)
-          .toDate(),
-      status: data[VehicleFields.status] ?? AppConstants.available,
-      createdAt: (data[VehicleFields.createdAt] as Timestamp).toDate(),
-      updatedAt: (data[VehicleFields.updatedAt] as Timestamp).toDate(),
     );
   }
 

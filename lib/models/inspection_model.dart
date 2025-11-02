@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../common_services/firebase_error_helper.dart';
 import '../core/constants/app_constants.dart';
 import '../core/constants/firebase_constants.dart';
 
@@ -37,6 +38,9 @@ class InspectionModel {
   });
 
   /// Factory to load from Firestore
+  // ✅ FIXED: Replace InspectionModel.fromFirestore method
+  // Add import at top of file: import 'package:haus_des_control/core/utils/firestore_helpers.dart';
+
   factory InspectionModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
@@ -55,16 +59,22 @@ class InspectionModel {
       inspectorId: data[InspectionFields.inspectorId] ?? '',
       inspectorName: data[InspectionFields.inspectorName],
       scheduledTime: data[InspectionFields.scheduledTime],
-      completedTime: data[InspectionFields.completedTime] != null
-          ? (data[InspectionFields.completedTime] as Timestamp).toDate()
-          : null,
+      // ✅ FIXED: Using FirestoreHelpers
+      completedTime: FirestoreHelpers.parseTimestampNullable(
+        data[InspectionFields.completedTime],
+      ),
       status: data[InspectionFields.status] ?? AppConstants.pending,
       score: (data[InspectionFields.score] ?? "0/0").toString(),
       categories: parsedCategories,
       overallNotes: data[InspectionFields.overallNotes] ?? '',
       pdfReportUrl: data[InspectionFields.pdfReportUrl],
-      createdAt: (data[InspectionFields.createdAt] as Timestamp).toDate(),
-      updatedAt: (data[InspectionFields.updatedAt] as Timestamp).toDate(),
+      // ✅ FIXED: Using FirestoreHelpers
+      createdAt: FirestoreHelpers.parseTimestamp(
+        data[InspectionFields.createdAt],
+      ),
+      updatedAt: FirestoreHelpers.parseTimestamp(
+        data[InspectionFields.updatedAt],
+      ),
     );
   }
   Map<String, dynamic> toMap() {

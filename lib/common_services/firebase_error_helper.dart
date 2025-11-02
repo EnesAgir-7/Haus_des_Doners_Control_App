@@ -47,3 +47,32 @@ class FirebaseSafeRunner {
     debugPrint(st.toString());
   }
 }
+
+class FirestoreHelpers {
+  /// ✅ Safely parse Firestore Timestamp, handling null from serverTimestamp()
+  static DateTime parseTimestamp(dynamic timestamp, {DateTime? fallback}) {
+    if (timestamp == null) {
+      return fallback ?? DateTime.now();
+    }
+
+    if (timestamp is Timestamp) {
+      return timestamp.toDate();
+    }
+
+    // If it's already a DateTime (shouldn't happen but defensive)
+    if (timestamp is DateTime) {
+      return timestamp;
+    }
+
+    // Last resort fallback
+    return fallback ?? DateTime.now();
+  }
+
+  /// ✅ Safely parse nullable Timestamp
+  static DateTime? parseTimestampNullable(dynamic timestamp) {
+    if (timestamp == null) return null;
+    if (timestamp is Timestamp) return timestamp.toDate();
+    if (timestamp is DateTime) return timestamp;
+    return null;
+  }
+}

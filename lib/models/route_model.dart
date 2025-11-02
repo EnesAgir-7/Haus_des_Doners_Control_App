@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../common_services/firebase_error_helper.dart';
 import '../core/constants/app_constants.dart';
 import '../core/constants/firebase_constants.dart';
 
@@ -29,14 +30,16 @@ class RouteModel {
 
     return RouteModel(
       id: doc.id,
-      date: (data[RouteFields.date] as Timestamp).toDate(),
+      // ✅ FIXED: Using FirestoreHelpers
+      date: FirestoreHelpers.parseTimestamp(data[RouteFields.date]),
       inspectorId: data[RouteFields.inspectorId] ?? '',
       inspectorName: data[RouteFields.inspectorName] ?? '',
       stops: stopsData
           .map((stop) => RouteStopModel.fromMap(stop as Map<String, dynamic>))
           .toList(),
-      createdAt: (data[RouteFields.createdAt] as Timestamp).toDate(),
-      updatedAt: (data[RouteFields.updatedAt] as Timestamp).toDate(),
+      // ✅ FIXED: Using FirestoreHelpers
+      createdAt: FirestoreHelpers.parseTimestamp(data[RouteFields.createdAt]),
+      updatedAt: FirestoreHelpers.parseTimestamp(data[RouteFields.updatedAt]),
     );
   }
 

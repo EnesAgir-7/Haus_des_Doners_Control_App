@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../common_services/firebase_error_helper.dart';
 import '../core/constants/firebase_constants.dart';
 
 class InspectorStatsModel {
@@ -37,9 +38,11 @@ class InspectorStatsModel {
       pendingInspections: data[InspectorStatsFields.pendingInspections] ?? 0,
       averageScore:
           (data[InspectorStatsFields.averageScore]?.toDouble() ?? 0.0),
-      lastUpdated: data[InspectorStatsFields.lastUpdated] != null
-          ? (data[InspectorStatsFields.lastUpdated] as Timestamp).toDate()
-          : DateTime.now(),
+      // ✅ FIXED: Using FirestoreHelpers
+      lastUpdated: FirestoreHelpers.parseTimestamp(
+        data[InspectorStatsFields.lastUpdated],
+        fallback: DateTime.now(),
+      ),
     );
   }
 
@@ -53,7 +56,6 @@ class InspectorStatsModel {
       InspectorStatsFields.pendingInspections: pendingInspections,
       InspectorStatsFields.averageScore: averageScore,
       InspectorStatsFields.lastUpdated: Timestamp.fromDate(lastUpdated),
-      
     };
   }
 

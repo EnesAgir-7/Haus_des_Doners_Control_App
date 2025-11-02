@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 
+import '../common_services/firebase_error_helper.dart';
 import '../core/constants/firebase_constants.dart';
 
 class TaskModel {
@@ -48,9 +49,10 @@ class TaskModel {
       relatedInspectionId: data[TaskFields.relatedInspectionId],
       status: data[TaskFields.status] ?? AppConstants.pending,
       priority: data[TaskFields.priority] ?? AppConstants.medium,
-      dueDate: data[TaskFields.dueDate] != null
-          ? (data[TaskFields.dueDate] as Timestamp).toDate()
-          : null,
+      // ✅ FIXED: Using FirestoreHelpers
+      dueDate: FirestoreHelpers.parseTimestampNullable(
+        data[TaskFields.dueDate],
+      ),
       comments:
           commentsData?.asMap().entries.map((entry) {
             final commentMap = entry.value as Map<String, dynamic>;
@@ -60,8 +62,9 @@ class TaskModel {
             return TaskCommentModel.fromMap(commentMap, id: commentId);
           }).toList() ??
           [],
-      createdAt: (data[TaskFields.createdAt] as Timestamp).toDate(),
-      updatedAt: (data[TaskFields.updatedAt] as Timestamp).toDate(),
+      // ✅ FIXED: Using FirestoreHelpers
+      createdAt: FirestoreHelpers.parseTimestamp(data[TaskFields.createdAt]),
+      updatedAt: FirestoreHelpers.parseTimestamp(data[TaskFields.updatedAt]),
     );
   }
    /// ✅ CopyWith method
@@ -147,13 +150,16 @@ class TaskCommentModel {
     required this.photos,
   });
 
-  factory TaskCommentModel.fromMap(Map<String, dynamic> data, {String? id}) {
+factory TaskCommentModel.fromMap(Map<String, dynamic> data, {String? id}) {
     return TaskCommentModel(
-      id: id ?? data[TaskCommentFields.id] ?? '', // ADD THIS
+      id: id ?? data[TaskCommentFields.id] ?? '',
       userId: data[TaskCommentFields.userId] ?? '',
       userName: data[TaskCommentFields.userName] ?? '',
       text: data[TaskCommentFields.text] ?? '',
-      timestamp: (data[TaskCommentFields.timestamp] as Timestamp).toDate(),
+      // ✅ FIXED: Using FirestoreHelpers
+      timestamp: FirestoreHelpers.parseTimestamp(
+        data[TaskCommentFields.timestamp],
+      ),
       photos: List<String>.from(data[TaskCommentFields.photos] ?? []),
     );
   }
