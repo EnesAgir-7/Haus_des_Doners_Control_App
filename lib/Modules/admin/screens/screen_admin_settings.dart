@@ -85,7 +85,7 @@ class ScreenAdminSettings extends StatelessWidget {
               ),
 
               _buildSectionTitle(context, LocaleKeys.change_language.tr()),
-              const SizedBox(height: 20),
+              const SizedBox(height: 6),
               const LanguageButton(),
 
               // _buildSectionTitle(context, 'User & Access'),
@@ -125,7 +125,6 @@ class ScreenAdminSettings extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildHeader() {
     return Row(
