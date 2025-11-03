@@ -467,8 +467,6 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   icon: Icons.star_outline,
                   gradientColors: [
                     Color(0xFF0F766E), Color(0xFF115E59),
-                    // _getScoreColor(stats.),
-                    // _getScoreColor(stats.avgScore).withValues(alpha: 0.7),
                   ],
                 ),
               ),
