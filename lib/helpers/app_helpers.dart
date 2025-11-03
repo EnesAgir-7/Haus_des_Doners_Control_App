@@ -72,6 +72,19 @@ Color getPercentageColor(double percentage) {
 }
 
 
+IconData getPercentageIcon(double percentage) {
+  if (percentage == 100) {
+    return Icons.emoji_events; // Excellent
+  } else if (percentage == 75) {
+    return Icons.thumb_up; // Good
+  } else if (percentage == 25) {
+    return Icons.warning; // Fair
+  } else {
+    return Icons.error; // Poor / 0%
+  }
+}
+
+
 
 String calculatePerformancePercent(String totalScoreStr) {
   final parts = totalScoreStr.split('/');

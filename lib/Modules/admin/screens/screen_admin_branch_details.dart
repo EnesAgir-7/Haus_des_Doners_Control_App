@@ -461,23 +461,14 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     final parsedScores = widget.branch.last12MonthsScores!
         .where((s) => s != '0' && s.contains('/'))
         .map((s) {
-          final parts = s.split('/');
-          if (parts.length == 2) {
-            final totalScore = double.tryParse(parts[0]) ?? 0;
-            final maxScore = double.tryParse(parts[1]) ?? 1;
-
-            if (maxScore <= 0) return 0.0;
-
-            // Average score per question (scale to 1-4)
-            final avgScorePerQuestion = (totalScore / maxScore) * 4;
-
-            // Map to your 1-4 percentage
-            if (avgScorePerQuestion <= 1) return 100.0;
-            if (avgScorePerQuestion <= 2) return 75.0;
-            if (avgScorePerQuestion <= 3) return 25.0;
+          try {
+            // Use your global helper method instead of custom calculation
+            final percentage = calculatePerformancePercent(s);
+            return double.tryParse(percentage) ?? 0.0;
+          } catch (e) {
+            print('Error calculating percentage for: $s');
             return 0.0;
           }
-          return 0.0;
         })
         .where((p) => p >= 0)
         .toList();
@@ -692,7 +683,9 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         _buildCompactStatCard(
           label: LocaleKeys.performance.tr(),
           value: '${widget.branch.averagePercent}%',
-          icon: Icons.trending_up,
+          icon: getPercentageIcon(
+            double.tryParse(widget.branch.averagePercent)!,
+          ),
           color: getPercentageColor(
             double.tryParse(widget.branch.averagePercent) ?? 0,
           ),
