@@ -17,7 +17,7 @@ import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/app_button.dart';
 import '../../inspector/widgets/custom_toast.dart';
 import '../admin_providers/provider_admin_branches.dart';
-import '../widgets/admin_branch_chart.dart';
+import '../widgets/performance_chart.dart';
 import '../widgets/widgets_admin_branch_details.dart';
 import 'screen_admin_branch_edit.dart';
 import 'screen_admin_inspections.dart';
@@ -399,7 +399,12 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         if (!widget.branch.haveNoScores) ...[
           _buildPerformanceSummary(),
           const SizedBox(height: 12),
-          buildBranchPerformanceChart(widget.branch.last12MonthsScores),
+          buildPerformanceChart(
+            scores: widget.branch.last12MonthsScores!,
+            title: LocaleKeys.last12Inspections.tr(),
+            icon: Icons.bar_chart,
+            subtitle: LocaleKeys.oldestToLatest.tr(),
+          ),
           const SizedBox(height: 16),
         ],
         _buildInspectorCard(),
@@ -423,8 +428,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                   _buildStatsGrid(),
                   const SizedBox(height: 20),
                   if (!widget.branch.haveNoScores)
-                    buildBranchPerformanceChart(
-                      widget.branch.last12MonthsScores,
+                    buildPerformanceChart(
+                      scores: widget.branch.last12MonthsScores!,
+                      title: LocaleKeys.last12Inspections.tr(),
+                      icon: Icons.bar_chart,
+                      subtitle: LocaleKeys.oldestToLatest.tr(),
                     ),
                 ],
               ),
@@ -685,7 +693,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           label: LocaleKeys.performance.tr(),
           value: '${widget.branch.averagePercent}%',
           icon: Icons.trending_up,
-          color: getBranchPerformanceColor(
+          color: getPercentageColor(
             double.tryParse(widget.branch.averagePercent) ?? 0,
           ),
         ),
@@ -1209,7 +1217,10 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ],
           if (widget.branch.software != null) ...[
             _buildInfoRow(
-              LocaleKeys.software.tr(), widget.branch.software!, Icons.computer),
+              LocaleKeys.software.tr(),
+              widget.branch.software!,
+              Icons.computer,
+            ),
             const SizedBox(height: 12),
           ],
           if (widget.branch.shopInformation != null) ...[
@@ -1372,7 +1383,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           SizedBox(
             width: double.infinity,
             child: AppButton(
-              text:LocaleKeys.changeInspector.tr(),
+              text: LocaleKeys.changeInspector.tr(),
               onPressed: _showAssignInspectorDialog,
               padding: const EdgeInsets.symmetric(vertical: 12),
               borderRadius: 10,
@@ -1382,7 +1393,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           Column(
             children: [
               Text(
-               LocaleKeys.branchInActiveRoute.tr(), 
+                LocaleKeys.branchInActiveRoute.tr(),
                 style: TextStyle(
                   color: Colors.orange,
                   fontSize: 12,
@@ -1551,13 +1562,13 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           style: TextStyle(color: Colors.white),
         ),
         content: Text(
-          LocaleKeys.unassignInspectorConfirm.tr(), 
+          LocaleKeys.unassignInspectorConfirm.tr(),
           style: TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child:  Text(
+            child: Text(
               LocaleKeys.cancel.tr(),
               style: TextStyle(color: Colors.white70),
             ),

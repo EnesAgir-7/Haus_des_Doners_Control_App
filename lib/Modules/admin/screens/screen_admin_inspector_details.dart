@@ -8,7 +8,7 @@ import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
-import '../widgets/widgets_admin_branch_details.dart';
+import '../widgets/performance_chart.dart';
 import 'screen_admin_inspector_branches.dart';
 import 'screen_admin_user_details.dart';
 
@@ -598,7 +598,17 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          buildScoresChart(stats),
+         // Usage for Inspector History:
+          buildPerformanceChart(
+            scores: stats.recentScores,
+            title: LocaleKeys.recentPerformance.tr(),
+            icon: Icons.show_chart,
+            maxScoresToShow: 10,
+            subtitle: LocaleKeys.lastInspections.tr()
+              .replaceFirst('{count}', stats.recentScores.length.toString())
+              .replaceFirst('{s}', stats.recentScores.length > 1 ? 's' : ''),
+          ), 
+
           const Divider(height: 24, color: Colors.white12),
           _buildLastUpdatedRow(stats),
         ],

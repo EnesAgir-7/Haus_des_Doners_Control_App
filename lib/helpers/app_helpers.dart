@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../core/constants/app_colors.dart';
+
 String formatDate(DateTime date) {
   return DateFormat('dd MMM yyyy, hh:mm a').format(date);
 }
@@ -56,8 +58,22 @@ Color getScoreColor(String scoreString) {
 //   return '${percentage.toStringAsFixed(0)}';
 // }
 
+
+Color getPercentageColor(double percentage) {
+  if (percentage == 100) {
+    return Colors.green;
+  } else if (percentage == 75) {
+    return AppColors.amber;
+  } else if (percentage == 25) {
+    return Colors.orange;
+  } else {
+    return AppColors.primaryRed;
+  }
+}
+
+
+
 String calculatePerformancePercent(String totalScoreStr) {
-  // totalScoreStr example: "17/24" -> points / maxPoints
   final parts = totalScoreStr.split('/');
   if (parts.length != 2) return '100';
 
@@ -66,7 +82,6 @@ String calculatePerformancePercent(String totalScoreStr) {
 
   if (maxPoints <= 0) return '100';
 
-  // Calculate average score per question
   final avgScorePerQuestion = points / maxPoints * 4; // scale to 1–4
 
   // Map average score to your custom percentage

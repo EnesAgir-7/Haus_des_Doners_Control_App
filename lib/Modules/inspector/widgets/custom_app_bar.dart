@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/app_env.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:provider/provider.dart';
 
@@ -17,7 +18,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({
     super.key,
     this.showLogout = false,
-    this.actions, 
+    this.actions,
     this.showLang = false,
     this.title,
   });
@@ -62,7 +63,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  child: Image.asset(kAppLogo, height: 32, fit: BoxFit.contain),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (AppEnvironment.isDev) ...[
+                        Icon(Icons.circle, color: AppColors.green),
+                        SizedBox(width: 7),
+                      ],
+                      Image.asset(kAppLogo, height: 32, fit: BoxFit.contain),
+                    ],
+                  ),
                 ),
               ),
         centerTitle: true,
@@ -87,37 +97,44 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                 ),
               )
             : null,
-        actions:actions?? [
-          if (showLang) const LanguageButton(),
-          if (showLogout)
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white.withValues(alpha: 0.2),
-                    Colors.white.withValues(alpha: 0.1),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+        actions:
+            actions ??
+            [
+              if (showLang) const LanguageButton(),
+              if (showLogout)
+                Container(
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 8,
                   ),
-                ],
-              ),
-              child: IconButton(
-                onPressed: () {
-                  _showLogoutDialog(context);
-                },
-                icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.white.withValues(alpha: 0.2),
+                        Colors.white.withValues(alpha: 0.1),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      _showLogoutDialog(context);
+                    },
+                    icon: const Icon(Icons.logout_rounded, color: Colors.white),
                     tooltip: LocaleKeys.logout.tr(),
-              ),
-            ),
-        ],
+                  ),
+                ),
+            ],
       ),
     );
   }
@@ -155,7 +172,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             const SizedBox(width: 12),
-             Expanded(
+            Expanded(
               child: Text(
                 LocaleKeys.confirmLogout.tr(),
                 style: TextStyle(
@@ -168,7 +185,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ],
         ),
         content: Text(
-          LocaleKeys.confirmLogoutMessage.tr(), 
+          LocaleKeys.confirmLogoutMessage.tr(),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.7),
             fontSize: 14,
@@ -181,7 +198,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             child: Text(
-              LocaleKeys.cancel.tr(), 
+              LocaleKeys.cancel.tr(),
               style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
             ),
           ),
