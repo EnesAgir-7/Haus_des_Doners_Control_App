@@ -39,7 +39,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(showLogout: false, showLang: false),
+      appBar: CustomAppBar(),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(

@@ -210,7 +210,7 @@ class ProviderBranches extends ChangeNotifier {
     }
   }
 
-  Future<bool> assignBranchToMe({
+  Future<bool> assignRouteToMe({
     required String branchId,
     required String branchName,
     required String branchAddress,
@@ -222,7 +222,7 @@ class ProviderBranches extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      await _branchService.assignBranchToHimself(
+      await _branchService.assignRoute(
         inspectorId: loggedInUser!.id,
         inspectorName: loggedInUser!.name,
         timeSlot: timeSlot,

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admin_branches.dart';
-import 'package:haus_des_control/Modules/admin/screens/screen_admin_vehicle.dart';
-import 'package:haus_des_control/Modules/admin/screens/screen_admin_tasks.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admin_inspectors.dart';
+import 'package:haus_des_control/Modules/admin/screens/screen_admin_tasks.dart';
+import 'package:haus_des_control/Modules/admin/screens/screen_admin_vehicle.dart';
 
 import '../screens/screen_admin_home.dart';
-import '../screens/screen_admin_settings.dart';
 
 class AdminBottomNavProvider extends ChangeNotifier {
   int _selectedIndex = 0;
@@ -17,7 +16,7 @@ class AdminBottomNavProvider extends ChangeNotifier {
     ScreenAdminBranches(),
     ScreenAdminVehicle(),
     ScreenAdminTasks(),
-    ScreenAdminSettings(),
+    // ScreenAdminSettings(),
   ];
 
   void onItemTapped(int index) {

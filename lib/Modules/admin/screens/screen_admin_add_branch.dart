@@ -1043,6 +1043,7 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
       backgroundColor: AppColors.primaryDark,
       builder: (context) {
         return TemplateSelectionSheet(
+          showNote: false,
           templateHelper: TemplateHelper(),
           onTemplateSelected: (template) async {
             _selectedTemplateId = template.id;

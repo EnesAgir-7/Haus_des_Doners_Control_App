@@ -10,12 +10,13 @@ import '../screens/screen_admin_templates.dart';
 
 class TemplateSelectionSheet extends StatelessWidget {
   final TemplateHelper templateHelper;
+  final bool showNote;
   final Function(InspectionTemplate template) onTemplateSelected;
 
   const TemplateSelectionSheet({
     required this.templateHelper,
     required this.onTemplateSelected,
-    super.key,
+    super.key, required this.showNote,
   });
 
   @override
@@ -46,7 +47,7 @@ class TemplateSelectionSheet extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 8),
-              Row(
+            if(showNote)  Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(Icons.info_outline, color: AppColors.amber),

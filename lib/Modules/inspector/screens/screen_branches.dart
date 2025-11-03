@@ -610,6 +610,7 @@ class BranchDetailsSheet extends StatelessWidget {
       itemCount: provider.branchInspections.length,
       itemBuilder: (context, index) {
         final inspection = provider.branchInspections[index];
+        final Color scoreColor = getScoreColor(inspection.score);
 
         return GestureDetector(
           onTap: () {
@@ -668,26 +669,18 @@ class BranchDetailsSheet extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: getScoreColor(
-                          inspection.score,
-                        ).withValues(alpha: 0.2),
+                        color: scoreColor.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: getScoreColor(inspection.score),
-                        ),
+                        border: Border.all(color: scoreColor),
                       ),
                       child: Row(
                         children: [
-                          Icon(
-                            Icons.star,
-                            size: 14,
-                            color: getScoreColor(inspection.score),
-                          ),
+                          Icon(Icons.star, size: 14, color: scoreColor),
                           const SizedBox(width: 4),
                           Text(
                             inspection.score,
                             style: TextStyle(
-                              color: getScoreColor(inspection.score),
+                              color: scoreColor,
                               fontWeight: FontWeight.bold,
                               fontSize: 13,
                             ),
@@ -807,7 +800,7 @@ class BranchDetailsSheet extends StatelessWidget {
     );
 
     if (pickedDate != null) {
-      final success = await prod.assignBranchToMe(
+      final success = await prod.assignRouteToMe(
         branchId: branch.id,
         branchName: branch.name,
         branchAddress: branch.address,

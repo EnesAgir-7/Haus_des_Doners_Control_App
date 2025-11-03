@@ -166,7 +166,7 @@ class InspectorBranchService {
     }
   }
 
-  Future<void> assignBranchToHimself({
+  Future<void> assignRoute({
     required String inspectorId,
     required String inspectorName,
     required String branchId,
@@ -253,22 +253,6 @@ class InspectorBranchService {
       console('✅ Branch assigned successfully to inspector $inspectorName');
     } catch (e, st) {
       print("❌ Error assigning branch with batch: $e\n$st");
-      rethrow;
-    }
-  }
-
-  Future<void> updateBranchAssignedInspector(
-    String branchId,
-    Map<String, String> inspectorData,
-  ) async {
-    try {
-      await _db.collection(_collectionBranches).doc(branchId).update({
-        BranchFields.assignedInspector: inspectorData,
-        BranchFields.updatedAt: Timestamp.fromDate(DateTime.now()),
-      });
-      console('Branch assigned inspector updated successfully');
-    } catch (e) {
-      print("Error updating branch assigned inspector: $e");
       rethrow;
     }
   }

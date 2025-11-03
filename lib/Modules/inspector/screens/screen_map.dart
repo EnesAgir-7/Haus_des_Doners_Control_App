@@ -57,13 +57,13 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
         // Show loading or empty state if no branches
         if (controller.branches.isEmpty) {
           return Scaffold(
-            appBar: CustomAppBar(showLogout: false, showLang: false),
+            appBar: CustomAppBar(),
             body: const Center(child: CircularProgressIndicator()),
           );
         }
 
         return Scaffold(
-          appBar: CustomAppBar(showLogout: false, showLang: false),
+          appBar: CustomAppBar(),
           body: Stack(
             children: [
               GoogleMap(
@@ -239,7 +239,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
 
                                     if (pickedDate != null) {
                                       final success = await branchContr
-                                          .assignBranchToMe(
+                                          .assignRouteToMe(
                                             branchId: branch.id,
                                             branchName: branch.name,
                                             timeSlot: pickedDate,

@@ -118,8 +118,6 @@ class _ScreenPdfViewerState extends State<ScreenPdfViewer> {
       backgroundColor: AppColors.primaryDark,
       appBar: CustomAppBar(
         title: LocaleKeys.inspection_report.tr(),
-        showLang: false,
-        showLogout: false,
       ),
       // AppBar(
       //   title: const Text(''),

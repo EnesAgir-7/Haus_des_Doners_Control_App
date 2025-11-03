@@ -36,7 +36,7 @@ class AdminBottomNavBar extends StatelessWidget {
             }
           },
           child: Scaffold(
-            appBar: const CustomAppBar(showLang: true, showLogout: true),
+            appBar: const CustomAppBar(showSettings: true),
             body: IndexedStack(
               key: Key("admin_stack_${context.locale.languageCode}"),
               index: provider.selectedIndex,
@@ -110,14 +110,14 @@ class AdminBottomNavBar extends StatelessWidget {
                     label: LocaleKeys.tasks.tr(),
                   ),
 
-                  NavigationDestination(
-                    icon: const Icon(Icons.settings, color: Colors.white70),
-                    selectedIcon: Icon(
-                      Icons.settings,
-                      color: AppColors.primaryRed,
-                    ),
-                    label: LocaleKeys.settings_label.tr(),
-                  ),
+                  // NavigationDestination(
+                  //   icon: const Icon(Icons.settings, color: Colors.white70),
+                  //   selectedIcon: Icon(
+                  //     Icons.settings,
+                  //     color: AppColors.primaryRed,
+                  //   ),
+                  //   label: LocaleKeys.settings_label.tr(),
+                  // ),
                 ],
               ),
             ),

@@ -3,8 +3,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admins_listing.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/app_button.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../../common/logout_dialog.dart';
+import '../../inspector/widgets/language_button.dart';
 import 'screen_admin_templates.dart'; // Import the screen we just completed
 
 class ScreenAdminSettings extends StatelessWidget {
@@ -13,6 +18,32 @@ class ScreenAdminSettings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: CustomAppBar(),
+      persistentFooterDecoration: BoxDecoration(color: Colors.transparent),
+      persistentFooterButtons: [
+        Container(
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+
+          child: AppButton(
+            text: LocaleKeys.logout.tr(),
+
+            onPressed: () {
+              showLogoutDialog(context);
+            },
+          ),
+        ),
+      ],
       body: Container(
         child: SafeArea(
           child: ListView(
@@ -52,7 +83,11 @@ class ScreenAdminSettings extends StatelessWidget {
                   );
                 },
               ),
+
+              _buildSectionTitle(context, LocaleKeys.change_language.tr()),
               const SizedBox(height: 20),
+              const LanguageButton(),
+
               // _buildSectionTitle(context, 'User & Access'),
               // _buildSettingsTile(
               //   context,
@@ -90,6 +125,7 @@ class ScreenAdminSettings extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _buildHeader() {
     return Row(

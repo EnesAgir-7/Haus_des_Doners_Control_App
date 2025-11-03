@@ -165,7 +165,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                            LocaleKeys.inspectorAssignmentManaged.tr(), 
+                              LocaleKeys.inspectorAssignmentManaged.tr(),
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 13,
@@ -803,7 +803,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                         ),
                       )
                     : Text(
-                        LocaleKeys.updateBranch.tr(), 
+                        LocaleKeys.updateBranch.tr(),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -824,6 +824,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
       backgroundColor: AppColors.primaryDark,
       builder: (context) {
         return TemplateSelectionSheet(
+          showNote: true,
           templateHelper: TemplateHelper(),
           onTemplateSelected: (template) async {
             setState(() {
@@ -1306,7 +1307,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                       LocaleKeys.add.tr(), 
+                        LocaleKeys.add.tr(),
                         style: TextStyle(
                           color: AppColors.primaryRed,
                           fontSize: 12,
@@ -1583,7 +1584,8 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    _selectedTemplateName ?? LocaleKeys.selectInspectionTemplate.tr(),
+                    _selectedTemplateName ??
+                        LocaleKeys.selectInspectionTemplate.tr(),
                     style: TextStyle(
                       color: _selectedTemplateName != null
                           ? Colors.white

@@ -19,14 +19,14 @@ class LanguageButton extends StatelessWidget {
     final currentLanguage = _languages[currentLocale];
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      padding: EdgeInsets.symmetric(vertical: 7),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white.withValues(alpha: 0.2),
-            Colors.white.withValues(alpha: 0.1),
-          ],
-        ),
+        // gradient: LinearGradient(
+        //   colors: [
+        //     Colors.white.withValues(alpha: 0.2),
+        //     Colors.white.withValues(alpha: 0.1),
+        //   ],
+        // ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
         boxShadow: [
@@ -58,6 +58,13 @@ class LanguageButton extends StatelessWidget {
                   Icons.keyboard_arrow_down,
                   color: Colors.white.withValues(alpha: 0.9),
                   size: 18,
+                ),
+                Expanded(
+                  child: Text(
+                    textAlign: TextAlign.center,
+                    currentLanguage?['name'] ?? '🌐',
+                    style: const TextStyle(fontSize: 18),
+                  ),
                 ),
               ],
             ),
@@ -176,7 +183,7 @@ class LanguageButton extends StatelessWidget {
                             Icons.close,
                             color: Colors.white.withValues(alpha: 0.7),
                           ),
-                          tooltip: 'Close',
+                          tooltip: LocaleKeys.close.tr(),
                         ),
                       ),
                     ],

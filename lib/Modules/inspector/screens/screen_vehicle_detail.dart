@@ -51,7 +51,7 @@ class _ScreenInspectorVehicleDetailState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(showLang: false, showLogout: false),
+      appBar: CustomAppBar(),
       backgroundColor: AppColors.primaryDark,
       body: Container(
         decoration: BoxDecoration(

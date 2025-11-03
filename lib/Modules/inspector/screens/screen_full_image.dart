@@ -43,8 +43,6 @@ class _FullScreenImageViewerState extends State<FullScreenImageViewer> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: CustomAppBar(
-        showLang: false,
-        showLogout: false,
         title: LocaleKeys.photoCounter
             .tr()
             .replaceAll('{current}', (_currentIndex + 1).toString())
