@@ -10,6 +10,7 @@ import 'package:printing/printing.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_toast.dart';
 
 class PDFPreviewScreen extends StatelessWidget {
@@ -25,11 +26,9 @@ class PDFPreviewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '${LocaleKeys.pdfPreview.tr()} - $branchName',
-          style: const TextStyle(color: Colors.white, fontSize: 16),
-        ),
+      appBar: CustomAppBar(
+        title: '${LocaleKeys.pdfPreview.tr()} - $branchName',
+
         actions: [
           // IconButton(
           //   icon: const Icon(Icons.share, color: Colors.white),

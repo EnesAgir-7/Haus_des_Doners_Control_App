@@ -763,5 +763,7 @@ abstract class  LocaleKeys {
   static const category = 'category';
   static const not_signed = 'not_signed';
   static const of = 'of';
+  static const no = 'no';
+  static const yes = 'yes';
 
 }

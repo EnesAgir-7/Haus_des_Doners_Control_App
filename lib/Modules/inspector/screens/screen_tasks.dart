@@ -42,7 +42,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
           builder: (context, provider, child) {
             if (provider.isLoading) {
               return Center(
-                child: CircularProgressIndicator(color: Color(0xFFE53935)),
+                child: CircularProgressIndicator(color: AppColors.primaryRed),
               );
             }
             return Column(
@@ -122,23 +122,23 @@ class _ScreenTasksState extends State<ScreenTasks> {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Color(0xFFE53935).withValues(alpha: 0.15),
+                color: AppColors.primaryRed.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Color(0xFFE53935), width: 1),
+                border: Border.all(color: AppColors.primaryRed, width: 1),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.warning_amber_rounded,
-                    color: Color(0xFFE53935),
+                    color: AppColors.primaryRed,
                     size: 18,
                   ),
                   SizedBox(width: 8),
                   Text(
                     '${provider.overdueTasksCount} ${LocaleKeys.tasks_overdue.tr()}',
                     style: TextStyle(
-                      color: Color(0xFFE53935),
+                      color: AppColors.primaryRed,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -163,10 +163,10 @@ class _ScreenTasksState extends State<ScreenTasks> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? Color(0xFFE53935) : Color(0xFF2A2A2A),
+          color: isSelected ? AppColors.primaryRed : Color(0xFF2A2A2A),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? Color(0xFFE53935) : Color(0xFF3A3A3A),
+            color: isSelected ? AppColors.primaryRed : Color(0xFF3A3A3A),
             width: 1,
           ),
         ),
@@ -208,7 +208,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
   Widget _buildTaskList(ProviderTasks provider) {
     return RefreshIndicator(
       onRefresh: provider.refresh,
-      color: Color(0xFFE53935),
+      color: AppColors.primaryRed,
       backgroundColor: Color(0xFF2A2A2A),
       child: ListView.builder(
         padding: EdgeInsets.all(16),
@@ -229,7 +229,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: task.isOverdue
-              ? Color(0xFFE53935).withValues(alpha: 0.5)
+              ? AppColors.primaryRed.withValues(alpha: 0.5)
               : Color(0xFF3A3A3A),
           width: 1,
         ),
@@ -302,7 +302,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
                         Icons.calendar_today_outlined,
                         size: 14,
                         color: task.isOverdue
-                            ? Color(0xFFE53935)
+                            ? AppColors.primaryRed
                             : Color(0xFF808080),
                       ),
                       SizedBox(width: 6),
@@ -310,7 +310,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
                         _formatDueDate(task.dueDate!),
                         style: TextStyle(
                           color: task.isOverdue
-                              ? Color(0xFFE53935)
+                              ? AppColors.primaryRed
                               : Color(0xFF808080),
                           fontSize: 12,
                           fontWeight: task.isOverdue
@@ -418,7 +418,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
   Color _getPriorityColor(String priority) {
     switch (priority) {
       case AppConstants.high:
-        return Color(0xFFE53935);
+        return AppColors.primaryRed;
       case AppConstants.medium:
         return Color(0xFFFFA726);
       case AppConstants.low:
@@ -646,7 +646,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                         child: _buildActionButton(
                           label: LocaleKeys.complete.tr(),
                           icon: Icons.check_circle,
-                          color: Color(0xFF4CAF50),
+                          color: AppColors.green,
                           onPressed: () {
                             widget.provider.markAsCompleted(
                               widget.task.id,
@@ -684,8 +684,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                   style: TextStyle(color: Colors.white, fontSize: 14),
                   maxLines: null,
                   decoration: InputDecoration(
-                    hintText:
-                        LocaleKeys.addComment.tr(),
+                    hintText: LocaleKeys.addComment.tr(),
                     hintStyle: TextStyle(
                       color: Color(0xFF606060),
                       fontSize: 14,
@@ -701,7 +700,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
               Consumer<ProviderTasks>(
                 builder: (context, tasks, child) {
                   return IconButton(
-                    icon: Icon(Icons.send, color: Color(0xFFE53935)),
+                    icon: Icon(Icons.send, color: AppColors.primaryRed),
                     onPressed: tasks.isAddingComment
                         ? null
                         : () async {
@@ -882,7 +881,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
   Color _getPriorityColor(String priority) {
     switch (priority) {
       case AppConstants.high:
-        return Color(0xFFE53935);
+        return AppColors.primaryRed;
       case AppConstants.medium:
         return Color(0xFFFFA726);
       case AppConstants.low:

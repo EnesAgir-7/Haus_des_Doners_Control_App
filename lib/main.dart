@@ -48,7 +48,6 @@ void main() async {
 
   await EasyLocalization.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  // Initialize OneDrive
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       systemNavigationBarColor: AppColors.primaryDark,

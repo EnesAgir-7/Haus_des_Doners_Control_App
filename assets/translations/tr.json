@@ -742,5 +742,7 @@
   "category": "Kategori",
   "not_signed": "İmzalanmamış",
   "of": "/",
-  "photoes": "fotoğraf(lar)"
+  "photoes": "fotoğraf(lar)", 
+  "no": "Hayır",
+  "yes": "Evet"
 }

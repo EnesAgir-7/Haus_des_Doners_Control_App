@@ -758,5 +758,7 @@
   "overall_score": "Gesamtpunktzahl",
   "category": "Kategorie",
   "not_signed": "Nicht unterschrieben", 
-  "of": "von"
+  "of": "von", 
+  "no": "Nein",
+  "yes": "Ja"
 }

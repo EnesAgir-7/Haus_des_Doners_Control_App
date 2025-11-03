@@ -14,18 +14,6 @@ class ScreenAdminSettings extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primaryRed.withValues(alpha: 0.08),
-              AppColors.primaryDark,
-              AppColors.primaryDark,
-            ],
-            stops: const [0.0, 0.15, 1.0],
-          ),
-        ),
         child: SafeArea(
           child: ListView(
             padding: const EdgeInsets.all(24),
@@ -37,7 +25,7 @@ class ScreenAdminSettings extends StatelessWidget {
                 context,
                 icon: Icons.description,
                 title: LocaleKeys.inspectionQuestionnaire.tr(),
-                subtitle: LocaleKeys.createModifyDeleteForms.tr(), 
+                subtitle: LocaleKeys.createModifyDeleteForms.tr(),
                 onTap: () {
                   Navigator.push(
                     context,
@@ -51,8 +39,8 @@ class ScreenAdminSettings extends StatelessWidget {
               _buildSettingsTile(
                 context,
                 icon: Icons.admin_panel_settings,
-                title: LocaleKeys.manageAdmins.tr(), 
-                subtitle: LocaleKeys.addEditRemoveAdmins.tr(), 
+                title: LocaleKeys.manageAdmins.tr(),
+                subtitle: LocaleKeys.addEditRemoveAdmins.tr(),
 
                 color: AppColors.primaryRed,
                 onTap: () {
@@ -65,37 +53,37 @@ class ScreenAdminSettings extends StatelessWidget {
                 },
               ),
               const SizedBox(height: 20),
-              _buildSectionTitle(context, 'User & Access'),
-              _buildSettingsTile(
-                context,
-                icon: Icons.people,
-                title: 'Manage Users (Dummy)',
-                subtitle: 'Add, edit, or remove admin and inspector accounts.',
-                onTap: () {},
-              ),
-              _buildSettingsTile(
-                context,
-                icon: Icons.security,
-                title: 'Security Settings (Dummy)',
-                subtitle: 'Update passwords and security policies.',
-                onTap: () {},
-              ),
-              const SizedBox(height: 20),
-              _buildSectionTitle(context, 'System'),
-              _buildSettingsTile(
-                context,
-                icon: Icons.cloud_upload,
-                title: 'Backup & Restore (Dummy)',
-                subtitle: 'Manage cloud backup and data recovery.',
-                onTap: () {},
-              ),
-              _buildSettingsTile(
-                context,
-                icon: Icons.info_outline,
-                title: 'About App (Dummy)',
-                subtitle: 'View version, licenses, and documentation.',
-                onTap: () {},
-              ),
+              // _buildSectionTitle(context, 'User & Access'),
+              // _buildSettingsTile(
+              //   context,
+              //   icon: Icons.people,
+              //   title: 'Manage Users (Dummy)',
+              //   subtitle: 'Add, edit, or remove admin and inspector accounts.',
+              //   onTap: () {},
+              // ),
+              // _buildSettingsTile(
+              //   context,
+              //   icon: Icons.security,
+              //   title: 'Security Settings (Dummy)',
+              //   subtitle: 'Update passwords and security policies.',
+              //   onTap: () {},
+              // ),
+              // const SizedBox(height: 20),
+              // _buildSectionTitle(context, 'System'),
+              // _buildSettingsTile(
+              //   context,
+              //   icon: Icons.cloud_upload,
+              //   title: 'Backup & Restore (Dummy)',
+              //   subtitle: 'Manage cloud backup and data recovery.',
+              //   onTap: () {},
+              // ),
+              // _buildSettingsTile(
+              //   context,
+              //   icon: Icons.info_outline,
+              //   title: 'About App (Dummy)',
+              //   subtitle: 'View version, licenses, and documentation.',
+              //   onTap: () {},
+              // ),
             ],
           ),
         ),
@@ -109,7 +97,7 @@ class ScreenAdminSettings extends StatelessWidget {
         Icon(Icons.settings, color: Colors.lightBlueAccent),
         SizedBox(width: 6),
         Text(
-         LocaleKeys.adminSettings.tr(), 
+          LocaleKeys.adminSettings.tr(),
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,

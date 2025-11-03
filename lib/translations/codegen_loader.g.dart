@@ -774,7 +774,9 @@ class CodegenLoader extends AssetLoader{
   "overall_score": "Gesamtpunktzahl",
   "category": "Kategorie",
   "not_signed": "Nicht unterschrieben",
-  "of": "von"
+  "of": "von",
+  "no": "Nein",
+  "yes": "Ja"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -2300,7 +2302,9 @@ static const Map<String,dynamic> _tr = {
   "category": "Kategori",
   "not_signed": "İmzalanmamış",
   "of": "/",
-  "photoes": "fotoğraf(lar)"
+  "photoes": "fotoğraf(lar)",
+  "no": "Hayır",
+  "yes": "Evet"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

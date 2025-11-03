@@ -6,6 +6,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../models/inspection_template_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../admin_firebase_services/admin_template_service.dart';
+import '../screens/screen_admin_templates.dart';
 
 class TemplateSelectionSheet extends StatelessWidget {
   final TemplateHelper templateHelper;
@@ -78,9 +79,30 @@ class TemplateSelectionSheet extends StatelessWidget {
                         !snapshot.hasData ||
                         snapshot.data!.isEmpty) {
                       return Center(
-                        child: Text(
-                          LocaleKeys.noTemplatesAvailable.tr(),
-                          style: TextStyle(color: Colors.white54),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              LocaleKeys.noTemplatesAvailable.tr(),
+                              style: TextStyle(color: Colors.white54),
+                            ),
+                            SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ScreenAdminQuestionnaires(),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                LocaleKeys.createQuestionnaire.tr(),
+                                style: TextStyle(color: AppColors.white),
+                              ),
+                            ),
+                          ],
                         ),
                       );
                     }

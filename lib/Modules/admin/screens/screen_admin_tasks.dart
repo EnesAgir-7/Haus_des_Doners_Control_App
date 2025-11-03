@@ -188,7 +188,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    entry.key.replaceAll('_', ' ').capitalizeWords(),
+                    entry.key.toLocaleKey(),
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 12,
@@ -227,7 +227,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
             Text(
               _selectedFilter == 'all'
                   ? LocaleKeys.noTasksAvailable.tr()
-                  : 'No ${_selectedFilter.replaceAll('_', ' ')} tasks',
+                  : '${LocaleKeys.no.tr()} ${_selectedFilter.replaceAll('_', ' ')} ${LocaleKeys.tasks.tr()}',
               style: TextStyle(color: Colors.white70, fontSize: 16),
             ),
             if (_selectedFilter != 'all') ...[
