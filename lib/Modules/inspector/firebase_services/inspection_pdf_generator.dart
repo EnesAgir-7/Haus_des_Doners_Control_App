@@ -8,6 +8,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../../helpers/app_helpers.dart';
+
 /// Complete PDF Generator for Inspection Reports
 class InspectionPDFGenerator {
   final String inspectionId;
@@ -314,14 +316,14 @@ class InspectionPDFGenerator {
   }
 
   pw.Widget _buildOverallScoreCompact() {
-    // Calculate average score per question
-    final numberOfQuestions =
-        maxPossibleScore / 4; // Since max per question is 4
-    final averageScore = totalScore / numberOfQuestions;
+    // Convert to score string format
+    final scoreString =
+        '${totalScore.toStringAsFixed(0)}/${maxPossibleScore.toStringAsFixed(0)}';
 
-    // Map average score to percentage using fixed mapping
-    final percentage = _scoreToPercentage(averageScore);
-    final performanceLevel = _getPerformanceLevel(percentage);
+    // Use your global helper method
+    final percentage = calculatePerformancePercent(scoreString);
+    final percentValue = int.tryParse(percentage) ?? 0;
+    final performanceLevel = _getPerformanceLevel(percentValue);
 
     return pw.Container(
       padding: const pw.EdgeInsets.all(14),
@@ -442,13 +444,13 @@ class InspectionPDFGenerator {
             ),
             // Data Rows
             ...categories.map((category) {
-              // Calculate average score for this category
-              final numberOfQuestions = category.maxScore / 4;
-              final averageScore = category.score / numberOfQuestions;
+              // Convert to score string format
+              final scoreString = '${category.score}/${category.maxScore}';
 
-              // Map to percentage using fixed mapping
-              final percentage = _scoreToPercentage(averageScore);
-              final performanceLevel = _getPerformanceLevel(percentage);
+              // Use your global helper method
+              final percentage = calculatePerformancePercent(scoreString);
+              final percentValue = int.tryParse(percentage) ?? 0;
+              final performanceLevel = _getPerformanceLevel(percentValue);
 
               return pw.TableRow(
                 children: [
@@ -493,30 +495,6 @@ class InspectionPDFGenerator {
         ),
       ],
     );
-  }
-
-  // Helper method to convert score to percentage using fixed mapping
-  int _scoreToPercentage(double averageScore) {
-    // Fixed mapping:
-    // 1.0 = 100%
-    // 2.0 = 75%
-    // 3.0 = 25%
-    // 4.0 = 0%
-
-    if (averageScore <= 1.0) return 100;
-    if (averageScore <= 2.0) {
-      // Linear interpolation between 100% and 75%
-      return (100 - ((averageScore - 1.0) * 25)).round();
-    }
-    if (averageScore <= 3.0) {
-      // Linear interpolation between 75% and 25%
-      return (75 - ((averageScore - 2.0) * 50)).round();
-    }
-    if (averageScore < 4.0) {
-      // Linear interpolation between 25% and 0%
-      return (25 - ((averageScore - 3.0) * 25)).round();
-    }
-    return 0;
   }
 
   pw.Widget _buildTableCell(

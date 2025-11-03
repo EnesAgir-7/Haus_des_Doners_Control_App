@@ -23,41 +23,18 @@ Future<void> openInBrowser(String pdfUrl, BuildContext context) async {
 Color getScoreColor(String scoreString) {
   if (!scoreString.contains('/')) return Colors.grey;
 
-  final parts = scoreString.split('/');
-  final obtained = double.tryParse(parts[0].trim()) ?? 0;
-  final total = double.tryParse(parts[1].trim()) ?? 1;
+  try {
+    // Use your global percentage calculation method
+    final percentage = calculatePerformancePercent(scoreString);
+    final percentValue = double.tryParse(percentage) ?? 0.0;
 
-  // Prevent division by zero
-  if (total == 0) return Colors.grey;
-
-  // Calculate ratio (0.0 = perfect, 1.0 = worst)
-  final ratio = obtained / total;
-
-  // Determine color — lower ratio = greener
-  if (ratio <= 0.3) return Colors.green;
-  if (ratio <= 0.6) return Colors.amber;
-  return Colors.red;
+    // Use your global color method for consistency
+    return getPercentageColor(percentValue);
+  } catch (e) {
+    print('Error in getScoreColor: $e');
+    return Colors.grey;
+  }
 }
-
-// String calculatePerformancePercent(averageScoreStr) {
-//   final parts = averageScoreStr.split('/');
-//   double percentage = 0.0;
-//   if (parts.length == 2) {
-//     final points = double.tryParse(parts[0]) ?? 0.0;
-//     final total = double.tryParse(parts[1]) ?? 1.0;
-
-//     if (total > 0) {
-//       percentage = (points / total) * 100.0;
-//     } else {
-//       percentage = 0.0; // Avoid division by zero
-//     }
-//   } else {
-//     percentage = double.tryParse(averageScoreStr) ?? 0.0;
-//   }
-
-//   return '${percentage.toStringAsFixed(0)}';
-// }
-
 
 Color getPercentageColor(double percentage) {
   if (percentage == 100) {
@@ -71,7 +48,6 @@ Color getPercentageColor(double percentage) {
   }
 }
 
-
 IconData getPercentageIcon(double percentage) {
   if (percentage == 100) {
     return Icons.emoji_events; // Excellent
@@ -83,8 +59,6 @@ IconData getPercentageIcon(double percentage) {
     return Icons.error; // Poor / 0%
   }
 }
-
-
 
 String calculatePerformancePercent(String totalScoreStr) {
   final parts = totalScoreStr.split('/');
