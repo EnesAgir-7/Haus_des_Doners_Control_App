@@ -396,12 +396,15 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           _buildAdditionalInfoCard(),
           const SizedBox(height: 16),
         ],
-        if (!widget.branch.haveNoScores) ...[
+        if (!widget.branch.haveNoScores) ...[ 
           _buildPerformanceSummary(),
           const SizedBox(height: 12),
           buildPerformanceChart(
             scores: widget.branch.last12MonthsScores!,
-            title: LocaleKeys.last12Inspections.tr(),
+            title: LocaleKeys.last12Inspections.tr().replaceAll(
+              "12",
+              widget.branch.last12MonthsScores!.length.toString(),
+            ),
             icon: Icons.bar_chart,
             subtitle: LocaleKeys.oldestToLatest.tr(),
           ),
