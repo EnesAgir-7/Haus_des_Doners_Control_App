@@ -17,17 +17,21 @@ import '../../inspector/screens/screen_full_image.dart';
 import '../admin_providers/provider_admin_tasks.dart';
 import 'task_add_edit_widget.dart';
 
-class TaskDetailSheet extends StatefulWidget {
+class AdminTaskDetailSheet extends StatefulWidget {
   final TaskModel task;
   final VoidCallback? onTaskUpdated;
 
-  const TaskDetailSheet({super.key, required this.task, this.onTaskUpdated});
+  const AdminTaskDetailSheet({
+    super.key,
+    required this.task,
+    this.onTaskUpdated,
+  });
 
   @override
-  State<TaskDetailSheet> createState() => _TaskDetailSheetState();
+  State<AdminTaskDetailSheet> createState() => _AdminTaskDetailSheetState();
 }
 
-class _TaskDetailSheetState extends State<TaskDetailSheet> {
+class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
   final TextEditingController _commentController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   final ScrollController _scrollController = ScrollController();

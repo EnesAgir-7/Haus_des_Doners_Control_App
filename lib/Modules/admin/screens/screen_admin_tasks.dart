@@ -11,7 +11,7 @@ import '../../../translations/locale_keys.g.dart';
 import '../admin_providers/provider_admin_tasks.dart';
 import '../widgets/admin_task_card.dart';
 import '../widgets/task_add_edit_widget.dart';
-import '../widgets/task_detail_sheet.dart';
+import '../widgets/admin_task_detail_sheet.dart';
 
 class ScreenAdminTasks extends StatefulWidget {
   const ScreenAdminTasks({super.key});
@@ -235,7 +235,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
               TextButton(
                 onPressed: () => setState(() => _selectedFilter = 'all'),
                 child: Text(
-                  LocaleKeys.viewAllTasks.tr(), 
+                  LocaleKeys.viewAllTasks.tr(),
                   style: TextStyle(color: AppColors.primaryRed),
                 ),
               ),
@@ -275,7 +275,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
       backgroundColor: AppColors.primaryRed,
       icon: Icon(Icons.add, color: Colors.white),
       label: Text(
-       LocaleKeys.addTask.tr(), 
+        LocaleKeys.addTask.tr(),
         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     );
@@ -292,7 +292,8 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (context) => TaskDetailSheet(task: task, onTaskUpdated: () {}),
+      builder: (context) =>
+          AdminTaskDetailSheet(task: task, onTaskUpdated: () {}),
     );
   }
 

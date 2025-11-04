@@ -32,6 +32,7 @@ class ProviderTasks extends ChangeNotifier {
   // Comment input
   final TextEditingController commentController = TextEditingController();
   List<File> _commentPhotos = [];
+  List<File> get commentPhotos => _commentPhotos;
 
   // Getters
   List<TaskModel> get tasks => _filteredAndSortedTasks();
@@ -68,7 +69,7 @@ class ProviderTasks extends ChangeNotifier {
 
     try {
       _tasksSubscription = _taskService
-          .streamTasksByInspector(inspectorId)
+          .streamTasksByInspector(loggedInUser!.id)
           .listen(
             (tasks) {
               _tasks = tasks;
