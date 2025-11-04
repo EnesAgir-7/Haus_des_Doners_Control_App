@@ -757,8 +757,12 @@
   "branch": "Filiale",
   "overall_score": "Gesamtpunktzahl",
   "category": "Kategorie",
-  "not_signed": "Nicht unterschrieben", 
-  "of": "von", 
+  "not_signed": "Nicht unterschrieben",
+  "of": "von",
   "no": "Nein",
-  "yes": "Ja"
+  "yes": "Ja",
+  "total_assignments": "Gesamtzuweisungen",
+  "overview": "Übersicht",
+  "time_based_metrics": "Zeitbasierte Metriken",
+  "todays_schedule": "Heutiger Zeitplan"
 }

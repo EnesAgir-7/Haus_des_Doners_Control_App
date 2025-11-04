@@ -776,7 +776,11 @@ class CodegenLoader extends AssetLoader{
   "not_signed": "Nicht unterschrieben",
   "of": "von",
   "no": "Nein",
-  "yes": "Ja"
+  "yes": "Ja",
+  "total_assignments": "Gesamtzuweisungen",
+  "overview": "Übersicht",
+  "time_based_metrics": "Zeitbasierte Metriken",
+  "todays_schedule": "Heutiger Zeitplan"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -1556,7 +1560,11 @@ static const Map<String,dynamic> _en = {
   "category": "Category",
   "not_signed": "Not Signed",
   "of": "of",
-  "photoes": "photo(s)"
+  "photoes": "photo(s)",
+  "total_assignments": "Total Assignments",
+  "overview": "Overview",
+  "time_based_metrics": "Time-based metrics",
+  "todays_schedule": "Today's schedule"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2304,7 +2312,11 @@ static const Map<String,dynamic> _tr = {
   "of": "/",
   "photoes": "fotoğraf(lar)",
   "no": "Hayır",
-  "yes": "Evet"
+  "yes": "Evet",
+  "total_assignments": "Toplam Atamalar",
+  "overview": "Genel Bakış",
+  "time_based_metrics": "Zaman Bazlı Metrikler",
+  "todays_schedule": "Bugünün Programı"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

@@ -8,22 +8,56 @@ import '../../../models/dashboard_statistics.dart';
 class InspectorStatsService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<DashboardStats> getDashboardStats(
+  // Future<DashboardStats> getDashboardStats(
+  //   String userId, {
+  //   TimeRange range = TimeRange.weekly,
+  // }) async {
+  //   final now = DateTime.now();
+  //   final startDate = _getStartDate(now, range);
+
+  //   final results = await Future.wait([
+  //     _getInspectionsInRange(userId, startDate),
+  //   ]);
+
+  //   final inspections = results[0];
+
+  //   return DashboardStats(
+  //     inspectionsCount: inspections.length,
+  //     averageScore: _calculateAverage(inspections),
+  //     timeRange: range,
+  //   );
+  // }
+Future<DashboardStats> getDashboardStats(
     String userId, {
     TimeRange range = TimeRange.weekly,
   }) async {
     final now = DateTime.now();
     final startDate = _getStartDate(now, range);
 
-    final results = await Future.wait([
-      _getInspectionsInRange(userId, startDate),
-    ]);
+    // Get aggregated data (count + sum for average)
+    final query = _db
+        .collection(Collections.inspections)
+        .where(InspectionFields.inspectorId, isEqualTo: userId)
+        .where(
+          InspectionFields.completedTime,
+          isGreaterThanOrEqualTo: startDate,
+        )
+        .where(InspectionFields.status, isEqualTo: AppConstants.completed);
 
-    final inspections = results[0];
+    // This is more efficient than fetching all docs
+    final snapshot = await query.get();
+
+    int count = snapshot.size;
+    double totalScore = 0.0;
+
+    for (var doc in snapshot.docs) {
+      final score = doc.data()[InspectionFields.score]?.toString() ?? "0";
+      totalScore += double.tryParse(score.split('/').first) ?? 0.0;
+    }
 
     return DashboardStats(
-      inspectionsCount: inspections.length,
-      averageScore: _calculateAverage(inspections),
+      inspectionsCount: count,
+      averageScore: count > 0 ? totalScore / count : 0.0,
       timeRange: range,
     );
   }
@@ -39,28 +73,49 @@ class InspectorStatsService {
     }
   }
 
-  Future<List<double>> _getInspectionsInRange(
-    String userId,
-    DateTime startDate,
-  ) async {
-    final snapshot = await _db
-        .collection(Collections.inspections)
-        .where(InspectionFields.inspectorId, isEqualTo: userId)
-        .where(
-          InspectionFields.completedTime,
-          isGreaterThanOrEqualTo: startDate,
-        )
-        .where(InspectionFields.status, isEqualTo: AppConstants.completed)
-        .get();
+  // Future<List<double>> _getInspectionsInRange(
+  //   String userId,
+  //   DateTime startDate,
+  // ) async {
+  //   final snapshot = await _db
+  //       .collection(Collections.inspections)
+  //       .where(InspectionFields.inspectorId, isEqualTo: userId)
+  //       .where(
+  //         InspectionFields.completedTime,
+  //         isGreaterThanOrEqualTo: startDate,
+  //       )
+  //       .where(InspectionFields.status, isEqualTo: AppConstants.completed)
+  //       .get();
 
-    return snapshot.docs.map((doc) {
-      final score = doc.data()[InspectionFields.score]?.toString() ?? "0";
-      return double.tryParse(score.split('/').first) ?? 0.0;
-    }).toList();
-  }
+  //   return snapshot.docs.map((doc) {
+  //     final score = doc.data()[InspectionFields.score]?.toString() ?? "0";
+  //     return double.tryParse(score.split('/').first) ?? 0.0;
+  //   }).toList();
+  // }
+  // Future<List<double>> _getInspectionsInRange(
+  //   String userId,
+  //   DateTime startDate,
+  // ) async {
+  //   final snapshot = await _db
+  //       .collection(Collections.inspections)
+  //       .where(InspectionFields.inspectorId, isEqualTo: userId)
+  //       .where(
+  //         InspectionFields.completedTime,
+  //         isGreaterThanOrEqualTo: startDate,
+  //       )
+  //       .where(InspectionFields.status, isEqualTo: AppConstants.completed)
+  //       .orderBy(InspectionFields.completedTime, descending: true)
+  //       .limit(100) // 👈 Add reasonable limit
+  //       .get();
 
-  double _calculateAverage(List<double> scores) {
-    if (scores.isEmpty) return 0.0;
-    return scores.reduce((a, b) => a + b) / scores.length;
-  }
+  //   return snapshot.docs.map((doc) {
+  //     final score = doc.data()[InspectionFields.score]?.toString() ?? "0";
+  //     return double.tryParse(score.split('/').first) ?? 0.0;
+  //   }).toList();
+  // }
+
+  // double _calculateAverage(List<double> scores) {
+  //   if (scores.isEmpty) return 0.0;
+  //   return scores.reduce((a, b) => a + b) / scores.length;
+  // }
 }

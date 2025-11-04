@@ -765,5 +765,9 @@ abstract class  LocaleKeys {
   static const of = 'of';
   static const no = 'no';
   static const yes = 'yes';
+  static const total_assignments = 'total_assignments';
+  static const overview = 'overview';
+  static const time_based_metrics = 'time_based_metrics';
+  static const todays_schedule = 'todays_schedule';
 
 }

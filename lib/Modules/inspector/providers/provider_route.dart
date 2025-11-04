@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
@@ -123,7 +124,7 @@ class ProviderRoute extends ChangeNotifier {
     }
 
     final today = DateTime.now();
-    final todayKey = "${today.year}-${today.month}-${today.day}";
+    final todayKey = DateFormat('yyyy-MM-dd').format(today);
 
     todaysStopsList = _allRoute!.stops
         .where((stop) => stop.timeSlot == todayKey)
