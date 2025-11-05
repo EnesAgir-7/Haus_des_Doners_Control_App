@@ -26,8 +26,6 @@ class ProviderTasks extends ChangeNotifier {
 
   // Filters
   String _statusFilter = AppConstants.pending;
-  String _priorityFilter = AppConstants.all;
-  String _sortBy = AppConstants.dueDate;
 
   // Comment input
   final TextEditingController commentController = TextEditingController();
@@ -101,38 +99,6 @@ class ProviderTasks extends ChangeNotifier {
       filtered = filtered
           .where((task) => task.status == _statusFilter)
           .toList();
-    }
-
-    // Filter by priority
-    if (_priorityFilter != AppConstants.all) {
-      filtered = filtered
-          .where((task) => task.priority == _priorityFilter)
-          .toList();
-    }
-
-    // Sort
-    switch (_sortBy) {
-      case AppConstants.dueDate:
-        filtered.sort((a, b) {
-          if (a.dueDate == null) return 1;
-          if (b.dueDate == null) return -1;
-          return a.dueDate!.compareTo(b.dueDate!);
-        });
-        break;
-      case AppConstants.priority:
-        final priorityOrder = {
-          AppConstants.high: 0,
-          AppConstants.medium: 1,
-          AppConstants.low: 2,
-        };
-        filtered.sort(
-          (a, b) =>
-              priorityOrder[a.priority]!.compareTo(priorityOrder[b.priority]!),
-        );
-        break;
-      case AppConstants.createdAt:
-        filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        break;
     }
 
     return filtered;

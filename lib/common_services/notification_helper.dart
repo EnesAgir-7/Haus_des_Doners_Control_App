@@ -1,7 +1,10 @@
 import 'dart:convert';
+
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
+
 import '../app_env.dart';
 import '../core/console.dart';
 
@@ -9,6 +12,7 @@ import '../core/console.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   console('Background message received: ${message.messageId}');
+  // ✅ Don't show notification here - system handles it automatically
 }
 
 class FCMHelper {
@@ -59,8 +63,8 @@ class FCMHelper {
       // Request permission (iOS)
       await _requestPermission();
 
-      // Initialize local notifications
-      await _initializeLocalNotifications();
+      // ✅ Initialize local notifications WITH tap handling
+      await _initializeLocalNotifications(onMessageOpenedApp);
 
       // Configure background handler
       FirebaseMessaging.onBackgroundMessage(
@@ -77,10 +81,14 @@ class FCMHelper {
         console('FCM Token refreshed: $newToken');
       });
 
-      // Handle foreground messages
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // ✅ FIXED: Handle foreground messages WITHOUT showing local notification
+      // System now handles display automatically via notification payload
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
         console('Foreground message received: ${message.messageId}');
-        _showLocalNotification(message);
+        console('Has notification: ${message.notification != null}');
+
+        await _showLocalNotification(message);
+        // Just call the callback for data handling
         onMessageReceived(message);
       });
 
@@ -122,7 +130,9 @@ class FCMHelper {
   }
 
   /// Initialize local notifications for foreground display
-  Future<void> _initializeLocalNotifications() async {
+  Future<void> _initializeLocalNotifications(
+    Function(RemoteMessage)? onMessageOpenedApp,
+  ) async {
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -138,11 +148,47 @@ class FCMHelper {
       iOS: iosSettings,
     );
 
-    await _localNotifications.initialize(initSettings);
+    // ✅ ADD: Handle notification tap
+    await _localNotifications.initialize(
+      initSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        if (response.payload != null && onMessageOpenedApp != null) {
+          try {
+            final data = jsonDecode(response.payload!);
+            // Create a fake RemoteMessage for consistency
+            final message = RemoteMessage(
+              data: Map<String, dynamic>.from(data),
+            );
+            onMessageOpenedApp(message);
+          } catch (e) {
+            console('Error parsing notification payload: $e');
+          }
+        }
+      },
+    );
+
+    // ✅ CRITICAL: Create Android notification channel
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'high_importance_channel',
+      'High Importance Notifications',
+      description: 'This channel is used for important notifications',
+      importance: Importance.high,
+      showBadge: true,
+      playSound: true,
+      enableVibration: true,
+    );
+
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(channel);
   }
 
-  /// Show local notification for foreground messages
+  /// ⚠️ KEEP THIS METHOD but it won't be called for regular notifications
+  /// Only use this for custom local notifications if needed
   Future<void> _showLocalNotification(RemoteMessage message) async {
+    console("Showing local notification");
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
           'high_importance_channel',
@@ -152,6 +198,8 @@ class FCMHelper {
           importance: Importance.high,
           priority: Priority.high,
           showWhen: true,
+
+          icon: '@mipmap/launcher_icon', // ✅ Your app icon
         );
 
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
@@ -165,10 +213,16 @@ class FCMHelper {
       iOS: iosDetails,
     );
 
+    final title =
+        message.data['title'] ??
+        message.notification?.title ??
+        'New Notification';
+    final body = message.data['body'] ?? message.notification?.body ?? '';
+
     await _localNotifications.show(
       message.hashCode,
-      message.notification?.title ?? 'New Notification',
-      message.notification?.body ?? '',
+      title,
+      body,
       notificationDetails,
       payload: jsonEncode(message.data),
     );
@@ -200,9 +254,9 @@ class FCMHelper {
   Future<void> subscribeUserToRoleTopics(String role) async {
     await subscribeToTopic(allUsersTopic);
 
-    if (role == 'admin') {
+    if (role == AppConstants.admin) {
       await subscribeToTopic(adminTopic);
-    } else if (role == 'inspector') {
+    } else if (role == AppConstants.inspector) {
       await subscribeToTopic(inspectorTopic);
     }
   }
@@ -210,8 +264,9 @@ class FCMHelper {
   /// Unsubscribe from all topics
   Future<void> unsubscribeFromAllTopics(String role) async {
     await unsubscribeFromTopic(allUsersTopic);
-    await unsubscribeFromTopic(adminTopic);
-    await unsubscribeFromTopic(inspectorTopic);
+    if (role == AppConstants.admin) await unsubscribeFromTopic(adminTopic);
+    if (role == AppConstants.inspector)
+      await unsubscribeFromTopic(inspectorTopic);
   }
 
   /// Get environment-prefixed topic
@@ -289,12 +344,21 @@ class FCMHelper {
     Map<String, dynamic>? data,
   }) async {
     try {
+      // ✅ Remove duplicates on client side too (belt and suspenders)
+      final uniqueTokens = fcmTokens.toSet().toList();
+
+      if (uniqueTokens.length != fcmTokens.length) {
+        console(
+          '⚠️ Removed ${fcmTokens.length - uniqueTokens.length} duplicate tokens',
+        );
+      }
+
       final callable = _functions.httpsCallable(
         'sendNotificationToMultipleTokens',
       );
 
       final result = await callable.call({
-        'fcmTokens': fcmTokens,
+        'fcmTokens': uniqueTokens,
         'title': title,
         'body': body,
         'data': data ?? {},
@@ -304,6 +368,12 @@ class FCMHelper {
         console(
           'Batch sent: ${result.data['successCount']} success, ${result.data['failureCount']} failed',
         );
+        if (result.data['originalTokenCount'] !=
+            result.data['uniqueTokenCount']) {
+          console(
+            '⚠️ Server removed ${result.data['originalTokenCount'] - result.data['uniqueTokenCount']} duplicate tokens',
+          );
+        }
         return result.data as Map<String, dynamic>;
       } else {
         console('Failed to send batch notification');
@@ -326,45 +396,3 @@ class FCMHelper {
     }
   }
 }
-
-
-
-
-
-
-
-
-
-// Send to single inspector
-// await FCMHelper.instance.sendNotificationToToken(
-//   fcmToken: 'inspector_fcm_token',
-//   title: 'New Task Assigned',
-//   body: 'You have been assigned a new inspection task',
-//   data: {
-//     'type': 'task_assigned',
-//     'taskId': '123',
-//   },
-// );
-
-// // Send to all inspectors via topic
-// await FCMHelper.instance.sendNotificationToTopic(
-//   topic: FCMHelper.inspectorTopic,
-//   title: 'Route Completed',
-//   body: 'A route has been completed successfully',
-//   data: {
-//     'type': 'route_completed',
-//     'routeId': 'route_789',
-//   },
-// );
-
-// // Send to multiple inspectors
-// final result = await FCMHelper.instance.sendNotificationToMultipleTokens(
-//   fcmTokens: ['token1', 'token2', 'token3'],
-//   title: 'Branch Update',
-//   body: 'Your branch assignments have been updated',
-//   data: {
-//     'type': 'branch_update',
-//   },
-// );
-
-// print('Sent: ${result['successCount']}, Failed: ${result['failureCount']}');

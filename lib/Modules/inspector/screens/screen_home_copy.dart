@@ -86,7 +86,7 @@ class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 16,
+
                 children: [
                   SizedBox(height: 10),
                   // User Info Header
@@ -104,6 +104,7 @@ class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
 
                   // SECTION 3: TODAY'S ROUTE PLAN (with progress)
                   const RoutePlanSection(),
+                  SizedBox(height: 10),
                 ],
               ),
             ),
@@ -211,25 +212,25 @@ class OverviewSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.lightBlack,
-            AppColors.lightBlack.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      // decoration: BoxDecoration(
+      //   gradient: LinearGradient(
+      //     begin: Alignment.topLeft,
+      //     end: Alignment.bottomRight,
+      //     colors: [
+      //       AppColors.lightBlack,
+      //       AppColors.lightBlack.withValues(alpha: 0.8),
+      //     ],
+      //   ),
+      //   borderRadius: BorderRadius.circular(24),
+      //   border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      //   boxShadow: [
+      //     BoxShadow(
+      //       color: Colors.black.withValues(alpha: 0.3),
+      //       blurRadius: 20,
+      //       offset: const Offset(0, 10),
+      //     ),
+      //   ],
+      // ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -337,25 +338,7 @@ class PerformanceSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.lightBlack,
-            AppColors.lightBlack.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -660,25 +643,7 @@ class RoutePlanSection extends StatelessWidget {
         if (stops.isEmpty) {
           return Container(
             padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.lightBlack,
-                  AppColors.lightBlack.withValues(alpha: 0.8),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-            ),
+
             child: Column(
               children: [
                 Row(
@@ -753,25 +718,7 @@ class RoutePlanSection extends StatelessWidget {
         // Has route - show progress + route items
         return Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                AppColors.lightBlack,
-                AppColors.lightBlack.withValues(alpha: 0.8),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -851,76 +798,76 @@ class RoutePlanSection extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
 
               // Today's Progress Card
               Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryRed.withValues(alpha: 0.15),
-                      AppColors.primaryRed.withValues(alpha: 0.05),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.primaryRed.withValues(alpha: 0.3),
-                  ),
-                ),
+                // padding: const EdgeInsets.all(12),
+                // decoration: BoxDecoration(
+                //   gradient: LinearGradient(
+                //     colors: [
+                //       AppColors.primaryRed.withValues(alpha: 0.15),
+                //       AppColors.primaryRed.withValues(alpha: 0.05),
+                //     ],
+                //   ),
+                //   borderRadius: BorderRadius.circular(12),
+                //   border: Border.all(
+                //     color: AppColors.primaryRed.withValues(alpha: 0.3),
+                //   ),
+                // ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryRed.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.today,
-                            color: AppColors.primaryRed,
-                            size: 16,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            LocaleKeys.todays_progress.tr(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.primaryRed,
-                                AppColors.primaryRed.withValues(alpha: 0.8),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            '${(routeProvider.todaysProgressValue * 100).toStringAsFixed(0)}%',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     Container(
+                    //       padding: const EdgeInsets.all(6),
+                    //       decoration: BoxDecoration(
+                    //         color: AppColors.primaryRed.withValues(alpha: 0.2),
+                    //         borderRadius: BorderRadius.circular(8),
+                    //       ),
+                    //       child: Icon(
+                    //         Icons.today,
+                    //         color: AppColors.primaryRed,
+                    //         size: 16,
+                    //       ),
+                    //     ),
+                    //     const SizedBox(width: 8),
+                    //     Expanded(
+                    //       child: Text(
+                    //         LocaleKeys.todays_progress.tr(),
+                    //         style: const TextStyle(
+                    //           color: Colors.white,
+                    //           fontSize: 14,
+                    //           fontWeight: FontWeight.w600,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //     Container(
+                    //       padding: const EdgeInsets.symmetric(
+                    //         horizontal: 10,
+                    //         vertical: 4,
+                    //       ),
+                    //       decoration: BoxDecoration(
+                    //         gradient: LinearGradient(
+                    //           colors: [
+                    //             AppColors.primaryRed,
+                    //             AppColors.primaryRed.withValues(alpha: 0.8),
+                    //           ],
+                    //         ),
+                    //         borderRadius: BorderRadius.circular(10),
+                    //       ),
+                    //       child: Text(
+                    //         '${(routeProvider.todaysProgressValue * 100).toStringAsFixed(0)}%',
+                    //         style: const TextStyle(
+                    //           color: Colors.white,
+                    //           fontSize: 13,
+                    //           fontWeight: FontWeight.bold,
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                     const SizedBox(height: 10),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),

@@ -2,127 +2,7 @@ const {onCall, HttpsError} = require("firebase-functions/v2/https");
 const {getMessaging} = require("firebase-admin/messaging");
 
 /**
- * Send notification to a single FCM token
- */
-exports.sendNotificationToToken = onCall(async (request) => {
-  // Check if user is authenticated
-  if (!request.auth) {
-    throw new HttpsError(
-        "unauthenticated",
-        "User must be authenticated to send notifications",
-    );
-  }
-
-  const {fcmToken, title, body, data} = request.data;
-
-  // Validate input
-  if (!fcmToken || !title || !body) {
-    throw new HttpsError(
-        "invalid-argument",
-        "Missing required fields: fcmToken, title, body",
-    );
-  }
-
-  const message = {
-    token: fcmToken,
-    notification: {
-      title: title,
-      body: body,
-    },
-    data: data || {},
-    android: {
-      priority: "high",
-      notification: {
-        sound: "default",
-        channelId: "high_importance_channel",
-      },
-    },
-    apns: {
-      payload: {
-        aps: {
-          sound: "default",
-          badge: 1,
-        },
-      },
-    },
-  };
-
-  try {
-    const response = await getMessaging().send(message);
-    console.log("✅ Notification sent successfully:", response);
-
-    return {
-      success: true,
-      messageId: response,
-    };
-  } catch (error) {
-    console.error("❌ Error sending notification:", error);
-    throw new HttpsError("internal", error.message);
-  }
-});
-
-/**
- * Send notification to a topic
- */
-exports.sendNotificationToTopic = onCall(async (request) => {
-  // Check if user is authenticated
-  if (!request.auth) {
-    throw new HttpsError(
-        "unauthenticated",
-        "User must be authenticated to send notifications",
-    );
-  }
-
-  const {topic, title, body, data} = request.data;
-
-  // Validate input
-  if (!topic || !title || !body) {
-    throw new HttpsError(
-        "invalid-argument",
-        "Missing required fields: topic, title, body",
-    );
-  }
-
-  const message = {
-    topic: topic,
-    notification: {
-      title: title,
-      body: body,
-    },
-    data: data || {},
-    android: {
-      priority: "high",
-      notification: {
-        sound: "default",
-        channelId: "high_importance_channel",
-      },
-    },
-    apns: {
-      payload: {
-        aps: {
-          sound: "default",
-          badge: 1,
-        },
-      },
-    },
-  };
-
-  try {
-    const response = await getMessaging().send(message);
-    console.log("✅ Topic notification sent successfully:", response);
-
-    return {
-      success: true,
-      messageId: response,
-    };
-  } catch (error) {
-    console.error("❌ Error sending topic notification:", error);
-    throw new HttpsError("internal", error.message);
-  }
-});
-
-/**
- * Send notification to multiple tokens (batch)
+ * Send notification to multiple tokens (batch) - FIXED VERSION
  */
 exports.sendNotificationToMultipleTokens = onCall(async (request) => {
   // Check if user is authenticated
@@ -150,32 +30,53 @@ exports.sendNotificationToMultipleTokens = onCall(async (request) => {
     );
   }
 
+  // ✅ REMOVE DUPLICATE TOKENS
+  const uniqueTokens = [...new Set(fcmTokens)];
+
+  console.log(`Original tokens: ${fcmTokens.length},
+     Unique: ${uniqueTokens.length}`);
+
   const message = {
+    // ✅ ADD NOTIFICATION PAYLOAD (this prevents double notifications)
     notification: {
       title: title,
       body: body,
     },
-    data: data || {},
+    data: {
+      title: title,
+      body: body,
+      ...(data || {}),
+    },
     android: {
       priority: "high",
       notification: {
+        channelId: "high_importance_channel", // ✅ Match your Flutter channel
         sound: "default",
-        channelId: "high_importance_channel",
+        priority: "high",
+        defaultSound: true,
+        defaultVibrateTimings: true,
       },
     },
     apns: {
       payload: {
         aps: {
+          alert: {
+            title: title,
+            body: body,
+          },
           sound: "default",
           badge: 1,
         },
+      },
+      headers: {
+        "apns-priority": "10",
       },
     },
   };
 
   try {
     const response = await getMessaging().sendEachForMulticast({
-      tokens: fcmTokens,
+      tokens: uniqueTokens, // ✅ Use unique tokens only
       ...message,
     });
 
@@ -187,8 +88,10 @@ exports.sendNotificationToMultipleTokens = onCall(async (request) => {
       success: true,
       successCount: response.successCount,
       failureCount: response.failureCount,
+      originalTokenCount: fcmTokens.length,
+      uniqueTokenCount: uniqueTokens.length,
       responses: response.responses.map((resp, idx) => ({
-        token: fcmTokens[idx],
+        token: uniqueTokens[idx],
         success: resp.success,
         error: resp.error ? resp.error.message : null,
       })),
@@ -200,10 +103,9 @@ exports.sendNotificationToMultipleTokens = onCall(async (request) => {
 });
 
 /**
- * Send notification with custom message payload
+ * Send notification to a single FCM token - FIXED VERSION
  */
-exports.sendCustomNotification = onCall(async (request) => {
-  // Check if user is authenticated
+exports.sendNotificationToToken = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
         "unauthenticated",
@@ -211,113 +113,131 @@ exports.sendCustomNotification = onCall(async (request) => {
     );
   }
 
-  const {fcmToken, topic, message} = request.data;
+  const {fcmToken, title, body, data} = request.data;
 
-  // Validate input
-  if ((!fcmToken && !topic) || !message) {
+  if (!fcmToken || !title || !body) {
     throw new HttpsError(
         "invalid-argument",
-        "Provide either fcmToken or topic, and a message object",
+        "Missing required fields: fcmToken, title, body",
     );
   }
 
-  // Add token or topic to message
-  if (fcmToken) {
-    message.token = fcmToken;
-  } else {
-    message.topic = topic;
-  }
+  const message = {
+    token: fcmToken,
+    // ✅ ADD NOTIFICATION PAYLOAD
+    notification: {
+      title: title,
+      body: body,
+    },
+    data: {
+      title: title,
+      body: body,
+      ...(data || {}),
+    },
+    android: {
+      priority: "high",
+      notification: {
+        channelId: "high_importance_channel",
+        sound: "default",
+        priority: "high",
+      },
+    },
+    apns: {
+      payload: {
+        aps: {
+          alert: {
+            title: title,
+            body: body,
+          },
+          sound: "default",
+        },
+      },
+      headers: {
+        "apns-priority": "10",
+      },
+    },
+  };
 
   try {
     const response = await getMessaging().send(message);
-    console.log("✅ Custom notification sent successfully:", response);
+    console.log("✅ Notification sent successfully:", response);
 
     return {
       success: true,
       messageId: response,
     };
   } catch (error) {
-    console.error("❌ Error sending custom notification:", error);
+    console.error("❌ Error sending notification:", error);
     throw new HttpsError("internal", error.message);
   }
 });
 
 /**
- * Subscribe user to topics
+ * Send notification to a topic - FIXED VERSION
  */
-exports.subscribeToTopics = onCall(async (request) => {
-  // Check if user is authenticated
+exports.sendNotificationToTopic = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError(
         "unauthenticated",
-        "User must be authenticated",
+        "User must be authenticated to send notifications",
     );
   }
 
-  const {fcmToken, topics} = request.data;
+  const {topic, title, body, data} = request.data;
 
-  if (!fcmToken || !topics || !Array.isArray(topics)) {
+  if (!topic || !title || !body) {
     throw new HttpsError(
         "invalid-argument",
-        "fcmToken and topics array required",
+        "Missing required fields: topic, title, body",
     );
   }
 
-  try {
-    await Promise.all(
-        topics.map((topic) =>
-          getMessaging().subscribeToTopic(fcmToken, topic),
-        ),
-    );
+  const message = {
+    topic: topic,
+    // ✅ ADD NOTIFICATION PAYLOAD
+    notification: {
+      title: title,
+      body: body,
+    },
+    data: {
+      title: title,
+      body: body,
+      ...(data || {}),
+    },
+    android: {
+      priority: "high",
+      notification: {
+        channelId: "high_importance_channel",
+        sound: "default",
+        priority: "high",
+      },
+    },
+    apns: {
+      payload: {
+        aps: {
+          alert: {
+            title: title,
+            body: body,
+          },
+          sound: "default",
+        },
+      },
+      headers: {
+        "apns-priority": "10",
+      },
+    },
+  };
 
-    console.log(`✅ Subscribed to topics:`, topics);
+  try {
+    const response = await getMessaging().send(message);
+    console.log("✅ Topic notification sent successfully:", response);
 
     return {
       success: true,
-      topics: topics,
+      messageId: response,
     };
   } catch (error) {
-    console.error("❌ Error subscribing to topics:", error);
-    throw new HttpsError("internal", error.message);
-  }
-});
-
-/**
- * Unsubscribe user from topics
- */
-exports.unsubscribeFromTopics = onCall(async (request) => {
-  // Check if user is authenticated
-  if (!request.auth) {
-    throw new HttpsError(
-        "unauthenticated",
-        "User must be authenticated",
-    );
-  }
-
-  const {fcmToken, topics} = request.data;
-
-  if (!fcmToken || !topics || !Array.isArray(topics)) {
-    throw new HttpsError(
-        "invalid-argument",
-        "fcmToken and topics array required",
-    );
-  }
-
-  try {
-    await Promise.all(
-        topics.map((topic) =>
-          getMessaging().unsubscribeFromTopic(fcmToken, topic),
-        ),
-    );
-
-    console.log(`✅ Unsubscribed from topics:`, topics);
-
-    return {
-      success: true,
-      topics: topics,
-    };
-  } catch (error) {
-    console.error("❌ Error unsubscribing from topics:", error);
+    console.error("❌ Error sending topic notification:", error);
     throw new HttpsError("internal", error.message);
   }
 });

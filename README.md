@@ -101,5 +101,9 @@ firebase projects:list
 
 
 # For Deploying Functions:
-firebase use dev/prod
+cd functions// then run -    npm run lint -- --fix
+firebase use dev
+firebase use prod
 firebase deploy --only functions
+
+firebase deploy --only functions:cleanupExpiredStops

@@ -255,14 +255,13 @@ class InspectorBranchService {
       // Send notification only if tokens exist
       if (loggedInUser?.fcmTokens != null &&
           loggedInUser!.fcmTokens!.isNotEmpty) {
-        final result = await FCMHelper.instance.sendNotificationToMultipleTokens(
+         await FCMHelper.instance.sendNotificationToMultipleTokens(
           fcmTokens: loggedInUser!.fcmTokens!,
           title: 'Route Assigned',
           body:
               'You have assigned ${stopToSave.branchName} to your route. Please be ready at $timeSlot',
           data: {'type': 'route_assigned', 'branchId': branchId},
         );
-        console(result);
       } else {
         console('⚠️ No FCM tokens available');
       }

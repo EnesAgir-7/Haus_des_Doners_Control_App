@@ -99,20 +99,23 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
 
     // Validation
     if (title.isEmpty) {
-      showSnakBarr(context, LocaleKeys.pleaseEnterTitle.tr());
+      showCustomSnackBar(context, LocaleKeys.pleaseEnterTitle.tr());
       return;
     }
 
     if (description.isEmpty) {
-      showSnakBarr(context, LocaleKeys.pleaseEnterDescription.tr());
+      showCustomSnackBar(context, LocaleKeys.pleaseEnterDescription.tr());
       return;
     }
 
     if (_selectedInspectorId == null) {
-      showSnakBarr(context, LocaleKeys.pleaseSelectInspector.tr());
+      showCustomSnackBar(context, LocaleKeys.pleaseSelectInspector.tr());
       return;
     }
-
+    if (_dueDate == null) {
+      showCustomSnackBar(context, "Please select due date");
+      return;
+    }
     setState(() => _isLoading = true);
 
     try {
