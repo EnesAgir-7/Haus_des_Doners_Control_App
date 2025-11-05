@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -30,6 +31,8 @@ import 'Modules/inspector/providers/provider_panel.dart';
 import 'Modules/inspector/providers/provider_report_photo.dart';
 import 'Modules/inspector/screens/bottom_nav_bar.dart';
 import 'Modules/inspector/screens/screen_auth.dart';
+import 'common_services/notification_helper.dart';
+import 'core/console.dart';
 import 'core/constants/app_colors.dart';
 import 'core/global_focus_manager.dart';
 import 'core/theme/app_theme.dart';
@@ -54,7 +57,16 @@ void main() async {
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
-
+  // Initialize FCM
+  await FCMHelper.instance.initialize(
+    onMessageReceived: (RemoteMessage message) {
+      console('Message received: ${message.notification?.title}');
+    },
+    onMessageOpenedApp: (RemoteMessage message) {
+      console('Notification opened: ${message.data}');
+      // Navigate based on message.data
+    },
+  );
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

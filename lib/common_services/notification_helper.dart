@@ -1,0 +1,370 @@
+import 'dart:convert';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import '../app_env.dart';
+import '../core/console.dart';
+
+/// Background message handler (must be top-level function)
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  console('Background message received: ${message.messageId}');
+}
+
+class FCMHelper {
+  // Singleton instance
+  static final FCMHelper _instance = FCMHelper._internal();
+  factory FCMHelper() => _instance;
+  FCMHelper._internal();
+
+  static FCMHelper get instance => _instance;
+
+  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  FirebaseMessaging get messaging => _messaging;
+
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
+  late final FirebaseFunctions _functions;
+
+  String? _fcmToken;
+  bool _isInitialized = false;
+
+  // Topic names
+  static const String adminTopic = 'admins';
+  static const String inspectorTopic = 'inspectors';
+  static const String allUsersTopic = 'all_users';
+
+  String? get fcmToken => _fcmToken;
+  bool get isInitialized => _isInitialized;
+
+  /// Initialize FCM
+  Future<void> initialize({
+    required Function(RemoteMessage) onMessageReceived,
+    Function(RemoteMessage)? onMessageOpenedApp,
+  }) async {
+    if (_isInitialized) {
+      console('FCM already initialized');
+      return;
+    }
+
+    try {
+      // Initialize Cloud Functions with region (optional)
+      _functions = FirebaseFunctions.instance;
+
+      // Use emulator in dev (optional - uncomment if using emulator)
+      if (AppEnvironment.isDev) {
+        // _functions.useFunctionsEmulator('localhost', 5001);
+      }
+
+      // Request permission (iOS)
+      await _requestPermission();
+
+      // Initialize local notifications
+      await _initializeLocalNotifications();
+
+      // Configure background handler
+      FirebaseMessaging.onBackgroundMessage(
+        _firebaseMessagingBackgroundHandler,
+      );
+
+      // Get FCM token
+      _fcmToken = await _messaging.getToken();
+      console('FCM Token: $_fcmToken');
+
+      // Listen to token refresh
+      _messaging.onTokenRefresh.listen((newToken) {
+        _fcmToken = newToken;
+        console('FCM Token refreshed: $newToken');
+      });
+
+      // Handle foreground messages
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        console('Foreground message received: ${message.messageId}');
+        _showLocalNotification(message);
+        onMessageReceived(message);
+      });
+
+      // Handle notification tap when app is in background
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        console('Notification opened app: ${message.messageId}');
+        if (onMessageOpenedApp != null) {
+          onMessageOpenedApp(message);
+        }
+      });
+
+      // Check for initial message (app opened from terminated state)
+      RemoteMessage? initialMessage = await _messaging.getInitialMessage();
+      if (initialMessage != null && onMessageOpenedApp != null) {
+        onMessageOpenedApp(initialMessage);
+      }
+
+      _isInitialized = true;
+      console('FCM initialized successfully');
+    } catch (e) {
+      console('FCM initialization error: $e');
+      rethrow;
+    }
+  }
+
+  /// Request notification permission (iOS & Android 13+)
+  Future<void> _requestPermission() async {
+    NotificationSettings settings = await _messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+
+    console('Notification permission: ${settings.authorizationStatus}');
+  }
+
+  /// Initialize local notifications for foreground display
+  Future<void> _initializeLocalNotifications() async {
+    const AndroidInitializationSettings androidSettings =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const DarwinInitializationSettings iosSettings =
+        DarwinInitializationSettings(
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
+
+    const InitializationSettings initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: iosSettings,
+    );
+
+    await _localNotifications.initialize(initSettings);
+  }
+
+  /// Show local notification for foreground messages
+  Future<void> _showLocalNotification(RemoteMessage message) async {
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'high_importance_channel',
+          'High Importance Notifications',
+          channelDescription:
+              'This channel is used for important notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+          showWhen: true,
+        );
+
+    const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _localNotifications.show(
+      message.hashCode,
+      message.notification?.title ?? 'New Notification',
+      message.notification?.body ?? '',
+      notificationDetails,
+      payload: jsonEncode(message.data),
+    );
+  }
+
+  /// Subscribe to topic
+  Future<void> subscribeToTopic(String topic) async {
+    try {
+      final envTopic = _getEnvTopic(topic);
+      await _messaging.subscribeToTopic(envTopic);
+      console('Subscribed to topic: $envTopic');
+    } catch (e) {
+      console('Failed to subscribe to topic: $e');
+    }
+  }
+
+  /// Unsubscribe from topic
+  Future<void> unsubscribeFromTopic(String topic) async {
+    try {
+      final envTopic = _getEnvTopic(topic);
+      await _messaging.unsubscribeFromTopic(envTopic);
+      console('Unsubscribed from topic: $envTopic');
+    } catch (e) {
+      console('Failed to unsubscribe from topic: $e');
+    }
+  }
+
+  /// Subscribe user based on role
+  Future<void> subscribeUserToRoleTopics(String role) async {
+    await subscribeToTopic(allUsersTopic);
+
+    if (role == 'admin') {
+      await subscribeToTopic(adminTopic);
+    } else if (role == 'inspector') {
+      await subscribeToTopic(inspectorTopic);
+    }
+  }
+
+  /// Unsubscribe from all topics
+  Future<void> unsubscribeFromAllTopics(String role) async {
+    await unsubscribeFromTopic(allUsersTopic);
+    await unsubscribeFromTopic(adminTopic);
+    await unsubscribeFromTopic(inspectorTopic);
+  }
+
+  /// Get environment-prefixed topic
+  String _getEnvTopic(String topic) {
+    final prefix = AppEnvironment.isDev ? 'dev_' : 'prod_';
+    return '$prefix$topic';
+  }
+
+  /// Send notification to specific FCM token via Cloud Function
+  Future<bool> sendNotificationToToken({
+    required String fcmToken,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      final callable = _functions.httpsCallable('sendNotificationToToken');
+
+      final result = await callable.call({
+        'fcmToken': fcmToken,
+        'title': title,
+        'body': body,
+        'data': data ?? {},
+      });
+
+      if (result.data['success'] == true) {
+        console('Notification sent: ${result.data['messageId']}');
+        return true;
+      } else {
+        console('Failed to send notification');
+        return false;
+      }
+    } catch (e) {
+      console('Error sending notification: $e');
+      return false;
+    }
+  }
+
+  /// Send notification to topic via Cloud Function
+  Future<bool> sendNotificationToTopic({
+    required String topic,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      final envTopic = _getEnvTopic(topic);
+      final callable = _functions.httpsCallable('sendNotificationToTopic');
+
+      final result = await callable.call({
+        'topic': envTopic,
+        'title': title,
+        'body': body,
+        'data': data ?? {},
+      });
+
+      if (result.data['success'] == true) {
+        console('Topic notification sent: ${result.data['messageId']}');
+        return true;
+      } else {
+        console('Failed to send topic notification');
+        return false;
+      }
+    } catch (e) {
+      console('Error sending topic notification: $e');
+      return false;
+    }
+  }
+
+  /// Send notifications to multiple tokens (batch)
+  Future<Map<String, dynamic>> sendNotificationToMultipleTokens({
+    required List<String> fcmTokens,
+    required String title,
+    required String body,
+    Map<String, dynamic>? data,
+  }) async {
+    try {
+      final callable = _functions.httpsCallable(
+        'sendNotificationToMultipleTokens',
+      );
+
+      final result = await callable.call({
+        'fcmTokens': fcmTokens,
+        'title': title,
+        'body': body,
+        'data': data ?? {},
+      });
+
+      if (result.data['success'] == true) {
+        console(
+          'Batch sent: ${result.data['successCount']} success, ${result.data['failureCount']} failed',
+        );
+        return result.data as Map<String, dynamic>;
+      } else {
+        console('Failed to send batch notification');
+        return {'success': false};
+      }
+    } catch (e) {
+      console('Error sending batch notification: $e');
+      return {'success': false, 'error': e.toString()};
+    }
+  }
+
+  /// Delete FCM token
+  Future<void> deleteToken() async {
+    try {
+      await _messaging.deleteToken();
+      _fcmToken = null;
+      console('FCM token deleted');
+    } catch (e) {
+      console('Failed to delete FCM token: $e');
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+// Send to single inspector
+// await FCMHelper.instance.sendNotificationToToken(
+//   fcmToken: 'inspector_fcm_token',
+//   title: 'New Task Assigned',
+//   body: 'You have been assigned a new inspection task',
+//   data: {
+//     'type': 'task_assigned',
+//     'taskId': '123',
+//   },
+// );
+
+// // Send to all inspectors via topic
+// await FCMHelper.instance.sendNotificationToTopic(
+//   topic: FCMHelper.inspectorTopic,
+//   title: 'Route Completed',
+//   body: 'A route has been completed successfully',
+//   data: {
+//     'type': 'route_completed',
+//     'routeId': 'route_789',
+//   },
+// );
+
+// // Send to multiple inspectors
+// final result = await FCMHelper.instance.sendNotificationToMultipleTokens(
+//   fcmTokens: ['token1', 'token2', 'token3'],
+//   title: 'Branch Update',
+//   body: 'Your branch assignments have been updated',
+//   data: {
+//     'type': 'branch_update',
+//   },
+// );
+
+// print('Sent: ${result['successCount']}, Failed: ${result['failureCount']}');

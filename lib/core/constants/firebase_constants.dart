@@ -152,6 +152,7 @@ class UserFields {
   static const String active = 'active';
   static const String region = 'region';
   static const String serviceAccount = 'serviceAccount';
+  static const String fcmTokens = 'fcmTokens';
   static const String createdAt = 'createdAt';
   static const String updatedAt = 'updatedAt';
 }

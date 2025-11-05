@@ -298,3 +298,23 @@ exports.deleteInspector = onCall(async (request) => {
     );
   }
 });
+
+// ==========================================
+// 📱 FCM NOTIFICATION FUNCTIONS
+// ==========================================
+
+// Import and export notification functions
+const notificationFunctions = require("./notifications/fcm-notifications");
+
+exports.sendNotificationToToken =
+  notificationFunctions.sendNotificationToToken;
+exports.sendNotificationToTopic =
+  notificationFunctions.sendNotificationToTopic;
+exports.sendNotificationToMultipleTokens =
+  notificationFunctions.sendNotificationToMultipleTokens;
+exports.sendCustomNotification =
+  notificationFunctions.sendCustomNotification;
+exports.subscribeToTopics =
+  notificationFunctions.subscribeToTopics;
+exports.unsubscribeFromTopics =
+  notificationFunctions.unsubscribeFromTopics;

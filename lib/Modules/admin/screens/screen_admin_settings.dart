@@ -5,125 +5,156 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admins_listing.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/app_button.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
-import '../../common/logout_dialog.dart';
+import '../../inspector/providers/provider_auth.dart';
 import '../../inspector/widgets/language_button.dart';
-import 'screen_admin_templates.dart'; // Import the screen we just completed
+import 'screen_admin_templates.dart';
 
 class ScreenAdminSettings extends StatelessWidget {
   const ScreenAdminSettings({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(),
-      persistentFooterDecoration: BoxDecoration(color: Colors.transparent),
-      persistentFooterButtons: [
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+    return Consumer<ProviderAuth>(
+      builder: (context, authProvider, child) {
+        return Scaffold(
+          appBar: CustomAppBar(),
+          persistentFooterDecoration: BoxDecoration(color: Colors.transparent),
+          persistentFooterButtons: [
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-            ],
-          ),
-
-          child: AppButton(
-            text: LocaleKeys.logout.tr(),
-
-            onPressed: () {
-              showLogoutDialog(context);
-            },
-          ),
-        ),
-      ],
-      body: Container(
-        child: SafeArea(
-          child: ListView(
-            padding: const EdgeInsets.all(24),
-            children: [
-              _buildHeader(),
-              SizedBox(height: 12),
-              _buildSectionTitle(context, LocaleKeys.inspectionManagement.tr()),
-              _buildSettingsTile(
-                context,
-                icon: Icons.description,
-                title: LocaleKeys.inspectionQuestionnaire.tr(),
-                subtitle: LocaleKeys.createModifyDeleteForms.tr(),
-                onTap: () {
-                  Navigator.push(
+              child: AppButton(
+                text: LocaleKeys.logout.tr(),
+                isLoading: authProvider.isLoading,
+                onPressed: authProvider.isLoading
+                    ? null
+                    : () => _handleLogout(context, authProvider),
+              ),
+            ),
+          ],
+          body: Container(
+            child: SafeArea(
+              child: ListView(
+                padding: const EdgeInsets.all(24),
+                children: [
+                  _buildHeader(),
+                  SizedBox(height: 12),
+                  _buildSectionTitle(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const ScreenAdminQuestionnaires(),
-                    ),
-                  );
-                },
-                color: AppColors.primaryRed,
-              ),
-              _buildSettingsTile(
-                context,
-                icon: Icons.admin_panel_settings,
-                title: LocaleKeys.manageAdmins.tr(),
-                subtitle: LocaleKeys.addEditRemoveAdmins.tr(),
-
-                color: AppColors.primaryRed,
-                onTap: () {
-                  Navigator.push(
+                    LocaleKeys.inspectionManagement.tr(),
+                  ),
+                  _buildSettingsTile(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const ScreenAdminListing(),
-                    ),
-                  );
-                },
+                    icon: Icons.description,
+                    title: LocaleKeys.inspectionQuestionnaire.tr(),
+                    subtitle: LocaleKeys.createModifyDeleteForms.tr(),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const ScreenAdminQuestionnaires(),
+                        ),
+                      );
+                    },
+                    color: AppColors.primaryRed,
+                  ),
+                  _buildSettingsTile(
+                    context,
+                    icon: Icons.admin_panel_settings,
+                    title: LocaleKeys.manageAdmins.tr(),
+                    subtitle: LocaleKeys.addEditRemoveAdmins.tr(),
+                    color: AppColors.primaryRed,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ScreenAdminListing(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildSectionTitle(context, LocaleKeys.change_language.tr()),
+                  const SizedBox(height: 6),
+                  const LanguageButton(),
+                ],
               ),
-
-              _buildSectionTitle(context, LocaleKeys.change_language.tr()),
-              const SizedBox(height: 6),
-              const LanguageButton(),
-
-              // _buildSectionTitle(context, 'User & Access'),
-              // _buildSettingsTile(
-              //   context,
-              //   icon: Icons.people,
-              //   title: 'Manage Users (Dummy)',
-              //   subtitle: 'Add, edit, or remove admin and inspector accounts.',
-              //   onTap: () {},
-              // ),
-              // _buildSettingsTile(
-              //   context,
-              //   icon: Icons.security,
-              //   title: 'Security Settings (Dummy)',
-              //   subtitle: 'Update passwords and security policies.',
-              //   onTap: () {},
-              // ),
-              // const SizedBox(height: 20),
-              // _buildSectionTitle(context, 'System'),
-              // _buildSettingsTile(
-              //   context,
-              //   icon: Icons.cloud_upload,
-              //   title: 'Backup & Restore (Dummy)',
-              //   subtitle: 'Manage cloud backup and data recovery.',
-              //   onTap: () {},
-              // ),
-              // _buildSettingsTile(
-              //   context,
-              //   icon: Icons.info_outline,
-              //   title: 'About App (Dummy)',
-              //   subtitle: 'View version, licenses, and documentation.',
-              //   onTap: () {},
-              // ),
-            ],
+            ),
           ),
+        );
+      },
+    );
+  }
+
+  Future<void> _handleLogout(
+    BuildContext context,
+    ProviderAuth authProvider,
+  ) async {
+    // Show confirmation dialog
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF212121),
+        title: Text(
+          LocaleKeys.logout.tr(),
+          style: TextStyle(color: Colors.white),
         ),
+        content: Text(
+          LocaleKeys.confirmLogoutMessage.tr(),
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              LocaleKeys.cancel.tr(),
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.primaryRed),
+            child: Text(LocaleKeys.logout.tr()),
+          ),
+        ],
       ),
     );
+
+    if (shouldLogout != true) return;
+
+    try {
+      await authProvider.logout();
+
+      // Only navigate back if logout was successful and context is still mounted
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      // Show error if logout fails
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildHeader() {
