@@ -25,7 +25,7 @@ class ProviderTasks extends ChangeNotifier {
   bool _isAddingComment = false;
 
   // Filters
-  String _statusFilter = AppConstants.all;
+  String _statusFilter = AppConstants.pending;
   String _priorityFilter = AppConstants.all;
   String _sortBy = AppConstants.dueDate;
 
