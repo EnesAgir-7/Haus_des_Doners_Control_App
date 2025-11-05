@@ -85,7 +85,6 @@ class FCMHelper {
       // System now handles display automatically via notification payload
       FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
         console('Foreground message received: ${message.messageId}');
-        console('Has notification: ${message.notification != null}');
 
         await _showLocalNotification(message);
         // Just call the callback for data handling

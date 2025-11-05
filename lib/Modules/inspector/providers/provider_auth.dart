@@ -22,8 +22,9 @@ class ProviderAuth extends ChangeNotifier {
   UserModel? userModel;
   StreamSubscription? _tokenRefreshSubscription;
 
-  // ✅ NEW: Prevent concurrent token operations
-  bool _isUpdatingToken = false;
+  // ✅ Prevent duplicate operations
+  String? _lastSyncedToken;
+  bool _isSyncing = false;
 
   ProviderAuth() {
     _loadCachedUser();
@@ -50,8 +51,7 @@ class ProviderAuth extends ChangeNotifier {
         userModel = UserModel.fromMap(cachedMap);
         loggedInUser = userModel;
 
-        // ✅ FIXED: Only start listener if FCM is initialized
-        // Don't add token here - will be handled by token refresh if needed
+        // Start listener for cached user
         if (FCMHelper.instance.isInitialized) {
           _startTokenRefreshListener();
         }
@@ -99,18 +99,15 @@ class ProviderAuth extends ChangeNotifier {
       // Subscribe to FCM topics based on role
       await FCMHelper.instance.subscribeUserToRoleTopics(userModel!.role);
 
-      // ✅ FIXED: Start listener BEFORE adding token to prevent race condition
+      // Start listener FIRST (before sync)
       _startTokenRefreshListener();
 
-      // ✅ FIXED: Add a small delay to ensure listener is active
-      await Future.delayed(const Duration(milliseconds: 100));
-
-      // Add current device's FCM token to the array
+      // Sync FCM token
       final fcmToken = FCMHelper.instance.fcmToken;
       if (fcmToken != null) {
-        await _addFCMToken(user.uid, fcmToken, userModel!.role);
+        await _syncFCMToken(user.uid, fcmToken, userModel!.role);
       } else {
-        console('FCM token not available during login', type: DebugType.alert);
+        console('⚠️ FCM token not available');
       }
 
       await LocalStorageHelper.instance.saveData(
@@ -128,173 +125,113 @@ class ProviderAuth extends ChangeNotifier {
     }
   }
 
-  /// Listen to FCM token refresh and update in Firestore
   void _startTokenRefreshListener() {
-    // ✅ FIXED: Cancel existing subscription first
+    // Cancel existing subscription
     _tokenRefreshSubscription?.cancel();
     _tokenRefreshSubscription = null;
 
-    // Only listen if user is logged in and FCM is initialized
-    if (userModel != null && FCMHelper.instance.isInitialized) {
-      console('🎧 Starting FCM token refresh listener');
+    if (userModel == null || !FCMHelper.instance.isInitialized) return;
 
-      _tokenRefreshSubscription = FCMHelper.instance.messaging.onTokenRefresh
-          .listen((newToken) async {
-            console('🔄 FCM token refreshed: $newToken');
+    console('🎧 Token listener started');
 
-            if (userModel != null && !_isUpdatingToken) {
-              // Get old token to replace it
-              final oldToken = FCMHelper.instance.fcmToken;
-              if (oldToken != null && oldToken != newToken) {
-                await _replaceFCMToken(
-                  userModel!.id,
-                  oldToken,
-                  newToken,
-                  userModel!.role,
-                );
-              } else {
-                await _addFCMToken(userModel!.id, newToken, userModel!.role);
-              }
-            }
-          });
-    }
+    _tokenRefreshSubscription = FCMHelper.instance.messaging.onTokenRefresh
+        .listen((newToken) async {
+          // ✅ Skip if we just synced this token
+          if (newToken == _lastSyncedToken) {
+            console('⏭️ Token already synced, skipping');
+            return;
+          }
+
+          console('🔄 Token refresh: $newToken');
+          if (userModel != null) {
+            await _syncFCMToken(userModel!.id, newToken, userModel!.role);
+          }
+        });
   }
 
-  /// Add FCM token to the user's token array (multi-device support)
-  Future<void> _addFCMToken(String uid, String token, String role) async {
-    // ✅ FIXED: Prevent concurrent operations
-    if (_isUpdatingToken) {
-      console('⏳ Token update already in progress, skipping...');
+  /// ✅ OPTIMIZED: Single sync method with guards
+  Future<void> _syncFCMToken(String uid, String token, String role) async {
+    // ✅ Guard 1: Already syncing
+    if (_isSyncing) {
+      console('⏳ Sync in progress, skipping');
       return;
     }
 
-    _isUpdatingToken = true;
+    // ✅ Guard 2: Token already synced
+    if (_lastSyncedToken == token &&
+        userModel?.fcmTokens?.contains(token) == true) {
+      console('✓ Token already synced');
+      return;
+    }
+
+    _isSyncing = true;
 
     try {
       final collection = role == 'admin'
           ? Collections.admins
           : Collections.inspectors;
 
-      // ✅ FIXED: Use transaction to prevent race conditions
-      await _firestore.runTransaction((transaction) async {
+      // ✅ Single transaction (fast & atomic)
+      final needsUpdate = await _firestore.runTransaction<bool>((
+        transaction,
+      ) async {
         final docRef = _firestore.collection(collection).doc(uid);
         final doc = await transaction.get(docRef);
 
         if (!doc.exists) {
-          console('❌ User document not found', type: DebugType.error);
-          return;
+          console('❌ User doc not found');
+          return false;
         }
 
         final currentTokens = List<String>.from(
           doc.data()?[UserFields.fcmTokens] ?? [],
         );
 
-        if (currentTokens.contains(token)) {
-          console('ℹ️ FCM token already exists, skipping add');
-          return;
+        // ✅ Remove duplicates + add current token
+        final uniqueTokens = {...currentTokens, token}.toList();
+
+        // ✅ Only update if changed
+        if (uniqueTokens.length == currentTokens.length &&
+            currentTokens.contains(token)) {
+          console('✓ No update needed');
+          return false;
         }
 
-        // Add token
-        currentTokens.add(token);
-
         transaction.update(docRef, {
-          UserFields.fcmTokens: currentTokens,
+          UserFields.fcmTokens: uniqueTokens,
           UserFields.updatedAt: FieldValue.serverTimestamp(),
         });
 
-        console('✅ FCM token added successfully for user: $uid');
+        // ✅ Update local models inside transaction
+        userModel?.fcmTokens = List.from(uniqueTokens);
+        loggedInUser?.fcmTokens = List.from(uniqueTokens);
+
+        console('✅ Synced: ${uniqueTokens.length} tokens');
+        return true;
       });
 
-      // ✅ Update local models AFTER successful Firestore update
-      if (!userModel!.fcmTokens!.contains(token)) {
-        userModel?.fcmTokens?.add(token);
-        loggedInUser?.fcmTokens?.add(token);
+      // ✅ Save to cache only if updated
+      if (needsUpdate && userModel != null) {
         await LocalStorageHelper.instance.saveData(
           cacheUserKey,
           userModel!.toMap(),
         );
+        _lastSyncedToken = token;
+        console('💾 Cache updated');
       }
     } catch (e) {
-      console('❌ Failed to add FCM token: $e', type: DebugType.error);
+      console('❌ Sync failed: $e');
     } finally {
-      _isUpdatingToken = false;
+      _isSyncing = false;
     }
   }
 
-  Future<void> _replaceFCMToken(
-    String uid,
-    String oldToken,
-    String newToken,
-    String role,
-  ) async {
-    // ✅ FIXED: Prevent concurrent operations
-    if (_isUpdatingToken) {
-      console('⏳ Token update already in progress, skipping...');
-      return;
-    }
-
-    _isUpdatingToken = true;
-
-    try {
-      final collection = role == 'admin'
-          ? Collections.admins
-          : Collections.inspectors;
-
-      // ✅ FIXED: Use transaction for atomic operation
-      await _firestore.runTransaction((transaction) async {
-        final docRef = _firestore.collection(collection).doc(uid);
-        final doc = await transaction.get(docRef);
-
-        if (!doc.exists) {
-          console('❌ User document not found', type: DebugType.error);
-          return;
-        }
-
-        final currentTokens = List<String>.from(
-          doc.data()?[UserFields.fcmTokens] ?? [],
-        );
-
-        // Remove old token and add new one
-        currentTokens.remove(oldToken);
-        if (!currentTokens.contains(newToken)) {
-          currentTokens.add(newToken);
-        }
-
-        transaction.update(docRef, {
-          UserFields.fcmTokens: currentTokens,
-          UserFields.updatedAt: FieldValue.serverTimestamp(),
-        });
-
-        console('✅ FCM token replaced successfully for user: $uid');
-      });
-
-      // ✅ Update local models
-      userModel?.fcmTokens?.remove(oldToken);
-      loggedInUser?.fcmTokens?.remove(oldToken);
-      if (!userModel!.fcmTokens!.contains(newToken)) {
-        userModel?.fcmTokens?.add(newToken);
-        loggedInUser?.fcmTokens?.add(newToken);
-      }
-
-      await LocalStorageHelper.instance.saveData(
-        cacheUserKey,
-        userModel!.toMap(),
-      );
-    } catch (e) {
-      console('❌ Failed to replace FCM token: $e', type: DebugType.error);
-    } finally {
-      _isUpdatingToken = false;
-    }
-  }
-
-  /// Remove only the current device's FCM token
   Future<void> _removeFCMToken(String uid, String token, String role) async {
     try {
       final collection = role == 'admin'
           ? Collections.admins
           : Collections.inspectors;
 
-      // ✅ Use transaction for consistency
       await _firestore.runTransaction((transaction) async {
         final docRef = _firestore.collection(collection).doc(uid);
         final doc = await transaction.get(docRef);
@@ -305,25 +242,32 @@ class ProviderAuth extends ChangeNotifier {
           doc.data()?[UserFields.fcmTokens] ?? [],
         );
 
-        currentTokens.remove(token);
+        if (!currentTokens.contains(token)) {
+          console('✓ Token already removed');
+          return;
+        }
+
+        final updatedTokens = currentTokens.where((t) => t != token).toList();
 
         transaction.update(docRef, {
-          UserFields.fcmTokens: currentTokens,
+          UserFields.fcmTokens: updatedTokens,
           UserFields.updatedAt: FieldValue.serverTimestamp(),
         });
+
+        userModel?.fcmTokens = List.from(updatedTokens);
+        loggedInUser?.fcmTokens = List.from(updatedTokens);
+
+        console('✅ Token removed: ${updatedTokens.length} left');
       });
 
-      // Update local models
-      userModel?.fcmTokens?.remove(token);
-      loggedInUser?.fcmTokens?.remove(token);
-      await LocalStorageHelper.instance.saveData(
-        cacheUserKey,
-        userModel!.toMap(),
-      );
-
-      console('✅ FCM token removed successfully for user: $uid');
+      if (userModel != null) {
+        await LocalStorageHelper.instance.saveData(
+          cacheUserKey,
+          userModel!.toMap(),
+        );
+      }
     } catch (e) {
-      console('❌ Failed to remove FCM token: $e', type: DebugType.error);
+      console('❌ Remove failed: $e');
     }
   }
 
@@ -332,7 +276,7 @@ class ProviderAuth extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // ✅ Cancel token refresh listener FIRST
+      // Cancel listener
       await _tokenRefreshSubscription?.cancel();
       _tokenRefreshSubscription = null;
 
@@ -341,7 +285,7 @@ class ProviderAuth extends ChangeNotifier {
         await FCMHelper.instance.unsubscribeFromAllTopics(userModel!.role);
       }
 
-      // Remove ONLY current device's FCM token (not all tokens!)
+      // Remove current token
       final currentToken = FCMHelper.instance.fcmToken;
       if (userModel != null && currentToken != null) {
         await _removeFCMToken(userModel!.id, currentToken, userModel!.role);
@@ -349,10 +293,14 @@ class ProviderAuth extends ChangeNotifier {
 
       userModel = null;
       loggedInUser = null;
+      _lastSyncedToken = null;
+
       await _authHelper.signOut();
       await LocalStorageHelper.instance.removeData(cacheUserKey);
+
+      console('✅ Logout complete');
     } catch (e) {
-      console('❌ Logout error: $e', type: DebugType.error);
+      console('❌ Logout error: $e');
       rethrow;
     } finally {
       _isLoading = false;

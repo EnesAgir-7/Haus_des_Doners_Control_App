@@ -11,7 +11,7 @@ class UserModel {
   final String createdAt;
   final String updatedAt;
   final String serviceAccount;
-  final List<String>? fcmTokens; // ✅ Changed from String? to List<String>?
+  List<String>? fcmTokens; // ✅ Changed from String? to List<String>?
 
   UserModel({
     required this.id,

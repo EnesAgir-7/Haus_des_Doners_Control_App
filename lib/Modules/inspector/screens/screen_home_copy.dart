@@ -1,8 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/common/fadded_divider.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_bottom_nav_bar.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_branches.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
@@ -94,6 +96,7 @@ class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
 
                   // SECTION 1: TOTAL ASSIGNMENTS (Static Overview)
                   const OverviewSection(),
+                  FadedDivider(color: AppColors.primaryRed, height: 5),
 
                   // SECTION 2: PERFORMANCE METRICS (Dynamic with Time Filter)
                   Consumer<ProviderPanel>(
@@ -102,6 +105,7 @@ class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
                     },
                   ),
 
+                  FadedDivider(color: AppColors.primaryRed, height: 5),
                   // SECTION 3: TODAY'S ROUTE PLAN (with progress)
                   const RoutePlanSection(),
                   SizedBox(height: 10),
@@ -144,21 +148,26 @@ class UserInfoHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primaryRed.withValues(alpha: 0.25),
-                  AppColors.primaryRed.withValues(alpha: 0.15),
-                ],
+          InkWell(
+            onTap: () {
+              console(loggedInUser!.fcmTokens?.toList());
+            },
+            child: Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primaryRed.withValues(alpha: 0.25),
+                    AppColors.primaryRed.withValues(alpha: 0.15),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16),
               ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              Icons.person_outline,
-              color: AppColors.primaryRed,
-              size: 28,
+              child: Icon(
+                Icons.person_outline,
+                color: AppColors.primaryRed,
+                size: 28,
+              ),
             ),
           ),
           const SizedBox(width: 16),
