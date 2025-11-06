@@ -190,9 +190,9 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
     final remainingKm = maxKm - currentKm;
 
     // ✅ FIXED: Calculate remaining percentage correctly
-    final remainingPercent = maxKm > 0
-        ? ((remainingKm / maxKm) * 100).clamp(0, 100).toInt()
-        : 0;
+    // final remainingPercent = maxKm > 0
+    //     ? ((remainingKm / maxKm) * 100).clamp(0, 100).toInt()
+    //     : 0;
 
     return _buildSection(
       title: LocaleKeys.mileageDetails.tr(),
@@ -253,11 +253,11 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
           icon: Icons.trending_down,
           color: remainingKm < 1000 ? Colors.red : Colors.orange,
         ),
-        const SizedBox(height: 16),
-        _buildProgressCard(
-          label: "${LocaleKeys.remaining.tr()} %",
-          percent: remainingPercent,
-        ),
+        // const SizedBox(height: 16),
+        // _buildProgressCard(
+        //   label: "${LocaleKeys.remaining.tr()} %",
+        //   percent: remainingPercent,
+        // ),
       ],
     );
   }
@@ -632,60 +632,60 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
     );
   }
 
-  Widget _buildProgressCard({required String label, required int percent}) {
-    Color progressColor;
-    if (percent < 50) {
-      progressColor = Colors.green;
-    } else if (percent < 80) {
-      progressColor = Colors.orange;
-    } else {
-      progressColor = Colors.red;
-    }
+  // Widget _buildProgressCard({required String label, required int percent}) {
+  //   Color progressColor;
+  //   if (percent < 50) {
+  //     progressColor = Colors.green;
+  //   } else if (percent < 80) {
+  //     progressColor = Colors.orange;
+  //   } else {
+  //     progressColor = Colors.red;
+  //   }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12,
-                ),
-              ),
-              Text(
-                '$percent%',
-                style: TextStyle(
-                  color: progressColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: LinearProgressIndicator(
-              value: percent / 100,
-              backgroundColor: Colors.white.withValues(alpha: 0.1),
-              valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-              minHeight: 8,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(
+  //       color: Colors.white.withValues(alpha: 0.05),
+  //       borderRadius: BorderRadius.circular(12),
+  //       border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+  //     ),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             Text(
+  //               label,
+  //               style: TextStyle(
+  //                 color: Colors.white.withValues(alpha: 0.6),
+  //                 fontSize: 12,
+  //               ),
+  //             ),
+  //             Text(
+  //               '$percent%',
+  //               style: TextStyle(
+  //                 color: progressColor,
+  //                 fontSize: 18,
+  //                 fontWeight: FontWeight.bold,
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         const SizedBox(height: 12),
+  //         ClipRRect(
+  //           borderRadius: BorderRadius.circular(8),
+  //           child: LinearProgressIndicator(
+  //             value: percent / 100,
+  //             backgroundColor: Colors.white.withValues(alpha: 0.1),
+  //             valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+  //             minHeight: 8,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildSaveButton() {
     return AppButton(

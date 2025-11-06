@@ -62,6 +62,8 @@ Text(LocaleKeys.welcome.tr()); // ✅ Translated text
 # For Building APKs: 
 # Android
 flutter build apk --dart-define=environment=prod --dart-define-from-file=config/prod.json
+flutter build apk --dart-define=environment=dev --dart-define-from-file=config/dev.json
+
 # iOS
 flutter build ios --dart-define=environment=prod --dart-define-from-file=config/prod.json
 
