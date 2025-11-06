@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import '../../../common_services/notification_helper.dart';
+import '../../../core/console.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/vehicle_model.dart';
 import '../../../translations/locale_keys.g.dart';
@@ -69,7 +72,7 @@ class InspectorVehicleService {
           ? ((remainingKm / maxKm) * 100).clamp(0, 100).toInt()
           : 0;
 
-      // Update vehicle
+      // Update vehicle in Firestore
       await vehicleRef.update({
         VehicleFields.currentKm: newKm,
         VehicleFields.remainingKm: remainingKm,
@@ -77,11 +80,37 @@ class InspectorVehicleService {
         VehicleFields.updatedAt: FieldValue.serverTimestamp(),
       });
 
-      print(
-        '✅ Vehicle $vehicleId kilometers updated to $newKm km by inspector',
-      );
+      console('✅ Vehicle $vehicleId kilometers updated to $newKm km');
+
+      // ✅ Send notification to all admins
+      try {
+        await FCMHelper.instance.sendNotificationToTopic(
+          topic: AppConstants.adminTopic,
+          title: LocaleKeys.vehicle_km_updated_title.tr(),
+          body: LocaleKeys.vehicle_km_updated_body.tr(
+            namedArgs: {
+              'newKm': newKm.toString(),
+              'remainingKm': remainingKm.toString(),
+            },
+          ),
+          data: {
+            'type': 'vehicle_km_updated',
+            'vehicleId': vehicleId,
+            'newKm': newKm,
+            'remainingKm': remainingKm,
+          },
+        );
+      } catch (notificationError) {
+        // Don't block operation if notification fails
+        console(
+          '⚠️ Failed to send vehicle KM notification: $notificationError',
+        );
+      }
     } catch (e, st) {
-      print("❌ Error updating vehicle kilometers: $e\n$st");
+      console(
+        '❌ Error updating vehicle kilometers: $e\n$st',
+        type: DebugType.error,
+      );
       rethrow;
     }
   }

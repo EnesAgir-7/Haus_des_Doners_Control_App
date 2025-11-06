@@ -1,5 +1,3 @@
-
-
 class AppConstants {
   static const inspector = "inspector";
   static const admin = "admin";
@@ -30,5 +28,8 @@ class AppConstants {
   static const branch = "branch";
   static const delete = "delete";
   static const edit = "edit";
-}
 
+  static const adminTopic = 'admins';
+  static const inspectorTopic = 'inspectors';
+  static const allUsersTopic = 'all_users';
+}

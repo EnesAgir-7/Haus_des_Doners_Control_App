@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_branches.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
+import 'package:haus_des_control/Modules/common/fadded_divider.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -77,6 +78,7 @@ class _ScreenAdminHomeState extends State<ScreenAdminHome>
               children: [
                 const SizedBox(height: 24),
                 DashboardCard(),
+                FadedDivider(),
                 const SizedBox(height: 24),
                 const InspectionSection(),
                 const SizedBox(height: 24),
@@ -96,25 +98,25 @@ class DashboardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.lightBlack,
-            AppColors.lightBlack.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      // decoration: BoxDecoration(
+      //   gradient: LinearGradient(
+      //     begin: Alignment.topLeft,
+      //     end: Alignment.bottomRight,
+      //     colors: [
+      //       AppColors.lightBlack,
+      //       AppColors.lightBlack.withValues(alpha: 0.8),
+      //     ],
+      //   ),
+      //   borderRadius: BorderRadius.circular(24),
+      //   border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      //   boxShadow: [
+      //     BoxShadow(
+      //       color: Colors.black.withValues(alpha: 0.3),
+      //       blurRadius: 20,
+      //       offset: const Offset(0, 10),
+      //     ),
+      //   ],
+      // ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -189,7 +191,9 @@ class DashboardCard extends StatelessWidget {
                       context.read<AdminBottomNavProvider>().onItemTapped(2);
                     },
                     textSize: isLoading ? 10 : 28,
-                    number: isLoading ? LocaleKeys.loading.tr() : count.toString(),
+                    number: isLoading
+                        ? LocaleKeys.loading.tr()
+                        : count.toString(),
                     label: LocaleKeys.total_branches.tr(),
                     icon: Icons.apartment_outlined,
                     color: Colors.blue,
@@ -210,7 +214,9 @@ class DashboardCard extends StatelessWidget {
                       context.read<AdminBottomNavProvider>().onItemTapped(1);
                     },
                     textSize: isLoading ? 10 : 28,
-                    number: isLoading ? LocaleKeys.loading.tr() : count.toString(),
+                    number: isLoading
+                        ? LocaleKeys.loading.tr()
+                        : count.toString(),
                     label: LocaleKeys.total_users.tr(),
                     icon: Icons.people_outline,
                     color: Colors.green,
@@ -231,7 +237,9 @@ class DashboardCard extends StatelessWidget {
                       context.read<AdminBottomNavProvider>().onItemTapped(4);
                     },
                     textSize: isLoading ? 10 : 28,
-                    number: isLoading ? LocaleKeys.loading.tr() : count.toString(),
+                    number: isLoading
+                        ? LocaleKeys.loading.tr()
+                        : count.toString(),
                     label: LocaleKeys.total_tasks.tr(),
                     icon: Icons.task_outlined,
                     color: Colors.orange,
@@ -252,7 +260,9 @@ class DashboardCard extends StatelessWidget {
                       context.read<AdminBottomNavProvider>().onItemTapped(3);
                     },
                     textSize: isLoading ? 10 : 28,
-                    number: isLoading ? LocaleKeys.loading.tr() : count.toString(),
+                    number: isLoading
+                        ? LocaleKeys.loading.tr()
+                        : count.toString(),
                     label: LocaleKeys.total_fleet.tr(),
                     icon: Icons.directions_car_outlined,
                     color: AppColors.amber,

@@ -163,7 +163,6 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
             assignedInspectorId: _currentTask.assignedInspectorId,
             assignedInspectorName: _currentTask.assignedInspectorName,
             relatedBranchId: _currentTask.relatedBranchId,
-            relatedInspectionId: _currentTask.relatedInspectionId,
             status: _currentTask.status,
             priority: _currentTask.priority,
             dueDate: _currentTask.dueDate,
@@ -204,7 +203,11 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
         tasksProvider.addCommentPhoto(photo);
       }
 
-      final comment = await tasksProvider.addComment(_currentTask.id, context);
+      final comment = await tasksProvider.addComment(
+        _currentTask.id,
+        context,
+        _currentTask.assignedInspectorId,
+      );
 
       if (comment != null) {
         setState(() {
@@ -215,7 +218,6 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
             assignedInspectorId: _currentTask.assignedInspectorId,
             assignedInspectorName: _currentTask.assignedInspectorName,
             relatedBranchId: _currentTask.relatedBranchId,
-            relatedInspectionId: _currentTask.relatedInspectionId,
             status: _currentTask.status,
             priority: _currentTask.priority,
             dueDate: _currentTask.dueDate,
@@ -467,6 +469,7 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
                                     .read<ProviderAdminTasks>();
                                 final success = await tasksProvider.deleteTask(
                                   _currentTask.id,
+                                  context,
                                 );
                                 if (success) {
                                   showSnakBarr(

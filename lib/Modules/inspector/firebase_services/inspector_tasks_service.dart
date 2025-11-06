@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
+import '../../../common_services/notification_helper.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/task_model.dart';
+import '../../../translations/locale_keys.g.dart';
 
 class InspectorTaskService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -51,8 +54,30 @@ class InspectorTaskService {
 
       // 3️⃣ Commit the batch
       await batch.commit();
-    } catch (e) {
-      print('Error updating task status: $e');
+      console('✅ Task $taskId status updated to $newStatus');
+
+      // 4️⃣ Send notification to admins (topic)
+      try {
+        await FCMHelper.instance.sendNotificationToTopic(
+          topic: AppConstants.adminTopic,
+          title: LocaleKeys.task_status_updated.tr(),
+          body: LocaleKeys.task_status_body.tr(
+            namedArgs: {'status': newStatus},
+          ),
+          data: {
+            'type': 'task_updated',
+            'taskId': taskId,
+            'newStatus': newStatus,
+          },
+        );
+      } catch (notificationError) {
+        // Do not block the operation if notification fails
+        console(
+          '⚠️ Failed to send task status notification: $notificationError',
+        );
+      }
+    } catch (e, st) {
+      console('❌ Error updating task status: $e\n$st', type: DebugType.error);
       rethrow;
     }
   }

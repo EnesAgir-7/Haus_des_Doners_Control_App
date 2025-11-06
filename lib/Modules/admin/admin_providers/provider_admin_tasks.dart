@@ -139,14 +139,18 @@ class ProviderAdminTasks extends ChangeNotifier {
 
   // Update task status
 
-  Future<bool> updateTask(String taskId, Map<String, dynamic> data) async {
+  Future<bool> updateTask(
+    String taskId,
+    Map<String, dynamic> data,
+    BuildContext context,
+  ) async {
     try {
       _isUpdating = true;
       _errorMessage = null;
       notifyListeners();
 
       // Service handles all batch operations and history updates
-      await _taskAdminService.updateTask(taskId, data);
+      await _taskAdminService.updateTask(taskId, data, context);
 
       _isUpdating = false;
       notifyListeners();
@@ -191,6 +195,7 @@ class ProviderAdminTasks extends ChangeNotifier {
   Future<TaskCommentModel?> addComment(
     String taskId,
     BuildContext context,
+    String inspectorId, 
   ) async {
     final commentText = commentController.text.trim();
 
@@ -218,14 +223,14 @@ class ProviderAdminTasks extends ChangeNotifier {
       final comment = TaskCommentModel(
         id: commentId, // ✅ UPDATED: Use generated unique ID instead of taskId
         userId: loggedInUser!.id,
-        userName: loggedInUser?.name ?? LocaleKeys.inspector.tr() ,
+        userName: loggedInUser?.name ?? LocaleKeys.inspector.tr(),
         text: commentText,
         timestamp: DateTime.now(),
         photos: photoUrls,
       );
 
       // Save comment in backend
-      await _taskAdminService.addTaskComment(taskId, comment);
+      await _taskAdminService.addTaskComment(taskId, comment, inspectorId );
 
       _isAddingComment = false;
       notifyListeners();
@@ -255,6 +260,7 @@ class ProviderAdminTasks extends ChangeNotifier {
     String status = AppConstants.pending,
     String priority = AppConstants.medium,
     DateTime? dueDate,
+    required BuildContext context,
   }) async {
     try {
       _isUpdating = true;
@@ -269,7 +275,6 @@ class ProviderAdminTasks extends ChangeNotifier {
         assignedInspectorId: assignedInspectorId,
         assignedInspectorName: assignedInspectorName,
         relatedBranchId: relatedBranchId,
-        relatedInspectionId: relatedInspectionId,
         status: status,
         priority: priority,
         dueDate: dueDate,
@@ -279,7 +284,7 @@ class ProviderAdminTasks extends ChangeNotifier {
       );
 
       // Service handles all batch operations and history updates
-      await _taskAdminService.createTask(task);
+      await _taskAdminService.createTask(task, context);
 
       _isUpdating = false;
       notifyListeners();
@@ -292,12 +297,12 @@ class ProviderAdminTasks extends ChangeNotifier {
     }
   }
 
-  Future<bool> deleteTask(String taskId) async {
+  Future<bool> deleteTask(String taskId, BuildContext context) async {
     try {
       _isUpdating = true;
       notifyListeners();
 
-      await _taskAdminService.deleteTask(taskId);
+      await _taskAdminService.deleteTask(taskId, context);
 
       _isUpdating = false;
       notifyListeners();

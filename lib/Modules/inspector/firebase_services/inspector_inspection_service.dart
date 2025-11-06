@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 
+import '../../../common_services/notification_helper.dart';
+import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../models/inspection_model.dart';
 import '../../../models/inspection_template_model.dart';
@@ -199,6 +202,24 @@ class InspectorInspectionService {
       );
 
       await batch.commit();
+      if (loggedInUser?.fcmTokens != null &&
+          loggedInUser!.fcmTokens!.isNotEmpty) {
+        await FCMHelper.instance.sendNotificationToTopic(
+          topic: AppConstants
+              .adminTopic, // or AppConstants.allUsersTopic if shared
+          title: LocaleKeys.newInspectionSubmitted.tr(),
+          body: LocaleKeys.newInspectionBody.tr().replaceFirst(
+            '{branchName}',
+            inspection.branchName,
+          ),
+          data: {
+            'type': 'inspection_submitted',
+            'branchId': inspection.branchId,
+          },
+        );
+      } else {
+        console('⚠️ No FCM tokens available for the logged-in user.');
+      }
 
       return docRef.id;
     } catch (e, st) {

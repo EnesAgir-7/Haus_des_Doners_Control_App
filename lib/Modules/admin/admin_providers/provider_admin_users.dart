@@ -178,11 +178,15 @@ class ProviderAdminUsers extends ChangeNotifier {
   Future<void> unassignBranchFromInspector(
     String branchId,
     String inspectionId,
+    String branchName,
+    BuildContext context,
   ) async {
     try {
       _isLoading = true;
       notifyListeners();
       await _branchService.removeBranchFromInspector(
+        branchName: branchName,
+        context: context,
         branchId: branchId,
         inspectorId: inspectionId,
       );

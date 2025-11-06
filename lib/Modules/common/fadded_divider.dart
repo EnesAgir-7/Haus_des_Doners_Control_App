@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/app_colors.dart';
 
 class FadedDivider extends StatelessWidget {
   final double thickness;
@@ -9,7 +10,7 @@ class FadedDivider extends StatelessWidget {
     super.key,
     this.thickness = 2,
     this.height = 24,
-    this.color = Colors.grey,
+    this.color = AppColors.primaryRed,
   });
 
   @override

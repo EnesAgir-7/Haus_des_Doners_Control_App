@@ -33,10 +33,6 @@ class FCMHelper {
   String? _fcmToken;
   bool _isInitialized = false;
 
-  // Topic names
-  static const String adminTopic = 'admins';
-  static const String inspectorTopic = 'inspectors';
-  static const String allUsersTopic = 'all_users';
 
   String? get fcmToken => _fcmToken;
   bool get isInitialized => _isInitialized;
@@ -251,21 +247,21 @@ class FCMHelper {
 
   /// Subscribe user based on role
   Future<void> subscribeUserToRoleTopics(String role) async {
-    await subscribeToTopic(allUsersTopic);
+    await subscribeToTopic(AppConstants.allUsersTopic);
 
     if (role == AppConstants.admin) {
-      await subscribeToTopic(adminTopic);
+      await subscribeToTopic(AppConstants.adminTopic);
     } else if (role == AppConstants.inspector) {
-      await subscribeToTopic(inspectorTopic);
+      await subscribeToTopic(AppConstants.inspectorTopic);
     }
   }
 
   /// Unsubscribe from all topics
   Future<void> unsubscribeFromAllTopics(String role) async {
-    await unsubscribeFromTopic(allUsersTopic);
-    if (role == AppConstants.admin) await unsubscribeFromTopic(adminTopic);
+    await unsubscribeFromTopic(AppConstants.allUsersTopic);
+    if (role == AppConstants.admin) await unsubscribeFromTopic(AppConstants.adminTopic);
     if (role == AppConstants.inspector)
-      await unsubscribeFromTopic(inspectorTopic);
+      await unsubscribeFromTopic(AppConstants.inspectorTopic);
   }
 
   /// Get environment-prefixed topic

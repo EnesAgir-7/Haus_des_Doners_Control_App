@@ -33,25 +33,25 @@ class _InspectionSectionState extends State<InspectionSection> {
     return Container(
       margin: const EdgeInsets.only(bottom: 30),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.lightBlack,
-            AppColors.lightBlack.withValues(alpha: 0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      // decoration: BoxDecoration(
+      //   gradient: LinearGradient(
+      //     colors: [
+      //       AppColors.lightBlack,
+      //       AppColors.lightBlack.withValues(alpha: 0.8),
+      //     ],
+      //     begin: Alignment.topLeft,
+      //     end: Alignment.bottomRight,
+      //   ),
+      //   borderRadius: BorderRadius.circular(24),
+      //   border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      //   boxShadow: [
+      //     BoxShadow(
+      //       color: Colors.black.withValues(alpha: 0.3),
+      //       blurRadius: 20,
+      //       offset: const Offset(0, 10),
+      //     ),
+      //   ],
+      // ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -59,8 +59,8 @@ class _InspectionSectionState extends State<InspectionSection> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-               Text(
-               LocaleKeys.recentInspections.tr(), 
+              Text(
+                LocaleKeys.recentInspections.tr(),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -99,7 +99,7 @@ class _InspectionSectionState extends State<InspectionSection> {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        LocaleKeys.viewAll.tr(), 
+                        LocaleKeys.viewAll.tr(),
                         style: TextStyle(
                           color: AppColors.primaryRed,
                           fontWeight: FontWeight.w600,
@@ -131,7 +131,7 @@ class _InspectionSectionState extends State<InspectionSection> {
                 return Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                    LocaleKeys.failedToLoadInspections.tr(), 
+                    LocaleKeys.failedToLoadInspections.tr(),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 13,
@@ -146,7 +146,7 @@ class _InspectionSectionState extends State<InspectionSection> {
                 return Padding(
                   padding: const EdgeInsets.all(12),
                   child: Text(
-                   LocaleKeys.noRecentInspections.tr(), 
+                    LocaleKeys.noRecentInspections.tr(),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 13,

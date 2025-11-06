@@ -769,5 +769,37 @@ abstract class  LocaleKeys {
   static const overview = 'overview';
   static const time_based_metrics = 'time_based_metrics';
   static const todays_schedule = 'todays_schedule';
+  static const routeAssigned = 'routeAssigned';
+  static const routeAssignedBody = 'routeAssignedBody';
+  static const newInspectionSubmitted = 'newInspectionSubmitted';
+  static const newInspectionBody = 'newInspectionBody';
+  static const task_status_updated = 'task_status_updated';
+  static const task_status_body = 'task_status_body';
+  static const vehicle_km_updated_title = 'vehicle_km_updated_title';
+  static const vehicle_km_updated_body = 'vehicle_km_updated_body';
+  static const branch_unassigned_title = 'branch_unassigned_title';
+  static const branch_unassigned_body = 'branch_unassigned_body';
+  static const branch_assigned_title = 'branch_assigned_title';
+  static const branch_assigned_body = 'branch_assigned_body';
+  static const task_assigned_title = 'task_assigned_title';
+  static const task_assigned_body = 'task_assigned_body';
+  static const task_completed_title = 'task_completed_title';
+  static const task_completed_body = 'task_completed_body';
+  static const task_updated_title = 'task_updated_title';
+  static const task_updated_body = 'task_updated_body';
+  static const task_unassigned_title = 'task_unassigned_title';
+  static const task_unassigned_body = 'task_unassigned_body';
+  static const task_status_changed_title = 'task_status_changed_title';
+  static const task_status_changed_body = 'task_status_changed_body';
+  static const task_deleted_title = 'task_deleted_title';
+  static const task_deleted_body = 'task_deleted_body';
+  static const task_deleted_admin_title = 'task_deleted_admin_title';
+  static const task_deleted_admin_body = 'task_deleted_admin_body';
+  static const task_comment_added_title = 'task_comment_added_title';
+  static const task_comment_added_body = 'task_comment_added_body';
+  static const branch_deleted_title = 'branch_deleted_title';
+  static const branch_deleted_body = 'branch_deleted_body';
+  static const vehicle_deleted_title = 'vehicle_deleted_title';
+  static const vehicle_deleted_body = 'vehicle_deleted_body';
 
 }

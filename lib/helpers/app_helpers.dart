@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
+import 'package:provider/provider.dart';
 
 import '../core/constants/app_colors.dart';
 
@@ -169,4 +171,14 @@ Future<String?> pickRouteDate(
       );
     },
   );
+}
+
+
+List<String> getInspectorTokens(String inspectorId, BuildContext context) {
+  final inspector =  context.read<ProviderAdminUsers>().inspectors.firstWhere(
+    (e) => e.id == inspectorId,
+    // orElse: () => null,
+  );
+  if (inspector.fcmTokens == null) return [];
+  return List<String>.from(inspector.fcmTokens!);
 }

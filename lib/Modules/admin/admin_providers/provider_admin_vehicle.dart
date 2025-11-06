@@ -90,9 +90,11 @@ class ProviderAdminVehicles extends ChangeNotifier {
     DateTime? lastServiceDate,
     DateTime? nextServiceDue,
     required int maxKm,
+    required BuildContext context,
   }) async {
     try {
       await _vehicleService.updateVehicleWithBatch(
+        context: context,
         vehicleId: vehicleId,
         newKm: newKm,
         newPlate: newPlate,
@@ -148,6 +150,7 @@ class ProviderAdminVehicles extends ChangeNotifier {
     try {
       await _vehicleService.deleteVehicle(
         vehicleId: vehicleId,
+        context: context,
         inspectorId: inspectorId,
       );
 

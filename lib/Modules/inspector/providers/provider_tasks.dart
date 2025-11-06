@@ -129,7 +129,6 @@ class ProviderTasks extends ChangeNotifier {
           assignedInspectorId: _tasks[index].assignedInspectorId,
           assignedInspectorName: _tasks[index].assignedInspectorName,
           relatedBranchId: _tasks[index].relatedBranchId,
-          relatedInspectionId: _tasks[index].relatedInspectionId,
           status: newStatus,
           priority: _tasks[index].priority,
           dueDate: _tasks[index].dueDate,

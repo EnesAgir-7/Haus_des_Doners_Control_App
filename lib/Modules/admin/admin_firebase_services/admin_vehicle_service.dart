@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 
+import '../../../common_services/notification_helper.dart';
 import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
+import '../../../helpers/app_helpers.dart';
 import '../../../models/vehicle_model.dart';
 import 'admin_user_service.dart';
 
@@ -25,7 +28,7 @@ class AdminVehicleService {
         );
   }
 
-Future<void> updateVehicleWithBatch({
+  Future<void> updateVehicleWithBatch({
     required String vehicleId,
     int? newKm,
     String? newPlate,
@@ -36,12 +39,13 @@ Future<void> updateVehicleWithBatch({
     DateTime? lastServiceDate,
     DateTime? nextServiceDue,
     required int maxKm,
+    required BuildContext context,
   }) async {
     final batch = FirebaseFirestore.instance.batch();
     final vehicleRef = _db.collection(_collectionVehicles).doc(vehicleId);
 
     try {
-      // Get current vehicle to access currentKm if needed
+      // Get current vehicle
       final vehicleDoc = await vehicleRef.get();
       if (!vehicleDoc.exists) {
         throw Exception(LocaleKeys.vehicle_not_found.tr());
@@ -50,17 +54,14 @@ Future<void> updateVehicleWithBatch({
       final vehicleData = vehicleDoc.data()!;
       final currentKmInDb = vehicleData[VehicleFields.currentKm] as int? ?? 0;
 
-      // Build the update map for vehicle
+      // Build update map
       final Map<String, dynamic> vehicleUpdates = {};
 
-      // 0️⃣ Always update maxKm
+      // Update maxKm
       vehicleUpdates[VehicleFields.maxKm] = maxKm;
 
-      // 1️⃣ Handle kilometer changes
-      // IMPORTANT: Use newKm if provided, otherwise use current km from database
+      // Handle kilometer changes
       final kmToUse = newKm ?? currentKmInDb;
-
-      // ✅ FIXED: Always recalculate remaining and percentage
       final remainingKm = maxKm - kmToUse;
       final remainingPercent = ((remainingKm / maxKm) * 100)
           .clamp(0, 100)
@@ -72,15 +73,9 @@ Future<void> updateVehicleWithBatch({
       vehicleUpdates[VehicleFields.remainingKm] = remainingKm;
       vehicleUpdates[VehicleFields.remainingPercent] = remainingPercent;
 
-      // 2️⃣ Handle basic field updates
-      if (newPlate != null) {
-        vehicleUpdates[VehicleFields.plate] = newPlate;
-      }
-      if (newModel != null) {
-        vehicleUpdates[VehicleFields.model] = newModel;
-      }
-
-      // 3️⃣ Handle service date updates
+      // Other updates
+      if (newPlate != null) vehicleUpdates[VehicleFields.plate] = newPlate;
+      if (newModel != null) vehicleUpdates[VehicleFields.model] = newModel;
       if (lastServiceDate != null) {
         vehicleUpdates[VehicleFields.lastServiceDate] = Timestamp.fromDate(
           lastServiceDate,
@@ -92,7 +87,7 @@ Future<void> updateVehicleWithBatch({
         );
       }
 
-      // 4️⃣ Handle inspector assignment changes
+      // Handle inspector assignment
       if (newInspectorId != null) {
         // UNASSIGN
         if (newInspectorId.isEmpty) {
@@ -136,20 +131,53 @@ Future<void> updateVehicleWithBatch({
         }
       }
 
-      // Add updated timestamp
+      // Updated timestamp
       vehicleUpdates[VehicleFields.updatedAt] = FieldValue.serverTimestamp();
 
-      // 5️⃣ Update vehicle document in batch
+      // Update vehicle
       if (vehicleUpdates.isNotEmpty) {
         batch.update(vehicleRef, vehicleUpdates);
       }
 
-      // 6️⃣ Commit the batch (All or Nothing)
+      // Commit batch
       await batch.commit();
-
       console('✅ Vehicle $vehicleId updated successfully');
+
+      // ✅ Send notification (if newKm updated or inspector changed)
+      try {
+        final tokens = <String>[];
+        if (newInspectorId != null && newInspectorId.isNotEmpty) {
+          tokens.addAll(getInspectorTokens(newInspectorId, context));
+        } else if (oldInspectorId != null && oldInspectorId.isNotEmpty) {
+          tokens.addAll(getInspectorTokens(oldInspectorId, context));
+        }
+
+        if (tokens.isNotEmpty) {
+          await FCMHelper.instance.sendNotificationToMultipleTokens(
+            fcmTokens: tokens,
+            title: LocaleKeys.vehicle_km_updated_title.tr(),
+            body: LocaleKeys.vehicle_km_updated_body.tr(
+              namedArgs: {
+                'vehicleId': vehicleId,
+                'newKm': kmToUse.toString(),
+                'remainingKm': remainingKm.toString(),
+              },
+            ),
+            data: {
+              'type': 'vehicle_km_updated',
+              'vehicleId': vehicleId,
+              'newKm': kmToUse,
+              'remainingKm': remainingKm,
+              'timestamp': DateTime.now().toIso8601String(),
+            },
+          );
+        }
+      } catch (notificationError) {
+        console('⚠️ Vehicle update notification failed: $notificationError');
+        // Do not throw, allow the method to complete
+      }
     } catch (e, st) {
-      print("❌ Error updating vehicle: $e\n$st");
+      console('❌ Error updating vehicle: $e\n$st', type: DebugType.error);
       rethrow;
     }
   }
@@ -157,6 +185,7 @@ Future<void> updateVehicleWithBatch({
   Future<void> deleteVehicle({
     required String vehicleId,
     String? inspectorId,
+    required BuildContext context,
   }) async {
     final batch = _db.batch();
     final vehicleRef = _db.collection(_collectionVehicles).doc(vehicleId);
@@ -165,7 +194,7 @@ Future<void> updateVehicleWithBatch({
       // 1️⃣ Delete vehicle document
       batch.delete(vehicleRef);
 
-      // 2️⃣ If assigned inspector exists, update their history
+      // 2️⃣ Update inspector history if assigned
       if (inspectorId != null && inspectorId.isNotEmpty) {
         final inspectorHistoryRef = _db
             .collection(Collections.inspectorStats)
@@ -177,15 +206,39 @@ Future<void> updateVehicleWithBatch({
         });
       }
 
-      // 3️⃣ Commit all batched changes together
+      // 3️⃣ Commit batch
       await batch.commit();
 
       console('✅ Vehicle $vehicleId deleted successfully');
       if (inspectorId != null && inspectorId.isNotEmpty) {
         console('🧾 Inspector $inspectorId history updated (vehicle removed)');
+
+        // ✅ Send notification to inspector (do not fail method if notification fails)
+        try {
+          final inspectorTokens = getInspectorTokens(inspectorId, context);
+
+          if (inspectorTokens.isNotEmpty) {
+            await FCMHelper.instance.sendNotificationToMultipleTokens(
+              fcmTokens: inspectorTokens,
+              title: LocaleKeys.vehicle_deleted_title.tr(),
+              body: LocaleKeys.vehicle_deleted_body.tr(
+                namedArgs: {'vehicleId': vehicleId},
+              ),
+              data: {
+                'type': 'vehicle_deleted',
+                'vehicleId': vehicleId,
+                'timestamp': DateTime.now().toIso8601String(),
+              },
+            );
+          }
+        } catch (notificationError) {
+          console(
+            '⚠️ Vehicle deletion notification failed: $notificationError',
+          );
+        }
       }
     } catch (e, st) {
-      print('❌ Error deleting vehicle: $e\n$st');
+      console('❌ Error deleting vehicle: $e\n$st', type: DebugType.error);
       rethrow;
     }
   }

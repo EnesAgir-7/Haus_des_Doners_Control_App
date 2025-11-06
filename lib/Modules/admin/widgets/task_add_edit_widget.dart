@@ -136,10 +136,11 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
               : null,
         };
 
-        success = await tasksProvider.updateTask(widget.task!.id, data);
+        success = await tasksProvider.updateTask(widget.task!.id, data, context);
       } else {
         // Create new task
         success = await tasksProvider.createTask(
+          context: context,
           title: title,
           description: description,
           assignedInspectorId: _selectedInspectorId!,

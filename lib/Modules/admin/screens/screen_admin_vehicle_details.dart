@@ -749,6 +749,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
 
       // Call the batch update method
       await context.read<ProviderAdminVehicles>().updateVehicleWithBatch(
+        context: context,
         vehicleId: widget.vehicle.id,
         newKm: kmChanged ? newKm : null,
         newPlate: plateChanged ? newPlate : null,

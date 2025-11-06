@@ -224,6 +224,7 @@ class ProviderAdminBranches with ChangeNotifier {
   Future<void> deleteBranch({
     required String branchId,
     required String? inspectorId,
+    required BuildContext context,
   }) async {
     _setLoading(true);
     _error = null;
@@ -232,6 +233,7 @@ class ProviderAdminBranches with ChangeNotifier {
       await _branchService.deleteBranch(
         branchId: branchId,
         inspectorId: inspectorId,
+        context: context
       );
     } catch (e) {
       _error = "${LocaleKeys.error_deleting_branch.tr()}: $e";
@@ -274,14 +276,18 @@ class ProviderAdminBranches with ChangeNotifier {
     required String branchId,
     required String inspectorId,
     required String inspectorName,
+    required String branchName,
+    required BuildContext context,
     String? oldInspectorId, // ✅ Add this parameter
   }) async {
     _setLoading(true);
     try {
       console('Assigning branch to inspector...');
       await _branchService.assignBranchToInspector(
+        context: context,
         inspectorId: inspectorId,
         inspectorName: inspectorName,
+        branchName: branchName,
         branchId: branchId,
         oldInspectorId: oldInspectorId, // ✅ Pass it down
       );
@@ -297,13 +303,17 @@ class ProviderAdminBranches with ChangeNotifier {
   Future<bool> unassignInspectorFromBranch({
     required String branchId,
     required String inspectorId,
+    required String branchName,
+    required BuildContext context,
   }) async {
     _setLoading(true);
     try {
       console('Unassigning branch from ${inspectorId} ${branchId}...');
 
       await _branchService.removeBranchFromInspector(
+        context: context,
         branchId: branchId,
+        branchName: branchName,
         inspectorId: inspectorId,
       );
       return true; // ✅ Success

@@ -227,6 +227,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
       final provider = context.read<ProviderAdminBranches>();
       try {
         await provider.deleteBranch(
+          context: context,
           branchId: widget.branch.id,
           inspectorId: widget.branch.assignedInspector?.id,
         );
@@ -396,7 +397,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           _buildAdditionalInfoCard(),
           const SizedBox(height: 16),
         ],
-        if (!widget.branch.haveNoScores) ...[ 
+        if (!widget.branch.haveNoScores) ...[
           _buildPerformanceSummary(),
           const SizedBox(height: 12),
           buildPerformanceChart(
@@ -1522,6 +1523,8 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
       if (selected != null && mounted) {
         try {
           final success = await provider.assignInspectorToBranch(
+            context: context,
+            branchName: widget.branch.name,
             branchId: widget.branch.id,
             inspectorId: selected.id,
             inspectorName: selected.name,
@@ -1585,8 +1588,10 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         final success = await context
             .read<ProviderAdminBranches>()
             .unassignInspectorFromBranch(
+              branchName: widget.branch.name,
               branchId: widget.branch.id,
               inspectorId: widget.branch.assignedInspector!.id,
+              context: context,
             );
 
         if (success) {

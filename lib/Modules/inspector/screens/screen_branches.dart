@@ -9,6 +9,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../helpers/app_helpers.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../../admin/screens/screen_admin_branch_edit.dart';
 import '../providers/provider_branches.dart';
 import '../widgets/app_button.dart';
 import '../widgets/inspector_branch_card.dart';
@@ -351,11 +352,12 @@ class _ScreenBranchesState extends State<ScreenBranches> {
 }
 
 // Branch Details Bottom Sheet
+// ignore: must_be_immutable
 class BranchDetailsSheet extends StatelessWidget {
-  final BranchModel branch;
+  BranchModel branch;
   final ProviderBranches provider;
 
-  const BranchDetailsSheet({required this.branch, required this.provider});
+  BranchDetailsSheet({required this.branch, required this.provider});
 
   @override
   Widget build(BuildContext context) {
@@ -373,7 +375,24 @@ class BranchDetailsSheet extends StatelessWidget {
               _buildDragHandle(),
               SizedBox(height: 12),
               _buildHeader(context),
-              SizedBox(height: 16),
+              SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () async {
+                  final BranchModel? newBranch = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ScreenAdminEditBranch(branch: branch),
+                    ),
+                  );
+
+                  if (newBranch != null) {
+                    Navigator.pop(context);
+                  }
+                },
+                child: Text(LocaleKeys.updateBranch.tr()),
+              ),
+              SizedBox(height: 12),
+              // SizedBox(height: 16),
               _buildStatCards(),
               SizedBox(height: 16),
               if (branch.stop != null) _buildNextInspectionCard(),
@@ -465,8 +484,13 @@ class BranchDetailsSheet extends StatelessWidget {
         Expanded(
           child: _buildStatCard(
             label: LocaleKeys.average_score.tr(),
-            value: branch.averageScore,
-            icon: Icons.star,
+            value: "${calculatePerformancePercent(branch.averageScore)}%",
+            icon: getPercentageIcon(
+              double.tryParse(
+                    calculatePerformancePercent(branch.averageScore),
+                  ) ??
+                  0,
+            ),
             color: Colors.amber,
           ),
         ),

@@ -11,7 +11,6 @@ class TaskModel {
   final String assignedInspectorId;
   final String assignedInspectorName;
   final String? relatedBranchId;
-  final String? relatedInspectionId;
   final String status; // "pending" | "in_progress" | "completed"
   final String priority; // "low" | "medium" | "high"
   final DateTime? dueDate;
@@ -26,7 +25,6 @@ class TaskModel {
     required this.assignedInspectorId,
     required this.assignedInspectorName,
     this.relatedBranchId,
-    this.relatedInspectionId,
     required this.status,
     required this.priority,
     this.dueDate,
@@ -46,7 +44,6 @@ class TaskModel {
       assignedInspectorId: data[TaskFields.assignedInspectorId] ?? '',
       assignedInspectorName: data[TaskFields.assignedInspectorName] ?? '',
       relatedBranchId: data[TaskFields.relatedBranchId],
-      relatedInspectionId: data[TaskFields.relatedInspectionId],
       status: data[TaskFields.status] ?? AppConstants.pending,
       priority: data[TaskFields.priority] ?? AppConstants.medium,
       // ✅ FIXED: Using FirestoreHelpers
@@ -91,7 +88,6 @@ class TaskModel {
       assignedInspectorName:
           assignedInspectorName ?? this.assignedInspectorName,
       relatedBranchId: relatedBranchId ?? this.relatedBranchId,
-      relatedInspectionId: relatedInspectionId ?? this.relatedInspectionId,
       status: status ?? this.status,
       priority: priority ?? this.priority,
       dueDate: dueDate ?? this.dueDate,
@@ -108,7 +104,6 @@ class TaskModel {
       TaskFields.assignedInspectorId: assignedInspectorId,
       TaskFields.assignedInspectorName: assignedInspectorName,
       TaskFields.relatedBranchId: relatedBranchId,
-      TaskFields.relatedInspectionId: relatedInspectionId,
       TaskFields.status: status,
       TaskFields.priority: priority,
       TaskFields.dueDate: dueDate != null ? Timestamp.fromDate(dueDate!) : null,
