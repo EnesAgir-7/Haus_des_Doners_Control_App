@@ -195,7 +195,7 @@ class ProviderAdminTasks extends ChangeNotifier {
   Future<TaskCommentModel?> addComment(
     String taskId,
     BuildContext context,
-    String inspectorId, 
+    String inspectorId,
   ) async {
     final commentText = commentController.text.trim();
 
@@ -230,7 +230,12 @@ class ProviderAdminTasks extends ChangeNotifier {
       );
 
       // Save comment in backend
-      await _taskAdminService.addTaskComment(taskId, comment, inspectorId );
+      await _taskAdminService.addTaskComment(
+        taskId,
+        comment,
+        inspectorId,
+        context,
+      );
 
       _isAddingComment = false;
       notifyListeners();

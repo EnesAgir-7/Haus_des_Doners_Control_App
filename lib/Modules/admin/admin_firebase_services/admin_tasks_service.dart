@@ -32,6 +32,7 @@ class AdminTaskService {
     String taskId,
     TaskCommentModel comment,
     String inspectorId,
+    BuildContext context, // Added context parameter
   ) async {
     console("Adding comment");
     try {
@@ -41,21 +42,27 @@ class AdminTaskService {
         TaskFields.updatedAt: FieldValue.serverTimestamp(),
       });
 
-      // ✅ Send notification to admins (wrapped in try-catch so it won't block)
+      // ✅ Send notification to inspector (wrapped in try-catch so it won't block)
       try {
-        await FCMHelper.instance.sendNotificationToTopic(
-          topic: AppConstants.adminTopic,
-          title: LocaleKeys.task_comment_added_title.tr(),
-          body: LocaleKeys.task_comment_added_body.tr(
-            namedArgs: {'taskId': taskId},
-          ),
-          data: {
-            'type': 'task_comment_added',
-            'taskId': taskId,
-            'commentBy': inspectorId,
-            'timestamp': DateTime.now().toIso8601String(),
-          },
-        );
+        final inspectorTokens = getInspectorTokens(inspectorId, context);
+
+        if (inspectorTokens.isNotEmpty) {
+          await FCMHelper.instance.sendNotificationToMultipleTokens(
+            fcmTokens: inspectorTokens,
+            title: LocaleKeys.task_comment_added_title.tr(),
+            body: LocaleKeys.task_comment_added_body.tr(
+              namedArgs: {'taskId': taskId},
+            ),
+            data: {
+              'type': 'task_comment_added',
+              'taskId': taskId,
+              'commentBy': inspectorId,
+              'timestamp': DateTime.now().toIso8601String(),
+            },
+          );
+        } else {
+          console('⚠️ No FCM tokens found for inspector: $inspectorId');
+        }
       } catch (notificationError) {
         console('⚠️ Failed to send comment notification: $notificationError');
         // Do NOT rethrow; method continues successfully
@@ -69,37 +76,57 @@ class AdminTaskService {
   // Delete task
   /// Delete task and update inspector history
   Future<void> deleteTask(String taskId, BuildContext context) async {
-    final task = await getTaskById(taskId);
-    if (task == null) {
-      throw Exception(LocaleKeys.no_tasks_found.tr());
-    }
-
-    final batch = _db.batch();
-
-    // Delete task document
-    final docRef = _db.collection(Collections.tasks).doc(taskId);
-    batch.delete(docRef);
-
-    // Only update history if task was NOT completed
-    if (task.status != AppConstants.completed) {
-      await adminUserService.updateInspectorHistoryBatch(
-        batch: batch,
-        inspectorId: task.assignedInspectorId,
-        updates: {IHF.tasksTotal: FieldValue.increment(-1)},
-      );
-    }
-
-    // Commit batch
-    await batch.commit();
-    console('✅ Task $taskId deleted successfully');
-
-    // ✅ Notifications
     try {
-      // ✅ 1. Notify inspector
-      final inspectorTokens = getInspectorTokens(
-        task.assignedInspectorId,
-        context,
-      );
+      final task = await getTaskById(taskId);
+      if (task == null) {
+        throw Exception(LocaleKeys.no_tasks_found.tr());
+      }
+
+      final batch = _db.batch();
+
+      // Delete task document
+      final docRef = _db.collection(Collections.tasks).doc(taskId);
+      batch.delete(docRef);
+
+      // Only update history if task was NOT completed
+      if (task.status != AppConstants.completed) {
+        await adminUserService.updateInspectorHistoryBatch(
+          batch: batch,
+          inspectorId: task.assignedInspectorId,
+          updates: {IHF.tasksTotal: FieldValue.increment(-1)},
+        );
+      }
+
+      // Commit batch - CRITICAL OPERATION
+      await batch.commit();
+      console('✅ Task $taskId deleted successfully');
+
+      // Send notification to inspector AFTER successful deletion (non-blocking)
+      _sendTaskDeletionNotification(
+        inspectorId: task.assignedInspectorId,
+        taskId: taskId,
+        taskTitle: task.title,
+        context: context,
+      ).catchError((error) {
+        console('⚠️ Task deletion notification failed: $error');
+        // Silently fail - don't affect the main operation
+      });
+    } catch (e, st) {
+      console('❌ Error deleting task: $e\n$st', type: DebugType.error);
+      rethrow;
+    }
+  }
+
+  // Separate method for sending notifications (non-blocking)
+  Future<void> _sendTaskDeletionNotification({
+    required String inspectorId,
+    required String taskId,
+    required String taskTitle,
+    required BuildContext context,
+  }) async {
+    try {
+      final inspectorTokens = getInspectorTokens(inspectorId, context);
+
       if (inspectorTokens.isNotEmpty) {
         console('📤 Notifying inspector about deleted task');
 
@@ -107,18 +134,19 @@ class AdminTaskService {
           fcmTokens: inspectorTokens,
           title: LocaleKeys.task_deleted_title.tr(),
           body: LocaleKeys.task_deleted_body.tr(
-            namedArgs: {'taskTitle': task.title},
+            namedArgs: {'taskTitle': taskTitle},
           ),
           data: {
             'type': 'task_deleted',
             'taskId': taskId,
-            'taskTitle': task.title,
+            'taskTitle': taskTitle,
             'timestamp': DateTime.now().toIso8601String(),
           },
         );
       }
     } catch (e) {
-      console('⚠️ Notification error (deleteTask): $e');
+      console('⚠️ Notification error: $e');
+      // Don't rethrow - this is intentionally silent
     }
   }
 
@@ -237,56 +265,76 @@ class AdminTaskService {
       batch.set(docRef, taskData);
 
       // Update inspector's total tasks
-      await adminUserService.updateInspectorHistoryBatch(
+      adminUserService.updateInspectorHistoryBatch(
         batch: batch,
         inspectorId: task.assignedInspectorId,
         updates: {IHF.tasksTotal: FieldValue.increment(1)},
       );
 
-      // Commit batch
+      // Commit batch - CRITICAL OPERATION
       await batch.commit();
       console('✅ Task created successfully: ${docRef.id}');
 
-      // ✅ Send notification to assigned inspector
-      try {
-        final inspectorTokens = getInspectorTokens(
-          task.assignedInspectorId,
-          context,
-        );
-
-        if (inspectorTokens.isNotEmpty) {
-          console(
-            '📤 Sending task notification to ${inspectorTokens.length} device(s)',
-          );
-
-          await FCMHelper.instance.sendNotificationToMultipleTokens(
-            fcmTokens: inspectorTokens,
-            title: LocaleKeys.task_assigned_title.tr(),
-            body: LocaleKeys.task_assigned_body.tr(
-              namedArgs: {'taskTitle': task.title},
-            ),
-            data: {
-              'type': 'task_assigned',
-              'taskId': docRef.id,
-              'taskTitle': task.title,
-              'taskDescription': task.description,
-              'taskPriority': task.priority,
-              'dueDate': task.dueDate?.toIso8601String() ?? '',
-              'inspectorId': task.assignedInspectorId,
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-          );
-        } else {
-          console(
-            '⚠️ No FCM tokens found for inspector ${task.assignedInspectorId}',
-          );
-        }
-      } catch (notificationError) {
-        console('⚠️ Task notification error: $notificationError');
-      }
+      // Send notification to assigned inspector AFTER successful creation (non-blocking)
+      _sendTaskAssignmentNotification(
+        inspectorId: task.assignedInspectorId,
+        taskId: docRef.id,
+        taskTitle: task.title,
+        taskDescription: task.description,
+        taskPriority: task.priority,
+        dueDate: task.dueDate,
+        context: context,
+      ).catchError((error) {
+        console('⚠️ Task assignment notification failed: $error');
+        // Silently fail - don't affect the main operation
+      });
     } catch (e, st) {
       console('❌ Error creating task: $e\n$st', type: DebugType.error);
       rethrow;
+    }
+  }
+
+  // Separate method for sending notifications (non-blocking)
+  Future<void> _sendTaskAssignmentNotification({
+    required String inspectorId,
+    required String taskId,
+    required String taskTitle,
+    required String taskDescription,
+    required String taskPriority,
+    DateTime? dueDate,
+    required BuildContext context,
+  }) async {
+    try {
+      final inspectorTokens = getInspectorTokens(inspectorId, context);
+
+      if (inspectorTokens.isNotEmpty) {
+        console(
+          '📤 Sending task notification to ${inspectorTokens.length} device(s)',
+        );
+
+        await FCMHelper.instance.sendNotificationToMultipleTokens(
+          fcmTokens: inspectorTokens,
+          title: LocaleKeys.task_assigned_title.tr(),
+          body: LocaleKeys.task_assigned_body.tr(
+            namedArgs: {'taskTitle': taskTitle},
+          ),
+          data: {
+            'type': 'task_assigned',
+            'taskId': taskId,
+            'taskTitle': taskTitle,
+            'taskDescription': taskDescription,
+            'taskPriority': taskPriority,
+            'dueDate': dueDate?.toIso8601String() ?? '',
+            'inspectorId': inspectorId,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+      } else {
+        console('⚠️ No FCM tokens found for inspector $inspectorId');
+      }
+    } catch (e) {
+      console('⚠️ Notification error: $e');
+      // Don't rethrow - this is intentionally silent
     }
   }
 
