@@ -85,13 +85,34 @@ class InspectorTaskService {
   // Add comment to task
   Future<void> addTaskComment(String taskId, TaskCommentModel comment) async {
     try {
+      // Update Firestore
       await _db.collection(_collection).doc(taskId).update({
         TaskFields.comments: FieldValue.arrayUnion([comment.toMap()]),
         TaskFields.updatedAt: FieldValue.serverTimestamp(),
       });
+
+      // ✅ Send notification to admins (wrapped in try-catch so it won't block)
+      try {
+        await FCMHelper.instance.sendNotificationToTopic(
+          topic: AppConstants.adminTopic,
+          title: LocaleKeys.task_comment_added_title.tr(),
+          body: LocaleKeys.task_comment_added_body.tr(
+            namedArgs: {'taskId': taskId},
+          ),
+          data: {
+            'type': 'task_comment_added',
+            'taskId': taskId,
+            'commentBy': comment.userId, // Using comment's userId
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
+      } catch (notificationError) {
+        console('⚠️ Failed to send comment notification: $notificationError');
+        // Do NOT rethrow; method continues successfully
+      }
     } catch (e) {
-      console('Error adding task comment: $e');
-      rethrow;
+      console('❌ Error adding task comment: $e');
+      rethrow; // Only rethrow if the Firestore update fails
     }
   }
 }

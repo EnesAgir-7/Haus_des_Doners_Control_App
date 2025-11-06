@@ -177,7 +177,6 @@ Future<String?> pickRouteDate(
 List<String> getInspectorTokens(String inspectorId, BuildContext context) {
   final inspector =  context.read<ProviderAdminUsers>().inspectors.firstWhere(
     (e) => e.id == inspectorId,
-    // orElse: () => null,
   );
   if (inspector.fcmTokens == null) return [];
   return List<String>.from(inspector.fcmTokens!);

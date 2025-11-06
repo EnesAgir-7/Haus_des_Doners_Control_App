@@ -66,13 +66,13 @@ class InspectorVehicleService {
         throw Exception(LocaleKeys.km_exceeds_limit.tr());
       }
 
-      // ✅ Calculate new remaining values
+      // Calculate new remaining values
       final remainingKm = maxKm - newKm;
       final remainingPercent = maxKm > 0
           ? ((remainingKm / maxKm) * 100).clamp(0, 100).toInt()
           : 0;
 
-      // Update vehicle in Firestore
+      // Update vehicle in Firestore - CRITICAL OPERATION
       await vehicleRef.update({
         VehicleFields.currentKm: newKm,
         VehicleFields.remainingKm: remainingKm,
@@ -82,36 +82,51 @@ class InspectorVehicleService {
 
       console('✅ Vehicle $vehicleId kilometers updated to $newKm km');
 
-      // ✅ Send notification to all admins
-      try {
-        await FCMHelper.instance.sendNotificationToTopic(
-          topic: AppConstants.adminTopic,
-          title: LocaleKeys.vehicle_km_updated_title.tr(),
-          body: LocaleKeys.vehicle_km_updated_body.tr(
-            namedArgs: {
-              'newKm': newKm.toString(),
-              'remainingKm': remainingKm.toString(),
-            },
-          ),
-          data: {
-            'type': 'vehicle_km_updated',
-            'vehicleId': vehicleId,
-            'newKm': newKm,
-            'remainingKm': remainingKm,
-          },
-        );
-      } catch (notificationError) {
-        // Don't block operation if notification fails
-        console(
-          '⚠️ Failed to send vehicle KM notification: $notificationError',
-        );
-      }
+      // Send notification to all admins AFTER successful update (non-blocking)
+      _sendVehicleKmNotificationToAdmins(
+        vehicleId: vehicleId,
+        newKm: newKm,
+        remainingKm: remainingKm,
+      ).catchError((error) {
+        console('⚠️ Failed to send vehicle KM notification: $error');
+        // Silently fail - don't affect the main operation
+      });
     } catch (e, st) {
       console(
         '❌ Error updating vehicle kilometers: $e\n$st',
         type: DebugType.error,
       );
       rethrow;
+    }
+  }
+
+  // Separate method for sending notifications (non-blocking)
+  Future<void> _sendVehicleKmNotificationToAdmins({
+    required String vehicleId,
+    required int newKm,
+    required int remainingKm,
+  }) async {
+    try {
+      await FCMHelper.instance.sendNotificationToTopic(
+        topic: AppConstants.adminTopic,
+        title: LocaleKeys.vehicle_km_updated_title.tr(),
+        body: LocaleKeys.vehicle_km_updated_body.tr(
+          namedArgs: {
+            'newKm': newKm.toString(),
+            'remainingKm': remainingKm.toString(),
+          },
+        ),
+        data: {
+          'type': 'vehicle_km_updated',
+          'vehicleId': vehicleId,
+          'newKm': newKm,
+          'remainingKm': remainingKm,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+    } catch (e) {
+      console('⚠️ Notification error: $e');
+      // Don't rethrow - this is intentionally silent
     }
   }
 }
