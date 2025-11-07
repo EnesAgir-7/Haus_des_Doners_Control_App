@@ -4,6 +4,7 @@ import 'package:haus_des_control/Modules/inspector/screens/screen_pdf_viewer.dar
 import 'package:haus_des_control/models/branch_model.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/remote_config_service.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
@@ -357,6 +358,8 @@ class BranchDetailsSheet extends StatelessWidget {
   BranchModel branch;
   final ProviderBranches provider;
 
+  final remoteConfig = RemoteConfigService();
+
   BranchDetailsSheet({required this.branch, required this.provider});
 
   @override
@@ -375,22 +378,24 @@ class BranchDetailsSheet extends StatelessWidget {
               _buildDragHandle(),
               SizedBox(height: 12),
               _buildHeader(context),
-              SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: () async {
-                  final BranchModel? newBranch = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ScreenAdminEditBranch(branch: branch),
-                    ),
-                  );
+              if (remoteConfig.inspectorBranchEdit) ...[
+                SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () async {
+                    final BranchModel? newBranch = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ScreenAdminEditBranch(branch: branch),
+                      ),
+                    );
 
-                  if (newBranch != null) {
-                    Navigator.pop(context);
-                  }
-                },
-                child: Text(LocaleKeys.updateBranch.tr()),
-              ),
+                    if (newBranch != null) {
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: Text(LocaleKeys.updateBranch.tr()),
+                ),
+              ],
               SizedBox(height: 12),
               // SizedBox(height: 16),
               _buildStatCards(),

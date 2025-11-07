@@ -1,0 +1,59 @@
+import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/foundation.dart';
+
+import '../core/constants/app_constants.dart';
+
+class RemoteConfigService {
+  static final RemoteConfigService _instance = RemoteConfigService._internal();
+  factory RemoteConfigService() => _instance;
+
+  late final FirebaseRemoteConfig _remoteConfig;
+
+  RemoteConfigService._internal();
+
+  /// Initialize Remote Config with default values and fetch latest
+  Future<void> initialize() async {
+    _remoteConfig = FirebaseRemoteConfig.instance;
+
+    // ✅ Configure fetch behavior BEFORE anything else
+    await _remoteConfig.setConfigSettings(
+      RemoteConfigSettings(
+        fetchTimeout: const Duration(seconds: 30),
+        minimumFetchInterval: Duration.zero,
+        // minimumFetchInterval: Duration(hours: 1),
+      ),
+    );
+
+    await _remoteConfig.setDefaults({
+      AppConstants.showInspectorNotification: true,
+      AppConstants.enableNotifications: true,
+      AppConstants.inspectorBranchEdit: true,
+    });
+
+    try {
+      // Fetch and activate latest config
+      await _remoteConfig.fetchAndActivate();
+      debugPrint('✅ Remote Config fetched and activated successfully');
+    } catch (e) {
+      debugPrint('⚠️ Remote Config fetch failed: $e');
+    }
+  }
+
+  /// ---- Flags ----
+  bool get showInspectorNotification =>
+      _remoteConfig.getBool(AppConstants.showInspectorNotification);
+  bool get inspectorBranchEdit =>
+      _remoteConfig.getBool(AppConstants.inspectorBranchEdit);
+
+  bool get enableNotifications =>
+      _remoteConfig.getBool(AppConstants.enableNotifications);
+
+  Future<void> refresh() async {
+    try {
+      await _remoteConfig.fetchAndActivate();
+      debugPrint('🔄 Remote Config refreshed.');
+    } catch (e) {
+      debugPrint('⚠️ Remote Config refresh failed: $e');
+    }
+  }
+}

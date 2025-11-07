@@ -171,7 +171,28 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
   }
 
   Widget _buildEmptyState(ProviderVehicle provider) {
-    return Center(child: Text(LocaleKeys.noVehiclesAssigned.tr()));
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.car_crash, size: 80, color: Color(0xFF3A3A3A)),
+          SizedBox(height: 16),
+          Text(
+            LocaleKeys.noVehiclesFound.tr(),
+            style: TextStyle(
+              color: Color(0xFF808080),
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            LocaleKeys.noVehiclesAssigned.tr(),
+            style: TextStyle(color: Color(0xFF606060), fontSize: 14),
+          ),
+        ],
+      ),
+    );
   }
 
   void _navigateToVehicleDetails(

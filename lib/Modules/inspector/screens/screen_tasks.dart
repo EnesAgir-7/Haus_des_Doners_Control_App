@@ -462,7 +462,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
           ),
           SizedBox(height: 8),
           Text(
-            LocaleKeys.no_tasks_found.tr(),
+            LocaleKeys.no_assigned_tasks.tr(),
             style: TextStyle(color: Color(0xFF606060), fontSize: 14),
           ),
         ],

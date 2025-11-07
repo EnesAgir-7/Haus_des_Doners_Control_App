@@ -32,4 +32,8 @@ class AppConstants {
   static const adminTopic = 'admins';
   static const inspectorTopic = 'inspectors';
   static const allUsersTopic = 'all_users';
+
+  static const showInspectorNotification = 'showInspectorNotification';
+  static const enableNotifications = 'enableNotifications';
+  static const inspectorBranchEdit = 'inspectorBranchEdit';
 }

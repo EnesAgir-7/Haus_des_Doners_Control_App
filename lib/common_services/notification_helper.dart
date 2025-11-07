@@ -5,11 +5,14 @@ import '../core/console.dart';
 import '../core/constants/app_constants.dart';
 import '../helpers/app_helpers.dart';
 import 'fcm_helper.dart';
+import 'remote_config_service.dart';
 
 class NotificationHelper {
   NotificationHelper._();
 
   static final NotificationHelper instance = NotificationHelper._();
+
+  final remoteConfig = RemoteConfigService();
 
   FCMHelper fcmHelper = FCMHelper();
   Future<bool> sendToInspector({
@@ -18,10 +21,10 @@ class NotificationHelper {
     required String title,
     required String body,
     required Map<String, dynamic> data,
-    List<String>? fcmTokens, // optional tokens
+    List<String>? fcmTokens,
   }) async {
     try {
-      // 1️⃣ Use provided tokens or fetch from provider
+      if (remoteConfig.enableNotifications == false) return false;
       final inspectorTokens =
           fcmTokens?.where((t) => t.isNotEmpty).toList() ??
           await getInspectorTokens(inspectorId, context);
@@ -36,7 +39,6 @@ class NotificationHelper {
         '📤 Sending notification to inspector $inspectorId (${inspectorTokens.length} device(s))',
       );
 
-      // 3️⃣ Send notification
       final result = await _sendNotificationToMultipleTokens(
         fcmTokens: inspectorTokens,
         title: title,
@@ -120,6 +122,7 @@ class NotificationHelper {
     Map<String, dynamic>? data,
   }) async {
     try {
+      if (remoteConfig.enableNotifications == false) return false;
       final callable = fcmHelper.functions.httpsCallable(
         'sendNotificationToToken',
       );
@@ -151,6 +154,7 @@ class NotificationHelper {
     required String body,
     Map<String, dynamic>? data,
   }) async {
+    if (remoteConfig.enableNotifications == false) return false;
     try {
       final envTopic = _getEnvTopic(topic);
       final callable = fcmHelper.functions.httpsCallable(

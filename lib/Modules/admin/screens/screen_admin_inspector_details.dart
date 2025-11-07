@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/remote_config_service.dart';
 import '../../../common_services/send_notification_dialog.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/inspector_history_model.dart';
@@ -25,7 +26,8 @@ class ScreenInspectorDetails extends StatefulWidget {
 class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
   String? _selectedMonthKey;
 
-  @override
+  final remoteConfig = RemoteConfigService();
+
   @override
   void initState() {
     super.initState();
@@ -101,24 +103,24 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
       appBar: CustomAppBar(
         title: "${widget.inspector.name} ${LocaleKeys.statistics.tr()}",
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_active_outlined),
-            onPressed: () {
-              showNotifyDialog(
-                context: context,
-                inspectorId: widget.inspector.id,
-                inspectorName: widget.inspector.name,
-                fcmTokens: widget.inspector.fcmTokens,
-              );
-            },
-          ),
+          if (remoteConfig.showInspectorNotification)
+            IconButton(
+              icon: const Icon(Icons.notifications_active_outlined),
+              onPressed: () {
+                showNotifyDialog(
+                  context: context,
+                  inspectorId: widget.inspector.id,
+                  inspectorName: widget.inspector.name,
+                  fcmTokens: widget.inspector.fcmTokens,
+                );
+              },
+            ),
           IconButton.filled(
             visualDensity: VisualDensity.comfortable,
             onPressed: () {
