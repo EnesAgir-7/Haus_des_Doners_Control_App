@@ -30,6 +30,7 @@ class RemoteConfigService {
       AppConstants.showInspectorNotification: true,
       AppConstants.enableNotifications: true,
       AppConstants.inspectorBranchEdit: true,
+      AppConstants.useOldHome: false,
     });
 
     try {
@@ -49,6 +50,8 @@ class RemoteConfigService {
 
   bool get enableNotifications =>
       _remoteConfig.getBool(AppConstants.enableNotifications);
+  bool get useOldHome =>
+      _remoteConfig.getBool(AppConstants.useOldHome);
 
   Future<void> refresh() async {
     try {

@@ -28,6 +28,7 @@ import 'Modules/inspector/providers/provider_control.dart';
 import 'Modules/inspector/providers/provider_inspections.dart';
 import 'Modules/inspector/providers/provider_map.dart';
 import 'Modules/inspector/providers/provider_panel.dart';
+import 'Modules/inspector/providers/provider_panel_old.dart';
 import 'Modules/inspector/providers/provider_report_photo.dart';
 import 'Modules/inspector/screens/bottom_nav_bar.dart';
 import 'Modules/inspector/screens/screen_auth.dart';
@@ -95,6 +96,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ProviderAuth()),
         ChangeNotifierProvider(create: (_) => ProviderPanel()),
+        ChangeNotifierProvider(create: (_) => ProviderPanelOld()),
         ChangeNotifierProvider(create: (_) => ProviderBranches()),
         ChangeNotifierProvider(create: (_) => ProviderReportPhoto()),
         ChangeNotifierProvider(create: (_) => ProviderVehicle()),
