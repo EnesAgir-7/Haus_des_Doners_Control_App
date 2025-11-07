@@ -360,7 +360,7 @@ class AdminTaskService {
     // ✅ Scenario 1: Inspector was reassigned
     if (inspectorChanged) {
       // Notify OLD inspector (task unassigned)
-      await NotificationHelper.instance.sendToInspector(
+       NotificationHelper.instance.sendToInspector(
         inspectorId: currentTask.assignedInspectorId,
         context: context,
         title: LocaleKeys.task_unassigned_title.tr(),
@@ -376,7 +376,7 @@ class AdminTaskService {
       );
 
       // Notify NEW inspector (task assigned)
-      await NotificationHelper.instance.sendToInspector(
+       NotificationHelper.instance.sendToInspector(
         inspectorId: newInspectorId,
         context: context,
         title: LocaleKeys.task_assigned_title.tr(),
@@ -419,7 +419,7 @@ class AdminTaskService {
         notificationType = 'task_updated';
       }
 
-      await NotificationHelper.instance.sendToInspector(
+       NotificationHelper.instance.sendToInspector(
         inspectorId: currentTask.assignedInspectorId,
         context: context,
         title: notificationTitle,

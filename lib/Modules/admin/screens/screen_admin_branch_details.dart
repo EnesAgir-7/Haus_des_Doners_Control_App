@@ -50,7 +50,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         _detailsError = null;
       });
 
-      await Future.delayed(const Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 500));
 
       if (mounted) {
         setState(() => _isLoadingDetails = false);
@@ -1522,6 +1522,9 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
 
       if (selected != null && mounted) {
         try {
+          setState(() {
+            _isLoadingDetails = true;
+          });
           final success = await provider.assignInspectorToBranch(
             context: context,
             branchName: widget.branch.name,
@@ -1536,7 +1539,9 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               id: selected.id,
               name: selected.name,
             );
-            setState(() {});
+            setState(() {
+              _isLoadingDetails = false;
+            });
             showSnakBarr(context, LocaleKeys.inspectorAssignedSuccess.tr());
           } else {
             showSnakBarr(context, LocaleKeys.failedToAssignInspector.tr());
@@ -1585,6 +1590,9 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
 
     if (confirmed == true && mounted) {
       try {
+        setState(() {
+          _isLoadingDetails = true;
+        });
         final success = await context
             .read<ProviderAdminBranches>()
             .unassignInspectorFromBranch(
@@ -1596,7 +1604,9 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
 
         if (success) {
           widget.branch.assignedInspector = null;
-          setState(() {});
+          setState(() {
+            _isLoadingDetails = false;
+          });
           if (mounted) {
             showSnakBarr(context, LocaleKeys.inspectorUnassignedSuccess.tr());
           }

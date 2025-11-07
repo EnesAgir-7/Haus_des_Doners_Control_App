@@ -107,7 +107,7 @@ class InspectorVehicleService {
     required int remainingKm,
   }) async {
     try {
-      await NotificationHelper.instance.sendNotificationToTopic(
+      NotificationHelper.instance.sendNotificationToTopic(
         topic: AppConstants.adminTopic,
         title: LocaleKeys.vehicle_km_updated_title.tr(),
         body: LocaleKeys.vehicle_km_updated_body.tr(

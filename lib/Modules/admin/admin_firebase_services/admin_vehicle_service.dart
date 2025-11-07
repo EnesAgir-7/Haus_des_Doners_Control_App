@@ -215,7 +215,7 @@ Future<void> updateVehicleWithBatch({
       if (inspectorId != null && inspectorId.isNotEmpty) {
         console('🧾 Inspector $inspectorId history updated (vehicle removed)');
 
-        await NotificationHelper.instance.sendToInspector(
+         NotificationHelper.instance.sendToInspector(
           inspectorId: inspectorId,
           context: context,
           title: LocaleKeys.vehicle_deleted_title.tr(),

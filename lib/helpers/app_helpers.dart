@@ -4,6 +4,7 @@ import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_us
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:provider/provider.dart';
 
+import '../core/console.dart';
 import '../core/constants/app_colors.dart';
 
 String formatDate(DateTime date) {
@@ -175,9 +176,38 @@ Future<String?> pickRouteDate(
 }
 
 List<String> getInspectorTokens(String inspectorId, BuildContext context) {
-  final inspector = context.read<ProviderAdminUsers>().inspectors.firstWhere(
-    (e) => e.id == inspectorId,
-  );
-  if (inspector.fcmTokens == null) return [];
-  return List<String>.from(inspector.fcmTokens!);
+  try {
+    // Handle empty inspectorId
+    if (inspectorId.isEmpty) {
+      console('⚠️ Empty inspectorId provided');
+      return [];
+    }
+
+    final inspectors = context.read<ProviderAdminUsers>().inspectors;
+
+    // Handle empty inspectors list
+    if (inspectors.isEmpty) {
+      console('⚠️ No inspectors found in provider');
+      return [];
+    }
+
+    // Find inspector safely
+    final inspector = inspectors.where((e) => e.id == inspectorId).firstOrNull;
+
+    // Handle inspector not found
+    if (inspector == null) {
+      console('⚠️ Inspector $inspectorId not found in provider');
+      return [];
+    }
+
+    // Handle null or empty fcmTokens — but don’t log (let sendToInspector handle it)
+    if (inspector.fcmTokens == null || inspector.fcmTokens!.isEmpty) {
+      return [];
+    }
+
+    return List<String>.from(inspector.fcmTokens!);
+  } catch (e) {
+    console('⚠️ Error getting inspector tokens for $inspectorId: $e');
+    return [];
+  }
 }

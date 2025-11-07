@@ -30,19 +30,20 @@ class NotificationHelper {
     required Map<String, dynamic> data,
   }) async {
     try {
-      // 1️⃣ Get inspector tokens
-      final inspectorTokens = getInspectorTokens(inspectorId, context);
+      // 1️⃣ Get inspector tokens (await!)
+      final inspectorTokens = await getInspectorTokens(inspectorId, context);
 
+      // 2️⃣ Validate tokens
       if (inspectorTokens.isEmpty) {
         console('⚠️ No FCM tokens found for inspector $inspectorId');
-        return false;
+        return false; // Stop here
       }
 
       console(
         '📤 Sending notification to inspector $inspectorId (${inspectorTokens.length} device(s))',
       );
 
-      // 2️⃣ Send notification
+      // 3️⃣ Send notification
       final result = await _sendNotificationToMultipleTokens(
         fcmTokens: inspectorTokens,
         title: title,
@@ -54,7 +55,7 @@ class NotificationHelper {
         },
       );
 
-      // 3️⃣ Log result
+      // 4️⃣ Log result
       if (result['success'] == true) {
         console(
           '✅ Notification sent: ${result['successCount']} success, ${result['failureCount']} failed',
@@ -126,7 +127,9 @@ class NotificationHelper {
     Map<String, dynamic>? data,
   }) async {
     try {
-      final callable = fcmHelper.functions.httpsCallable('sendNotificationToToken');
+      final callable = fcmHelper.functions.httpsCallable(
+        'sendNotificationToToken',
+      );
 
       final result = await callable.call({
         'fcmToken': fcmToken,
@@ -157,7 +160,9 @@ class NotificationHelper {
   }) async {
     try {
       final envTopic = _getEnvTopic(topic);
-      final callable = fcmHelper.functions.httpsCallable('sendNotificationToTopic');
+      final callable = fcmHelper.functions.httpsCallable(
+        'sendNotificationToTopic',
+      );
 
       final result = await callable.call({
         'topic': envTopic,
@@ -227,6 +232,4 @@ class NotificationHelper {
       return {'success': false, 'error': e.toString()};
     }
   }
-
-
 }

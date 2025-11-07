@@ -66,6 +66,8 @@ class LanguageButton extends StatelessWidget {
                     style: const TextStyle(fontSize: 18),
                   ),
                 ),
+
+                Text("             "),
               ],
             ),
           ),

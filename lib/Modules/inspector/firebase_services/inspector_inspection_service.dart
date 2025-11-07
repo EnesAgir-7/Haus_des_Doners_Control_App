@@ -201,7 +201,7 @@ class InspectorInspectionService {
       );
 
       await batch.commit();
-      await NotificationHelper.instance.sendNotificationToTopic(
+      NotificationHelper.instance.sendNotificationToTopic(
         topic: AppConstants.adminTopic,
         title: LocaleKeys.newInspectionSubmitted.tr(),
         body: LocaleKeys.newInspectionBody.tr().replaceFirst(

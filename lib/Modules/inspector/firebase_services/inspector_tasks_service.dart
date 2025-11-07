@@ -84,7 +84,7 @@ class InspectorTaskService {
         TaskFields.updatedAt: FieldValue.serverTimestamp(),
       });
 
-      await NotificationHelper.instance.sendNotificationToTopic(
+      NotificationHelper.instance.sendNotificationToTopic(
         topic: AppConstants.adminTopic,
         title: LocaleKeys.task_comment_added_title.tr(),
         body: LocaleKeys.task_comment_added_body.tr(

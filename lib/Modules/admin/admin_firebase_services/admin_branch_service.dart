@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -217,6 +219,7 @@ class AdminBranchService {
     final branchRef = _db.collection(_collectionBranches).doc(branchId);
 
     try {
+      console("Unawaited");
       // 2️⃣ Unassign branch document
       batch.update(branchRef, {
         BranchFields.assignedInspector: null,
@@ -236,7 +239,7 @@ class AdminBranchService {
       await batch.commit();
       console('✅ Branch $branchId unassigned from inspector $inspectorId');
 
-      await NotificationHelper.instance.sendToInspector(
+      NotificationHelper.instance.sendToInspector(
         context: context,
         inspectorId: inspectorId,
         title: LocaleKeys.branch_unassigned_title.tr(),
@@ -361,7 +364,7 @@ class AdminBranchService {
       if (oldInspectorId != null &&
           oldInspectorId.isNotEmpty &&
           oldInspectorId != inspectorId) {
-        await NotificationHelper.instance.sendToInspector(
+        NotificationHelper.instance.sendToInspector(
           context: context,
           inspectorId: oldInspectorId,
           title: LocaleKeys.branch_unassigned_title.tr(),
@@ -378,7 +381,7 @@ class AdminBranchService {
         );
       }
 
-      await NotificationHelper.instance.sendToInspector(
+      NotificationHelper.instance.sendToInspector(
         context: context,
         inspectorId: inspectorId,
         title: LocaleKeys.branch_assigned_title.tr(),
