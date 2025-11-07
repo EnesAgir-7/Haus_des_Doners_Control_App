@@ -12,26 +12,19 @@ class NotificationHelper {
   static final NotificationHelper instance = NotificationHelper._();
 
   FCMHelper fcmHelper = FCMHelper();
-
-  /// Send notification to an inspector
-  ///
-  /// This method handles:
-  /// - Getting inspector FCM tokens
-  /// - Sending notification
-  /// - Error handling (won't throw errors)
-  /// - Console logging
-  ///
-  /// Returns true if notification was sent successfully, false otherwise
   Future<bool> sendToInspector({
     required String inspectorId,
     required BuildContext context,
     required String title,
     required String body,
     required Map<String, dynamic> data,
+    List<String>? fcmTokens, // optional tokens
   }) async {
     try {
-      // 1️⃣ Get inspector tokens (await!)
-      final inspectorTokens = await getInspectorTokens(inspectorId, context);
+      // 1️⃣ Use provided tokens or fetch from provider
+      final inspectorTokens =
+          fcmTokens?.where((t) => t.isNotEmpty).toList() ??
+          await getInspectorTokens(inspectorId, context);
 
       // 2️⃣ Validate tokens
       if (inspectorTokens.isEmpty) {

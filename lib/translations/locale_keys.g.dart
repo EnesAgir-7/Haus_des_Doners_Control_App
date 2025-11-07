@@ -801,5 +801,29 @@ abstract class  LocaleKeys {
   static const branch_deleted_body = 'branch_deleted_body';
   static const vehicle_deleted_title = 'vehicle_deleted_title';
   static const vehicle_deleted_body = 'vehicle_deleted_body';
+  static const loggedOut = 'loggedOut';
+  static const sendNotificationTitle = 'sendNotificationTitle';
+  static const titleLabel = 'titleLabel';
+  static const bodyLabel = 'bodyLabel';
+  static const cancelButton = 'cancelButton';
+  static const sendButton = 'sendButton';
+  static const closeButton = 'closeButton';
+  static const loggedOutMessage = 'loggedOutMessage';
+  static const emptyFieldsMessage = 'emptyFieldsMessage';
+  static const notificationSentMessage = 'notificationSentMessage';
+  static const notificationFailedMessage = 'notificationFailedMessage';
+  static const january = 'january';
+  static const february = 'february';
+  static const march = 'march';
+  static const april = 'april';
+  static const may = 'may';
+  static const june = 'june';
+  static const july = 'july';
+  static const august = 'august';
+  static const september = 'september';
+  static const october = 'october';
+  static const november = 'november';
+  static const december = 'december';
+  static const noFcmDescription = 'noFcmDescription';
 
 }

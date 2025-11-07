@@ -84,7 +84,7 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
         Icon(Icons.people, color: Colors.lightBlueAccent),
         SizedBox(width: 6),
         Text(
-          LocaleKeys.inspectors.tr(), 
+          LocaleKeys.inspectors.tr(),
           style: TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
@@ -99,7 +99,7 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-          '${provider.inspectors.length} ${LocaleKeys.users.tr()}', 
+            '${provider.inspectors.length} ${LocaleKeys.users.tr()}',
             style: TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
@@ -400,12 +400,16 @@ class InspectorCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: inspector.active
+                    color:
+                        (inspector.fcmTokens != null &&
+                            inspector.fcmTokens!.isNotEmpty)
                         ? Colors.green.withValues(alpha: 0.2)
                         : Colors.red.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: inspector.active
+                      color:
+                          (inspector.fcmTokens != null &&
+                              inspector.fcmTokens!.isNotEmpty)
                           ? Colors.green.withValues(alpha: 0.3)
                           : Colors.red.withValues(alpha: 0.3),
                     ),
@@ -414,15 +418,29 @@ class InspectorCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        inspector.active ? Icons.check_circle : Icons.cancel,
+                        (inspector.fcmTokens != null &&
+                                inspector.fcmTokens!.isNotEmpty)
+                            ? Icons.check_circle
+                            : Icons.cancel,
                         size: 12,
-                        color: inspector.active ? Colors.green : Colors.red,
+                        color:
+                            (inspector.fcmTokens != null &&
+                                inspector.fcmTokens!.isNotEmpty)
+                            ? Colors.green
+                            : Colors.red,
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        inspector.active ? LocaleKeys.active.tr() : LocaleKeys.inactive.tr(),
+                        (inspector.fcmTokens != null &&
+                                inspector.fcmTokens!.isNotEmpty)
+                            ? LocaleKeys.active.tr()
+                            : LocaleKeys.loggedOut.tr(),
                         style: TextStyle(
-                          color: inspector.active ? Colors.green : Colors.red,
+                          color:
+                              (inspector.fcmTokens != null &&
+                                  inspector.fcmTokens!.isNotEmpty)
+                              ? Colors.green
+                              : Colors.red,
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
                         ),
@@ -431,18 +449,6 @@ class InspectorCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                // Switch(
-                //   value: inspector.active,
-                //   onChanged: (value) async {
-                //     await context
-                //         .read<ProviderAdminUsers>()
-                //         .toggleInspectorActive(inspector.id, value);
-                //   },
-                //   activeThumbColor: Colors.greenAccent,
-                //   inactiveThumbColor: Colors.redAccent,
-                //   inactiveTrackColor: Colors.redAccent.withValues(alpha: 0.5),
-                //   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                // ),
               ],
             ),
           ],

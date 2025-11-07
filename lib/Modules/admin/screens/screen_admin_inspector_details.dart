@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/send_notification_dialog.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
@@ -65,19 +66,19 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
 
     final month = parts[0];
 
-    const monthNames = {
-      "01": "January",
-      "02": "February",
-      "03": "March",
-      "04": "April",
-      "05": "May",
-      "06": "June",
-      "07": "July",
-      "08": "August",
-      "09": "September",
-      "10": "October",
-      "11": "November",
-      "12": "December",
+    var monthNames = {
+      "01": LocaleKeys.january.tr(),
+      "02": LocaleKeys.february.tr(),
+      "03": LocaleKeys.march.tr(),
+      "04": LocaleKeys.april.tr(),
+      "05": LocaleKeys.may.tr(),
+      "06": LocaleKeys.june.tr(),
+      "07": LocaleKeys.july.tr(),
+      "08": LocaleKeys.august.tr(),
+      "09": LocaleKeys.september.tr(),
+      "10": LocaleKeys.october.tr(),
+      "11": LocaleKeys.november.tr(),
+      "12": LocaleKeys.december.tr(),
     };
 
     return monthNames[month] ?? month;
@@ -107,6 +108,17 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
       appBar: CustomAppBar(
         title: "${widget.inspector.name} ${LocaleKeys.statistics.tr()}",
         actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_active_outlined),
+            onPressed: () {
+              showNotifyDialog(
+                context: context,
+                inspectorId: widget.inspector.id,
+                inspectorName: widget.inspector.name,
+                fcmTokens: widget.inspector.fcmTokens,
+              );
+            },
+          ),
           IconButton.filled(
             visualDensity: VisualDensity.comfortable,
             onPressed: () {
@@ -465,9 +477,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   label: LocaleKeys.assignedVehicles.tr(),
                   value: stats.vehicleIds.length.toString(),
                   icon: Icons.star_outline,
-                  gradientColors: [
-                    Color(0xFF0F766E), Color(0xFF115E59),
-                  ],
+                  gradientColors: [Color(0xFF0F766E), Color(0xFF115E59)],
                 ),
               ),
             ],
@@ -596,16 +606,17 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-         // Usage for Inspector History:
+          // Usage for Inspector History:
           buildPerformanceChart(
             scores: stats.recentScores,
             title: LocaleKeys.recentPerformance.tr(),
             icon: Icons.show_chart,
             maxScoresToShow: 10,
-            subtitle: LocaleKeys.lastInspections.tr()
-              .replaceFirst('{count}', stats.recentScores.length.toString())
-              .replaceFirst('{s}', stats.recentScores.length > 1 ? 's' : ''),
-          ), 
+            subtitle: LocaleKeys.lastInspections
+                .tr()
+                .replaceFirst('{count}', stats.recentScores.length.toString())
+                .replaceFirst('{s}', stats.recentScores.length > 1 ? 's' : ''),
+          ),
 
           const Divider(height: 24, color: Colors.white12),
           _buildLastUpdatedRow(stats),
