@@ -11,6 +11,7 @@ Widget buildPerformanceChart({
   required List<String> scores,
   required String title,
   required IconData icon,
+  bool removeDeco = false,
   String? subtitle,
   int? maxScoresToShow,
 }) {
@@ -70,11 +71,13 @@ Widget buildPerformanceChart({
       const SizedBox(height: 12),
       Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        ),
+        decoration: removeDeco
+            ? null
+            : BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              ),
         child: Column(
           children: [
             // Legend

@@ -1,83 +1,89 @@
-// lib/providers/panel_provider.dart
 import 'package:flutter/material.dart';
-
+import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
 import '../../../core/constants/firebase_constants.dart';
-import '../../../core/enums.dart';
-import '../../../translations/locale_keys.g.dart';
-import '../firebase_services/inspector_stats_service.dart';
-import '../../../models/dashboard_statistics.dart';
+import '../../../models/inspector_history_model.dart';
 
-/// Provider for Panel (Dashboard) screen
-/// Shows inspector's monthly stats and overview
 class ProviderPanel extends ChangeNotifier {
-  final InspectorStatsService _statsService = InspectorStatsService();
+  final AdminUserService _userService = AdminUserService();
 
   bool _isLoading = false;
   String? _errorMessage;
-
-  // int _totalBranches = 0;
-  int _completedInspections = 0;
-  // int _pendingTasks = 0;
-  double _averageScore = 0.0;
-
-  // int get totalBranches => _totalBranches;
-  int get completedInspections => _completedInspections;
-  // int get pendingTasks => _pendingTasks;
-  double get averageScore => _averageScore;
-
-  DashboardStats? _stats;
-  TimeRange _selectedRange = TimeRange.weekly;
-  TimeRange get selectedRange => _selectedRange;
+  InspectorHistoryModel? _currentMonthStats;
+  List<String> _availableMonths = [];
+  String? _selectedMonthKey;
 
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
-  DashboardStats? get stats => _stats;
+  InspectorHistoryModel? get currentMonthStats => _currentMonthStats;
+  List<String> get availableMonths => _availableMonths;
+  String? get selectedMonthKey => _selectedMonthKey;
 
-  // Initialize - call this when screen loads
+  // Computed values for UI
+  int get completedInspections => _currentMonthStats?.totalInspections ?? 0;
+
   Future<void> initialize() async {
-    // await fetchDashboardData();
-    await loadDashboardStats();
+    await loadMonthlyStats();
   }
 
-  Future<void> loadDashboardStats() async {
+  Future<void> loadMonthlyStats() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final stats = await _statsService.getDashboardStats(
-        loggedInUser!.id,
-        range: _selectedRange,
+      final userId = loggedInUser!.id;
+      final now = DateTime.now();
+
+      // Load current month stats
+      _currentMonthStats = await _userService.getInspectorMonthStats(
+        userId,
+        now.year,
+        now.month,
       );
 
-      // _totalBranches = stats.assignedBranches;
-      _completedInspections = stats.inspectionsCount;
-      // _pendingTasks = stats.pendingTasks;
-      _averageScore = stats.averageScore;
+      // Get available months
+      _availableMonths = await _userService.getAvailableMonths(userId);
+
+      // Set current month as selected
+      _selectedMonthKey = '${now.month.toString().padLeft(2, '0')}-${now.year}';
+
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      debugPrint('Error loading dashboard stats: $e');
-      _errorMessage = '${LocaleKeys.errorLoadingStatistics} ${e.toString()}';
+      debugPrint('Error loading monthly stats: $e');
+      _errorMessage = 'Error loading statistics: ${e.toString()}';
       _isLoading = false;
       notifyListeners();
-      print(_errorMessage);
     }
   }
 
-  Future<void> changeTimeRange(TimeRange range) async {
-    _selectedRange = range;
+  Future<void> switchMonth(int year, int month) async {
+    _isLoading = true;
     notifyListeners();
-    await loadDashboardStats();
+
+    try {
+      final userId = loggedInUser!.id;
+      _currentMonthStats = await _userService.getInspectorMonthStats(
+        userId,
+        year,
+        month,
+      );
+
+      _selectedMonthKey = '${month.toString().padLeft(2, '0')}-$year';
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error switching month: $e');
+      _errorMessage = 'Error loading month data: ${e.toString()}';
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  // Refresh data
   Future<void> refresh() async {
-    // await fetchDashboardData();
-    await loadDashboardStats();
+    await loadMonthlyStats();
   }
 
-  // Clear error
   void clearError() {
     _errorMessage = null;
     notifyListeners();

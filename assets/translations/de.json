@@ -761,7 +761,7 @@
   "of": "von",
   "no": "Nein",
   "yes": "Ja",
-  "total_assignments": "Gesamtzuweisungen",
+  "current_assignments": "Güncel Atamalar",
   "overview": "Übersicht",
   "time_based_metrics": "Zeitbasierte Metriken",
   "todays_schedule": "Heutiger Zeitplan",
