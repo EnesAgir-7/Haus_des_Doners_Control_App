@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/core/console.dart';
 
-import '../../../common_services/notification_helper.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_model.dart';
@@ -251,22 +250,6 @@ class InspectorBranchService {
 
       await batch.commit();
 
-      // // Send to multiple inspectors
-      // Send notification only if tokens exist
-      if (loggedInUser?.fcmTokens != null &&
-          loggedInUser!.fcmTokens!.isNotEmpty) {
-        await FCMHelper.instance.sendNotificationToMultipleTokens(
-          fcmTokens: loggedInUser!.fcmTokens!,
-          title: LocaleKeys.routeAssigned.tr(),
-          body: LocaleKeys.routeAssignedBody
-              .tr()
-              .replaceFirst('{branchName}', stopToSave.branchName)
-              .replaceFirst('{timeSlot}', timeSlot),
-          data: {'type': 'route_assigned', 'branchId': branchId},
-        );
-      } else {
-        console('⚠️ No FCM tokens available');
-      }
       console('✅ Branch assigned successfully to inspector $inspectorName');
     } catch (e, st) {
       print("❌ Error assigning branch with batch: $e\n$st");

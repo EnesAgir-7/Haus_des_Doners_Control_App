@@ -6,7 +6,6 @@ import 'package:haus_des_control/core/console.dart';
 
 import '../../../common_services/notification_helper.dart';
 import '../../../core/constants/firebase_constants.dart';
-import '../../../helpers/app_helpers.dart';
 import '../../../models/branch_model.dart';
 import '../../../translations/locale_keys.g.dart';
 
@@ -77,7 +76,7 @@ class AdminBranchService {
   }
 
   /// Add a new branch
-  Future<void> addBranch(BranchModel branch) async {
+  Future<void> addBranch(BranchModel branch, BuildContext context) async {
     try {
       // Create a batch
       final batch = _db.batch();
@@ -149,46 +148,22 @@ class AdminBranchService {
 
       // ✅ Send notification if inspector is assigned
       if (branch.assignedInspector != null) {
-        try {
-          // Get inspector's FCM tokens
-          final inspectorDoc = await _db
-              .collection(Collections.inspectors)
-              .doc(branch.assignedInspector!.id)
-              .get();
-
-          final inspectorFcmTokens = List<String>.from(
-            inspectorDoc.data()?[UserFields.fcmTokens] ?? [],
-          );
-
-          if (inspectorFcmTokens.isNotEmpty) {
-            console(
-              '📤 Sending notification to ${inspectorFcmTokens.length} device(s)',
-            );
-
-            await FCMHelper.instance.sendNotificationToMultipleTokens(
-              fcmTokens: inspectorFcmTokens,
-              title: LocaleKeys.branch_assigned_title.tr(),
-              body: LocaleKeys.branch_assigned_body.tr(
-                namedArgs: {'branchName': branch.name},
-              ),
-              data: {
-                'type': 'branch_assigned',
-                'branchId': docRef.id,
-                'branchName': branch.name,
-                'branchAddress': branch.address,
-                'inspectorId': branch.assignedInspector!.id,
-                'timestamp': DateTime.now().toIso8601String(),
-              },
-            );
-          } else {
-            console(
-              '⚠️ No FCM tokens for inspector ${branch.assignedInspector!.id}',
-            );
-          }
-        } catch (notificationError) {
-          // Don't fail the whole operation if notification fails
-          console('⚠️ Notification error: $notificationError');
-        }
+        await NotificationHelper.instance.sendToInspector(
+          context: context,
+          inspectorId: branch.assignedInspector!.id,
+          title: LocaleKeys.branch_assigned_title.tr(),
+          body: LocaleKeys.branch_assigned_body.tr(
+            namedArgs: {'branchName': branch.name},
+          ),
+          data: {
+            'type': 'branch_assigned',
+            'branchId': docRef.id,
+            'branchName': branch.name,
+            'branchAddress': branch.address,
+            'inspectorId': branch.assignedInspector!.id,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
       }
     } catch (e) {
       console('❌ Error adding branch: $e', type: DebugType.error);
@@ -242,9 +217,6 @@ class AdminBranchService {
     final branchRef = _db.collection(_collectionBranches).doc(branchId);
 
     try {
-      // ✅ 1️⃣ Get inspector's FCM tokens from your helper method
-      final inspectorFcmTokens = getInspectorTokens(inspectorId, context);
-
       // 2️⃣ Unassign branch document
       batch.update(branchRef, {
         BranchFields.assignedInspector: null,
@@ -264,42 +236,21 @@ class AdminBranchService {
       await batch.commit();
       console('✅ Branch $branchId unassigned from inspector $inspectorId');
 
-      // ✅ 5️⃣ Send notification to inspector (errors won't block)
-      if (inspectorFcmTokens.isNotEmpty) {
-        try {
-          console(
-            '📤 Sending notification to ${inspectorFcmTokens.length} device(s)',
-          );
-
-          final result = await FCMHelper.instance
-              .sendNotificationToMultipleTokens(
-                fcmTokens: inspectorFcmTokens,
-                title: LocaleKeys.branch_unassigned_title.tr(),
-                body: LocaleKeys.branch_unassigned_body.tr(
-                  namedArgs: {'branchName': branchName},
-                ),
-                data: {
-                  'type': 'branch_unassigned',
-                  'branchId': branchId,
-                  'branchName': branchName,
-                  'inspectorId': inspectorId,
-                  'timestamp': DateTime.now().toIso8601String(),
-                },
-              );
-
-          if (result['success'] == true) {
-            console(
-              '✅ Notification sent: ${result['successCount']} success, ${result['failureCount']} failed',
-            );
-          } else {
-            console('⚠️ Notification failed to send');
-          }
-        } catch (e) {
-          console('⚠️ Failed to send notification: $e');
-        }
-      } else {
-        console('⚠️ No FCM tokens for inspector $inspectorId');
-      }
+      await NotificationHelper.instance.sendToInspector(
+        context: context,
+        inspectorId: inspectorId,
+        title: LocaleKeys.branch_unassigned_title.tr(),
+        body: LocaleKeys.branch_unassigned_body.tr(
+          namedArgs: {'branchName': branchName},
+        ),
+        data: {
+          'type': 'branch_unassigned',
+          'branchId': branchId,
+          'branchName': branchName,
+          'inspectorId': inspectorId,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
     } catch (e, st) {
       console('❌ Error unassigning branch: $e\n$st', type: DebugType.error);
       rethrow;
@@ -335,35 +286,20 @@ class AdminBranchService {
 
       // 4️⃣ Send notification to assigned inspector (if any)
       if (inspectorId != null && inspectorId.isNotEmpty) {
-        try {
-          final inspectorTokens = getInspectorTokens(inspectorId, context);
-
-          if (inspectorTokens.isNotEmpty) {
-            console(
-              '📤 Sending branch deletion notification to inspector $inspectorId',
-            );
-
-            await FCMHelper.instance.sendNotificationToMultipleTokens(
-              fcmTokens: inspectorTokens,
-              title: LocaleKeys.branch_deleted_title.tr(),
-              body: LocaleKeys.branch_deleted_body.tr(
-                namedArgs: {'branchId': branchId},
-              ),
-              data: {
-                'type': 'branch_deleted',
-                'branchId': branchId,
-                'inspectorId': inspectorId,
-                'timestamp': DateTime.now().toIso8601String(),
-              },
-            );
-          } else {
-            console('⚠️ No FCM tokens for inspector $inspectorId');
-          }
-        } catch (notificationError) {
-          console(
-            '⚠️ Failed to send branch deletion notification: $notificationError',
-          );
-        }
+        await NotificationHelper.instance.sendToInspector(
+          context: context,
+          inspectorId: inspectorId,
+          title: LocaleKeys.branch_deleted_title.tr(),
+          body: LocaleKeys.branch_deleted_body.tr(
+            namedArgs: {'branchId': branchId},
+          ),
+          data: {
+            'type': 'branch_deleted',
+            'branchId': branchId,
+            'inspectorId': inspectorId,
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
       }
     } catch (e, st) {
       console(
@@ -425,62 +361,38 @@ class AdminBranchService {
       if (oldInspectorId != null &&
           oldInspectorId.isNotEmpty &&
           oldInspectorId != inspectorId) {
-        try {
-          final oldInspectorTokens = getInspectorTokens(
-            oldInspectorId,
-            context,
-          );
-
-          if (oldInspectorTokens.isNotEmpty) {
-            console('📤 Notifying old inspector: $oldInspectorId');
-
-            await FCMHelper.instance.sendNotificationToMultipleTokens(
-              fcmTokens: oldInspectorTokens,
-              title: LocaleKeys.branch_unassigned_title.tr(),
-              body: LocaleKeys.branch_unassigned_body.tr(
-                namedArgs: {'branchName': branchName},
-              ),
-              data: {
-                'type': 'branch_unassigned',
-                'branchId': branchId,
-                'branchName': branchName,
-                'reason': 'reassigned',
-                'timestamp': DateTime.now().toIso8601String(),
-              },
-            );
-          }
-        } catch (e) {
-          console('⚠️ Failed to notify old inspector: $e');
-        }
+        await NotificationHelper.instance.sendToInspector(
+          context: context,
+          inspectorId: oldInspectorId,
+          title: LocaleKeys.branch_unassigned_title.tr(),
+          body: LocaleKeys.branch_unassigned_body.tr(
+            namedArgs: {'branchName': branchName},
+          ),
+          data: {
+            'type': 'branch_unassigned',
+            'branchId': branchId,
+            'branchName': branchName,
+            'reason': 'reassigned',
+            'timestamp': DateTime.now().toIso8601String(),
+          },
+        );
       }
 
-      // ✅ 6️⃣ Notify NEW inspector
-      try {
-        final newInspectorTokens = getInspectorTokens(inspectorId, context);
-
-        if (newInspectorTokens.isNotEmpty) {
-          console('📤 Notifying new inspector: $inspectorId');
-
-          await FCMHelper.instance.sendNotificationToMultipleTokens(
-            fcmTokens: newInspectorTokens,
-            title: LocaleKeys.branch_assigned_title.tr(),
-            body: LocaleKeys.branch_assigned_body.tr(
-              namedArgs: {'branchName': branchName},
-            ),
-            data: {
-              'type': 'branch_assigned',
-              'branchId': branchId,
-              'branchName': branchName,
-              'inspectorId': inspectorId,
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-          );
-        } else {
-          console('⚠️ No FCM tokens for inspector $inspectorId');
-        }
-      } catch (e) {
-        console('⚠️ Failed to notify new inspector: $e');
-      }
+      await NotificationHelper.instance.sendToInspector(
+        context: context,
+        inspectorId: inspectorId,
+        title: LocaleKeys.branch_assigned_title.tr(),
+        body: LocaleKeys.branch_assigned_body.tr(
+          namedArgs: {'branchName': branchName},
+        ),
+        data: {
+          'type': 'branch_assigned',
+          'branchId': branchId,
+          'branchName': branchName,
+          'inspectorId': inspectorId,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
     } catch (e, st) {
       console('❌ Error assigning branch: $e\n$st', type: DebugType.error);
       rethrow;

@@ -5,7 +5,6 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
 
 import '../../../common_services/notification_helper.dart';
-import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../models/inspection_model.dart';
 import '../../../models/inspection_template_model.dart';
@@ -202,25 +201,15 @@ class InspectorInspectionService {
       );
 
       await batch.commit();
-      if (loggedInUser?.fcmTokens != null &&
-          loggedInUser!.fcmTokens!.isNotEmpty) {
-        await FCMHelper.instance.sendNotificationToTopic(
-          topic: AppConstants
-              .adminTopic, // or AppConstants.allUsersTopic if shared
-          title: LocaleKeys.newInspectionSubmitted.tr(),
-          body: LocaleKeys.newInspectionBody.tr().replaceFirst(
-            '{branchName}',
-            inspection.branchName,
-          ),
-          data: {
-            'type': 'inspection_submitted',
-            'branchId': inspection.branchId,
-          },
-        );
-      } else {
-        console('⚠️ No FCM tokens available for the logged-in user.');
-      }
-
+      await NotificationHelper.instance.sendNotificationToTopic(
+        topic: AppConstants.adminTopic,
+        title: LocaleKeys.newInspectionSubmitted.tr(),
+        body: LocaleKeys.newInspectionBody.tr().replaceFirst(
+          '{branchName}',
+          inspection.branchName,
+        ),
+        data: {'type': 'inspection_submitted', 'branchId': inspection.branchId},
+      );
       return docRef.id;
     } catch (e, st) {
       print('Error creating inspection: $e\n$st');

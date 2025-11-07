@@ -8,7 +8,6 @@ import 'package:haus_des_control/core/constants/app_constants.dart';
 
 import '../../../common_services/notification_helper.dart';
 import '../../../core/constants/firebase_constants.dart';
-import '../../../helpers/app_helpers.dart';
 import '../../../models/task_model.dart';
 import '../../../translations/locale_keys.g.dart';
 
@@ -32,7 +31,7 @@ class AdminTaskService {
     String taskId,
     TaskCommentModel comment,
     String inspectorId,
-    BuildContext context, // Added context parameter
+    BuildContext context,
   ) async {
     console("Adding comment");
     try {
@@ -42,34 +41,23 @@ class AdminTaskService {
         TaskFields.updatedAt: FieldValue.serverTimestamp(),
       });
 
-      // ✅ Send notification to inspector (wrapped in try-catch so it won't block)
-      try {
-        final inspectorTokens = getInspectorTokens(inspectorId, context);
-
-        if (inspectorTokens.isNotEmpty) {
-          await FCMHelper.instance.sendNotificationToMultipleTokens(
-            fcmTokens: inspectorTokens,
-            title: LocaleKeys.task_comment_added_title.tr(),
-            body: LocaleKeys.task_comment_added_body.tr(
-              namedArgs: {'taskId': taskId},
-            ),
-            data: {
-              'type': 'task_comment_added',
-              'taskId': taskId,
-              'commentBy': inspectorId,
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-          );
-        } else {
-          console('⚠️ No FCM tokens found for inspector: $inspectorId');
-        }
-      } catch (notificationError) {
-        console('⚠️ Failed to send comment notification: $notificationError');
-        // Do NOT rethrow; method continues successfully
-      }
+      // ✅ Send notification to inspector
+      await NotificationHelper.instance.sendToInspector(
+        inspectorId: inspectorId,
+        context: context,
+        title: LocaleKeys.task_comment_added_title.tr(),
+        body: LocaleKeys.task_comment_added_body.tr(
+          namedArgs: {'taskId': taskId},
+        ),
+        data: {
+          'type': 'task_comment_added',
+          'taskId': taskId,
+          'commentBy': inspectorId,
+        },
+      );
     } catch (e) {
       console('❌ Error adding task comment: $e');
-      rethrow; // Only rethrow if the Firestore update fails
+      rethrow;
     }
   }
 
@@ -102,51 +90,23 @@ class AdminTaskService {
       console('✅ Task $taskId deleted successfully');
 
       // Send notification to inspector AFTER successful deletion (non-blocking)
-      _sendTaskDeletionNotification(
+      await NotificationHelper.instance.sendToInspector(
         inspectorId: task.assignedInspectorId,
-        taskId: taskId,
-        taskTitle: task.title,
         context: context,
-      ).catchError((error) {
-        console('⚠️ Task deletion notification failed: $error');
-        // Silently fail - don't affect the main operation
-      });
+        title: LocaleKeys.task_deleted_title.tr(),
+        body: LocaleKeys.task_deleted_body.tr(
+          namedArgs: {'taskTitle': task.title},
+        ),
+        data: {
+          'type': 'task_deleted',
+          'taskId': taskId,
+          'taskTitle': task.title,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
     } catch (e, st) {
       console('❌ Error deleting task: $e\n$st', type: DebugType.error);
       rethrow;
-    }
-  }
-
-  // Separate method for sending notifications (non-blocking)
-  Future<void> _sendTaskDeletionNotification({
-    required String inspectorId,
-    required String taskId,
-    required String taskTitle,
-    required BuildContext context,
-  }) async {
-    try {
-      final inspectorTokens = getInspectorTokens(inspectorId, context);
-
-      if (inspectorTokens.isNotEmpty) {
-        console('📤 Notifying inspector about deleted task');
-
-        await FCMHelper.instance.sendNotificationToMultipleTokens(
-          fcmTokens: inspectorTokens,
-          title: LocaleKeys.task_deleted_title.tr(),
-          body: LocaleKeys.task_deleted_body.tr(
-            namedArgs: {'taskTitle': taskTitle},
-          ),
-          data: {
-            'type': 'task_deleted',
-            'taskId': taskId,
-            'taskTitle': taskTitle,
-            'timestamp': DateTime.now().toIso8601String(),
-          },
-        );
-      }
-    } catch (e) {
-      console('⚠️ Notification error: $e');
-      // Don't rethrow - this is intentionally silent
     }
   }
 
@@ -275,7 +235,6 @@ class AdminTaskService {
       await batch.commit();
       console('✅ Task created successfully: ${docRef.id}');
 
-      // Send notification to assigned inspector AFTER successful creation (non-blocking)
       _sendTaskAssignmentNotification(
         inspectorId: task.assignedInspectorId,
         taskId: docRef.id,
@@ -284,10 +243,7 @@ class AdminTaskService {
         taskPriority: task.priority,
         dueDate: task.dueDate,
         context: context,
-      ).catchError((error) {
-        console('⚠️ Task assignment notification failed: $error');
-        // Silently fail - don't affect the main operation
-      });
+      );
     } catch (e, st) {
       console('❌ Error creating task: $e\n$st', type: DebugType.error);
       rethrow;
@@ -304,38 +260,24 @@ class AdminTaskService {
     DateTime? dueDate,
     required BuildContext context,
   }) async {
-    try {
-      final inspectorTokens = getInspectorTokens(inspectorId, context);
-
-      if (inspectorTokens.isNotEmpty) {
-        console(
-          '📤 Sending task notification to ${inspectorTokens.length} device(s)',
-        );
-
-        await FCMHelper.instance.sendNotificationToMultipleTokens(
-          fcmTokens: inspectorTokens,
-          title: LocaleKeys.task_assigned_title.tr(),
-          body: LocaleKeys.task_assigned_body.tr(
-            namedArgs: {'taskTitle': taskTitle},
-          ),
-          data: {
-            'type': 'task_assigned',
-            'taskId': taskId,
-            'taskTitle': taskTitle,
-            'taskDescription': taskDescription,
-            'taskPriority': taskPriority,
-            'dueDate': dueDate?.toIso8601String() ?? '',
-            'inspectorId': inspectorId,
-            'timestamp': DateTime.now().toIso8601String(),
-          },
-        );
-      } else {
-        console('⚠️ No FCM tokens found for inspector $inspectorId');
-      }
-    } catch (e) {
-      console('⚠️ Notification error: $e');
-      // Don't rethrow - this is intentionally silent
-    }
+    await NotificationHelper.instance.sendToInspector(
+      context: context,
+      inspectorId: inspectorId,
+      title: LocaleKeys.task_assigned_title.tr(),
+      body: LocaleKeys.task_assigned_body.tr(
+        namedArgs: {'taskTitle': taskTitle},
+      ),
+      data: {
+        'type': 'task_assigned',
+        'taskId': taskId,
+        'taskTitle': taskTitle,
+        'taskDescription': taskDescription,
+        'taskPriority': taskPriority,
+        'dueDate': dueDate?.toIso8601String() ?? '',
+        'inspectorId': inspectorId,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   // Update task
@@ -414,106 +356,81 @@ class AdminTaskService {
     await batch.commit();
     console('✅ Task $taskId updated successfully');
 
-    // ✅ NOTIFICATIONS
-    try {
-      // Helper to get inspector FCM tokens from provider
+    // ✅ NOTIFICATIONS - Now using NotificationHelper
+    // ✅ Scenario 1: Inspector was reassigned
+    if (inspectorChanged) {
+      // Notify OLD inspector (task unassigned)
+      await NotificationHelper.instance.sendToInspector(
+        inspectorId: currentTask.assignedInspectorId,
+        context: context,
+        title: LocaleKeys.task_unassigned_title.tr(),
+        body: LocaleKeys.task_unassigned_body.tr(
+          namedArgs: {'taskTitle': currentTask.title},
+        ),
+        data: {
+          'type': 'task_unassigned',
+          'taskId': taskId,
+          'taskTitle': currentTask.title,
+          'reason': 'reassigned',
+        },
+      );
 
-      // ✅ Scenario 1: Inspector was reassigned
-      if (inspectorChanged) {
-        // Notify OLD inspector (task unassigned)
-        final oldInspectorTokens = getInspectorTokens(
-          currentTask.assignedInspectorId,
-          context,
-        );
-        if (oldInspectorTokens.isNotEmpty) {
-          console('📤 Notifying old inspector about task removal');
-          await FCMHelper.instance.sendNotificationToMultipleTokens(
-            fcmTokens: oldInspectorTokens,
-            title: LocaleKeys.task_unassigned_title.tr(),
-            body: LocaleKeys.task_unassigned_body.tr(
-              namedArgs: {'taskTitle': currentTask.title},
-            ),
-            data: {
-              'type': 'task_unassigned',
-              'taskId': taskId,
-              'taskTitle': currentTask.title,
-              'reason': 'reassigned',
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-          );
-        }
-
-        // Notify NEW inspector (task assigned)
-        final newInspectorTokens = getInspectorTokens(newInspectorId, context);
-        if (newInspectorTokens.isNotEmpty) {
-          console('📤 Notifying new inspector about task assignment');
-          await FCMHelper.instance.sendNotificationToMultipleTokens(
-            fcmTokens: newInspectorTokens,
-            title: LocaleKeys.task_assigned_title.tr(),
-            body: LocaleKeys.task_assigned_body.tr(
-              namedArgs: {'taskTitle': currentTask.title},
-            ),
-            data: {
-              'type': 'task_assigned',
-              'taskId': taskId,
-              'taskTitle': currentTask.title,
-              'taskDescription': currentTask.description,
-              'taskPriority': currentTask.priority,
-              'dueDate': currentTask.dueDate?.toIso8601String() ?? '',
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-          );
-        }
+      // Notify NEW inspector (task assigned)
+      await NotificationHelper.instance.sendToInspector(
+        inspectorId: newInspectorId,
+        context: context,
+        title: LocaleKeys.task_assigned_title.tr(),
+        body: LocaleKeys.task_assigned_body.tr(
+          namedArgs: {'taskTitle': currentTask.title},
+        ),
+        data: {
+          'type': 'task_assigned',
+          'taskId': taskId,
+          'taskTitle': currentTask.title,
+          'taskDescription': currentTask.description,
+          'taskPriority': currentTask.priority,
+          'dueDate': currentTask.dueDate?.toIso8601String() ?? '',
+        },
+      );
+    }
+    // ✅ Scenario 2: Task updated (same inspector)
+    else {
+      // Skip notification if task was completed by inspector
+      if (statusChanged && newStatus == AppConstants.completed) {
+        console('⏭️ Skipping notification - task completed by inspector');
+        return;
       }
-      // ✅ Scenario 2: Task updated (same inspector)
-      else {
-        final inspectorTokens = getInspectorTokens(
-          currentTask.assignedInspectorId,
-          context,
+
+      String notificationTitle;
+      String notificationBody;
+      String notificationType;
+
+      if (statusChanged) {
+        notificationTitle = LocaleKeys.task_status_changed_title.tr();
+        notificationBody = LocaleKeys.task_status_changed_body.tr(
+          namedArgs: {'taskTitle': currentTask.title, 'newStatus': newStatus},
         );
-        if (inspectorTokens.isNotEmpty) {
-          String notificationTitle;
-          String notificationBody;
-          String notificationType;
-
-          if (statusChanged && newStatus == AppConstants.completed) {
-            console('⏭️ Skipping notification - task completed by inspector');
-            return;
-          } else if (statusChanged) {
-            notificationTitle = LocaleKeys.task_status_changed_title.tr();
-            notificationBody = LocaleKeys.task_status_changed_body.tr(
-              namedArgs: {
-                'taskTitle': currentTask.title,
-                'newStatus': newStatus,
-              },
-            );
-            notificationType = 'task_status_changed';
-          } else {
-            notificationTitle = LocaleKeys.task_updated_title.tr();
-            notificationBody = LocaleKeys.task_updated_body.tr(
-              namedArgs: {'taskTitle': currentTask.title},
-            );
-            notificationType = 'task_updated';
-          }
-
-          console('📤 Notifying inspector about task update');
-
-          await FCMHelper.instance.sendNotificationToMultipleTokens(
-            fcmTokens: inspectorTokens,
-            title: notificationTitle,
-            body: notificationBody,
-            data: {
-              'type': notificationType,
-              'taskId': taskId,
-              'taskTitle': currentTask.title,
-              'updatedFields': data.keys.toList(),
-              'timestamp': DateTime.now().toIso8601String(),
-            },
-          );
-        }
+        notificationType = 'task_status_changed';
+      } else {
+        notificationTitle = LocaleKeys.task_updated_title.tr();
+        notificationBody = LocaleKeys.task_updated_body.tr(
+          namedArgs: {'taskTitle': currentTask.title},
+        );
+        notificationType = 'task_updated';
       }
-    } catch (notificationError) {
-      console('⚠️ Notification error: $notificationError');
+
+      await NotificationHelper.instance.sendToInspector(
+        inspectorId: currentTask.assignedInspectorId,
+        context: context,
+        title: notificationTitle,
+        body: notificationBody,
+        data: {
+          'type': notificationType,
+          'taskId': taskId,
+          'taskTitle': currentTask.title,
+          'updatedFields': data.keys.toList(),
+        },
+      );
     }
   }
 }

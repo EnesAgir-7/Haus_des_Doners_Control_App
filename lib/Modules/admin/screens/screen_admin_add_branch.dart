@@ -1320,7 +1320,7 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
       );
 
       final provider = context.read<ProviderAdminBranches>();
-      final success = await provider.addBranch(branch: branch);
+      final success = await provider.addBranch(branch: branch, context: context);
 
       if (mounted) {
         setState(() => _isSubmitting = false);

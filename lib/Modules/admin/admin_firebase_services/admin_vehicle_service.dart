@@ -7,7 +7,6 @@ import '../../../common_services/notification_helper.dart';
 import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
-import '../../../helpers/app_helpers.dart';
 import '../../../models/vehicle_model.dart';
 import 'admin_user_service.dart';
 
@@ -28,7 +27,7 @@ class AdminVehicleService {
         );
   }
 
-  Future<void> updateVehicleWithBatch({
+Future<void> updateVehicleWithBatch({
     required String vehicleId,
     int? newKm,
     String? newPlate,
@@ -87,6 +86,10 @@ class AdminVehicleService {
         );
       }
 
+      // Track inspector change for notifications
+      bool inspectorChanged = false;
+      String? notifyInspectorId;
+
       // Handle inspector assignment
       if (newInspectorId != null) {
         // UNASSIGN
@@ -103,6 +106,8 @@ class AdminVehicleService {
                 IHF.vehicleIds: FieldValue.arrayRemove([vehicleId]),
               },
             );
+            inspectorChanged = true;
+            notifyInspectorId = oldInspectorId;
           }
         } else {
           // ASSIGN/REASSIGN
@@ -128,6 +133,8 @@ class AdminVehicleService {
               IHF.vehicleIds: FieldValue.arrayUnion([vehicleId]),
             },
           );
+          inspectorChanged = true;
+          notifyInspectorId = newInspectorId;
         }
       }
 
@@ -144,37 +151,31 @@ class AdminVehicleService {
       console('✅ Vehicle $vehicleId updated successfully');
 
       // ✅ Send notification (if newKm updated or inspector changed)
-      try {
-        final tokens = <String>[];
-        if (newInspectorId != null && newInspectorId.isNotEmpty) {
-          tokens.addAll(getInspectorTokens(newInspectorId, context));
-        } else if (oldInspectorId != null && oldInspectorId.isNotEmpty) {
-          tokens.addAll(getInspectorTokens(oldInspectorId, context));
-        }
+      // Determine which inspector to notify
+      final inspectorToNotify =
+          notifyInspectorId ??
+          (oldInspectorId?.isNotEmpty == true ? oldInspectorId : null);
 
-        if (tokens.isNotEmpty) {
-          await FCMHelper.instance.sendNotificationToMultipleTokens(
-            fcmTokens: tokens,
-            title: LocaleKeys.vehicle_km_updated_title.tr(),
-            body: LocaleKeys.vehicle_km_updated_body.tr(
-              namedArgs: {
-                'vehicleId': vehicleId,
-                'newKm': kmToUse.toString(),
-                'remainingKm': remainingKm.toString(),
-              },
-            ),
-            data: {
-              'type': 'vehicle_km_updated',
+      if (inspectorToNotify != null && inspectorToNotify.isNotEmpty) {
+        await NotificationHelper.instance.sendToInspector(
+          inspectorId: inspectorToNotify,
+          context: context,
+          title: LocaleKeys.vehicle_km_updated_title.tr(),
+          body: LocaleKeys.vehicle_km_updated_body.tr(
+            namedArgs: {
               'vehicleId': vehicleId,
-              'newKm': kmToUse,
-              'remainingKm': remainingKm,
-              'timestamp': DateTime.now().toIso8601String(),
+              'newKm': kmToUse.toString(),
+              'remainingKm': remainingKm.toString(),
             },
-          );
-        }
-      } catch (notificationError) {
-        console('⚠️ Vehicle update notification failed: $notificationError');
-        // Do not throw, allow the method to complete
+          ),
+          data: {
+            'type': 'vehicle_km_updated',
+            'vehicleId': vehicleId,
+            'newKm': kmToUse,
+            'remainingKm': remainingKm,
+            'inspectorChanged': inspectorChanged,
+          },
+        );
       }
     } catch (e, st) {
       console('❌ Error updating vehicle: $e\n$st', type: DebugType.error);
@@ -196,46 +197,33 @@ class AdminVehicleService {
 
       // 2️⃣ Update inspector history if assigned
       if (inspectorId != null && inspectorId.isNotEmpty) {
-        final inspectorHistoryRef = _db
-            .collection(Collections.inspectorStats)
-            .doc(inspectorId);
-
-        batch.update(inspectorHistoryRef, {
-          IHF.vehicleIds: FieldValue.arrayRemove([vehicleId]),
-          IHF.lastUpdated: Timestamp.now(),
-        });
+        await _userService.updateInspectorHistoryBatch(
+          batch: batch,
+          inspectorId: inspectorId,
+          updates: {
+            IHF.vehicleIds: FieldValue.arrayRemove([vehicleId]),
+          },
+        );
       }
 
       // 3️⃣ Commit batch
       await batch.commit();
 
       console('✅ Vehicle $vehicleId deleted successfully');
+
+      // 4️⃣ Send notification to inspector
       if (inspectorId != null && inspectorId.isNotEmpty) {
         console('🧾 Inspector $inspectorId history updated (vehicle removed)');
 
-        // ✅ Send notification to inspector (do not fail method if notification fails)
-        try {
-          final inspectorTokens = getInspectorTokens(inspectorId, context);
-
-          if (inspectorTokens.isNotEmpty) {
-            await FCMHelper.instance.sendNotificationToMultipleTokens(
-              fcmTokens: inspectorTokens,
-              title: LocaleKeys.vehicle_deleted_title.tr(),
-              body: LocaleKeys.vehicle_deleted_body.tr(
-                namedArgs: {'vehicleId': vehicleId},
-              ),
-              data: {
-                'type': 'vehicle_deleted',
-                'vehicleId': vehicleId,
-                'timestamp': DateTime.now().toIso8601String(),
-              },
-            );
-          }
-        } catch (notificationError) {
-          console(
-            '⚠️ Vehicle deletion notification failed: $notificationError',
-          );
-        }
+        await NotificationHelper.instance.sendToInspector(
+          inspectorId: inspectorId,
+          context: context,
+          title: LocaleKeys.vehicle_deleted_title.tr(),
+          body: LocaleKeys.vehicle_deleted_body.tr(
+            namedArgs: {'vehicleId': vehicleId},
+          ),
+          data: {'type': 'vehicle_deleted', 'vehicleId': vehicleId},
+        );
       }
     } catch (e, st) {
       console('❌ Error deleting vehicle: $e\n$st', type: DebugType.error);

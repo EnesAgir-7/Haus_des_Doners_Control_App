@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
+
 import '../../../common_services/notification_helper.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/task_model.dart';
@@ -57,25 +58,17 @@ class InspectorTaskService {
       console('✅ Task $taskId status updated to $newStatus');
 
       // 4️⃣ Send notification to admins (topic)
-      try {
-        await FCMHelper.instance.sendNotificationToTopic(
-          topic: AppConstants.adminTopic,
-          title: LocaleKeys.task_status_updated.tr(),
-          body: LocaleKeys.task_status_body.tr(
-            namedArgs: {'status': newStatus},
-          ),
-          data: {
-            'type': 'task_updated',
-            'taskId': taskId,
-            'newStatus': newStatus,
-          },
-        );
-      } catch (notificationError) {
-        // Do not block the operation if notification fails
-        console(
-          '⚠️ Failed to send task status notification: $notificationError',
-        );
-      }
+
+      await NotificationHelper.instance.sendNotificationToTopic(
+        topic: AppConstants.adminTopic,
+        title: LocaleKeys.task_status_updated.tr(),
+        body: LocaleKeys.task_status_body.tr(namedArgs: {'status': newStatus}),
+        data: {
+          'type': 'task_updated',
+          'taskId': taskId,
+          'newStatus': newStatus,
+        },
+      );
     } catch (e, st) {
       console('❌ Error updating task status: $e\n$st', type: DebugType.error);
       rethrow;
@@ -91,25 +84,19 @@ class InspectorTaskService {
         TaskFields.updatedAt: FieldValue.serverTimestamp(),
       });
 
-      // ✅ Send notification to admins (wrapped in try-catch so it won't block)
-      try {
-        await FCMHelper.instance.sendNotificationToTopic(
-          topic: AppConstants.adminTopic,
-          title: LocaleKeys.task_comment_added_title.tr(),
-          body: LocaleKeys.task_comment_added_body.tr(
-            namedArgs: {'taskId': taskId},
-          ),
-          data: {
-            'type': 'task_comment_added',
-            'taskId': taskId,
-            'commentBy': comment.userId, // Using comment's userId
-            'timestamp': DateTime.now().toIso8601String(),
-          },
-        );
-      } catch (notificationError) {
-        console('⚠️ Failed to send comment notification: $notificationError');
-        // Do NOT rethrow; method continues successfully
-      }
+      await NotificationHelper.instance.sendNotificationToTopic(
+        topic: AppConstants.adminTopic,
+        title: LocaleKeys.task_comment_added_title.tr(),
+        body: LocaleKeys.task_comment_added_body.tr(
+          namedArgs: {'taskId': taskId},
+        ),
+        data: {
+          'type': 'task_comment_added',
+          'taskId': taskId,
+          'commentBy': comment.userId, // Using comment's userId
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
     } catch (e) {
       console('❌ Error adding task comment: $e');
       rethrow; // Only rethrow if the Firestore update fails

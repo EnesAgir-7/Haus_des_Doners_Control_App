@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:haus_des_control/common_services/notification_helper.dart';
 
-import '../../../common_services/notification_helper.dart';
 import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
@@ -107,7 +107,7 @@ class InspectorVehicleService {
     required int remainingKm,
   }) async {
     try {
-      await FCMHelper.instance.sendNotificationToTopic(
+      await NotificationHelper.instance.sendNotificationToTopic(
         topic: AppConstants.adminTopic,
         title: LocaleKeys.vehicle_km_updated_title.tr(),
         body: LocaleKeys.vehicle_km_updated_body.tr(

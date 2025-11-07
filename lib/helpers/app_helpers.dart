@@ -9,6 +9,7 @@ import '../core/constants/app_colors.dart';
 String formatDate(DateTime date) {
   return DateFormat('dd MMM yyyy, hh:mm a').format(date);
 }
+
 Color getScoreColor(String scoreString) {
   if (!scoreString.contains('/')) return Colors.grey;
 
@@ -173,9 +174,8 @@ Future<String?> pickRouteDate(
   );
 }
 
-
 List<String> getInspectorTokens(String inspectorId, BuildContext context) {
-  final inspector =  context.read<ProviderAdminUsers>().inspectors.firstWhere(
+  final inspector = context.read<ProviderAdminUsers>().inspectors.firstWhere(
     (e) => e.id == inspectorId,
   );
   if (inspector.fcmTokens == null) return [];

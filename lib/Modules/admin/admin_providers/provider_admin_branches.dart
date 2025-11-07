@@ -233,7 +233,7 @@ class ProviderAdminBranches with ChangeNotifier {
       await _branchService.deleteBranch(
         branchId: branchId,
         inspectorId: inspectorId,
-        context: context
+        context: context,
       );
     } catch (e) {
       _error = "${LocaleKeys.error_deleting_branch.tr()}: $e";
@@ -261,10 +261,13 @@ class ProviderAdminBranches with ChangeNotifier {
     } finally {}
   }
 
-  Future<bool> addBranch({required BranchModel branch}) async {
+  Future<bool> addBranch({
+    required BranchModel branch,
+    required BuildContext context,
+  }) async {
     try {
       console('Adding Branch...');
-      await _branchService.addBranch(branch);
+      await _branchService.addBranch(branch, context);
       return true;
     } catch (e) {
       console('❌ Error updating template: $e');
