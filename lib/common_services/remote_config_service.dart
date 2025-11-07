@@ -1,5 +1,6 @@
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
+import 'package:haus_des_control/app_env.dart';
 
 import '../core/constants/app_constants.dart';
 
@@ -19,8 +20,9 @@ class RemoteConfigService {
     await _remoteConfig.setConfigSettings(
       RemoteConfigSettings(
         fetchTimeout: const Duration(seconds: 30),
-        minimumFetchInterval: Duration.zero,
-        // minimumFetchInterval: Duration(hours: 1),
+        minimumFetchInterval: AppEnvironment.isProd
+            ? Duration(hours: 1)
+            : Duration.zero,
       ),
     );
 
