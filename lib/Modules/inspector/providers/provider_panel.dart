@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/inspector_history_model.dart';
+import '../firebase_services/inspector_user_service.dart';
 
 class ProviderPanel extends ChangeNotifier {
-  final AdminUserService _userService = AdminUserService();
+  final InspectorUserService _userService = InspectorUserService();
 
   bool _isLoading = false;
   String? _errorMessage;
@@ -12,76 +13,121 @@ class ProviderPanel extends ChangeNotifier {
   List<String> _availableMonths = [];
   String? _selectedMonthKey;
 
+  StreamSubscription<InspectorHistoryModel?>? _statsSubscription;
+  String? _currentInspectorId;
+
+  // Getters
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   InspectorHistoryModel? get currentMonthStats => _currentMonthStats;
   List<String> get availableMonths => _availableMonths;
   String? get selectedMonthKey => _selectedMonthKey;
 
-  // Computed values for UI
   int get completedInspections => _currentMonthStats?.totalInspections ?? 0;
 
+  /// Initialize - called when the screen loads
   Future<void> initialize() async {
-    await loadMonthlyStats();
+    initializeWithStream();
   }
 
-  Future<void> loadMonthlyStats() async {
+  /// Smart stream initialization (avoid multiple streams for same user)
+  void initializeWithStream() async {
+    final inspectorId = loggedInUser!.id;
+
+    if (_statsSubscription != null && _currentInspectorId == inspectorId) {
+      // Stream is already active for the same user
+      return;
+    }
+
+    // Save current user id
+    _currentInspectorId = inspectorId;
+
+    // Cancel existing subscription if any
+    await _statsSubscription?.cancel();
+
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
+    final now = DateTime.now();
+    _selectedMonthKey = '${now.month.toString().padLeft(2, '0')}-${now.year}';
+
     try {
-      final userId = loggedInUser!.id;
-      final now = DateTime.now();
+      // Fetch available months once
+      _availableMonths = await _userService.getAvailableMonths(inspectorId);
 
-      // Load current month stats
-      _currentMonthStats = await _userService.getInspectorMonthStats(
-        userId,
-        now.year,
-        now.month,
-      );
-
-      // Get available months
-      _availableMonths = await _userService.getAvailableMonths(userId);
-
-      // Set current month as selected
-      _selectedMonthKey = '${now.month.toString().padLeft(2, '0')}-${now.year}';
-
-      _isLoading = false;
-      notifyListeners();
+      // Start streaming current month stats
+      _statsSubscription = _userService
+          .streamInspectorMonthStats(inspectorId, now.year, now.month)
+          .listen(
+            (stats) {
+              _currentMonthStats = stats;
+              _isLoading = false;
+              _errorMessage = null;
+              notifyListeners();
+            },
+            onError: (error) {
+              debugPrint('Error streaming monthly stats: $error');
+              _errorMessage = '${error.toString()}';
+              _isLoading = false;
+              notifyListeners();
+            },
+          );
     } catch (e) {
-      debugPrint('Error loading monthly stats: $e');
-      _errorMessage = 'Error loading statistics: ${e.toString()}';
+      debugPrint('Error initializing monthly stats stream: $e');
+      _errorMessage = ' ${e.toString()}';
       _isLoading = false;
       notifyListeners();
     }
   }
 
+  /// Switch month dynamically
   Future<void> switchMonth(int year, int month) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final userId = loggedInUser!.id;
-      _currentMonthStats = await _userService.getInspectorMonthStats(
-        userId,
-        year,
-        month,
-      );
-
+      final inspectorId = loggedInUser!.id;
       _selectedMonthKey = '${month.toString().padLeft(2, '0')}-$year';
-      _isLoading = false;
-      notifyListeners();
+
+      // Cancel previous subscription
+      await _statsSubscription?.cancel();
+
+      // Start streaming new month stats
+      _statsSubscription = _userService
+          .streamInspectorMonthStats(inspectorId, year, month)
+          .listen(
+            (stats) {
+              _currentMonthStats = stats;
+              _isLoading = false;
+              _errorMessage = null;
+              notifyListeners();
+            },
+            onError: (error) {
+              debugPrint('Error switching month: $error');
+              _errorMessage = '${error.toString()}';
+              _isLoading = false;
+              notifyListeners();
+            },
+          );
     } catch (e) {
       debugPrint('Error switching month: $e');
-      _errorMessage = 'Error loading month data: ${e.toString()}';
+      _errorMessage = ' ${e.toString()}';
       _isLoading = false;
       notifyListeners();
     }
   }
 
+  /// Refresh available months
   Future<void> refresh() async {
-    await loadMonthlyStats();
+    try {
+      final inspectorId = loggedInUser!.id;
+      _availableMonths = await _userService.getAvailableMonths(inspectorId);
+      notifyListeners();
+      // Stream will automatically update current month stats
+    } catch (e) {
+      debugPrint('Error refreshing months: $e');
+    }
   }
 
   void clearError() {
@@ -91,6 +137,7 @@ class ProviderPanel extends ChangeNotifier {
 
   @override
   void dispose() {
+    _statsSubscription?.cancel();
     super.dispose();
   }
 }
