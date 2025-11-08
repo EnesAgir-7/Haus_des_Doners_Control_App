@@ -10,7 +10,9 @@ import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
+import '../data/inspector_data_cache.dart';
 import '../widgets/performance_chart.dart';
+import 'admin_data_bottomsheets.dart';
 import 'screen_admin_inspector_branches.dart';
 import 'screen_admin_user_details.dart';
 
@@ -46,6 +48,12 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
         });
       }
     });
+  }
+
+  @override
+  void dispose() {
+    InspectorDataCache.clearAll();
+    super.dispose();
   }
 
   List<String> _generateLast12Months() {
@@ -467,6 +475,17 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             children: [
               Expanded(
                 child: _buildCompactStatCard(
+                  ontap: () {
+                    // Show Inspections Bottom Sheet
+                    InspectorDetailsBottomSheets.showInspectionsSheet(
+                      context,
+                      inspectorId: widget.inspector.id,
+                      inspectorName: widget.inspector.name,
+                      year: _getYearFromKey(_selectedMonthKey!),
+                      month: _getMonthFromKey(_selectedMonthKey!),
+                      totalInspections: stats.totalInspections,
+                    );
+                  },
                   label: LocaleKeys.branchesVisitedReported.tr(),
                   value: stats.totalInspections.toString(),
                   icon: Icons.assignment_turned_in_outlined,
@@ -476,6 +495,17 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildCompactStatCard(
+                  ontap: () {
+                    // Show Vehicles Bottom Sheet
+                    InspectorDetailsBottomSheets.showVehiclesSheet(
+                      context,
+                      inspectorId: widget.inspector.id,
+                      inspectorName: widget.inspector.name,
+                      year: _getYearFromKey(_selectedMonthKey!),
+                      month: _getMonthFromKey(_selectedMonthKey!),
+                      totalVehicles: stats.vehicleIds.length,
+                    );
+                  },
                   label: LocaleKeys.assignedVehicles.tr(),
                   value: stats.vehicleIds.length.toString(),
                   icon: Icons.star_outline,
@@ -489,6 +519,18 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             children: [
               Expanded(
                 child: _buildCompactStatCard(
+                  ontap: () {
+                    // Show Tasks Bottom Sheet
+                    InspectorDetailsBottomSheets.showTasksSheet(
+                      context,
+                      inspectorId: widget.inspector.id,
+                      inspectorName: widget.inspector.name,
+                      year: _getYearFromKey(_selectedMonthKey!),
+                      month: _getMonthFromKey(_selectedMonthKey!),
+                      totalTasks: stats.tasksTotal,
+                      completedTasks: stats.tasksCompleted,
+                    );
+                  },
                   label: LocaleKeys.tasksCompleted.tr(),
                   value: "${stats.tasksCompleted}/${stats.tasksTotal}",
                   icon: Icons.check_circle_outline,
