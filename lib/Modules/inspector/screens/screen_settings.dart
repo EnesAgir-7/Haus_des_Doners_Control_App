@@ -21,8 +21,11 @@ class ScreenSettings extends StatelessWidget {
     return Consumer<ProviderAuth>(
       builder: (context, authProvider, child) {
         return Scaffold(
+          key: Key('settingsScreen${context.locale.languageCode}'),
           appBar: const CustomAppBar(),
-          persistentFooterDecoration: const BoxDecoration(color: Colors.transparent),
+          persistentFooterDecoration: const BoxDecoration(
+            color: Colors.transparent,
+          ),
           persistentFooterButtons: [
             Container(
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),

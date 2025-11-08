@@ -103,8 +103,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => loggedInUser!.isAdmin
-                            ? const ScreenAdminSettings()
-                            : const ScreenSettings(),
+                            // ignore: prefer_const_constructors
+                            ? ScreenAdminSettings()
+                            // ignore: prefer_const_constructors
+                            : ScreenSettings(),
                       ),
                     );
                   },
