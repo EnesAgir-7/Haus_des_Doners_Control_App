@@ -233,6 +233,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
           // Success State - Show month selector always
           return RefreshIndicator(
             onRefresh: () async {
+              InspectorDataCache.clearAll();
               await provider.getInspectorStatistics(widget.inspector.id);
             },
             color: AppColors.primaryRed,
@@ -503,7 +504,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                       inspectorName: widget.inspector.name,
                       year: _getYearFromKey(_selectedMonthKey!),
                       month: _getMonthFromKey(_selectedMonthKey!),
-                      
+
                       vehicleIds: stats.vehicleIds,
                       totalVehicles: stats.vehicleIds.length,
                     );
