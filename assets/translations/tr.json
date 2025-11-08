@@ -804,6 +804,6 @@
   "october": "Ekim",
   "november": "Kasım",
   "december": "Aralık",
-  "noFcmDescription": "Bu kullanıcı çıkış yaptığı için bildirim alamaz.", 
-  "info_missing_records": "Beklenenden daha az kayıt görüyorsanız, bazı araç verileri veritabanından silinmiş veya güncellenmiş olabilir."
+  "noFcmDescription": "Bu kullanıcı çıkış yaptığı için bildirim alamaz.",
+  "info_missing_records": "Beklenenden daha az kayıt görüyorsanız, veritabanındaki bazı verilerin silinmiş veya güncellenmiş olması mümkündür."
 }

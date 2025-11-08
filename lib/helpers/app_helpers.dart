@@ -211,3 +211,13 @@ List<String> getInspectorTokens(String inspectorId, BuildContext context) {
     return [];
   }
 }
+
+int getMonthFromKey(String monthKey) {
+  final parts = monthKey.split('-');
+  return parts.length == 2 ? int.parse(parts[0]) : DateTime.now().month;
+}
+
+int getYearFromKey(String monthKey) {
+  final parts = monthKey.split('-');
+  return parts.length == 2 ? int.parse(parts[1]) : DateTime.now().year;
+}

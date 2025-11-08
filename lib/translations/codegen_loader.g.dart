@@ -837,7 +837,7 @@ class CodegenLoader extends AssetLoader{
   "november": "November",
   "december": "Dezember",
   "noFcmDescription": "Dieser Benutzer kann keine Benachrichtigungen erhalten, da er abgemeldet ist.",
-  "info_missing_records": "Wenn Sie weniger Datensätze als erwartet sehen, wurden möglicherweise einige Fahrzeugdaten aus der Datenbank gelöscht oder aktualisiert."
+  "info_missing_records": "Wenn Sie weniger Datensätze sehen als erwartet, ist es möglich, dass einige Daten in der Datenbank entfernt oder aktualisiert wurden."
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -1678,7 +1678,7 @@ static const Map<String,dynamic> _en = {
   "november": "November",
   "december": "December",
   "noFcmDescription": "This user cannot receive notifications because they are logged out.",
-  "info_missing_records": "If you see fewer records than expected, it’s possible that some vehicle data has been removed or updated in the database."
+  "info_missing_records": "If you see fewer records than expected, it’s possible that some data has been removed or updated in the database."
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2487,7 +2487,7 @@ static const Map<String,dynamic> _tr = {
   "november": "Kasım",
   "december": "Aralık",
   "noFcmDescription": "Bu kullanıcı çıkış yaptığı için bildirim alamaz.",
-  "info_missing_records": "Beklenenden daha az kayıt görüyorsanız, bazı araç verileri veritabanından silinmiş veya güncellenmiş olabilir."
+  "info_missing_records": "Beklenenden daha az kayıt görüyorsanız, veritabanındaki bazı verilerin silinmiş veya güncellenmiş olması mümkündür."
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../common_services/remote_config_service.dart';
 import '../../../common_services/send_notification_dialog.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../helpers/app_helpers.dart';
 import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
 import '../../../translations/locale_keys.g.dart';
@@ -94,19 +95,13 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     return monthNames[month] ?? month;
   }
 
-  int _getYearFromKey(String monthKey) {
-    final parts = monthKey.split('-');
-    return parts.length == 2 ? int.parse(parts[1]) : DateTime.now().year;
-  }
 
-  int _getMonthFromKey(String monthKey) {
-    final parts = monthKey.split('-');
-    return parts.length == 2 ? int.parse(parts[0]) : DateTime.now().month;
-  }
+
+
 
   void _switchToMonthKey(String monthKey) {
-    final year = _getYearFromKey(monthKey);
-    final month = _getMonthFromKey(monthKey);
+    final year = getYearFromKey(monthKey);
+    final month = getMonthFromKey(monthKey);
     context.read<ProviderAdminUsers>().switchMonth(year, month);
   }
 
@@ -359,7 +354,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   ),
                   SizedBox(width: 12),
                   Text(
-                    '${_getMonthNameFromKey(monthKey)} ${_getYearFromKey(monthKey)}',
+                    '${_getMonthNameFromKey(monthKey)} ${getYearFromKey(monthKey)}',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -374,7 +369,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             final isSelected = monthKey == _selectedMonthKey;
             final isAvailable = availableMonths.contains(monthKey);
             final monthName = _getMonthNameFromKey(monthKey);
-            final year = _getYearFromKey(monthKey);
+            final year = getYearFromKey(monthKey);
 
             return DropdownMenuItem<String>(
               value: monthKey,
@@ -482,8 +477,8 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                       context,
                       inspectorId: widget.inspector.id,
                       inspectorName: widget.inspector.name,
-                      year: _getYearFromKey(_selectedMonthKey!),
-                      month: _getMonthFromKey(_selectedMonthKey!),
+                      year: getYearFromKey(_selectedMonthKey!),
+                      month: getMonthFromKey(_selectedMonthKey!),
                       totalInspections: stats.totalInspections,
                     );
                   },
@@ -502,8 +497,8 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                       context,
                       inspectorId: widget.inspector.id,
                       inspectorName: widget.inspector.name,
-                      year: _getYearFromKey(_selectedMonthKey!),
-                      month: _getMonthFromKey(_selectedMonthKey!),
+                      year: getYearFromKey(_selectedMonthKey!),
+                      month: getMonthFromKey(_selectedMonthKey!),
 
                       vehicleIds: stats.vehicleIds,
                       totalVehicles: stats.vehicleIds.length,
@@ -528,8 +523,8 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                       context,
                       inspectorId: widget.inspector.id,
                       inspectorName: widget.inspector.name,
-                      year: _getYearFromKey(_selectedMonthKey!),
-                      month: _getMonthFromKey(_selectedMonthKey!),
+                      year: getYearFromKey(_selectedMonthKey!),
+                      month: getMonthFromKey(_selectedMonthKey!),
                       totalTasks: stats.tasksTotal,
                       completedTasks: stats.tasksCompleted,
                     );

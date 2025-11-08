@@ -37,4 +37,5 @@ class AppConstants {
   static const enableNotifications = 'enableNotifications';
   static const inspectorBranchEdit = 'inspectorBranchEdit';
   static const useOldHome = 'useOldHome';
+  static const showInspectorHomeGraph = 'showInspectorHomeGraph';
 }

@@ -821,5 +821,5 @@
   "november": "November",
   "december": "Dezember",
   "noFcmDescription": "Dieser Benutzer kann keine Benachrichtigungen erhalten, da er abgemeldet ist.",
-  "info_missing_records": "Wenn Sie weniger Datensätze als erwartet sehen, wurden möglicherweise einige Fahrzeugdaten aus der Datenbank gelöscht oder aktualisiert."
+  "info_missing_records": "Wenn Sie weniger Datensätze sehen als erwartet, ist es möglich, dass einige Daten in der Datenbank entfernt oder aktualisiert wurden."
 }

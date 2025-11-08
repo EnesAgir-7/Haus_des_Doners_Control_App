@@ -8,8 +8,10 @@ import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/remote_config_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../helpers/app_helpers.dart';
 import '../../../models/inspector_history_model.dart';
 import '../../../models/route_model.dart';
 import '../../../translations/locale_keys.g.dart';
@@ -29,6 +31,7 @@ class ScreenHome extends StatefulWidget {
 class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
   late AnimationController _animController;
   late Animation<double> _fadeAnimation;
+  final config = RemoteConfigService();
 
   @override
   void initState() {
@@ -98,7 +101,10 @@ class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
                   // SECTION 2: PERFORMANCE METRICS (Dynamic with Time Filter)
                   Consumer<ProviderPanel>(
                     builder: (context, panelProvider, child) {
-                      return PerformanceSection(provider: panelProvider);
+                      return PerformanceSection(
+                        provider: panelProvider,
+                        config: config,
+                      );
                     },
                   ),
 
@@ -341,8 +347,13 @@ class OverviewSection extends StatelessWidget {
 
 class PerformanceSection extends StatelessWidget {
   final ProviderPanel provider;
+  final RemoteConfigService config;
 
-  const PerformanceSection({super.key, required this.provider});
+  const PerformanceSection({
+    super.key,
+    required this.provider,
+    required this.config,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -491,33 +502,34 @@ class PerformanceSection extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Performance Chart Section
-        Container(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildPerformanceChart(
-                scores: stats.recentScores,
-                title: LocaleKeys.recentPerformance.tr(),
-                icon: Icons.show_chart,
-                maxScoresToShow: 10,
-                subtitle: LocaleKeys.lastInspections
-                    .tr()
-                    .replaceFirst(
-                      '{count}',
-                      stats.recentScores.length.toString(),
-                    )
-                    .replaceFirst(
-                      '{s}',
-                      stats.recentScores.length > 1 ? 's' : '',
-                    ),
-              ),
-              const SizedBox(height: 16),
-              const Divider(height: 1, color: Colors.white12),
-              const SizedBox(height: 12),
-              _buildLastUpdatedRow(stats),
-            ],
+        if (config.showInspectorHomeGraph)
+          Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildPerformanceChart(
+                  scores: stats.recentScores,
+                  title: LocaleKeys.recentPerformance.tr(),
+                  icon: Icons.show_chart,
+                  maxScoresToShow: 10,
+                  subtitle: LocaleKeys.lastInspections
+                      .tr()
+                      .replaceFirst(
+                        '{count}',
+                        stats.recentScores.length.toString(),
+                      )
+                      .replaceFirst(
+                        '{s}',
+                        stats.recentScores.length > 1 ? 's' : '',
+                      ),
+                ),
+                const SizedBox(height: 16),
+                const Divider(height: 1, color: Colors.white12),
+                const SizedBox(height: 12),
+                _buildLastUpdatedRow(stats),
+              ],
+            ),
           ),
-        ),
       ],
     );
   }
@@ -699,8 +711,8 @@ class PerformanceSection extends StatelessWidget {
         }).toList(),
         onChanged: (String? newMonthKey) {
           if (newMonthKey != null) {
-            final year = _getYearFromKey(newMonthKey);
-            final month = _getMonthFromKey(newMonthKey);
+            final year = getYearFromKey(newMonthKey);
+            final month = getMonthFromKey(newMonthKey);
             provider.switchMonth(year, month);
           }
         },
@@ -740,15 +752,8 @@ class PerformanceSection extends StatelessWidget {
     return monthNames[month] ?? month;
   }
 
-  int _getYearFromKey(String monthKey) {
-    final parts = monthKey.split('-');
-    return parts.length == 2 ? int.parse(parts[1]) : DateTime.now().year;
-  }
 
-  int _getMonthFromKey(String monthKey) {
-    final parts = monthKey.split('-');
-    return parts.length == 2 ? int.parse(parts[0]) : DateTime.now().month;
-  }
+
 }
 
 class StatBox extends StatelessWidget {
