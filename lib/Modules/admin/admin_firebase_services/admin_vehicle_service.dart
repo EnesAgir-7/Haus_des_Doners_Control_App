@@ -27,7 +27,7 @@ class AdminVehicleService {
         );
   }
 
-Future<void> updateVehicleWithBatch({
+  Future<void> updateVehicleWithBatch({
     required String vehicleId,
     int? newKm,
     String? newPlate,
@@ -157,7 +157,7 @@ Future<void> updateVehicleWithBatch({
           (oldInspectorId?.isNotEmpty == true ? oldInspectorId : null);
 
       if (inspectorToNotify != null && inspectorToNotify.isNotEmpty) {
-        await NotificationHelper.instance.sendToInspector(
+        NotificationHelper.instance.sendToInspector(
           inspectorId: inspectorToNotify,
           context: context,
           title: LocaleKeys.vehicle_km_updated_title.tr(),
@@ -215,7 +215,7 @@ Future<void> updateVehicleWithBatch({
       if (inspectorId != null && inspectorId.isNotEmpty) {
         console('🧾 Inspector $inspectorId history updated (vehicle removed)');
 
-         NotificationHelper.instance.sendToInspector(
+        NotificationHelper.instance.sendToInspector(
           inspectorId: inspectorId,
           context: context,
           title: LocaleKeys.vehicle_deleted_title.tr(),

@@ -42,7 +42,7 @@ class AdminTaskService {
       });
 
       // ✅ Send notification to inspector
-      await NotificationHelper.instance.sendToInspector(
+      NotificationHelper.instance.sendToInspector(
         inspectorId: inspectorId,
         context: context,
         title: LocaleKeys.task_comment_added_title.tr(),
@@ -90,7 +90,7 @@ class AdminTaskService {
       console('✅ Task $taskId deleted successfully');
 
       // Send notification to inspector AFTER successful deletion (non-blocking)
-      await NotificationHelper.instance.sendToInspector(
+      NotificationHelper.instance.sendToInspector(
         inspectorId: task.assignedInspectorId,
         context: context,
         title: LocaleKeys.task_deleted_title.tr(),
@@ -225,7 +225,7 @@ class AdminTaskService {
       batch.set(docRef, taskData);
 
       // Update inspector's total tasks
-      adminUserService.updateInspectorHistoryBatch(
+     await adminUserService.updateInspectorHistoryBatch(
         batch: batch,
         inspectorId: task.assignedInspectorId,
         updates: {IHF.tasksTotal: FieldValue.increment(1)},
@@ -260,7 +260,7 @@ class AdminTaskService {
     DateTime? dueDate,
     required BuildContext context,
   }) async {
-    await NotificationHelper.instance.sendToInspector(
+     NotificationHelper.instance.sendToInspector(
       context: context,
       inspectorId: inspectorId,
       title: LocaleKeys.task_assigned_title.tr(),

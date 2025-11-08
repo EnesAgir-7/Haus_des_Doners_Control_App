@@ -150,7 +150,7 @@ class AdminBranchService {
 
       // ✅ Send notification if inspector is assigned
       if (branch.assignedInspector != null) {
-        await NotificationHelper.instance.sendToInspector(
+         NotificationHelper.instance.sendToInspector(
           context: context,
           inspectorId: branch.assignedInspector!.id,
           title: LocaleKeys.branch_assigned_title.tr(),
@@ -289,7 +289,7 @@ class AdminBranchService {
 
       // 4️⃣ Send notification to assigned inspector (if any)
       if (inspectorId != null && inspectorId.isNotEmpty) {
-        await NotificationHelper.instance.sendToInspector(
+        NotificationHelper.instance.sendToInspector(
           context: context,
           inspectorId: inspectorId,
           title: LocaleKeys.branch_deleted_title.tr(),
