@@ -825,5 +825,6 @@ abstract class  LocaleKeys {
   static const november = 'november';
   static const december = 'december';
   static const noFcmDescription = 'noFcmDescription';
+  static const info_missing_records = 'info_missing_records';
 
 }

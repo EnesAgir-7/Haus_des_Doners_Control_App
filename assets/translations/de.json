@@ -820,5 +820,6 @@
   "october": "Oktober",
   "november": "November",
   "december": "Dezember",
-  "noFcmDescription": "Dieser Benutzer kann keine Benachrichtigungen erhalten, da er abgemeldet ist."
+  "noFcmDescription": "Dieser Benutzer kann keine Benachrichtigungen erhalten, da er abgemeldet ist.",
+  "info_missing_records": "Wenn Sie weniger Datensätze als erwartet sehen, wurden möglicherweise einige Fahrzeugdaten aus der Datenbank gelöscht oder aktualisiert."
 }

@@ -836,5 +836,6 @@
   "october": "October",
   "november": "November",
   "december": "December",
-  "noFcmDescription": "This user cannot receive notifications because they are logged out."
+  "noFcmDescription": "This user cannot receive notifications because they are logged out.",
+  "info_missing_records": "If you see fewer records than expected, it’s possible that some vehicle data has been removed or updated in the database."
 }

@@ -503,6 +503,8 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                       inspectorName: widget.inspector.name,
                       year: _getYearFromKey(_selectedMonthKey!),
                       month: _getMonthFromKey(_selectedMonthKey!),
+                      
+                      vehicleIds: stats.vehicleIds,
                       totalVehicles: stats.vehicleIds.length,
                     );
                   },

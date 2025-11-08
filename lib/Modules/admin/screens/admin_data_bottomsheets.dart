@@ -115,6 +115,9 @@ class InspectorDetailsBottomSheets {
                         ),
                       ],
                     ),
+
+                    SizedBox(height: 10),
+                    InfoMessage(message: LocaleKeys.info_missing_records.tr()),
                   ],
                 ),
               ),
@@ -271,6 +274,9 @@ class InspectorDetailsBottomSheets {
                         ),
                       ],
                     ),
+
+                    SizedBox(height: 10),
+                    InfoMessage(message: LocaleKeys.info_missing_records.tr()),
                   ],
                 ),
               ),
@@ -328,6 +334,8 @@ class InspectorDetailsBottomSheets {
     required String inspectorName,
     required int year,
     required int month,
+
+    required List<String> vehicleIds,
     required int totalVehicles,
   }) {
     showModalBottomSheet(
@@ -425,6 +433,8 @@ class InspectorDetailsBottomSheets {
                         ),
                       ],
                     ),
+                    SizedBox(height: 10),
+                    InfoMessage(message: LocaleKeys.info_missing_records.tr()),
                   ],
                 ),
               ),
@@ -435,6 +445,7 @@ class InspectorDetailsBottomSheets {
                     inspectorId,
                     year,
                     month,
+                    vehicleIds,
                   ),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -792,5 +803,33 @@ class InspectorDetailsBottomSheets {
       12: LocaleKeys.december.tr(),
     };
     return monthNames[month] ?? '';
+  }
+}
+
+class InfoMessage extends StatelessWidget {
+  final String message;
+  const InfoMessage({Key? key, required this.message}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(Icons.info_outline, size: 20, color: AppColors.amber),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: AppColors.whiteWithOpacity(0.3),
+                fontSize: 13,
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

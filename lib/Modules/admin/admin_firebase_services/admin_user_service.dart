@@ -444,23 +444,27 @@ class InspectorDataService {
     String inspectorId,
     int year,
     int month,
+    List<String> vehicleIds,
   ) async {
-    // Check cache first
+    if (vehicleIds.isEmpty) return [];
+
+    // ✅ Check cache first
     final cached = InspectorDataCache.getVehicles(inspectorId, year, month);
     if (cached != null) return cached;
 
-    // Fetch from Firestore
+    // ✅ Fetch only by vehicle IDs
     final snapshot = await FirebaseFirestore.instance
         .collection(Collections.vehicles)
-        .where(VehicleFields.assignedInspectorId, isEqualTo: inspectorId)
+        .where(FieldPath.documentId, whereIn: vehicleIds)
         .get();
 
     final vehicles = snapshot.docs
         .map((doc) => VehicleModel.fromFirestore(doc))
         .toList();
 
-    // Cache the result
+    // ✅ Cache the result by inspector + month/year
     InspectorDataCache.setVehicles(inspectorId, year, month, vehicles);
+
     return vehicles;
   }
 }
