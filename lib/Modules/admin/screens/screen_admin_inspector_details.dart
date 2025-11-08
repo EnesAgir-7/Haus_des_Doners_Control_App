@@ -57,48 +57,6 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     super.dispose();
   }
 
-  List<String> _generateLast12Months() {
-    final List<String> months = [];
-    final now = DateTime.now();
-
-    for (int i = 0; i < 12; i++) {
-      final date = DateTime(now.year, now.month - i, 1);
-      final monthKey = '${date.month.toString().padLeft(2, '0')}-${date.year}';
-      months.add(monthKey);
-    }
-
-    return months;
-  }
-
-  String _getMonthNameFromKey(String monthKey) {
-    // monthKey format: "01-2025"
-    final parts = monthKey.split('-');
-    if (parts.length != 2) return monthKey;
-
-    final month = parts[0];
-
-    var monthNames = {
-      "01": LocaleKeys.january.tr(),
-      "02": LocaleKeys.february.tr(),
-      "03": LocaleKeys.march.tr(),
-      "04": LocaleKeys.april.tr(),
-      "05": LocaleKeys.may.tr(),
-      "06": LocaleKeys.june.tr(),
-      "07": LocaleKeys.july.tr(),
-      "08": LocaleKeys.august.tr(),
-      "09": LocaleKeys.september.tr(),
-      "10": LocaleKeys.october.tr(),
-      "11": LocaleKeys.november.tr(),
-      "12": LocaleKeys.december.tr(),
-    };
-
-    return monthNames[month] ?? month;
-  }
-
-
-
-
-
   void _switchToMonthKey(String monthKey) {
     final year = getYearFromKey(monthKey);
     final month = getMonthFromKey(monthKey);
@@ -137,10 +95,10 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             },
             icon: Text(
               widget.inspector.name[0],
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
           ),
-          SizedBox(width: 10),
+          const SizedBox(width: 10),
         ],
       ),
       body: Consumer<ProviderAdminUsers>(
@@ -150,11 +108,11 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(color: AppColors.primaryRed),
+                  const CircularProgressIndicator(color: AppColors.primaryRed),
                   const SizedBox(height: 16),
                   Text(
                     LocaleKeys.loadingStatistics.tr(),
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
               ),
@@ -169,7 +127,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.error_outline,
                       size: 64,
                       color: AppColors.primaryRed,
@@ -177,7 +135,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                     const SizedBox(height: 16),
                     Text(
                       LocaleKeys.errorLoadingStatistics.tr(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -186,7 +144,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                     const SizedBox(height: 8),
                     Text(
                       provider.error!,
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -213,11 +171,11 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.inbox_outlined, size: 64, color: Colors.white38),
+                  const Icon(Icons.inbox_outlined, size: 64, color: Colors.white38),
                   const SizedBox(height: 16),
                   Text(
                     LocaleKeys.noStatisticsAvailable.tr(),
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                    style: const TextStyle(color: Colors.white70, fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -236,20 +194,20 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 children: [
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   _buildMonthSelector(provider),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
                   // Show stats if available, otherwise show no data message
                   if (provider.currentMonthStats != null) ...[
                     _buildStatsGrid(provider.currentMonthStats!),
                     _buildDetailedSection(provider.currentMonthStats!),
                   ] else ...[
-                    SizedBox(height: 100),
+                    const SizedBox(height: 100),
                     Center(
                       child: Column(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.inbox_outlined,
                             size: 64,
                             color: Colors.white38,
@@ -257,7 +215,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                           const SizedBox(height: 16),
                           Text(
                             LocaleKeys.noDataForSelectedMonth.tr(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white70,
                               fontSize: 16,
                             ),
@@ -276,19 +234,16 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
   }
 
   Widget _buildMonthSelector(ProviderAdminUsers provider) {
-    // Generate last 12 months
-    final last12Months = _generateLast12Months();
+    final last12Months = generateLast12Months();
 
-    // Filter to show only available months (optional)
     final availableMonths = provider.inspectorAllData?.availableMonths ?? [];
 
-    // Use last12Months for dropdown, but mark unavailable ones
     if (_selectedMonthKey == null && last12Months.isNotEmpty) {
       _selectedMonthKey = last12Months.first; // Current month
     }
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -308,7 +263,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
           BoxShadow(
             color: AppColors.primaryRed.withValues(alpha: 0.1),
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -317,20 +272,20 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
           value: _selectedMonthKey,
           isExpanded: true,
           isDense: false,
-          dropdownColor: Color(0xFF1a1a1a),
+          dropdownColor: const Color(0xFF1a1a1a),
           icon: Container(
-            padding: EdgeInsets.all(4),
+            padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: AppColors.primaryRed.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.arrow_drop_down_rounded,
               color: AppColors.primaryRed,
               size: 24,
             ),
           ),
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -341,21 +296,21 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               return Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: AppColors.primaryRed.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.calendar_month_rounded,
                       color: AppColors.primaryRed,
                       size: 18,
                     ),
                   ),
-                  SizedBox(width: 12),
+                  const SizedBox(width: 12),
                   Text(
-                    '${_getMonthNameFromKey(monthKey)} ${getYearFromKey(monthKey)}',
-                    style: TextStyle(
+                    '${getMonthNameFromKey(monthKey)} ${getYearFromKey(monthKey)}',
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -368,7 +323,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
           items: last12Months.map((monthKey) {
             final isSelected = monthKey == _selectedMonthKey;
             final isAvailable = availableMonths.contains(monthKey);
-            final monthName = _getMonthNameFromKey(monthKey);
+            final monthName = getMonthNameFromKey(monthKey);
             final year = getYearFromKey(monthKey);
 
             return DropdownMenuItem<String>(
@@ -385,7 +340,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                           : (isAvailable ? Colors.white60 : Colors.white30),
                       size: 18,
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,10 +363,10 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                                 ),
                               ),
                               if (!isAvailable) ...[
-                                SizedBox(width: 6),
+                                const SizedBox(width: 6),
                                 Text(
                                   LocaleKeys.noData.tr(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white30,
                                     fontSize: 11,
                                     fontStyle: FontStyle.italic,
@@ -420,7 +375,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                               ],
                             ],
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
                             year.toString(),
                             style: TextStyle(
@@ -435,7 +390,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                       ),
                     ),
                     if (isSelected)
-                      Icon(
+                      const Icon(
                         Icons.check_circle_rounded,
                         color: AppColors.primaryRed,
                         size: 20,
@@ -485,7 +440,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   label: LocaleKeys.branchesVisitedReported.tr(),
                   value: stats.totalInspections.toString(),
                   icon: Icons.assignment_turned_in_outlined,
-                  gradientColors: [Color(0xFF4A5568), Color(0xFF2D3748)],
+                  gradientColors: [const Color(0xFF4A5568), const Color(0xFF2D3748)],
                 ),
               ),
               const SizedBox(width: 12),
@@ -507,7 +462,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   label: LocaleKeys.assignedVehicles.tr(),
                   value: stats.vehicleIds.length.toString(),
                   icon: Icons.star_outline,
-                  gradientColors: [Color(0xFF0F766E), Color(0xFF115E59)],
+                  gradientColors: [const Color(0xFF0F766E), const Color(0xFF115E59)],
                 ),
               ),
             ],
@@ -532,7 +487,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   label: LocaleKeys.tasksCompleted.tr(),
                   value: "${stats.tasksCompleted}/${stats.tasksTotal}",
                   icon: Icons.check_circle_outline,
-                  gradientColors: [Color(0xFF0F766E), Color(0xFF115E59)],
+                  gradientColors: [const Color(0xFF0F766E), const Color(0xFF115E59)],
                   subtitle: "$completionRate%",
                 ),
               ),
@@ -553,7 +508,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   label: LocaleKeys.branchesAssigned.tr(),
                   value: stats.branchesIds.length.toString(),
                   icon: Icons.store_outlined,
-                  gradientColors: [Color(0xFF9333EA), Color(0xFF7E22CE)],
+                  gradientColors: [const Color(0xFF9333EA), const Color(0xFF7E22CE)],
                 ),
               ),
             ],
@@ -670,15 +625,15 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
   Widget _buildLastUpdatedRow(InspectorHistoryModel stats) {
     return Row(
       children: [
-        Icon(Icons.update, size: 16, color: Colors.white54),
+        const Icon(Icons.update, size: 16, color: Colors.white54),
         const SizedBox(width: 8),
         Text(
           '${LocaleKeys.lastUpdated.tr()} ',
-          style: TextStyle(color: Colors.white54, fontSize: 12),
+          style: const TextStyle(color: Colors.white54, fontSize: 12),
         ),
         Text(
           _formatDate(stats.lastUpdated),
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 12,
             fontWeight: FontWeight.w600,

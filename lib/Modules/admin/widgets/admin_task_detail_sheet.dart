@@ -104,7 +104,7 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
         backgroundColor: AppColors.lightBlack,
         title: Text(
           LocaleKeys.deleteComments.tr(),
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
 
         content: Text(
@@ -121,7 +121,7 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(
               LocaleKeys.delete.tr(),
-              style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],
@@ -316,9 +316,9 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.lightBlack,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           children: [
@@ -367,7 +367,7 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
                         onPressed: _selectAllComments,
                         child: Text(
                           LocaleKeys.selectAll.tr(),
-                          style: TextStyle(color: AppColors.primaryRed),
+                          style: const TextStyle(color: AppColors.primaryRed),
                         ),
                       ),
                     IconButton(
@@ -423,7 +423,7 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
                           Icons.flag_rounded,
                         ),
 
-                        Spacer(),
+                        const Spacer(),
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context);
@@ -456,7 +456,7 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
                                     },
                                     child: Text(
                                       LocaleKeys.delete.tr(),
-                                      style: TextStyle(color: Colors.red),
+                                      style: const TextStyle(color: Colors.red),
                                     ),
                                   ),
                                 ],
@@ -1066,7 +1066,7 @@ class _AdminTaskDetailSheetState extends State<AdminTaskDetailSheet> {
                         )
                       : Text(
                           LocaleKeys.post.tr(),
-                          style: TextStyle(fontWeight: FontWeight.w600),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                 ),
               ],

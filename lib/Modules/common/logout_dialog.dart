@@ -32,7 +32,7 @@ void showLogoutDialog(BuildContext context) {
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.logout_rounded,
               color: AppColors.primaryRed,
               size: 24,
@@ -42,7 +42,7 @@ void showLogoutDialog(BuildContext context) {
           Expanded(
             child: Text(
               LocaleKeys.confirmLogout.tr(),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -103,7 +103,7 @@ void showLogoutDialog(BuildContext context) {
             ),
             child: Text(
               LocaleKeys.logout.tr(),
-              style: TextStyle(fontWeight: FontWeight.w600),
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
         ),

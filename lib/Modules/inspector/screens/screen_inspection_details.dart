@@ -39,7 +39,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: const CustomAppBar(),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -56,7 +56,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
         child: Consumer<ProviderInspection>(
           builder: (context, provider, child) {
             if (provider.isLoading) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(color: AppColors.primaryRed),
               );
             }
@@ -282,7 +282,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
       children: [
         Text(
           LocaleKeys.overall_notes.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -317,7 +317,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
       children: [
         Text(
           LocaleKeys.categoryBreakdown.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -509,7 +509,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+            const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
             const SizedBox(height: 16),
             Text(
               LocaleKeys.error_occurred.tr(),

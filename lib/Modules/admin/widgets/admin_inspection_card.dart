@@ -90,7 +90,7 @@ class AdminInspectionCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.apartment, size: 20.0, color: Colors.lightBlueAccent),
+          const Icon(Icons.apartment, size: 20.0, color: Colors.lightBlueAccent),
           const SizedBox(width: 10.0),
           Expanded(
             child: Column(

@@ -97,11 +97,11 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
   Widget _buildHeader(ProviderAdminInspections provider) {
     return Row(
       children: [
-        Icon(Icons.fact_check, color: Colors.lightBlueAccent),
-        SizedBox(width: 6),
+        const Icon(Icons.fact_check, color: Colors.lightBlueAccent),
+        const SizedBox(width: 6),
         Text(
           LocaleKeys.inspections.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -109,18 +109,18 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
         ),
         Text(
           " ${LocaleKeys.page.tr()}-${provider.pageNo.toString()}",
-          style: TextStyle(fontSize: 10),
+          style: const TextStyle(fontSize: 10),
         ),
-        Spacer(),
+        const Spacer(),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: AppColors.lightRed,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             "${provider.inspections.length} ${LocaleKeys.total.tr()}",
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -134,14 +134,14 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
   Widget _buildSearchBar(ProviderAdminInspections provider) {
     return TextField(
       onChanged: provider.setSearchQuery,
-      style: TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         hintText: "${LocaleKeys.search.tr()} ${LocaleKeys.byBranchName.tr()}",
-        hintStyle: TextStyle(color: Colors.white54),
-        prefixIcon: Icon(Icons.search, color: Colors.white54),
+        hintStyle: const TextStyle(color: Colors.white54),
+        prefixIcon: const Icon(Icons.search, color: Colors.white54),
         suffixIcon: provider.searchQuery.isNotEmpty
             ? IconButton(
-                icon: Icon(Icons.clear, color: Colors.white54),
+                icon: const Icon(Icons.clear, color: Colors.white54),
                 onPressed: () => provider.setSearchQuery(''),
               )
             : null,
@@ -149,17 +149,17 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
         fillColor: AppColors.lightBlack,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white24),
+          borderSide: const BorderSide(color: Colors.white24),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white24),
+          borderSide: const BorderSide(color: Colors.white24),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed),
+          borderSide: const BorderSide(color: AppColors.primaryRed),
         ),
-        contentPadding: EdgeInsets.symmetric(vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
       ),
     );
   }
@@ -204,7 +204,7 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
     return GestureDetector(
       onTap: () => provider.setSortBy(value),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primaryRed : AppColors.lightBlack,
           borderRadius: BorderRadius.circular(8),
@@ -220,7 +220,7 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
               size: 14,
               color: isSelected ? Colors.white : Colors.white54,
             ),
-            SizedBox(width: 6),
+            const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
@@ -237,7 +237,7 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
 
   Widget _buildInspectionList(ProviderAdminInspections provider) {
     if (provider.isLoading && provider.inspections.isEmpty) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryRed),
       );
     }
@@ -256,8 +256,8 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
       backgroundColor: AppColors.lightBlack,
       child: ListView.builder(
         controller: _scrollController,
-        padding: EdgeInsets.only(bottom: 50),
-        physics: AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 50),
+        physics: const AlwaysScrollableScrollPhysics(),
         itemCount: provider.inspections.length + (provider.hasMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index == provider.inspections.length) {
@@ -281,8 +281,8 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
   }
 
   Widget _buildLoadingIndicator() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 16),
       child: Center(
         child: CircularProgressIndicator(
           color: AppColors.primaryRed,
@@ -297,26 +297,26 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
-          SizedBox(height: 16),
+          const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          const SizedBox(height: 16),
           Text(
             LocaleKeys.error_occurred.tr(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               provider.errorMessage!,
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: provider.refresh,
             style: ElevatedButton.styleFrom(
@@ -332,25 +332,25 @@ class _ScreenAdminInspectionsState extends State<ScreenAdminInspections> {
   Widget _buildEmptyState(ProviderAdminInspections provider) {
     return Center(
       child: SingleChildScrollView(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.fact_check, size: 80, color: Colors.white24),
-            SizedBox(height: 16),
+            const Icon(Icons.fact_check, size: 80, color: Colors.white24),
+            const SizedBox(height: 16),
             Text(
               provider.searchQuery.isNotEmpty
                   ? LocaleKeys.noInspectionsFound.tr()
                   : LocaleKeys.no_inspections_yet.tr(),
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
             if (provider.searchQuery.isNotEmpty) ...[
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               TextButton(
                 onPressed: () => provider.setSearchQuery(''),
                 child: Text(
                   LocaleKeys.clear_search.tr(),
-                  style: TextStyle(color: AppColors.primaryRed),
+                  style: const TextStyle(color: AppColors.primaryRed),
                 ),
               ),
             ],

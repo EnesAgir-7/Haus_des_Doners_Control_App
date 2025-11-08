@@ -29,7 +29,7 @@ class InspectorDetailsBottomSheets {
         minChildSize: 0.5,
         maxChildSize: 0.95,
         builder: (_, controller) => Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.primaryDark,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
@@ -45,7 +45,7 @@ class InspectorDetailsBottomSheets {
                       AppColors.primaryRed.withValues(alpha: 0.1),
                     ],
                   ),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 child: Column(
                   children: [
@@ -66,7 +66,7 @@ class InspectorDetailsBottomSheets {
                             color: AppColors.primaryRed.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.check_circle_outline,
                             color: AppColors.primaryRed,
                             size: 24,
@@ -79,7 +79,7 @@ class InspectorDetailsBottomSheets {
                             children: [
                               Text(
                                 LocaleKeys.tasksCompleted.tr(),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -87,7 +87,7 @@ class InspectorDetailsBottomSheets {
                               ),
                               Text(
                                 '$inspectorName - ${_getMonthName(month)} $year',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white60,
                                   fontSize: 12,
                                 ),
@@ -106,7 +106,7 @@ class InspectorDetailsBottomSheets {
                           ),
                           child: Text(
                             '$completedTasks/$totalTasks',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -116,7 +116,7 @@ class InspectorDetailsBottomSheets {
                       ],
                     ),
 
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     InfoMessage(message: LocaleKeys.info_missing_records.tr()),
                   ],
                 ),
@@ -131,7 +131,7 @@ class InspectorDetailsBottomSheets {
                   ),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
+                      return const Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primaryRed,
                         ),
@@ -188,7 +188,7 @@ class InspectorDetailsBottomSheets {
         minChildSize: 0.5,
         maxChildSize: 0.95,
         builder: (_, controller) => Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.primaryDark,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
@@ -204,7 +204,7 @@ class InspectorDetailsBottomSheets {
                       Colors.green.withValues(alpha: 0.1),
                     ],
                   ),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 child: Column(
                   children: [
@@ -225,7 +225,7 @@ class InspectorDetailsBottomSheets {
                             color: Colors.green.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.assignment_turned_in_outlined,
                             color: Colors.green,
                             size: 24,
@@ -238,7 +238,7 @@ class InspectorDetailsBottomSheets {
                             children: [
                               Text(
                                 LocaleKeys.branchesVisitedReported.tr(),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -246,7 +246,7 @@ class InspectorDetailsBottomSheets {
                               ),
                               Text(
                                 '$inspectorName - ${_getMonthName(month)} $year',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white60,
                                   fontSize: 12,
                                 ),
@@ -265,7 +265,7 @@ class InspectorDetailsBottomSheets {
                           ),
                           child: Text(
                             '$totalInspections',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -275,7 +275,7 @@ class InspectorDetailsBottomSheets {
                       ],
                     ),
 
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     InfoMessage(message: LocaleKeys.info_missing_records.tr()),
                   ],
                 ),
@@ -290,7 +290,7 @@ class InspectorDetailsBottomSheets {
                   ),
                   builder: (_, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
+                      return const Center(
                         child: CircularProgressIndicator(color: Colors.green),
                       );
                     }
@@ -347,7 +347,7 @@ class InspectorDetailsBottomSheets {
         minChildSize: 0.5,
         maxChildSize: 0.95,
         builder: (_, controller) => Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.primaryDark,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
@@ -363,7 +363,7 @@ class InspectorDetailsBottomSheets {
                       Colors.blue.withValues(alpha: 0.1),
                     ],
                   ),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 child: Column(
                   children: [
@@ -384,7 +384,7 @@ class InspectorDetailsBottomSheets {
                             color: Colors.blue.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.directions_car_outlined,
                             color: Colors.blue,
                             size: 24,
@@ -397,7 +397,7 @@ class InspectorDetailsBottomSheets {
                             children: [
                               Text(
                                 LocaleKeys.assignedVehicles.tr(),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
@@ -405,7 +405,7 @@ class InspectorDetailsBottomSheets {
                               ),
                               Text(
                                 '$inspectorName - ${_getMonthName(month)} $year',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white60,
                                   fontSize: 12,
                                 ),
@@ -424,7 +424,7 @@ class InspectorDetailsBottomSheets {
                           ),
                           child: Text(
                             '$totalVehicles',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -433,7 +433,7 @@ class InspectorDetailsBottomSheets {
                         ),
                       ],
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     InfoMessage(message: LocaleKeys.info_missing_records.tr()),
                   ],
                 ),
@@ -449,7 +449,7 @@ class InspectorDetailsBottomSheets {
                   ),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
+                      return const Center(
                         child: CircularProgressIndicator(color: Colors.blue),
                       );
                     }
@@ -541,7 +541,7 @@ class InspectorDetailsBottomSheets {
               const SizedBox(height: 4),
               Text(
                 task.description,
-                style: TextStyle(color: Colors.white60, fontSize: 12),
+                style: const TextStyle(color: Colors.white60, fontSize: 12),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -549,19 +549,19 @@ class InspectorDetailsBottomSheets {
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 12, color: Colors.white54),
+                const Icon(Icons.calendar_today, size: 12, color: Colors.white54),
                 const SizedBox(width: 4),
                 Text(
                   DateFormat('MMM dd, yyyy').format(task.createdAt),
-                  style: TextStyle(color: Colors.white54, fontSize: 11),
+                  style: const TextStyle(color: Colors.white54, fontSize: 11),
                 ),
                 if (task.isCompleted) ...[
                   const SizedBox(width: 12),
-                  Icon(Icons.check, size: 12, color: Colors.green),
+                  const Icon(Icons.check, size: 12, color: Colors.green),
                   const SizedBox(width: 4),
                   Text(
                     DateFormat('MMM dd').format(task.updatedAt),
-                    style: TextStyle(color: Colors.green, fontSize: 11),
+                    style: const TextStyle(color: Colors.green, fontSize: 11),
                   ),
                 ],
               ],
@@ -609,11 +609,11 @@ class InspectorDetailsBottomSheets {
               color: Colors.green.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Icons.store_outlined, color: Colors.green, size: 24),
+            child: const Icon(Icons.store_outlined, color: Colors.green, size: 24),
           ),
           title: Text(
             inspection.branchName,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 15,
               fontWeight: FontWeight.w600,
@@ -625,13 +625,13 @@ class InspectorDetailsBottomSheets {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 12, color: Colors.white54),
+                  const Icon(Icons.calendar_today, size: 12, color: Colors.white54),
                   const SizedBox(width: 4),
                   Text(
                     DateFormat(
                       'MMM dd, yyyy HH:mm',
                     ).format(inspection.completedTime!),
-                    style: TextStyle(color: Colors.white54, fontSize: 11),
+                    style: const TextStyle(color: Colors.white54, fontSize: 11),
                   ),
                 ],
               ),
@@ -647,11 +647,11 @@ class InspectorDetailsBottomSheets {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.star, size: 14, color: AppColors.amber),
+                const Icon(Icons.star, size: 14, color: AppColors.amber),
                 const SizedBox(width: 4),
                 Text(
                   inspection.score,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.amber,
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
@@ -686,11 +686,11 @@ class InspectorDetailsBottomSheets {
             color: Colors.blue.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(Icons.directions_car, color: Colors.blue, size: 24),
+          child: const Icon(Icons.directions_car, color: Colors.blue, size: 24),
         ),
         title: Text(
           vehicle.model,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 15,
             fontWeight: FontWeight.w600,
@@ -703,11 +703,11 @@ class InspectorDetailsBottomSheets {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(Icons.pin, size: 12, color: Colors.white60),
+                  const Icon(Icons.pin, size: 12, color: Colors.white60),
                   const SizedBox(width: 4),
                   Text(
                     vehicle.plate,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white60,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -720,7 +720,7 @@ class InspectorDetailsBottomSheets {
               const SizedBox(height: 4),
               Text(
                 vehicle.model,
-                style: TextStyle(color: Colors.white60, fontSize: 12),
+                style: const TextStyle(color: Colors.white60, fontSize: 12),
               ),
             ],
             const SizedBox(height: 8),
@@ -746,7 +746,7 @@ class InspectorDetailsBottomSheets {
           const SizedBox(height: 16),
           Text(
             message,
-            style: TextStyle(color: Colors.white60, fontSize: 15),
+            style: const TextStyle(color: Colors.white60, fontSize: 15),
             textAlign: TextAlign.center,
           ),
         ],
@@ -761,11 +761,11 @@ class InspectorDetailsBottomSheets {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: AppColors.primaryRed),
+            const Icon(Icons.error_outline, size: 64, color: AppColors.primaryRed),
             const SizedBox(height: 16),
             Text(
               LocaleKeys.error_occurred.tr(),
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -774,7 +774,7 @@ class InspectorDetailsBottomSheets {
             const SizedBox(height: 8),
             Text(
               error,
-              style: TextStyle(color: Colors.white60, fontSize: 12),
+              style: const TextStyle(color: Colors.white60, fontSize: 12),
               textAlign: TextAlign.center,
             ),
           ],
@@ -816,7 +816,7 @@ class InfoMessage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.info_outline, size: 20, color: AppColors.amber),
+          const Icon(Icons.info_outline, size: 20, color: AppColors.amber),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

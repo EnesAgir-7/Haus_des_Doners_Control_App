@@ -57,7 +57,7 @@ Widget buildPerformanceChart({
           Expanded(
             child: Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.primaryRed,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -164,7 +164,7 @@ Widget buildPerformanceChart({
                           const SizedBox(height: 8),
                           Text(
                             '${score.toInt()}/${maxScore.toInt()}',
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white38,
                               fontSize: 9,
                             ),
@@ -184,7 +184,7 @@ Widget buildPerformanceChart({
                 return Expanded(
                   child: Text(
                     '#${parsedScores.length - index}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white54,
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
@@ -202,7 +202,7 @@ Widget buildPerformanceChart({
         Center(
           child: Text(
             subtitle,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white54,
               fontSize: 11,
               fontStyle: FontStyle.italic,
@@ -229,7 +229,7 @@ Widget _buildLegendItem(Color color, String label) {
       const SizedBox(width: 4),
       Text(
         label,
-        style: TextStyle(color: Colors.white54, fontSize: 10),
+        style: const TextStyle(color: Colors.white54, fontSize: 10),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),

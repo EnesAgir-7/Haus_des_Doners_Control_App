@@ -244,7 +244,7 @@ class _ScreenAdminCreateUserState extends State<ScreenAdminCreateUser> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -263,7 +263,7 @@ class _ScreenAdminCreateUserState extends State<ScreenAdminCreateUser> {
       decoration: InputDecoration(
         labelText: LocaleKeys.role.tr(),
         labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
-        prefixIcon: Icon(Icons.verified_user, color: AppColors.primaryRed),
+        prefixIcon: const Icon(Icons.verified_user, color: AppColors.primaryRed),
         filled: true,
         fillColor: Colors.white.withValues(alpha: 0.05),
         border: OutlineInputBorder(
@@ -276,7 +276,7 @@ class _ScreenAdminCreateUserState extends State<ScreenAdminCreateUser> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
         ),
       ),
       items: [

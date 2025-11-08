@@ -89,26 +89,26 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
   Widget _buildHeader(ProviderAdminTasks provider) {
     return Row(
       children: [
-        Icon(Icons.task_alt, color: Colors.lightBlueAccent),
-        SizedBox(width: 6),
+        const Icon(Icons.task_alt, color: Colors.lightBlueAccent),
+        const SizedBox(width: 6),
         Text(
           LocaleKeys.taskManagement.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
         ),
-        Spacer(),
+        const Spacer(),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: AppColors.lightRed,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             "${provider.allTasks.length} ${LocaleKeys.tasks.tr()}",
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -168,7 +168,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                         BoxShadow(
                           color: AppColors.primaryRed.withOpacity(0.3),
                           blurRadius: 6,
-                          offset: Offset(0, 3),
+                          offset: const Offset(0, 3),
                         ),
                       ]
                     : [],
@@ -180,7 +180,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                   const SizedBox(width: 4),
                   Text(
                     '${entry.value}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
@@ -189,7 +189,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
                   const SizedBox(width: 4),
                   Text(
                     entry.key.toLocaleKey(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white70,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -210,7 +210,7 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
   }
 
   Widget _buildLoadingState() {
-    return Center(
+    return const Center(
       child: CircularProgressIndicator(color: AppColors.primaryRed),
     );
   }
@@ -218,25 +218,25 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
   Widget _buildEmptyState(ProviderAdminTasks provider) {
     return Center(
       child: SingleChildScrollView(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.task_alt, size: 80, color: Colors.white24),
-            SizedBox(height: 16),
+            const Icon(Icons.task_alt, size: 80, color: Colors.white24),
+            const SizedBox(height: 16),
             Text(
               _selectedFilter == 'all'
                   ? LocaleKeys.noTasksAvailable.tr()
                   : '${LocaleKeys.no.tr()} ${_selectedFilter.replaceAll('_', ' ')} ${LocaleKeys.tasks.tr()}',
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
             if (_selectedFilter != 'all') ...[
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               TextButton(
                 onPressed: () => setState(() => _selectedFilter = 'all'),
                 child: Text(
                   LocaleKeys.viewAllTasks.tr(),
-                  style: TextStyle(color: AppColors.primaryRed),
+                  style: const TextStyle(color: AppColors.primaryRed),
                 ),
               ),
             ],
@@ -251,9 +251,9 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
     List<TaskModel> filteredTasks,
   ) {
     return ListView.builder(
-      padding: EdgeInsets.only(bottom: 80),
+      padding: const EdgeInsets.only(bottom: 80),
       key: const PageStorageKey('tasksListAdmin'),
-      physics: AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: filteredTasks.length,
       itemBuilder: (context, index) {
         return Padding(
@@ -273,10 +273,10 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
       heroTag: "addTaskFab",
       onPressed: () => _showTaskForm(context, null),
       backgroundColor: AppColors.primaryRed,
-      icon: Icon(Icons.add, color: Colors.white),
+      icon: const Icon(Icons.add, color: Colors.white),
       label: Text(
         LocaleKeys.addTask.tr(),
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     );
   }

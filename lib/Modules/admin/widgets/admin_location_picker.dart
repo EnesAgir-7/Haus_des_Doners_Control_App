@@ -245,7 +245,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
               color: AppColors.primaryRed.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.location_on,
               color: AppColors.primaryRed,
               size: 24,
@@ -258,7 +258,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
               children: [
                 Text(
                   LocaleKeys.pickLocation.tr(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -266,7 +266,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                 ),
                 Text(
                   LocaleKeys.searchOrTapOnMap.tr(),
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
             ),
@@ -338,7 +338,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                 color: AppColors.primaryRed.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.my_location,
                 color: AppColors.primaryRed,
                 size: 20,
@@ -383,7 +383,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
                 itemBuilder: (context, index) {
                   final prediction = _searchResults[index];
                   return ListTile(
-                    leading: Icon(
+                    leading: const Icon(
                       Icons.location_on,
                       color: AppColors.primaryRed,
                       size: 20,
@@ -439,7 +439,7 @@ class _LocationPickerDialogState extends State<LocationPickerDialog> {
       ),
       child: Row(
         children: [
-          Icon(Icons.place, color: AppColors.primaryRed, size: 20),
+          const Icon(Icons.place, color: AppColors.primaryRed, size: 20),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

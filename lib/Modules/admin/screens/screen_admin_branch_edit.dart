@@ -157,7 +157,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                       ),
                       child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.info_outline,
                             color: AppColors.primaryRed,
                             size: 20,
@@ -166,7 +166,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                           Expanded(
                             child: Text(
                               LocaleKeys.inspectorAssignmentManaged.tr(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 13,
                               ),
@@ -243,7 +243,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                         }
                       },
                       child: Container(
-                        padding: EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: AppColors.primaryDark.withValues(alpha: 0.6),
                           borderRadius: BorderRadius.circular(12),
@@ -253,12 +253,12 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                         ),
                         child: Row(
                           children: [
-                            Icon(Icons.map, color: AppColors.primaryRed),
-                            SizedBox(width: 12),
+                            const Icon(Icons.map, color: AppColors.primaryRed),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 '${_latitudeController.text}, ${_longitudeController.text}',
-                                style: TextStyle(color: Colors.white),
+                                style: const TextStyle(color: Colors.white),
                               ),
                             ),
                           ],
@@ -547,7 +547,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: AppColors.primaryRed, width: 2),
+              borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -698,7 +698,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.calendar_month,
                   color: AppColors.primaryRed,
                   size: 20,
@@ -775,7 +775,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                 ),
                 child: Text(
                   LocaleKeys.cancel.tr(),
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
@@ -804,7 +804,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                       )
                     : Text(
                         LocaleKeys.updateBranch.tr(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -856,7 +856,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                     children: [
                       Text(
                         LocaleKeys.selectOpeningDays.tr(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -946,7 +946,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                       color: Colors.white.withValues(alpha: 0.3),
                     ),
                   ),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: AppColors.primaryRed),
                   ),
                 ),
@@ -966,7 +966,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                       color: Colors.white.withValues(alpha: 0.3),
                     ),
                   ),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: AppColors.primaryRed),
                   ),
                 ),
@@ -986,7 +986,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                         color: Colors.white.withValues(alpha: 0.3),
                       ),
                     ),
-                    focusedBorder: OutlineInputBorder(
+                    focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: AppColors.primaryRed),
                     ),
                   ),
@@ -1056,7 +1056,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                       color: Colors.white.withValues(alpha: 0.3),
                     ),
                   ),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: AppColors.primaryRed),
                   ),
                 ),
@@ -1076,7 +1076,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                       color: Colors.white.withValues(alpha: 0.3),
                     ),
                   ),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                     borderSide: BorderSide(color: AppColors.primaryRed),
                   ),
                 ),
@@ -1096,7 +1096,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                         color: Colors.white.withValues(alpha: 0.3),
                       ),
                     ),
-                    focusedBorder: OutlineInputBorder(
+                    focusedBorder: const OutlineInputBorder(
                       borderSide: BorderSide(color: AppColors.primaryRed),
                     ),
                   ),
@@ -1234,7 +1234,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
+              const Icon(
                 Icons.add_circle_outline,
                 color: AppColors.primaryRed,
                 size: 36,
@@ -1242,7 +1242,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
               const SizedBox(height: 8),
               Text(
                 LocaleKeys.tapToAddContact.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -1299,7 +1299,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                             color: AppColors.primaryRed.withValues(alpha: 0.5),
                           ),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.add,
                           color: AppColors.primaryRed,
                           size: 20,
@@ -1308,7 +1308,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                       const SizedBox(height: 6),
                       Text(
                         LocaleKeys.add.tr(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.primaryRed,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -1482,7 +1482,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Icon(
+                                const Icon(
                                   Icons.edit_outlined,
                                   color: AppColors.primaryRed,
                                   size: 14,
@@ -1490,7 +1490,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                                 const SizedBox(width: 4),
                                 Text(
                                   LocaleKeys.edit.tr(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: AppColors.primaryRed,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -1533,7 +1533,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
                                 const SizedBox(width: 4),
                                 Text(
                                   LocaleKeys.delete.tr(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.redAccent,
                                     fontSize: 11,
                                     fontWeight: FontWeight.w600,
@@ -1580,7 +1580,7 @@ class _ScreenAdminEditBranchState extends State<ScreenAdminEditBranch> {
             ),
             child: Row(
               children: [
-                Icon(Icons.description, color: AppColors.primaryRed, size: 20),
+                const Icon(Icons.description, color: AppColors.primaryRed, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(

@@ -98,7 +98,7 @@ class InspectorInspectionService {
     try {
       final now = DateTime.now();
       final startOfDay = DateTime(now.year, now.month, now.day);
-      final endOfDay = startOfDay.add(Duration(days: 1));
+      final endOfDay = startOfDay.add(const Duration(days: 1));
 
       final snapshot = await _db
           .collection(_collection)
@@ -311,7 +311,7 @@ class InspectorInspectionService {
           createdAt: DateTime.now(),
           completedAt: DateTime.now(),
           inspectionScore: score,
-          expiryDate: Timestamp.fromDate(DateTime.now().add(Duration(days: 1))),
+          expiryDate: Timestamp.fromDate(DateTime.now().add(const Duration(days: 1))),
         );
       }
       return stop;

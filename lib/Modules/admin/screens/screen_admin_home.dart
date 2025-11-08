@@ -68,20 +68,20 @@ class _ScreenAdminHomeState extends State<ScreenAdminHome>
         ),
         child: FadeTransition(
           opacity: _fadeAnimation,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(
+          child: const SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.symmetric(horizontal: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
                 DashboardCard(),
                 FadedDivider(),
-                const SizedBox(height: 24),
-                const InspectionSection(),
-                const SizedBox(height: 24),
+                SizedBox(height: 24),
+                InspectionSection(),
+                SizedBox(height: 24),
               ],
             ),
           ),
@@ -134,7 +134,7 @@ class DashboardCard extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.admin_panel_settings,
                   color: AppColors.primaryRed,
                   size: 22,

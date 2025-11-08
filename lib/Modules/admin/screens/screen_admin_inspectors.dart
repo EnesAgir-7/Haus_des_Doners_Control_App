@@ -81,26 +81,26 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
   Widget _buildHeader(ProviderAdminUsers provider) {
     return Row(
       children: [
-        Icon(Icons.people, color: Colors.lightBlueAccent),
-        SizedBox(width: 6),
+        const Icon(Icons.people, color: Colors.lightBlueAccent),
+        const SizedBox(width: 6),
         Text(
           LocaleKeys.inspectors.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
         ),
-        Spacer(),
+        const Spacer(),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: AppColors.lightRed,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             '${provider.inspectors.length} ${LocaleKeys.users.tr()}',
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -141,7 +141,7 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed),
+          borderSide: const BorderSide(color: AppColors.primaryRed),
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
       ),
@@ -150,7 +150,7 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
 
   Widget _buildUsersList(ProviderAdminUsers provider) {
     if (provider.isLoading) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryRed),
       );
     }
@@ -168,9 +168,9 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
       color: AppColors.primaryRed,
       backgroundColor: AppColors.lightBlack,
       child: ListView.builder(
-        padding: EdgeInsets.only(bottom: 80),
+        padding: const EdgeInsets.only(bottom: 80),
         key: const PageStorageKey('inspectorsList'),
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         itemCount: provider.inspectors.length,
         itemBuilder: (context, index) {
           return InspectorCard(inspector: provider.inspectors[index]);
@@ -184,26 +184,26 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
-          SizedBox(height: 16),
+          const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          const SizedBox(height: 16),
           Text(
             LocaleKeys.error_occurred.tr(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               provider.error!,
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => provider.streamAllInspectors(),
             style: ElevatedButton.styleFrom(
@@ -219,20 +219,20 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
   Widget _buildEmptyState() {
     return Center(
       child: SingleChildScrollView(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.people_outline, size: 80, color: Colors.white24),
-            SizedBox(height: 16),
+            const Icon(Icons.people_outline, size: 80, color: Colors.white24),
+            const SizedBox(height: 16),
             Text(
               _searchController.text.isEmpty
                   ? LocaleKeys.noUsersAvailable.tr()
                   : LocaleKeys.no_users_found.tr(),
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
             if (_searchController.text.isNotEmpty) ...[
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               TextButton(
                 onPressed: () {
                   _searchController.clear();
@@ -240,7 +240,7 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
                 },
                 child: Text(
                   LocaleKeys.clear_search.tr(),
-                  style: TextStyle(color: AppColors.primaryRed),
+                  style: const TextStyle(color: AppColors.primaryRed),
                 ),
               ),
             ],
@@ -262,10 +262,10 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
         );
       },
       backgroundColor: AppColors.primaryRed,
-      icon: Icon(Icons.add, color: Colors.white),
+      icon: const Icon(Icons.add, color: Colors.white),
       label: Text(
         LocaleKeys.create_user.tr(),
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     );
   }

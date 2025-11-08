@@ -76,7 +76,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
               color: AppColors.primaryRed.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.directions_car,
               color: AppColors.primaryRed,
               size: 28,
@@ -89,7 +89,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
               children: [
                 Text(
                   LocaleKeys.vehicleManagement.tr(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -159,7 +159,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(
+                const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
                     AppColors.primaryRed,
                   ),
@@ -190,7 +190,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
                   const SizedBox(height: 16),
                   Text(
                   LocaleKeys.errorLoadingVehicles.tr(), 
@@ -300,7 +300,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
         }
 
         return ListView.builder(
-          key: PageStorageKey("vehiclesListAdmin"),
+          key: const PageStorageKey("vehiclesListAdmin"),
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
           itemCount: vehicles.length,
           itemBuilder: (context, index) {
@@ -331,7 +331,7 @@ class _ScreenAdminVehicleState extends State<ScreenAdminVehicle> {
       icon: const Icon(Icons.add, color: Colors.white),
       label:  Text(
        LocaleKeys.createVehicle.tr(), 
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
       elevation: 8,
     );

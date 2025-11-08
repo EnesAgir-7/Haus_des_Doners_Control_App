@@ -90,13 +90,13 @@ class _ScreenHomeOldState extends State<ScreenHomeOld> with TickerProviderStateM
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   // User Info Header
                   const UserInfoHeader(),
 
                   // SECTION 1: TOTAL ASSIGNMENTS (Static Overview)
                   const OverviewSection(),
-                  FadedDivider(color: AppColors.primaryRed, height: 5),
+                  const FadedDivider(color: AppColors.primaryRed, height: 5),
 
                   // SECTION 2: PERFORMANCE METRICS (Dynamic with Time Filter)
                   Consumer<ProviderPanelOld>(
@@ -105,10 +105,10 @@ class _ScreenHomeOldState extends State<ScreenHomeOld> with TickerProviderStateM
                     },
                   ),
 
-                  FadedDivider(color: AppColors.primaryRed, height: 5),
+                  const FadedDivider(color: AppColors.primaryRed, height: 5),
                   // SECTION 3: TODAY'S ROUTE PLAN (with progress)
                   const RoutePlanSection(),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),
@@ -163,7 +163,7 @@ class UserInfoHeader extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.person_outline,
                 color: AppColors.primaryRed,
                 size: 28,
@@ -256,7 +256,7 @@ class OverviewSection extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.dashboard_outlined,
                   color: Colors.blue,
                   size: 20,
@@ -268,7 +268,7 @@ class OverviewSection extends StatelessWidget {
                 children: [
                   Text(
                     LocaleKeys.current_assignments.tr(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -365,7 +365,7 @@ class PerformanceSection extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.trending_up, color: Colors.green, size: 20),
+                child: const Icon(Icons.trending_up, color: Colors.green, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -414,7 +414,7 @@ class PerformanceSection extends StatelessWidget {
                   isDense: true,
                   underline: const SizedBox(),
                   dropdownColor: AppColors.lightBlack,
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.keyboard_arrow_down,
                     color: AppColors.primaryRed,
                     size: 20,
@@ -444,9 +444,9 @@ class PerformanceSection extends StatelessWidget {
           const SizedBox(height: 20),
 
           if (provider.isLoading)
-            Center(
+            const Center(
               child: Padding(
-                padding: const EdgeInsets.all(40),
+                padding: EdgeInsets.all(40),
                 child: CircularProgressIndicator(
                   color: AppColors.primaryRed,
                   strokeWidth: 3,
@@ -628,7 +628,7 @@ class RoutePlanSection extends StatelessWidget {
               padding: const EdgeInsets.all(32),
               child: Column(
                 children: [
-                  CircularProgressIndicator(
+                  const CircularProgressIndicator(
                     color: AppColors.primaryRed,
                     strokeWidth: 3,
                   ),
@@ -668,7 +668,7 @@ class RoutePlanSection extends StatelessWidget {
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.route_outlined,
                         color: AppColors.primaryRed,
                         size: 20,
@@ -744,7 +744,7 @@ class RoutePlanSection extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.route_outlined,
                       color: AppColors.primaryRed,
                       size: 20,
@@ -905,7 +905,7 @@ class RoutePlanSection extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.check_circle,
                           size: 12,
                           color: AppColors.primaryRed,

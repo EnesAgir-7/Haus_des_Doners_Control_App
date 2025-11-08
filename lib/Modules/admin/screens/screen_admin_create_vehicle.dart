@@ -45,7 +45,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
+            colorScheme: const ColorScheme.dark(
               primary: AppColors.primaryRed,
               onPrimary: Colors.white,
               surface: AppColors.primaryDark,
@@ -227,7 +227,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -265,7 +265,7 @@ class _ScreenAdminCreateVehicleState extends State<ScreenAdminCreateVehicle> {
                 color: AppColors.primaryRed.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.calendar_today,
                 color: AppColors.primaryRed,
                 size: 20,

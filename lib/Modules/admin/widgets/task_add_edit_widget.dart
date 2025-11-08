@@ -77,7 +77,7 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
+            colorScheme: const ColorScheme.dark(
               primary: AppColors.primaryRed,
               onPrimary: Colors.white,
               surface: AppColors.lightBlack,
@@ -193,15 +193,15 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
 
     return Container(
       height: screenHeight,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: AppColors.lightBlack,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
@@ -473,7 +473,7 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
                           ),
                           child: Text(
                             LocaleKeys.cancel.tr(),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                             ),

@@ -43,7 +43,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: const CustomAppBar(),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -123,7 +123,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
         const SizedBox(width: 6),
         Text(
           LocaleKeys.admins.tr(), 
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -138,7 +138,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
           ),
           child: Text(
             '$totalCount ${LocaleKeys.users.tr()}', 
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -185,7 +185,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed),
+          borderSide: const BorderSide(color: AppColors.primaryRed),
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 12),
       ),
@@ -199,7 +199,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
     String? errorMessage,
   ) {
     if (isLoading) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryRed),
       );
     }
@@ -228,7 +228,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
           const SizedBox(height: 16),
           Text(
             LocaleKeys.error_occurred.tr(),
@@ -291,7 +291,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
                 },
                 child: Text(
                   LocaleKeys.clear_search.tr(),
-                  style: TextStyle(color: AppColors.primaryRed),
+                  style: const TextStyle(color: AppColors.primaryRed),
                 ),
               ),
             ],

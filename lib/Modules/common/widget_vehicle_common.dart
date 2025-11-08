@@ -241,7 +241,7 @@ class VehicleListCard extends StatelessWidget {
         const SizedBox(width: 8.0),
         Text(
           "${LocaleKeys.nextService.tr()}: ${formatDate(vehicle.nextServiceDue)} ($statusText)",
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 13.0,
             fontWeight: FontWeight.w500,

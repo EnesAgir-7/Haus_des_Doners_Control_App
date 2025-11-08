@@ -21,8 +21,8 @@ class ScreenAdminSettings extends StatelessWidget {
     return Consumer<ProviderAuth>(
       builder: (context, authProvider, child) {
         return Scaffold(
-          appBar: CustomAppBar(),
-          persistentFooterDecoration: BoxDecoration(color: Colors.transparent),
+          appBar: const CustomAppBar(),
+          persistentFooterDecoration: const BoxDecoration(color: Colors.transparent),
           persistentFooterButtons: [
             Container(
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
@@ -52,7 +52,7 @@ class ScreenAdminSettings extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 children: [
                   _buildHeader(),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   _buildSectionTitle(
                     context,
                     LocaleKeys.inspectionManagement.tr(),
@@ -111,18 +111,18 @@ class ScreenAdminSettings extends StatelessWidget {
         backgroundColor: const Color(0xFF212121),
         title: Text(
           LocaleKeys.logout.tr(),
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         content: Text(
           LocaleKeys.confirmLogoutMessage.tr(),
-          style: TextStyle(color: Colors.white70),
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               LocaleKeys.cancel.tr(),
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
             ),
           ),
           TextButton(
@@ -160,11 +160,11 @@ class ScreenAdminSettings extends StatelessWidget {
   Widget _buildHeader() {
     return Row(
       children: [
-        Icon(Icons.settings, color: Colors.lightBlueAccent),
-        SizedBox(width: 6),
+        const Icon(Icons.settings, color: Colors.lightBlueAccent),
+        const SizedBox(width: 6),
         Text(
           LocaleKeys.adminSettings.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -179,7 +179,7 @@ class ScreenAdminSettings extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8, bottom: 8),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white70,
           fontSize: 14,
           fontWeight: FontWeight.w600,
@@ -222,7 +222,7 @@ class ScreenAdminSettings extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -231,12 +231,12 @@ class ScreenAdminSettings extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                    style: const TextStyle(color: Colors.white54, fontSize: 12),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
           ],
         ),
       ),

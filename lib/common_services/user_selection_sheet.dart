@@ -19,9 +19,9 @@ Future<dynamic> showInspectorPicker({
     builder: (context) {
       return Container(
         height: MediaQuery.of(context).size.height * 0.7,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.lightBlack,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           children: [
@@ -40,7 +40,7 @@ Future<dynamic> showInspectorPicker({
                 children: [
                   Text(
                     LocaleKeys.select_inspector.tr(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: Colors.white,
@@ -169,7 +169,7 @@ Future<dynamic> showInspectorPicker({
                                   ),
                                 ),
                                 if (isSelected)
-                                  Icon(
+                                  const Icon(
                                     Icons.check_circle_rounded,
                                     color: AppColors.primaryRed,
                                     size: 24,

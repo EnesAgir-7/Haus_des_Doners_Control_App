@@ -71,7 +71,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
+            colorScheme: const ColorScheme.dark(
               primary: AppColors.primaryRed,
               onPrimary: Colors.white,
               surface: AppColors.primaryDark,
@@ -393,7 +393,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
             },
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.primaryRed,
-              side: BorderSide(color: AppColors.primaryRed),
+              side: const BorderSide(color: AppColors.primaryRed),
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -501,7 +501,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
         ),
       ),
       validator: validator,
@@ -787,11 +787,11 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+            const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
             const SizedBox(width: 12),
             Text(
               LocaleKeys.deleteVehicle.tr(),
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ],
         ),
@@ -809,7 +809,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               LocaleKeys.cancel.tr(),
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
             ),
           ),
           Consumer<ProviderAdminVehicles>(
@@ -829,7 +829,7 @@ class _ScreenAdminVehicleDetailsState extends State<ScreenAdminVehicleDetails> {
                       )
                     : Text(
                         LocaleKeys.delete.tr(),
-                        style: TextStyle(color: Colors.red),
+                        style: const TextStyle(color: Colors.red),
                       ),
               );
             },

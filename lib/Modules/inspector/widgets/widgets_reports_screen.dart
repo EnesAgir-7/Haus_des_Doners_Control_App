@@ -24,11 +24,11 @@ Future<void> showAskToSaveSignatureDialog({
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
-          Icon(Icons.draw, color: AppColors.primaryRed),
+          const Icon(Icons.draw, color: AppColors.primaryRed),
           const SizedBox(width: 12),
           Text(
             LocaleKeys.saveSignature.tr(),
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
         ],
       ),
@@ -38,7 +38,7 @@ Future<void> showAskToSaveSignatureDialog({
         children: [
           Text(
             LocaleKeys.saveSignaturePrompt.tr(),
-            style: TextStyle(color: Colors.white70),
+            style: const TextStyle(color: Colors.white70),
           ),
           const SizedBox(height: 16),
           Container(
@@ -55,7 +55,7 @@ Future<void> showAskToSaveSignatureDialog({
                 Expanded(
                   child: Text(
                     LocaleKeys.canRemoveLater.tr(),
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ),
               ],
@@ -68,7 +68,7 @@ Future<void> showAskToSaveSignatureDialog({
           onPressed: () => Navigator.pop(context, false),
           child: Text(
             LocaleKeys.notNow.tr(),
-            style: TextStyle(color: Colors.white70),
+            style: const TextStyle(color: Colors.white70),
           ),
         ),
         ElevatedButton(
@@ -78,7 +78,7 @@ Future<void> showAskToSaveSignatureDialog({
           ),
           child: Text(
             LocaleKeys.yesSaveIt.tr(),
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
         ),
       ],
@@ -111,7 +111,7 @@ Future<void> showDeleteSavedSignatureDialog({
           const SizedBox(width: 12),
           Text(
             LocaleKeys.deleteSavedSignature.tr(),
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: const TextStyle(color: Colors.white, fontSize: 18),
           ),
         ],
       ),
@@ -121,7 +121,7 @@ Future<void> showDeleteSavedSignatureDialog({
         children: [
           Text(
             LocaleKeys.deleteSignatureWarning.tr(),
-            style: TextStyle(color: Colors.white70),
+            style: const TextStyle(color: Colors.white70),
           ),
           const SizedBox(height: 16),
           Container(
@@ -138,7 +138,7 @@ Future<void> showDeleteSavedSignatureDialog({
                 Expanded(
                   child: Text(
                     LocaleKeys.actionCannotUndone.tr(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.orange,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -155,7 +155,7 @@ Future<void> showDeleteSavedSignatureDialog({
           onPressed: () => Navigator.pop(context, false),
           child: Text(
             LocaleKeys.cancel.tr(),
-            style: TextStyle(color: Colors.white70),
+            style: const TextStyle(color: Colors.white70),
           ),
         ),
         ElevatedButton(
@@ -163,7 +163,7 @@ Future<void> showDeleteSavedSignatureDialog({
           style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
           child: Text(
             LocaleKeys.deletePermanently.tr(),
-            style: TextStyle(color: Colors.white),
+            style: const TextStyle(color: Colors.white),
           ),
         ),
       ],

@@ -184,7 +184,7 @@ class InspectorBranchCard extends StatelessWidget {
   Widget _buildNextInspectionInfo() {
     return Row(
       children: [
-        Icon(Icons.next_plan, size: 14.0, color: Colors.green),
+        const Icon(Icons.next_plan, size: 14.0, color: Colors.green),
         const SizedBox(width: 6.0),
         Text(
           branch.isNextInspectionToday

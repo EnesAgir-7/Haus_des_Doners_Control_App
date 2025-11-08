@@ -94,7 +94,7 @@ class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
 
                 children: [
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   // User Info Header
                   const UserInfoHeader(),
 
@@ -108,15 +108,15 @@ class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
                     },
                   ),
 
-                  FadedDivider(color: AppColors.primaryRed, height: 5),
+                  const FadedDivider(color: AppColors.primaryRed, height: 5),
 
                   // SECTION 1: TOTAL ASSIGNMENTS (Static Overview)
                   const OverviewSection(),
-                  FadedDivider(color: AppColors.primaryRed, height: 5),
+                  const FadedDivider(color: AppColors.primaryRed, height: 5),
 
                   // SECTION 3: TODAY'S ROUTE PLAN (with progress)
                   const RoutePlanSection(),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),
@@ -171,7 +171,7 @@ class UserInfoHeader extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.person_outline,
                 color: AppColors.primaryRed,
                 size: 28,
@@ -264,7 +264,7 @@ class OverviewSection extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.dashboard_outlined,
                   color: Colors.blue,
                   size: 20,
@@ -276,7 +276,7 @@ class OverviewSection extends StatelessWidget {
                 children: [
                   Text(
                     LocaleKeys.current_assignments.tr(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -376,7 +376,7 @@ class PerformanceSection extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.trending_up, color: Colors.green, size: 20),
+                child: const Icon(Icons.trending_up, color: Colors.green, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -409,9 +409,9 @@ class PerformanceSection extends StatelessWidget {
           const SizedBox(height: 20),
 
           if (provider.isLoading)
-            Center(
+            const Center(
               child: Padding(
-                padding: const EdgeInsets.all(40),
+                padding: EdgeInsets.all(40),
                 child: CircularProgressIndicator(
                   color: AppColors.primaryRed,
                   strokeWidth: 3,
@@ -424,7 +424,7 @@ class PerformanceSection extends StatelessWidget {
                 padding: const EdgeInsets.all(40),
                 child: Column(
                   children: [
-                    Icon(Icons.inbox_outlined, size: 48, color: Colors.white38),
+                    const Icon(Icons.inbox_outlined, size: 48, color: Colors.white38),
                     const SizedBox(height: 12),
                     Text(
                       LocaleKeys.noDataForSelectedMonth.tr(),
@@ -459,7 +459,7 @@ class PerformanceSection extends StatelessWidget {
                 label: LocaleKeys.branchesVisitedReported.tr(),
                 value: stats.totalInspections.toString(),
                 icon: Icons.assignment_turned_in_outlined,
-                gradientColors: [Color(0xFF4CAF50), Color(0xFF388E3C)],
+                gradientColors: [const Color(0xFF4CAF50), const Color(0xFF388E3C)],
               ),
             ),
             const SizedBox(width: 12),
@@ -468,7 +468,7 @@ class PerformanceSection extends StatelessWidget {
                 label: LocaleKeys.vehicles.tr(),
                 value: stats.vehicleIds.length.toString(),
                 icon: Icons.directions_car_outlined,
-                gradientColors: [Color(0xFF2196F3), Color(0xFF1976D2)],
+                gradientColors: [const Color(0xFF2196F3), const Color(0xFF1976D2)],
               ),
             ),
           ],
@@ -483,7 +483,7 @@ class PerformanceSection extends StatelessWidget {
                 label: LocaleKeys.tasksCompleted.tr(),
                 value: "${stats.tasksCompleted}/${stats.tasksTotal}",
                 icon: Icons.check_circle_outline,
-                gradientColors: [Color(0xFF0F766E), Color(0xFF115E59)],
+                gradientColors: [const Color(0xFF0F766E), const Color(0xFF115E59)],
                 subtitle: "$completionRate%",
               ),
             ),
@@ -493,7 +493,7 @@ class PerformanceSection extends StatelessWidget {
                 label: LocaleKeys.branchesAssigned.tr(),
                 value: stats.branchesIds.length.toString(),
                 icon: Icons.store_outlined,
-                gradientColors: [Color(0xFF9333EA), Color(0xFF7E22CE)],
+                gradientColors: [const Color(0xFF9333EA), const Color(0xFF7E22CE)],
               ),
             ),
           ],
@@ -557,7 +557,7 @@ class PerformanceSection extends StatelessWidget {
           // ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: gradientColors[0].withValues(alpha: 0.3)),
-          boxShadow: [
+          boxShadow: const [
             // BoxShadow(
             //   color: gradientColors[0].withValues(alpha: 0.1),
             //   blurRadius: 12,
@@ -635,15 +635,15 @@ class PerformanceSection extends StatelessWidget {
   Widget _buildLastUpdatedRow(InspectorHistoryModel stats) {
     return Row(
       children: [
-        Icon(Icons.update, size: 16, color: Colors.white54),
+        const Icon(Icons.update, size: 16, color: Colors.white54),
         const SizedBox(width: 8),
         Text(
           '${LocaleKeys.lastUpdated.tr()} ',
-          style: TextStyle(color: Colors.white54, fontSize: 12),
+          style: const TextStyle(color: Colors.white54, fontSize: 12),
         ),
         Text(
           DateFormat('MMM dd, yyyy HH:mm').format(stats.lastUpdated),
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white70,
             fontSize: 12,
             fontWeight: FontWeight.w600,
@@ -654,7 +654,7 @@ class PerformanceSection extends StatelessWidget {
   }
 
   Widget _buildMonthSelector(BuildContext context, ProviderPanel provider) {
-    final last12Months = _generateLast12Months();
+    final last12Months = generateLast12Months();
     final availableMonths = provider.availableMonths;
 
     return Container(
@@ -674,7 +674,7 @@ class PerformanceSection extends StatelessWidget {
         isDense: true,
         underline: const SizedBox(),
         dropdownColor: AppColors.lightBlack,
-        icon: Icon(
+        icon: const Icon(
           Icons.keyboard_arrow_down,
           color: AppColors.primaryRed,
           size: 18,
@@ -686,7 +686,7 @@ class PerformanceSection extends StatelessWidget {
         ),
         items: last12Months.map((monthKey) {
           final isAvailable = availableMonths.contains(monthKey);
-          final monthName = _getMonthNameFromKey(monthKey);
+          final monthName = getMonthNameFromKey(monthKey);
 
           return DropdownMenuItem<String>(
             value: monthKey,
@@ -703,7 +703,7 @@ class PerformanceSection extends StatelessWidget {
                 if (!isAvailable)
                   Text(
                     ' (${LocaleKeys.noData.tr()})',
-                    style: TextStyle(color: Colors.white30, fontSize: 10),
+                    style: const TextStyle(color: Colors.white30, fontSize: 10),
                   ),
               ],
             ),
@@ -719,41 +719,6 @@ class PerformanceSection extends StatelessWidget {
       ),
     );
   }
-
-  List<String> _generateLast12Months() {
-    final List<String> months = [];
-    final now = DateTime.now();
-    for (int i = 0; i < 12; i++) {
-      final date = DateTime(now.year, now.month - i, 1);
-      final monthKey = '${date.month.toString().padLeft(2, '0')}-${date.year}';
-      months.add(monthKey);
-    }
-    return months;
-  }
-
-  String _getMonthNameFromKey(String monthKey) {
-    final parts = monthKey.split('-');
-    if (parts.length != 2) return monthKey;
-    final month = parts[0];
-    var monthNames = {
-      "01": LocaleKeys.january.tr(),
-      "02": LocaleKeys.february.tr(),
-      "03": LocaleKeys.march.tr(),
-      "04": LocaleKeys.april.tr(),
-      "05": LocaleKeys.may.tr(),
-      "06": LocaleKeys.june.tr(),
-      "07": LocaleKeys.july.tr(),
-      "08": LocaleKeys.august.tr(),
-      "09": LocaleKeys.september.tr(),
-      "10": LocaleKeys.october.tr(),
-      "11": LocaleKeys.november.tr(),
-      "12": LocaleKeys.december.tr(),
-    };
-    return monthNames[month] ?? month;
-  }
-
-
-
 }
 
 class StatBox extends StatelessWidget {
@@ -882,7 +847,7 @@ class RoutePlanSection extends StatelessWidget {
               padding: const EdgeInsets.all(32),
               child: Column(
                 children: [
-                  CircularProgressIndicator(
+                  const CircularProgressIndicator(
                     color: AppColors.primaryRed,
                     strokeWidth: 3,
                   ),
@@ -922,7 +887,7 @@ class RoutePlanSection extends StatelessWidget {
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.route_outlined,
                         color: AppColors.primaryRed,
                         size: 20,
@@ -998,7 +963,7 @@ class RoutePlanSection extends StatelessWidget {
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.route_outlined,
                       color: AppColors.primaryRed,
                       size: 20,
@@ -1159,7 +1124,7 @@ class RoutePlanSection extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.check_circle,
                           size: 12,
                           color: AppColors.primaryRed,

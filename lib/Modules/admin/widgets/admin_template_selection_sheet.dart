@@ -28,30 +28,30 @@ class TemplateSelectionSheet extends StatelessWidget {
       expand: false,
       builder: (context, scrollController) {
         return Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.primaryDark,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildDragHandle(),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 LocaleKeys.selectInspectionTemplate.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
             if(showNote)  Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline, color: AppColors.amber),
-                  SizedBox(width: 8),
+                  const Icon(Icons.info_outline, color: AppColors.amber),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       LocaleKeys.templateUpdateNote.tr(),
@@ -63,13 +63,13 @@ class TemplateSelectionSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Expanded(
                 child: StreamBuilder<List<InspectionTemplate>>(
                   stream: templateHelper.templatesStream(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
+                      return const Center(
                         child: CircularProgressIndicator(
                           color: AppColors.primaryRed,
                         ),
@@ -85,22 +85,22 @@ class TemplateSelectionSheet extends StatelessWidget {
                           children: [
                             Text(
                               LocaleKeys.noTemplatesAvailable.tr(),
-                              style: TextStyle(color: Colors.white54),
+                              style: const TextStyle(color: Colors.white54),
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        ScreenAdminQuestionnaires(),
+                                        const ScreenAdminQuestionnaires(),
                                   ),
                                 );
                               },
                               child: Text(
                                 LocaleKeys.createQuestionnaire.tr(),
-                                style: TextStyle(color: AppColors.white),
+                                style: const TextStyle(color: AppColors.white),
                               ),
                             ),
                           ],
@@ -110,7 +110,7 @@ class TemplateSelectionSheet extends StatelessWidget {
 
                     final templates = snapshot.data!;
                     return ListView.builder(
-                      key: PageStorageKey('templatesList'),
+                      key: const PageStorageKey('templatesList'),
                       controller: scrollController,
                       itemCount: templates.length,
                       itemBuilder: (context, index) {
@@ -154,7 +154,7 @@ class TemplateSelectionSheet extends StatelessWidget {
           color: AppColors.primaryDark,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: Colors.white24),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: Colors.black26,
               blurRadius: 4,
@@ -180,14 +180,14 @@ class TemplateSelectionSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     template.name,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -196,7 +196,7 @@ class TemplateSelectionSheet extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.category,
                         size: 14,
                         color: AppColors.primaryRed,
@@ -204,14 +204,14 @@ class TemplateSelectionSheet extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         '${template.categories.length} ${LocaleKeys.categories.tr()}',
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
+                        style: const TextStyle(color: Colors.white54, fontSize: 12),
                       ),
                     ],
                   ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: Colors.white38),
+            const Icon(Icons.chevron_right_rounded, color: Colors.white38),
           ],
         ),
       ),

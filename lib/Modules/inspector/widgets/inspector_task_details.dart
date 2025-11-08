@@ -18,7 +18,7 @@ class TaskDetailsSheet extends StatefulWidget {
   final TaskModel task;
   final ProviderTasks provider;
 
-  TaskDetailsSheet({required this.task, required this.provider});
+  const TaskDetailsSheet({required this.task, required this.provider});
 
   @override
   State<TaskDetailsSheet> createState() => _TaskDetailsSheetState();
@@ -73,7 +73,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
             top: 20,
             bottom: viewInsets.bottom + 20,
           ),
-          duration: Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 100),
           child: Column(
             children: [
               // Scrollable content
@@ -87,23 +87,23 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: Color(0xFF3A3A3A),
+                          color: const Color(0xFF3A3A3A),
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
                     // Title
                     Text(
                       widget.task.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
                     // Status and Priority
                     Row(
@@ -113,7 +113,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                           label: _getPriorityText(widget.task.priority),
                           color: _getPriorityColor(widget.task.priority),
                         ),
-                        SizedBox(width: 12),
+                        const SizedBox(width: 12),
                         _buildDetailBadge(
                           icon: Icons.schedule,
                           label: _getStatusText(widget.task.status),
@@ -121,27 +121,27 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
                     // Description
                     Text(
                       LocaleKeys.description.tr(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Color(0xFFB0B0B0),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       widget.task.description,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 15,
                         height: 1.5,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
                     // Meta info
                     if (widget.task.dueDate != null) ...[
@@ -151,7 +151,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                         value:
                             '${widget.task.dueDate!.day}/${widget.task.dueDate!.month}/${widget.task.dueDate!.year}',
                       ),
-                      SizedBox(height: 12),
+                      const SizedBox(height: 12),
                     ],
 
                     _buildInfoRow(
@@ -160,23 +160,23 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                       value: widget.task.assignedInspectorName,
                     ),
 
-                    SizedBox(height: 24),
-                    Divider(color: Color(0xFF3A3A3A)),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 24),
+                    const Divider(color: Color(0xFF3A3A3A)),
+                    const SizedBox(height: 16),
 
                     // Comments section
                     _buildCommentsSection(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
 
               // Fixed bottom section (Comment input and action buttons)
               if (!widget.task.isCompleted) ...[
-                Divider(color: Color(0xFF3A3A3A), height: 1),
-                SizedBox(height: 12),
+                const Divider(color: Color(0xFF3A3A3A), height: 1),
+                const SizedBox(height: 12),
                 _buildCommentInputField(),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     if (widget.task.isPending)
@@ -184,7 +184,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                         child: _buildActionButton(
                           label: LocaleKeys.start.tr(),
                           icon: Icons.play_arrow,
-                          color: Color(0xFFFFA726),
+                          color: const Color(0xFFFFA726),
                           onPressed: () {
                             widget.provider.markAsInProgress(
                               widget.task.id,
@@ -279,7 +279,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : Icon(Icons.send, color: AppColors.primaryRed),
+                              : const Icon(Icons.send, color: AppColors.primaryRed),
                           onPressed: taskCont.isAddingComment
                               ? null
                               : () async {
@@ -387,7 +387,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
     required Color color,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
@@ -397,7 +397,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 16, color: color),
-          SizedBox(width: 6),
+          const SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
@@ -418,15 +418,15 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: Color(0xFF808080)),
-        SizedBox(width: 12),
+        Icon(icon, size: 18, color: const Color(0xFF808080)),
+        const SizedBox(width: 12),
         Text(
           '$label: ',
-          style: TextStyle(color: Color(0xFF808080), fontSize: 14),
+          style: const TextStyle(color: Color(0xFF808080), fontSize: 14),
         ),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -440,10 +440,10 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
     if (widget.task.comments.isEmpty) {
       return Center(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 24),
+          padding: const EdgeInsets.symmetric(vertical: 24),
           child: Text(
             LocaleKeys.no_comments.tr(),
-            style: TextStyle(color: Color(0xFF606060), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF606060), fontSize: 14),
           ),
         ),
       );
@@ -452,10 +452,10 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
     return Column(
       children: widget.task.comments.map((comment) {
         return Container(
-          margin: EdgeInsets.only(bottom: 12),
-          padding: EdgeInsets.all(12),
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Color(0xFF2A2A2A),
+            color: const Color(0xFF2A2A2A),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
@@ -465,24 +465,24 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                 children: [
                   CircleAvatar(
                     radius: 16,
-                    backgroundColor: Color(0xFFE53935),
+                    backgroundColor: const Color(0xFFE53935),
                     child: Text(
                       comment.userName[0].toUpperCase(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           comment.userName,
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -490,7 +490,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                         ),
                         Text(
                           _formatTimestamp(comment.timestamp),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Color(0xFF606060),
                             fontSize: 11,
                           ),
@@ -501,15 +501,15 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                 ],
               ),
               if (comment.text.isNotEmpty) ...[
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   comment.text,
-                  style: TextStyle(color: Color(0xFFE0E0E0), fontSize: 13),
+                  style: const TextStyle(color: Color(0xFFE0E0E0), fontSize: 13),
                 ),
               ],
               // Photo gallery
               if (comment.photos.isNotEmpty) ...[
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Wrap(
                   spacing: 6,
                   runSpacing: 6,
@@ -531,7 +531,7 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                         height: 56,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Color(0xFF3A3A3A)),
+                          border: Border.all(color: const Color(0xFF3A3A3A)),
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
@@ -539,8 +539,8 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                             imageUrl: photoUrl,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              color: Color(0xFF1A1A1A),
-                              child: Center(
+                              color: const Color(0xFF1A1A1A),
+                              child: const Center(
                                 child: SizedBox(
                                   width: 16,
                                   height: 16,
@@ -555,8 +555,8 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
                             ),
                             errorWidget: (context, error, stackTrace) {
                               return Container(
-                                color: Color(0xFF1A1A1A),
-                                child: Icon(
+                                color: const Color(0xFF1A1A1A),
+                                child: const Icon(
                                   Icons.broken_image_rounded,
                                   color: Color(0xFF606060),
                                   size: 20,
@@ -588,12 +588,12 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
       icon: Icon(icon, size: 20),
       label: Text(
         label,
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
       ),
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         foregroundColor: Colors.white,
-        padding: EdgeInsets.symmetric(vertical: 14),
+        padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
@@ -604,10 +604,10 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
       case AppConstants.high:
         return AppColors.primaryRed;
       case AppConstants.medium:
-        return Color(0xFFFFA726);
+        return const Color(0xFFFFA726);
       case AppConstants.low:
       default:
-        return Color(0xFF4CAF50);
+        return const Color(0xFF4CAF50);
     }
   }
 
@@ -626,12 +626,12 @@ class _TaskDetailsSheetState extends State<TaskDetailsSheet> {
   Color _getStatusColor(String status) {
     switch (status) {
       case AppConstants.completed:
-        return Color(0xFF4CAF50);
+        return const Color(0xFF4CAF50);
       case AppConstants.inProgress:
-        return Color(0xFFFFA726);
+        return const Color(0xFFFFA726);
       case AppConstants.pending:
       default:
-        return Color(0xFF808080);
+        return const Color(0xFF808080);
     }
   }
 

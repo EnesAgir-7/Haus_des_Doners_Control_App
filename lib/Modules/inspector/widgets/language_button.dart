@@ -19,7 +19,7 @@ class LanguageButton extends StatelessWidget {
     final currentLanguage = _languages[currentLocale];
 
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 7),
+      padding: const EdgeInsets.symmetric(vertical: 7),
       decoration: BoxDecoration(
         // gradient: LinearGradient(
         //   colors: [
@@ -67,7 +67,7 @@ class LanguageButton extends StatelessWidget {
                   ),
                 ),
 
-                Text("             "),
+                const Text("             "),
               ],
             ),
           ),

@@ -30,12 +30,12 @@ class AppColors {
   static Color whiteWithOpacity(double opacity) => white.withValues(alpha: opacity);
   
   /// Light theme color scheme
-  static final ColorScheme lightColorScheme = ColorScheme(
+  static final ColorScheme lightColorScheme = const ColorScheme(
     primary: primaryRed,
     secondary: primaryDark,
     surface: white,
     surfaceBright: white,
-    error: const Color(0xFFB00020),
+    error: Color(0xFFB00020),
     onPrimary: white,
     onSecondary: white,
     onSurface: primaryDark,
@@ -45,12 +45,12 @@ class AppColors {
   );
 
   /// Dark theme color scheme - uses primaryDark as the main background
-  static final ColorScheme darkColorScheme = ColorScheme(
+  static final ColorScheme darkColorScheme = const ColorScheme(
     primary: primaryRed,
     secondary: white,
     surface: primaryDark,
     surfaceBright: primaryDark,
-    error: const Color(0xFFCF6679),
+    error: Color(0xFFCF6679),
     onPrimary: white,
     onSecondary: primaryDark,
     onSurface: white,

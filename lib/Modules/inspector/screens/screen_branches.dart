@@ -41,8 +41,8 @@ class _ScreenBranchesState extends State<ScreenBranches> {
         heroTag: "branchesFab",
         onPressed: () => Navigator.of(
           context,
-        ).push(MaterialPageRoute(builder: (context) => BranchMapScreen())),
-        child: Icon(Icons.location_on, size: 36),
+        ).push(MaterialPageRoute(builder: (context) => const BranchMapScreen())),
+        child: const Icon(Icons.location_on, size: 36),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -87,19 +87,19 @@ class _ScreenBranchesState extends State<ScreenBranches> {
   Widget _buildHeader(ProviderBranches provider) {
     return Row(
       children: [
-        Icon(Icons.apartment, color: Colors.lightBlueAccent),
-        SizedBox(width: 6),
+        const Icon(Icons.apartment, color: Colors.lightBlueAccent),
+        const SizedBox(width: 6),
         Text(
           LocaleKeys.my_branches.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
             fontSize: 16,
           ),
         ),
-        Spacer(),
+        const Spacer(),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
             color: AppColors.lightRed,
             borderRadius: BorderRadius.circular(12),
@@ -109,7 +109,7 @@ class _ScreenBranchesState extends State<ScreenBranches> {
               AppConstants.count,
               provider.branchCount.toString(),
             ),
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -123,14 +123,14 @@ class _ScreenBranchesState extends State<ScreenBranches> {
   Widget _buildSearchBar(ProviderBranches provider) {
     return TextField(
       onChanged: provider.setSearchQuery,
-      style: TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         hintText: LocaleKeys.search.tr(),
-        hintStyle: TextStyle(color: Colors.white54),
-        prefixIcon: Icon(Icons.search, color: Colors.white54),
+        hintStyle: const TextStyle(color: Colors.white54),
+        prefixIcon: const Icon(Icons.search, color: Colors.white54),
         suffixIcon: provider.searchQuery.isNotEmpty
             ? IconButton(
-                icon: Icon(Icons.clear, color: Colors.white54),
+                icon: const Icon(Icons.clear, color: Colors.white54),
                 onPressed: () => provider.setSearchQuery(''),
               )
             : null,
@@ -138,17 +138,17 @@ class _ScreenBranchesState extends State<ScreenBranches> {
         fillColor: AppColors.lightBlack,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white24),
+          borderSide: const BorderSide(color: Colors.white24),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white24),
+          borderSide: const BorderSide(color: Colors.white24),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed),
+          borderSide: const BorderSide(color: AppColors.primaryRed),
         ),
-        contentPadding: EdgeInsets.symmetric(vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(vertical: 12),
       ),
     );
   }
@@ -198,7 +198,7 @@ class _ScreenBranchesState extends State<ScreenBranches> {
     return GestureDetector(
       onTap: () => provider.setSortBy(value),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primaryRed : AppColors.lightBlack,
           borderRadius: BorderRadius.circular(8),
@@ -214,7 +214,7 @@ class _ScreenBranchesState extends State<ScreenBranches> {
               size: 14,
               color: isSelected ? Colors.white : Colors.white54,
             ),
-            SizedBox(width: 6),
+            const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
@@ -231,7 +231,7 @@ class _ScreenBranchesState extends State<ScreenBranches> {
 
   Widget _buildBranchList(ProviderBranches provider) {
     if (provider.isLoading) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryRed),
       );
     }
@@ -249,9 +249,9 @@ class _ScreenBranchesState extends State<ScreenBranches> {
       color: AppColors.primaryRed,
       backgroundColor: AppColors.lightBlack,
       child: ListView.builder(
-        padding: EdgeInsets.only(bottom: 50),
+        padding: const EdgeInsets.only(bottom: 50),
         key: const PageStorageKey('branchesList'),
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         itemCount: provider.branches.length,
         itemBuilder: (context, index) {
           final branchModel = provider.branches[index];
@@ -269,26 +269,26 @@ class _ScreenBranchesState extends State<ScreenBranches> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
-          SizedBox(height: 16),
+          const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          const SizedBox(height: 16),
           Text(
             LocaleKeys.error_occurred.tr(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               provider.errorMessage!,
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           ElevatedButton(
             onPressed: provider.refresh,
             style: ElevatedButton.styleFrom(
@@ -304,25 +304,25 @@ class _ScreenBranchesState extends State<ScreenBranches> {
   Widget _buildEmptyState(ProviderBranches provider) {
     return Center(
       child: SingleChildScrollView(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.apartment, size: 80, color: Colors.white24),
-            SizedBox(height: 16),
+            const Icon(Icons.apartment, size: 80, color: Colors.white24),
+            const SizedBox(height: 16),
             Text(
               provider.searchQuery.isEmpty
                   ? LocaleKeys.no_branches_assigned.tr()
                   : LocaleKeys.branch_not_found.tr(),
-              style: TextStyle(color: Colors.white70, fontSize: 16),
+              style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
             if (provider.searchQuery.isNotEmpty) ...[
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               TextButton(
                 onPressed: () => provider.setSearchQuery(''),
                 child: Text(
                   LocaleKeys.clear_search.tr(),
-                  style: TextStyle(color: AppColors.primaryRed),
+                  style: const TextStyle(color: AppColors.primaryRed),
                 ),
               ),
             ],
@@ -343,7 +343,7 @@ class _ScreenBranchesState extends State<ScreenBranches> {
       context: context,
       backgroundColor: AppColors.lightBlack,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) =>
@@ -371,15 +371,15 @@ class BranchDetailsSheet extends StatelessWidget {
       expand: false,
       builder: (context, scrollController) {
         return Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDragHandle(),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildHeader(context),
               if (remoteConfig.inspectorBranchEdit) ...[
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () async {
                     final BranchModel? newBranch = await Navigator.push(
@@ -396,22 +396,22 @@ class BranchDetailsSheet extends StatelessWidget {
                   child: Text(LocaleKeys.updateBranch.tr()),
                 ),
               ],
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               // SizedBox(height: 16),
               _buildStatCards(),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               if (branch.stop != null) _buildNextInspectionCard(),
-              Divider(color: Colors.white24),
-              SizedBox(height: 12),
+              const Divider(color: Colors.white24),
+              const SizedBox(height: 12),
               _buildInspectionHistoryHeader(),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Expanded(
                 child: Consumer<ProviderBranches>(
                   builder: (context, co, _) =>
                       _buildInspectionHistory(scrollController),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _buildActionButtons(context),
             ],
           ),
@@ -442,33 +442,33 @@ class BranchDetailsSheet extends StatelessWidget {
             children: [
               Text(
                 branch.name,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.location_on, size: 16, color: Colors.white54),
-                  SizedBox(width: 6),
+                  const Icon(Icons.location_on, size: 16, color: Colors.white54),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       branch.address,
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(Icons.person, size: 16, color: Colors.white54),
-                  SizedBox(width: 6),
+                  const Icon(Icons.person, size: 16, color: Colors.white54),
+                  const SizedBox(width: 6),
                   Text(
                     '${branch.contactName} - ${branch.contactPhone}',
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
               ),
@@ -476,7 +476,7 @@ class BranchDetailsSheet extends StatelessWidget {
           ),
         ),
         IconButton(
-          icon: Icon(Icons.close, color: Colors.white),
+          icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -499,7 +499,7 @@ class BranchDetailsSheet extends StatelessWidget {
             color: Colors.amber,
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: Consumer<ProviderBranches>(
             builder: (context, pro, child) {
@@ -523,7 +523,7 @@ class BranchDetailsSheet extends StatelessWidget {
     required Color color,
   }) {
     return Container(
-      padding: EdgeInsets.all(12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.lightRed,
         borderRadius: BorderRadius.circular(12),
@@ -532,19 +532,19 @@ class BranchDetailsSheet extends StatelessWidget {
       child: Column(
         children: [
           Icon(icon, color: color, size: 24),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Text(
             label,
-            style: TextStyle(color: Colors.white70, fontSize: 12),
+            style: const TextStyle(color: Colors.white70, fontSize: 12),
             textAlign: TextAlign.center,
           ),
         ],
@@ -554,8 +554,8 @@ class BranchDetailsSheet extends StatelessWidget {
 
   Widget _buildNextInspectionCard() {
     return Container(
-      padding: EdgeInsets.all(12),
-      margin: EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.green,
         borderRadius: BorderRadius.circular(8),
@@ -572,11 +572,11 @@ class BranchDetailsSheet extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.next_plan, color: Colors.white),
-              SizedBox(width: 8),
+              const Icon(Icons.next_plan, color: Colors.white),
+              const SizedBox(width: 8),
               Text(
                 LocaleKeys.yourNextInspection.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
                 ),
@@ -584,7 +584,7 @@ class BranchDetailsSheet extends StatelessWidget {
             ],
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: shadowDeco.copyWith(
               borderRadius: BorderRadius.circular(4),
             ),
@@ -592,7 +592,7 @@ class BranchDetailsSheet extends StatelessWidget {
               branch.isNextInspectionToday
                   ? LocaleKeys.today.tr()
                   : formatTimeSlot(branch.stop!.timeSlot.toString()),
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -603,7 +603,7 @@ class BranchDetailsSheet extends StatelessWidget {
   Widget _buildInspectionHistoryHeader() {
     return Text(
       LocaleKeys.last10Inspections.tr(),
-      style: TextStyle(
+      style: const TextStyle(
         color: AppColors.primaryRed,
         fontSize: 16,
         fontWeight: FontWeight.bold,
@@ -613,7 +613,7 @@ class BranchDetailsSheet extends StatelessWidget {
 
   Widget _buildInspectionHistory(ScrollController scrollController) {
     if (provider.isLoadingInspections) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryRed),
       );
     }
@@ -623,11 +623,11 @@ class BranchDetailsSheet extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.history, size: 60, color: Colors.white24),
-            SizedBox(height: 12),
+            const Icon(Icons.history, size: 60, color: Colors.white24),
+            const SizedBox(height: 12),
             Text(
               LocaleKeys.no_inspections_yet.tr(),
-              style: TextStyle(color: Colors.white54),
+              style: const TextStyle(color: Colors.white54),
             ),
           ],
         ),
@@ -762,7 +762,7 @@ class BranchDetailsSheet extends StatelessWidget {
                     );
                   },
                   backgroundColor: Colors.green,
-                  textStyle: TextStyle(
+                  textStyle: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -771,13 +771,13 @@ class BranchDetailsSheet extends StatelessWidget {
                   borderRadius: 10,
                 ),
               ),
-              SizedBox(width: 10),
+              const SizedBox(width: 10),
               Expanded(
                 child: AppButton(
                   text: LocaleKeys.manageRoute.tr(),
                   onPressed: () => _showRouteManagementSheet(context, prod),
                   backgroundColor: AppColors.primaryRed,
-                  textStyle: TextStyle(
+                  textStyle: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -848,7 +848,7 @@ class BranchDetailsSheet extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: AppColors.lightBlack,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) =>
@@ -867,7 +867,7 @@ class RouteManagementSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -881,24 +881,24 @@ class RouteManagementSheet extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 20),
-          Icon(Icons.route, size: 48, color: AppColors.primaryRed),
-          SizedBox(height: 16),
+          const SizedBox(height: 20),
+          const Icon(Icons.route, size: 48, color: AppColors.primaryRed),
+          const SizedBox(height: 16),
           Text(
             LocaleKeys.manageRoute.tr(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             branch.name,
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           Consumer<ProviderBranches>(
             builder: (context, prod, child) {
               return Column(
@@ -947,7 +947,7 @@ class RouteManagementSheet extends StatelessWidget {
                         }
                       },
                       backgroundColor: AppColors.amber,
-                      textStyle: TextStyle(
+                      textStyle: const TextStyle(
                         color: AppColors.primaryDark,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -955,7 +955,7 @@ class RouteManagementSheet extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       borderRadius: 10,
                     ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   AppButton(
                     isLoading: prod.isLoading,
                     text: LocaleKeys.removeFromRoute.tr(),
@@ -971,7 +971,7 @@ class RouteManagementSheet extends StatelessWidget {
                       }
                     },
                     backgroundColor: AppColors.primaryRed,
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -979,19 +979,19 @@ class RouteManagementSheet extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     borderRadius: 10,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
                       LocaleKeys.cancel.tr(),
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ),
                 ],
               );
             },
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
         ],
       ),
     );

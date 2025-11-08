@@ -114,7 +114,7 @@ Future<String?> pickRouteDate(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           LocaleKeys.select_date.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
@@ -143,7 +143,7 @@ Future<String?> pickRouteDate(
             onPressed: () => Navigator.pop(context, null),
             child: Text(
               LocaleKeys.cancel.tr(),
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+              style: const TextStyle(color: Colors.grey, fontSize: 16),
             ),
           ),
           ElevatedButton(
@@ -162,7 +162,7 @@ Future<String?> pickRouteDate(
             },
             child: Text(
               LocaleKeys.ok.tr(),
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
@@ -177,7 +177,6 @@ Future<String?> pickRouteDate(
 
 List<String> getInspectorTokens(String inspectorId, BuildContext context) {
   try {
-    // Handle empty inspectorId
     if (inspectorId.isEmpty) {
       console('⚠️ Empty inspectorId provided');
       return [];
@@ -185,22 +184,18 @@ List<String> getInspectorTokens(String inspectorId, BuildContext context) {
 
     final inspectors = context.read<ProviderAdminUsers>().inspectors;
 
-    // Handle empty inspectors list
     if (inspectors.isEmpty) {
       console('⚠️ No inspectors found in provider');
       return [];
     }
 
-    // Find inspector safely
     final inspector = inspectors.where((e) => e.id == inspectorId).firstOrNull;
 
-    // Handle inspector not found
     if (inspector == null) {
       console('⚠️ Inspector $inspectorId not found in provider');
       return [];
     }
 
-    // Handle null or empty fcmTokens — but don’t log (let sendToInspector handle it)
     if (inspector.fcmTokens == null || inspector.fcmTokens!.isEmpty) {
       return [];
     }
@@ -220,4 +215,38 @@ int getMonthFromKey(String monthKey) {
 int getYearFromKey(String monthKey) {
   final parts = monthKey.split('-');
   return parts.length == 2 ? int.parse(parts[1]) : DateTime.now().year;
+}
+
+String getMonthNameFromKey(String monthKey) {
+  final parts = monthKey.split('-');
+  if (parts.length != 2) return monthKey;
+  final month = parts[0];
+  var monthNames = {
+    "01": LocaleKeys.january.tr(),
+    "02": LocaleKeys.february.tr(),
+    "03": LocaleKeys.march.tr(),
+    "04": LocaleKeys.april.tr(),
+    "05": LocaleKeys.may.tr(),
+    "06": LocaleKeys.june.tr(),
+    "07": LocaleKeys.july.tr(),
+    "08": LocaleKeys.august.tr(),
+    "09": LocaleKeys.september.tr(),
+    "10": LocaleKeys.october.tr(),
+    "11": LocaleKeys.november.tr(),
+    "12": LocaleKeys.december.tr(),
+  };
+  return monthNames[month] ?? month;
+}
+
+List<String> generateLast12Months() {
+  final List<String> months = [];
+  final now = DateTime.now();
+
+  for (int i = 0; i < 12; i++) {
+    final date = DateTime(now.year, now.month - i, 1);
+    final monthKey = '${date.month.toString().padLeft(2, '0')}-${date.year}';
+    months.add(monthKey);
+  }
+
+  return months;
 }

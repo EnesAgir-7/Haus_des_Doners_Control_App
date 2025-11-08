@@ -11,11 +11,11 @@ class AdminBottomNavProvider extends ChangeNotifier {
   int get selectedIndex => _selectedIndex;
 
   final List<Widget> screens = [
-    ScreenAdminHome(),
-    ScreenAdminInspectors(),
-    ScreenAdminBranches(),
-    ScreenAdminVehicle(),
-    ScreenAdminTasks(),
+    const ScreenAdminHome(),
+    const ScreenAdminInspectors(),
+    const ScreenAdminBranches(),
+    const ScreenAdminVehicle(),
+    const ScreenAdminTasks(),
     // ScreenAdminSettings(),
   ];
 

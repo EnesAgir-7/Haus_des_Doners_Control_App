@@ -21,7 +21,7 @@ class RemoteConfigService {
       RemoteConfigSettings(
         fetchTimeout: const Duration(seconds: 30),
         minimumFetchInterval: AppEnvironment.isProd
-            ? Duration(hours: 1)
+            ? const Duration(hours: 1)
             : Duration.zero,
       ),
     );

@@ -21,8 +21,8 @@ class ScreenSettings extends StatelessWidget {
     return Consumer<ProviderAuth>(
       builder: (context, authProvider, child) {
         return Scaffold(
-          appBar: CustomAppBar(),
-          persistentFooterDecoration: BoxDecoration(color: Colors.transparent),
+          appBar: const CustomAppBar(),
+          persistentFooterDecoration: const BoxDecoration(color: Colors.transparent),
           persistentFooterButtons: [
             Container(
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
@@ -52,7 +52,7 @@ class ScreenSettings extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 children: [
                   _buildHeader(),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   _buildSectionTitle(context, LocaleKeys.change_language.tr()),
                   const SizedBox(height: 16),
                   const LanguageButton(),
@@ -107,13 +107,13 @@ class ScreenSettings extends StatelessWidget {
   Widget _buildHeader() {
     return Row(
       children: [
-        Icon(Icons.settings, color: Colors.lightBlueAccent),
-        SizedBox(width: 6),
+        const Icon(Icons.settings, color: Colors.lightBlueAccent),
+        const SizedBox(width: 6),
         Text(
           loggedInUser != null && loggedInUser!.isAdmin
               ? LocaleKeys.adminSettings.tr()
               : LocaleKeys.settings_label.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -128,7 +128,7 @@ class ScreenSettings extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8, bottom: 8),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white70,
           fontSize: 14,
           fontWeight: FontWeight.w600,

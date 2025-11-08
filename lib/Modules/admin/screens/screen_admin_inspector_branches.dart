@@ -99,7 +99,7 @@ class _ScreenAdminInspectorBranchesState
                 }
 
                 return ListView.separated(
-                  separatorBuilder: (context, index) => SizedBox(height: 12),
+                  separatorBuilder: (context, index) => const SizedBox(height: 12),
                   itemCount: _filteredBranches.length,
                   itemBuilder: (context, index) {
                     final branch = _filteredBranches[index];
@@ -125,21 +125,21 @@ class _ScreenAdminInspectorBranchesState
       ),
       child: Row(
         children: [
-          Icon(Icons.search_rounded, color: Colors.white60, size: 22),
+          const Icon(Icons.search_rounded, color: Colors.white60, size: 22),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
               controller: _searchController,
-              style: TextStyle(color: Colors.white, fontSize: 15),
+              style: const TextStyle(color: Colors.white, fontSize: 15),
               decoration: InputDecoration(
                 fillColor: Colors.transparent,
                 enabledBorder: InputBorder.none,
                 errorBorder: InputBorder.none,
                 focusedBorder: InputBorder.none,
                 hintText:  LocaleKeys.searchBranches.tr(),
-                hintStyle: TextStyle(color: Colors.white38, fontSize: 15),
+                hintStyle: const TextStyle(color: Colors.white38, fontSize: 15),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
               onChanged: (value) {
                 setState(() {
@@ -156,7 +156,7 @@ class _ScreenAdminInspectorBranchesState
                   _searchQuery = '';
                 });
               },
-              icon: Icon(Icons.close_rounded, color: Colors.white60, size: 20),
+              icon: const Icon(Icons.close_rounded, color: Colors.white60, size: 20),
             ),
         ],
       ),
@@ -165,7 +165,7 @@ class _ScreenAdminInspectorBranchesState
 
   Widget _buildBranchCard(BranchModel branch) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -208,7 +208,7 @@ class _ScreenAdminInspectorBranchesState
                         ),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.store_rounded,
                         color: Colors.white,
                         size: 24,
@@ -221,7 +221,7 @@ class _ScreenAdminInspectorBranchesState
                         children: [
                           Text(
                             branch.name,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -233,7 +233,7 @@ class _ScreenAdminInspectorBranchesState
                           if (branch.lastInspectionText.isNotEmpty) ...[
                             const SizedBox(height: 4),
                             Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
                                 vertical: 2,
                               ),
@@ -245,7 +245,7 @@ class _ScreenAdminInspectorBranchesState
                               ),
                               child: Text(
                                 branch.lastInspectionText,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: AppColors.primaryRed,
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
@@ -256,7 +256,7 @@ class _ScreenAdminInspectorBranchesState
                         ],
                       ),
                     ),
-                    Icon(
+                    const Icon(
                       Icons.chevron_right_rounded,
                       color: Colors.white38,
                       size: 24,
@@ -292,7 +292,7 @@ class _ScreenAdminInspectorBranchesState
         Expanded(
           child: Text(
             text,
-            style: TextStyle(color: Colors.white70, fontSize: 13),
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

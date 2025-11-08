@@ -234,7 +234,7 @@ class AdminTaskCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.calendar_today, size: 12, color: Colors.amber),
+                      const Icon(Icons.calendar_today, size: 12, color: Colors.amber),
                       const SizedBox(width: 4),
                       Text(
                         DateFormat('MMM d').format(task.dueDate!),

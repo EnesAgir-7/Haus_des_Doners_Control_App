@@ -268,7 +268,7 @@ Widget _buildLoggedOutContent(String inspectorName) {
         ),
         child: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
+            const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 24),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
@@ -304,7 +304,7 @@ Widget _buildLoggedOutContent(String inspectorName) {
                     color: AppColors.primaryRed.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
+                  child: const Icon(
                     Icons.person_outline,
                     size: 18,
                     color: AppColors.primaryRed,
@@ -381,7 +381,7 @@ Widget _buildNotificationForm(
                 color: AppColors.primaryRed.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.person, color: AppColors.primaryRed, size: 18),
+              child: const Icon(Icons.person, color: AppColors.primaryRed, size: 18),
             ),
             const SizedBox(width: 12),
             Expanded(

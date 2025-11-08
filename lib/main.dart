@@ -75,11 +75,11 @@ void main() async {
     runApp(
       EasyLocalization(
         path: 'assets/translations',
-        assetLoader: CodegenLoader(),
-        supportedLocales: [Locale('en'), Locale('de'), Locale('tr')],
-        fallbackLocale: Locale('tr'),
+        assetLoader: const CodegenLoader(),
+        supportedLocales: const [Locale('en'), Locale('de'), Locale('tr')],
+        fallbackLocale: const Locale('tr'),
         saveLocale: true,
-        startLocale: Locale('tr'),
+        startLocale: const Locale('tr'),
         useOnlyLangCode: true,
         useFallbackTranslationsForEmptyResources: true,
         child: const MyApp(),
@@ -152,7 +152,7 @@ class MyApp extends StatelessWidget {
 
           darkTheme: AppTheme.dark,
           themeMode: ThemeMode.dark,
-          home: AuthWrapper(),
+          home: const AuthWrapper(),
           routes: AppRouter.routes,
           localeListResolutionCallback: (deviceLocales, supportedLocales) {
             if (deviceLocales != null) {

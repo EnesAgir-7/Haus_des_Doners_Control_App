@@ -42,7 +42,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
         child: Consumer<ProviderTasks>(
           builder: (context, provider, child) {
             if (provider.isLoading) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(color: AppColors.primaryRed),
               );
             }
@@ -67,19 +67,19 @@ class _ScreenTasksState extends State<ScreenTasks> {
 
   Widget _buildFilterSection(ProviderTasks provider) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             LocaleKeys.tasks.tr(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
 
           // Status filter chips
           SingleChildScrollView(
@@ -92,14 +92,14 @@ class _ScreenTasksState extends State<ScreenTasks> {
                   isSelected: provider.statusFilter == AppConstants.all,
                   onTap: () => provider.setStatusFilter(AppConstants.all),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 _buildFilterChip(
                   label: LocaleKeys.pending.tr(),
                   count: provider.pendingTasksCount,
                   isSelected: provider.statusFilter == AppConstants.pending,
                   onTap: () => provider.setStatusFilter(AppConstants.pending),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 _buildFilterChip(
                   label: LocaleKeys.in_progress.tr(),
                   count: provider.inProgressTasksCount,
@@ -107,7 +107,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
                   onTap: () =>
                       provider.setStatusFilter(AppConstants.inProgress),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 _buildFilterChip(
                   label: LocaleKeys.completed.tr(),
                   count: provider.completedTasksCount,
@@ -119,9 +119,9 @@ class _ScreenTasksState extends State<ScreenTasks> {
           ),
 
           if (provider.overdueTasksCount > 0) ...[
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: AppColors.primaryRed.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
@@ -130,15 +130,15 @@ class _ScreenTasksState extends State<ScreenTasks> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.warning_amber_rounded,
                     color: AppColors.primaryRed,
                     size: 18,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
                     '${provider.overdueTasksCount} ${LocaleKeys.tasks_overdue.tr()}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primaryRed,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
@@ -162,12 +162,12 @@ class _ScreenTasksState extends State<ScreenTasks> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryRed : Color(0xFF2A2A2A),
+          color: isSelected ? AppColors.primaryRed : const Color(0xFF2A2A2A),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.primaryRed : Color(0xFF3A3A3A),
+            color: isSelected ? AppColors.primaryRed : const Color(0xFF3A3A3A),
             width: 1,
           ),
         ),
@@ -177,24 +177,24 @@ class _ScreenTasksState extends State<ScreenTasks> {
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : Color(0xFFB0B0B0),
+                color: isSelected ? Colors.white : const Color(0xFFB0B0B0),
                 fontSize: 14,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
-            SizedBox(width: 6),
+            const SizedBox(width: 6),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.2)
-                    : Color(0xFF3A3A3A),
+                    : const Color(0xFF3A3A3A),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
                 count.toString(),
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Color(0xFFB0B0B0),
+                  color: isSelected ? Colors.white : const Color(0xFFB0B0B0),
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
@@ -210,9 +210,9 @@ class _ScreenTasksState extends State<ScreenTasks> {
     return RefreshIndicator(
       onRefresh: provider.refresh,
       color: AppColors.primaryRed,
-      backgroundColor: Color(0xFF2A2A2A),
+      backgroundColor: const Color(0xFF2A2A2A),
       child: ListView.builder(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         itemCount: provider.tasks.length,
         itemBuilder: (context, index) {
           final task = provider.tasks[index];
@@ -224,14 +224,14 @@ class _ScreenTasksState extends State<ScreenTasks> {
 
   Widget _buildTaskCard(TaskModel task, ProviderTasks provider) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Color(0xFF2A2A2A),
+        color: const Color(0xFF2A2A2A),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: task.isOverdue
               ? AppColors.primaryRed.withValues(alpha: 0.5)
-              : Color(0xFF3A3A3A),
+              : const Color(0xFF3A3A3A),
           width: 1,
         ),
       ),
@@ -241,7 +241,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
           onTap: () => _showTaskDetails(context, task, provider),
           borderRadius: BorderRadius.circular(12),
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -257,7 +257,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
 
                     // Task info
                     Expanded(
@@ -266,7 +266,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
                         children: [
                           Text(
                             task.title,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -274,10 +274,10 @@ class _ScreenTasksState extends State<ScreenTasks> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           Text(
                             task.description,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFF808080),
                               fontSize: 13,
                             ),
@@ -293,7 +293,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
                   ],
                 ),
 
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
 
                 // Meta info
                 Row(
@@ -304,35 +304,35 @@ class _ScreenTasksState extends State<ScreenTasks> {
                         size: 14,
                         color: task.isOverdue
                             ? AppColors.primaryRed
-                            : Color(0xFF808080),
+                            : const Color(0xFF808080),
                       ),
-                      SizedBox(width: 6),
+                      const SizedBox(width: 6),
                       Text(
                         _formatDueDate(task.dueDate!),
                         style: TextStyle(
                           color: task.isOverdue
                               ? AppColors.primaryRed
-                              : Color(0xFF808080),
+                              : const Color(0xFF808080),
                           fontSize: 12,
                           fontWeight: task.isOverdue
                               ? FontWeight.w600
                               : FontWeight.normal,
                         ),
                       ),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                     ],
 
                     if (task.relatedBranchId != null) ...[
-                      Icon(
+                      const Icon(
                         Icons.location_on_outlined,
                         size: 14,
                         color: Color(0xFF808080),
                       ),
-                      SizedBox(width: 6),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           LocaleKeys.about_the_branch.tr(),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Color(0xFF808080),
                             fontSize: 12,
                           ),
@@ -342,16 +342,16 @@ class _ScreenTasksState extends State<ScreenTasks> {
                     ],
 
                     if (task.comments.isNotEmpty) ...[
-                      SizedBox(width: 8),
-                      Icon(
+                      const SizedBox(width: 8),
+                      const Icon(
                         Icons.comment_outlined,
                         size: 14,
                         color: Color(0xFF808080),
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         task.comments.length.toString(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Color(0xFF808080),
                           fontSize: 12,
                         ),
@@ -374,25 +374,25 @@ class _ScreenTasksState extends State<ScreenTasks> {
 
     switch (status) {
       case AppConstants.completed:
-        color = Color(0xFF4CAF50);
+        color = const Color(0xFF4CAF50);
         text = LocaleKeys.completed.tr();
         icon = Icons.check_circle;
         break;
       case AppConstants.inProgress:
-        color = Color(0xFFFFA726);
+        color = const Color(0xFFFFA726);
         text = LocaleKeys.in_progress.tr();
         icon = Icons.pending;
         break;
       case AppConstants.pending:
       default:
-        color = Color(0xFF808080);
+        color = const Color(0xFF808080);
         text = LocaleKeys.pending.tr();
         icon = Icons.hourglass_empty;
         break;
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(6),
@@ -402,7 +402,7 @@ class _ScreenTasksState extends State<ScreenTasks> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 12, color: color),
-          SizedBox(width: 4),
+          const SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
@@ -421,10 +421,10 @@ class _ScreenTasksState extends State<ScreenTasks> {
       case AppConstants.high:
         return AppColors.primaryRed;
       case AppConstants.medium:
-        return Color(0xFFFFA726);
+        return const Color(0xFFFFA726);
       case AppConstants.low:
       default:
-        return Color(0xFF4CAF50);
+        return const Color(0xFF4CAF50);
     }
   }
 
@@ -450,20 +450,20 @@ class _ScreenTasksState extends State<ScreenTasks> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.task_alt, size: 80, color: Color(0xFF3A3A3A)),
-          SizedBox(height: 16),
+          const Icon(Icons.task_alt, size: 80, color: Color(0xFF3A3A3A)),
+          const SizedBox(height: 16),
           Text(
             LocaleKeys.no_tasks_found.tr(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xFF808080),
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             LocaleKeys.no_assigned_tasks.tr(),
-            style: TextStyle(color: Color(0xFF606060), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF606060), fontSize: 14),
           ),
         ],
       ),
@@ -477,9 +477,9 @@ class _ScreenTasksState extends State<ScreenTasks> {
   ) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFF1A1A1A),
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => TaskDetailsSheet(task: task, provider: provider),

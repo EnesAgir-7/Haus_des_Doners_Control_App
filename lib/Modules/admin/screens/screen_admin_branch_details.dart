@@ -79,11 +79,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ),
           title: Row(
             children: [
-              Icon(Icons.info_outline, color: Colors.amber, size: 28),
+              const Icon(Icons.info_outline, color: Colors.amber, size: 28),
               const SizedBox(width: 12),
               Text(
                 LocaleKeys.branchInRoute.tr(),
-                style: TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.white),
               ),
             ],
           ),
@@ -92,14 +92,14 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               '{inspectorName}',
               widget.branch.assignedInspector!.name,
             ),
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
                 LocaleKeys.ok.tr(),
-                style: TextStyle(color: Colors.white70),
+                style: const TextStyle(color: Colors.white70),
               ),
             ),
           ],
@@ -116,11 +116,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+            const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
             const SizedBox(width: 12),
             Text(
               LocaleKeys.deleteBranch.tr(),
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
           ],
         ),
@@ -130,7 +130,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           children: [
             Text(
               LocaleKeys.deleteConfirmationMessage.tr(),
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
             ),
             const SizedBox(height: 8),
             Row(
@@ -138,7 +138,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 Expanded(
                   child: Text(
                     widget.branch.name,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primaryRed,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -147,7 +147,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 ),
 
                 IconButton(
-                  icon: Icon(Icons.content_copy, color: Colors.white),
+                  icon: const Icon(Icons.content_copy, color: Colors.white),
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: widget.branch.name));
                   },
@@ -173,7 +173,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: AppColors.primaryRed),
+                  borderSide: const BorderSide(color: AppColors.primaryRed),
                 ),
               ),
             ),
@@ -184,7 +184,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               LocaleKeys.cancel.tr(),
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
             ),
           ),
           Consumer<ProviderAdminBranches>(
@@ -214,7 +214,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                       )
                     : Text(
                         LocaleKeys.delete.tr(),
-                        style: TextStyle(color: Colors.red),
+                        style: const TextStyle(color: Colors.red),
                       ),
               );
             },
@@ -265,7 +265,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
       appBar: CustomAppBar(
         actions: [
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, color: Colors.white),
+            icon: const Icon(Icons.more_vert, color: Colors.white),
             color: AppColors.lightBlack,
             onSelected: (value) {
               if (value == AppConstants.edit) {
@@ -279,11 +279,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 value: AppConstants.edit,
                 child: Row(
                   children: [
-                    Icon(Icons.edit, color: AppColors.primaryRed, size: 20),
+                    const Icon(Icons.edit, color: AppColors.primaryRed, size: 20),
                     const SizedBox(width: 12),
                     Text(
                       LocaleKeys.editBranch.tr(),
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ],
                 ),
@@ -292,11 +292,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 value: AppConstants.delete,
                 child: Row(
                   children: [
-                    Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                    const Icon(Icons.delete_outline, color: Colors.red, size: 20),
                     const SizedBox(width: 12),
                     Text(
                       LocaleKeys.deleteBranch.tr() + '',
-                      style: TextStyle(color: Colors.red),
+                      style: const TextStyle(color: Colors.red),
                     ),
                   ],
                 ),
@@ -314,7 +314,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   }
 
   Widget _buildLoadingState() {
-    return Center(
+    return const Center(
       child: CircularProgressIndicator(color: AppColors.primaryRed),
     );
   }
@@ -477,7 +477,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         .where((p) => p >= 0)
         .toList();
 
-    if (parsedScores.isEmpty) return SizedBox.shrink();
+    if (parsedScores.isEmpty) return const SizedBox.shrink();
 
     final bestScore = parsedScores.reduce((a, b) => a > b ? a : b);
     final worstScore = parsedScores.reduce((a, b) => a < b ? a : b);
@@ -493,11 +493,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              Icon(Icons.analytics, color: AppColors.primaryRed, size: 20),
+              const Icon(Icons.analytics, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.twelveMonthSummary.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -567,7 +567,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             ),
           ),
           const SizedBox(height: 4),
-          Text(label, style: TextStyle(color: Colors.white60, fontSize: 11)),
+          Text(label, style: const TextStyle(color: Colors.white60, fontSize: 11)),
         ],
       ),
     );
@@ -588,7 +588,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                   color: AppColors.primaryRed.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.business,
                   color: AppColors.primaryRed,
                   size: 24,
@@ -768,11 +768,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              Icon(Icons.info_outline, color: AppColors.primaryRed, size: 20),
+              const Icon(Icons.info_outline, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.branchInfo.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -791,7 +791,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.content_copy, color: AppColors.primaryRed),
+                icon: const Icon(Icons.content_copy, color: AppColors.primaryRed),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: widget.branch.id));
                   showSnakBarr(context, LocaleKeys.copiedToClipboard.tr());
@@ -843,11 +843,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              Icon(Icons.contact_phone, color: AppColors.primaryRed, size: 20),
+              const Icon(Icons.contact_phone, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.contact.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -893,11 +893,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              Icon(Icons.email, color: AppColors.primaryRed, size: 20),
+              const Icon(Icons.email, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.branchEmail.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -925,11 +925,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              Icon(Icons.schedule, color: AppColors.primaryRed, size: 20),
+              const Icon(Icons.schedule, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.operatingHours.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -1006,7 +1006,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -1069,7 +1069,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 width: 1.5,
               ),
             ),
-            child: Icon(Icons.person, color: Colors.white, size: 18),
+            child: const Icon(Icons.person, color: Colors.white, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -1104,7 +1104,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                       contact.role!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: AppColors.primaryRed,
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
@@ -1191,11 +1191,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              Icon(Icons.info, color: AppColors.primaryRed, size: 20),
+              const Icon(Icons.info, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.additionalInformation.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -1232,7 +1232,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.description, color: Colors.white38, size: 18),
+                      const Icon(Icons.description, color: Colors.white38, size: 18),
                       const SizedBox(width: 12),
                       Text(
                         LocaleKeys.shopInformation.tr(),
@@ -1270,11 +1270,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              Icon(Icons.person_outline, color: AppColors.primaryRed, size: 20),
+              const Icon(Icons.person_outline, color: AppColors.primaryRed, size: 20),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.assigned_to.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -1304,11 +1304,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ),
           child: Column(
             children: [
-              Icon(Icons.person_off_outlined, size: 40, color: Colors.white24),
+              const Icon(Icons.person_off_outlined, size: 40, color: Colors.white24),
               const SizedBox(height: 8),
               Text(
                 LocaleKeys.unassigned.tr(),
-                style: TextStyle(color: Colors.white54, fontSize: 13),
+                style: const TextStyle(color: Colors.white54, fontSize: 13),
               ),
             ],
           ),
@@ -1343,7 +1343,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 backgroundColor: AppColors.primaryRed,
                 child: Text(
                   widget.branch.assignedInspector!.name[0].toUpperCase(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1363,14 +1363,14 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               if (widget.branch.stop != null)
                 Tooltip(
                   message: LocaleKeys.branchInRoute.tr(),
-                  child: Icon(Icons.route, color: Colors.green, size: 20),
+                  child: const Icon(Icons.route, color: Colors.green, size: 20),
                 )
               else
                 IconButton(
-                  icon: Icon(Icons.close, color: Colors.red, size: 20),
+                  icon: const Icon(Icons.close, color: Colors.red, size: 20),
                   onPressed: _unassignInspector,
                   padding: EdgeInsets.zero,
-                  constraints: BoxConstraints(),
+                  constraints: const BoxConstraints(),
                 ),
             ],
           ),
@@ -1391,7 +1391,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             children: [
               Text(
                 LocaleKeys.branchInActiveRoute.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.orange,
                   fontSize: 12,
                   fontStyle: FontStyle.italic,
@@ -1403,12 +1403,12 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: () => _showRouteStopInfo(widget.branch.stop!),
-                  icon: Icon(Icons.route, size: 18),
+                  icon: const Icon(Icons.route, size: 18),
                   label: Text(LocaleKeys.viewRoute.tr()),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white70,
-                    side: BorderSide(color: Colors.white24),
-                    padding: EdgeInsets.symmetric(vertical: 12),
+                    side: const BorderSide(color: Colors.white24),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -1469,7 +1469,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+            const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
             const SizedBox(height: 16),
             Text(
               LocaleKeys.error_occurred.tr(),
@@ -1563,25 +1563,25 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           LocaleKeys.unassignInspector.tr(),
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         content: Text(
           LocaleKeys.unassignInspectorConfirm.tr(),
-          style: TextStyle(color: Colors.white70),
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               LocaleKeys.cancel.tr(),
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               LocaleKeys.unassign.tr(),
-              style: TextStyle(color: AppColors.primaryRed),
+              style: const TextStyle(color: AppColors.primaryRed),
             ),
           ),
         ],

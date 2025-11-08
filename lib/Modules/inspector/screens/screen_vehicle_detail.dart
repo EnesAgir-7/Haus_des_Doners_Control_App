@@ -51,7 +51,7 @@ class _ScreenInspectorVehicleDetailState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: const CustomAppBar(),
       backgroundColor: AppColors.primaryDark,
       body: Container(
         decoration: BoxDecoration(
@@ -265,7 +265,7 @@ class _EnhancedVehicleInfo extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.directions_car_rounded,
               color: AppColors.primaryRed,
               size: 28,
@@ -303,7 +303,7 @@ class _EnhancedVehicleInfo extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.pin,
                             size: 12,
                             color: AppColors.primaryRed,
@@ -311,7 +311,7 @@ class _EnhancedVehicleInfo extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             plate,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: AppColors.primaryRed,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -457,7 +457,7 @@ class _EnhancedRemainingKm extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Icon(Icons.route_rounded, color: Colors.white, size: 18),
+                child: const Icon(Icons.route_rounded, color: Colors.white, size: 18),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -479,7 +479,7 @@ class _EnhancedRemainingKm extends StatelessWidget {
                   tooltip: LocaleKeys.update_km.tr(),
                   onPressed: () =>
                       _showEnhancedUpdateKmDialog(context, provider),
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.edit_outlined,
                     color: Colors.white,
                     size: 20,
@@ -644,7 +644,7 @@ class _EnhancedReturnDate extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(
+            child: const Icon(
               Icons.calendar_today_rounded,
               color: Colors.white,
               size: 24,
@@ -874,7 +874,7 @@ void _showEnhancedUpdateKmDialog(
                               ),
                             ],
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.info_outline,
                             color: Colors.white,
                             size: 20,
@@ -946,7 +946,7 @@ void _showEnhancedUpdateKmDialog(
                         hintStyle: TextStyle(
                           color: Colors.white.withValues(alpha: 0.3),
                         ),
-                        prefixIcon: Icon(
+                        prefixIcon: const Icon(
                           Icons.edit_road,
                           color: AppColors.primaryRed,
                         ),
@@ -964,7 +964,7 @@ void _showEnhancedUpdateKmDialog(
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: AppColors.primaryRed,
                             width: 2,
                           ),

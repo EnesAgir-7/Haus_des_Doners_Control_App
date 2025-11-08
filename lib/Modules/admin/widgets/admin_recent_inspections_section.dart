@@ -61,7 +61,7 @@ class _InspectionSectionState extends State<InspectionSection> {
             children: [
               Text(
                 LocaleKeys.recentInspections.tr(),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -92,7 +92,7 @@ class _InspectionSectionState extends State<InspectionSection> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.visibility_outlined,
                         color: AppColors.primaryRed,
                         size: 16,
@@ -100,7 +100,7 @@ class _InspectionSectionState extends State<InspectionSection> {
                       const SizedBox(width: 6),
                       Text(
                         LocaleKeys.viewAll.tr(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: AppColors.primaryRed,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,

@@ -48,7 +48,7 @@ class PDFPreviewScreen extends StatelessWidget {
         canChangePageFormat: false,
         canDebug: false,
         pdfFileName: 'inspection_${branchName.replaceAll(' ', '_')}.pdf',
-        actionBarTheme: PdfActionBarTheme(
+        actionBarTheme: const PdfActionBarTheme(
           backgroundColor: AppColors.primaryRed,
         ),
       ),

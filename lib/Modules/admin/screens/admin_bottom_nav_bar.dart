@@ -74,7 +74,7 @@ class AdminBottomNavBar extends StatelessWidget {
                 destinations: [
                   NavigationDestination(
                     icon: const Icon(Icons.dashboard, color: Colors.white70),
-                    selectedIcon: Icon(
+                    selectedIcon: const Icon(
                       Icons.dashboard,
                       color: AppColors.primaryRed,
                     ),
@@ -82,7 +82,7 @@ class AdminBottomNavBar extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.people, color: Colors.white70),
-                    selectedIcon: Icon(
+                    selectedIcon: const Icon(
                       Icons.people,
                       color: AppColors.primaryRed,
                     ),
@@ -90,7 +90,7 @@ class AdminBottomNavBar extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.apartment, color: Colors.white70),
-                    selectedIcon: Icon(
+                    selectedIcon: const Icon(
                       Icons.apartment,
                       color: AppColors.primaryRed,
                     ),
@@ -98,7 +98,7 @@ class AdminBottomNavBar extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.car_rental, color: Colors.white70),
-                    selectedIcon: Icon(
+                    selectedIcon: const Icon(
                       Icons.car_rental,
                       color: AppColors.primaryRed,
                     ),
@@ -106,7 +106,7 @@ class AdminBottomNavBar extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.task, color: Colors.white70),
-                    selectedIcon: Icon(Icons.task, color: AppColors.primaryRed),
+                    selectedIcon: const Icon(Icons.task, color: AppColors.primaryRed),
                     label: LocaleKeys.tasks.tr(),
                   ),
 

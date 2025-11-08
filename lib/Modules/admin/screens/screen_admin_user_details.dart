@@ -187,7 +187,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                       ],
                     ),
                   ] else ...[
-                    Center(child: CircularProgressIndicator()),
+                    const Center(child: CircularProgressIndicator()),
                   ],
                   const SizedBox(height: 16),
                 ],
@@ -265,7 +265,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
         ),
       ),
       validator: validator,
@@ -306,7 +306,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.primaryRed, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
         ),
       ),
       items: [
@@ -450,7 +450,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: LocaleKeys.enterNewPassword.tr(),
-                  hintStyle: TextStyle(color: Colors.white38),
+                  hintStyle: const TextStyle(color: Colors.white38),
                   filled: true,
                   fillColor: AppColors.primaryDark,
                   border: OutlineInputBorder(
@@ -474,7 +474,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: LocaleKeys.confirmPassword.tr(),
-                  hintStyle: TextStyle(color: Colors.white38),
+                  hintStyle: const TextStyle(color: Colors.white38),
                   filled: true,
                   fillColor: AppColors.primaryDark,
                   border: OutlineInputBorder(
@@ -496,7 +496,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
             onPressed: () => Navigator.pop(context),
             child: Text(
               LocaleKeys.cancel.tr(),
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
             ),
           ),
           TextButton(
@@ -514,7 +514,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
             },
             child: Text(
               LocaleKeys.update.tr(),
-              style: TextStyle(color: Colors.blue),
+              style: const TextStyle(color: Colors.blue),
             ),
           ),
         ],
@@ -539,7 +539,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
             children: [
               Text(
                 LocaleKeys.deleteInspectorConfirm.tr(),
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               Text('${LocaleKeys.inspector.tr()}: ${inspectorUser.name}'),
@@ -547,7 +547,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
               const SizedBox(height: 12),
               Text(
                 LocaleKeys.deleteActionIrreversible.tr(),
-                style: TextStyle(color: Colors.red),
+                style: const TextStyle(color: Colors.red),
               ),
               const SizedBox(height: 8),
               Text(LocaleKeys.inspectorAuthAccount.tr()),

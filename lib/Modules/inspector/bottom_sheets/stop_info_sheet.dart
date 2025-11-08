@@ -15,7 +15,7 @@ void showStopInfoBottomSheet(RouteStopModel stop, BuildContext context) {
     context: context,
     isScrollControlled: true,
     backgroundColor: AppColors.primaryDark,
-    shape: RoundedRectangleBorder(
+    shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
     builder: (context) => CompactStopInfoSheet(stop: stop),
@@ -244,7 +244,7 @@ class CompactStopInfoSheet extends StatelessWidget {
                               : stop.isCompleted
                               ? LocaleKeys.inspectionCompletedDesc.tr()
                               : LocaleKeys.inspectionCompleted.tr(),
-                          style: TextStyle(fontSize: 10),
+                          style: const TextStyle(fontSize: 10),
                         ),
                       ],
                     ),
@@ -457,7 +457,7 @@ class StopRouteManagementSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -471,24 +471,24 @@ class StopRouteManagementSheet extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 20),
-          Icon(Icons.route, size: 48, color: AppColors.primaryRed),
-          SizedBox(height: 16),
+          const SizedBox(height: 20),
+          const Icon(Icons.route, size: 48, color: AppColors.primaryRed),
+          const SizedBox(height: 16),
           Text(
             LocaleKeys.manageStop.tr(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             stop.branchName,
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+            style: const TextStyle(color: Colors.white70, fontSize: 14),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
 
           Consumer<ProviderBranches>(
             builder: (context, provider, child) {
@@ -536,7 +536,7 @@ class StopRouteManagementSheet extends StatelessWidget {
                         }
                       },
                       backgroundColor: AppColors.amber,
-                      textStyle: TextStyle(
+                      textStyle: const TextStyle(
                         color: AppColors.primaryDark,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -544,7 +544,7 @@ class StopRouteManagementSheet extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       borderRadius: 10,
                     ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   AppButton(
                     isLoading: provider.isLoading,
                     text: LocaleKeys.removeFromRoute.tr(),
@@ -556,28 +556,28 @@ class StopRouteManagementSheet extends StatelessWidget {
                           backgroundColor: AppColors.lightBlack,
                           title: Text(
                             LocaleKeys.removeStop.tr(),
-                            style: TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white),
                           ),
                           content: Text(
                             LocaleKeys.removeStopConfirmation.tr().replaceFirst(
                               '{branchName}',
                               stop.branchName,
                             ),
-                            style: TextStyle(color: Colors.white70),
+                            style: const TextStyle(color: Colors.white70),
                           ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
                               child: Text(
                                 LocaleKeys.cancel.tr(),
-                                style: TextStyle(color: Colors.white70),
+                                style: const TextStyle(color: Colors.white70),
                               ),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
                               child: Text(
                                 LocaleKeys.remove.tr(),
-                                style: TextStyle(color: AppColors.primaryRed),
+                                style: const TextStyle(color: AppColors.primaryRed),
                               ),
                             ),
                           ],
@@ -600,7 +600,7 @@ class StopRouteManagementSheet extends StatelessWidget {
                       }
                     },
                     backgroundColor: AppColors.primaryRed,
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -608,19 +608,19 @@ class StopRouteManagementSheet extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     borderRadius: 10,
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
                       LocaleKeys.cancel.tr(),
-                      style: TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ),
                 ],
               );
             },
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
         ],
       ),
     );

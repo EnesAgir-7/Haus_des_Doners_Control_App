@@ -63,8 +63,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (AppEnvironment.isDev) ...[
-                        Icon(Icons.circle, color: AppColors.green),
-                        SizedBox(width: 7),
+                        const Icon(Icons.circle, color: AppColors.green),
+                        const SizedBox(width: 7),
                       ],
                       Image.asset(kAppLogo, height: 32, fit: BoxFit.contain),
                     ],
@@ -103,8 +103,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => loggedInUser!.isAdmin
-                            ? ScreenAdminSettings()
-                            : ScreenSettings(),
+                            ? const ScreenAdminSettings()
+                            : const ScreenSettings(),
                       ),
                     );
                   },

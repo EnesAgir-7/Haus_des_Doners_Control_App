@@ -74,7 +74,7 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
         const SizedBox(width: 6),
         Text(
           LocaleKeys.myVehicles.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -90,7 +90,7 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
           child: Text(
             // Placeholder: Assuming the provider has a vehicleCount property
             '${LocaleKeys.count.tr()}: ${provider.vehicleCount.toString()}',
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -103,7 +103,7 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
 
   Widget _buildVehicleList(ProviderVehicle provider) {
     if (provider.isLoadingg) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(color: AppColors.primaryRed),
       );
     }
@@ -136,7 +136,7 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
           const SizedBox(height: 16),
           Text(
             LocaleKeys.error_occurred.tr(),
@@ -175,20 +175,20 @@ class _ScreenVehiclesListState extends State<ScreenVehiclesList> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.car_crash, size: 80, color: Color(0xFF3A3A3A)),
-          SizedBox(height: 16),
+          const Icon(Icons.car_crash, size: 80, color: Color(0xFF3A3A3A)),
+          const SizedBox(height: 16),
           Text(
             LocaleKeys.noVehiclesFound.tr(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Color(0xFF808080),
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             LocaleKeys.noVehiclesAssigned.tr(),
-            style: TextStyle(color: Color(0xFF606060), fontSize: 14),
+            style: const TextStyle(color: Color(0xFF606060), fontSize: 14),
           ),
         ],
       ),

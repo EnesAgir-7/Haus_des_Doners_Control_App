@@ -36,7 +36,7 @@ class ScreenBottomNavBar extends StatelessWidget {
             }
           },
           child: Scaffold(
-            appBar: CustomAppBar(showSettings: true),
+            appBar: const CustomAppBar(showSettings: true),
             body: IndexedStack(
               key: Key("stack${context.locale.languageCode}"),
               index: controller.selectedIndex,
@@ -45,7 +45,7 @@ class ScreenBottomNavBar extends StatelessWidget {
             bottomNavigationBar: Container(
               decoration: BoxDecoration(
                 color: AppColors.primaryDark,
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(20),
                   topRight: Radius.circular(20),
                 ),
@@ -75,7 +75,7 @@ class ScreenBottomNavBar extends StatelessWidget {
                 destinations: [
                   NavigationDestination(
                     icon: const Icon(Icons.dashboard, color: Colors.white70),
-                    selectedIcon: Icon(
+                    selectedIcon: const Icon(
                       Icons.dashboard,
                       color: AppColors.primaryRed,
                     ),
@@ -83,7 +83,7 @@ class ScreenBottomNavBar extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.apartment, color: Colors.white70),
-                    selectedIcon: Icon(
+                    selectedIcon: const Icon(
                       Icons.apartment,
                       color: AppColors.primaryRed,
                     ),
@@ -91,7 +91,7 @@ class ScreenBottomNavBar extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.alt_route, color: Colors.white70),
-                    selectedIcon: Icon(
+                    selectedIcon: const Icon(
                       Icons.alt_route,
                       color: AppColors.primaryRed,
                     ),
@@ -99,7 +99,7 @@ class ScreenBottomNavBar extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.car_rental, color: Colors.white70),
-                    selectedIcon: Icon(
+                    selectedIcon: const Icon(
                       Icons.car_rental,
                       color: AppColors.primaryRed,
                     ),
@@ -107,7 +107,7 @@ class ScreenBottomNavBar extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.task, color: Colors.white70),
-                    selectedIcon: Icon(Icons.task, color: AppColors.primaryRed),
+                    selectedIcon: const Icon(Icons.task, color: AppColors.primaryRed),
                     label: LocaleKeys.tasks.tr(),
                   ),
                 ],

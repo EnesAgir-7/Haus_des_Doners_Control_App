@@ -23,15 +23,15 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(),
+      appBar: const CustomAppBar(),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: "addQuestionnaireFab",
         onPressed: () => _showCreateTemplateDialog(),
         backgroundColor: AppColors.primaryRed,
-        icon: Icon(Icons.add, color: Colors.white),
+        icon: const Icon(Icons.add, color: Colors.white),
         label: Text(
           LocaleKeys.createQuestionnaire.tr(),
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
         ),
       ),
       body: Container(
@@ -69,11 +69,11 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
   Widget _buildHeader() {
     return Row(
       children: [
-        Icon(Icons.description, color: Colors.lightBlueAccent),
-        SizedBox(width: 6),
+        const Icon(Icons.description, color: Colors.lightBlueAccent),
+        const SizedBox(width: 6),
         Text(
           LocaleKeys.inspectionQuestionnaires.tr(),
-          style: TextStyle(
+          style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
             fontSize: 16,
@@ -88,7 +88,7 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
       stream: _templateHelper.templatesStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(color: AppColors.primaryRed),
           );
         }
@@ -100,7 +100,7 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
         final templates = snapshot.data ?? [];
 
         return ListView.builder(
-          padding: EdgeInsets.only(bottom: 80),
+          padding: const EdgeInsets.only(bottom: 80),
           itemCount: templates.length,
           itemBuilder: (context, index) {
             final template = templates[index];
@@ -130,7 +130,7 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
                 Expanded(
                   child: Text(
                     template.name,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -138,14 +138,14 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.lightRed,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     '${template.categories.length} ${LocaleKeys.categories.tr()}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.primaryRed,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -154,13 +154,13 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
                 ),
               ],
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: template.categories.map((category) {
                 return Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppColors.primaryRed.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(6),
@@ -168,7 +168,7 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
                   ),
                   child: Text(
                     category.title,
-                    style: TextStyle(color: Colors.white70, fontSize: 11),
+                    style: const TextStyle(color: Colors.white70, fontSize: 11),
                   ),
                 );
               }).toList(),
@@ -184,22 +184,22 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
-          SizedBox(height: 16),
+          const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          const SizedBox(height: 16),
           Text(
             LocaleKeys.errorLoadingQuestionnaires.tr(),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               error,
-              style: TextStyle(color: Colors.white70),
+              style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
           ),
@@ -221,7 +221,7 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
       context: context,
       backgroundColor: AppColors.lightBlack,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => TemplateDetailsSheet(
@@ -370,9 +370,9 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: Container(
-          constraints: BoxConstraints(),
+          constraints: const BoxConstraints(),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [AppColors.primaryDark, AppColors.lightBlack],
@@ -495,7 +495,7 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
         decoration: InputDecoration(
           labelText: LocaleKeys.questionnaireName.tr(),
           labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
-          prefixIcon: Icon(Icons.edit_note, color: AppColors.primaryRed),
+          prefixIcon: const Icon(Icons.edit_note, color: AppColors.primaryRed),
           filled: true,
           fillColor: AppColors.primaryDark.withValues(alpha: 0.5),
           border: _buildBorder(),
@@ -543,11 +543,11 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.category, color: AppColors.primaryRed, size: 18),
+                const Icon(Icons.category, color: AppColors.primaryRed, size: 18),
                 const SizedBox(width: 8),
                 Text(
                   LocaleKeys.categories.tr(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -605,7 +605,7 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
                       const SizedBox(width: 4),
                       Text(
                         LocaleKeys.add.tr(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
@@ -686,7 +686,7 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
           ),
           child: Text(
             '${index + 1}',
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.primaryRed,
               fontWeight: FontWeight.bold,
               fontSize: 14,
@@ -885,25 +885,25 @@ class TemplateDetailsSheet extends StatelessWidget {
       expand: false,
       builder: (context, scrollController) {
         return Padding(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDragHandle(),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildHeader(context),
-              SizedBox(height: 16),
-              Divider(color: Colors.white24),
-              SizedBox(height: 12),
+              const SizedBox(height: 16),
+              const Divider(color: Colors.white24),
+              const SizedBox(height: 12),
               Text(
                 '${LocaleKeys.categories.tr()} (${questionnaire.categories.length})',
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.primaryRed,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Expanded(
                 child: ListView.builder(
                   controller: scrollController,
@@ -911,8 +911,8 @@ class TemplateDetailsSheet extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final category = questionnaire.categories[index];
                     return Container(
-                      margin: EdgeInsets.only(bottom: 12),
-                      padding: EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: AppColors.lightRed,
                         borderRadius: BorderRadius.circular(12),
@@ -923,25 +923,25 @@ class TemplateDetailsSheet extends StatelessWidget {
                           Container(
                             width: 30,
                             height: 30,
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: AppColors.primaryRed,
                               shape: BoxShape.circle,
                             ),
                             child: Center(
                               child: Text(
                                 '${index + 1}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ),
                           ),
-                          SizedBox(width: 12),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: Text(
                               category.title,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -949,7 +949,7 @@ class TemplateDetailsSheet extends StatelessWidget {
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 4,
                             ),
@@ -960,11 +960,11 @@ class TemplateDetailsSheet extends StatelessWidget {
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.star, size: 12, color: Colors.amber),
-                                SizedBox(width: 4),
+                                const Icon(Icons.star, size: 12, color: Colors.amber),
+                                const SizedBox(width: 4),
                                 Text(
                                   '${LocaleKeys.max.tr()}: ${category.maxScore}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.amber,
                                     fontSize: 11,
                                     fontWeight: FontWeight.bold,
@@ -979,7 +979,7 @@ class TemplateDetailsSheet extends StatelessWidget {
                   },
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _buildActionButtons(context),
             ],
           ),
@@ -1010,22 +1010,22 @@ class TemplateDetailsSheet extends StatelessWidget {
             children: [
               Text(
                 questionnaire.name,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
                 '${LocaleKeys.questionnaireId.tr()}: ${questionnaire.id}',
-                style: TextStyle(color: Colors.white54, fontSize: 11),
+                style: const TextStyle(color: Colors.white54, fontSize: 11),
               ),
             ],
           ),
         ),
         IconButton(
-          icon: Icon(Icons.close, color: Colors.white),
+          icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
       ],
@@ -1049,7 +1049,7 @@ class TemplateDetailsSheet extends StatelessWidget {
               );
             },
             backgroundColor: AppColors.amber,
-            textStyle: TextStyle(
+            textStyle: const TextStyle(
               color: AppColors.primaryDark,
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -1058,7 +1058,7 @@ class TemplateDetailsSheet extends StatelessWidget {
             borderRadius: 10,
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         // ADD THE DELETE BUTTON AND LOGIC HERE
         Expanded(
           child: AppButton(
@@ -1081,21 +1081,21 @@ class TemplateDetailsSheet extends StatelessWidget {
         backgroundColor: AppColors.lightBlack,
         title: Text(
           LocaleKeys.confirmDeletion.tr(),
-          style: TextStyle(color: AppColors.primaryRed),
+          style: const TextStyle(color: AppColors.primaryRed),
         ),
         content: Text(
           LocaleKeys.deleteQuestionnaireConfirm.tr().replaceAll(
             '{questionnaireName}',
             questionnaire.name,
           ),
-          style: TextStyle(color: Colors.white70),
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
             child: Text(
               LocaleKeys.cancel.tr(),
-              style: TextStyle(color: Colors.white54),
+              style: const TextStyle(color: Colors.white54),
             ),
           ),
           TextButton(
@@ -1109,7 +1109,7 @@ class TemplateDetailsSheet extends StatelessWidget {
             },
             child: Text(
               LocaleKeys.delete.tr(),
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.primaryRed,
                 fontWeight: FontWeight.bold,
               ),

@@ -48,10 +48,10 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ScreenAdminAddBranch()),
+            MaterialPageRoute(builder: (context) => const ScreenAdminAddBranch()),
           );
         },
-        child: Icon(Icons.add_business_outlined),
+        child: const Icon(Icons.add_business_outlined),
       ),
     );
   }
@@ -77,7 +77,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
       decoration: InputDecoration(
         hintText: LocaleKeys.search.tr(),
         hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
-        prefixIcon: Icon(Icons.search, color: AppColors.primaryRed),
+        prefixIcon: const Icon(Icons.search, color: AppColors.primaryRed),
         suffixIcon: _searchController.text.isNotEmpty
             ? IconButton(
                 icon: const Icon(Icons.clear, color: Colors.white70),
@@ -99,7 +99,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: AppColors.primaryRed, width: 2),
+          borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
@@ -192,7 +192,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
     return Consumer<ProviderAdminBranches>(
       builder: (context, provider, _) {
         return Container(
-          margin: EdgeInsets.only(bottom: 10),
+          margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             color: AppColors.primaryDark.withValues(alpha: 0.3),
@@ -329,7 +329,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(color: AppColors.primaryRed),
+                const CircularProgressIndicator(color: AppColors.primaryRed),
                 const SizedBox(height: 16),
                 Text(
                   LocaleKeys.loadingBranches.tr(),
@@ -353,7 +353,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.error_outline, color: Colors.red, size: 48),
+                  const Icon(Icons.error_outline, color: Colors.red, size: 48),
                   const SizedBox(height: 16),
                   Text(
                    '${LocaleKeys.error.tr()}: ${provider.error}', 

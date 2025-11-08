@@ -56,14 +56,14 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
       builder: (context, controller, brr, _) {
         // Show loading or empty state if no branches
         if (controller.branches.isEmpty) {
-          return Scaffold(
+          return const Scaffold(
             appBar: CustomAppBar(),
-            body: const Center(child: CircularProgressIndicator()),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
         return Scaffold(
-          appBar: CustomAppBar(),
+          appBar: const CustomAppBar(),
           body: Stack(
             children: [
               GoogleMap(

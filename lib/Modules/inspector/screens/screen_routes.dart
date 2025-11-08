@@ -119,7 +119,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.filter_alt,
                                     size: 12,
                                     color: Colors.white,
@@ -510,7 +510,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
     if (isOverdue) {
       return BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [AppColors.primaryRed, AppColors.primaryDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -520,7 +520,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
     if (isToday) {
       return BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Color(0xFF4CAF50), Color(0xFF4CAF50)],
         ),
       );
@@ -602,7 +602,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
           BoxShadow(
             color: color1.withValues(alpha: 0.4),
             blurRadius: 4,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -613,7 +613,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
           const SizedBox(width: 4),
           Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -651,10 +651,10 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
 
   Widget _buildCompletedAtRow(String completedAt) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [AppColors.primaryRed, AppColors.primaryDark],
         ),
       ),
@@ -663,7 +663,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
           Expanded(
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.check_circle_outline,
                   size: 16,
                   color: AppColors.white,
@@ -675,7 +675,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
           ),
           Text(
             '${DateFormat("MMMM d, h:mm a").format(DateTime.parse(completedAt))}',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 13,
               color: AppColors.white,
               fontWeight: FontWeight.w500,

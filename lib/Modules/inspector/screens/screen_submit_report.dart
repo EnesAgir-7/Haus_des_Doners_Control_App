@@ -167,7 +167,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                       color: AppColors.lightBlack,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: CircularProgressIndicator(
+                    child: const CircularProgressIndicator(
                       color: AppColors.primaryRed,
                       strokeWidth: 3,
                     ),
@@ -175,7 +175,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                   const SizedBox(height: 20),
                   Text(
                     LocaleKeys.loadingInspection.tr(),
-                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
                   ),
                 ],
               ),
@@ -337,7 +337,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.location_on,
                             color: AppColors.primaryRed,
                             size: 14,
@@ -497,9 +497,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                     children: [
                       Text(
                         '${allRatings[score - 1]['emoji']}',
-                        style: TextStyle(fontSize: 30),
+                        style: const TextStyle(fontSize: 30),
                       ),
-                      SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -823,7 +823,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                     ),
                   ),
                 ] else ...[
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   if (isRequired && photos.isEmpty)
                     Text(
                       '${LocaleKeys.atLeast1PhotoRequired.tr()}',
@@ -876,7 +876,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.note_alt_outlined,
                   color: AppColors.primaryRed,
                   size: 20,
@@ -930,7 +930,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: AppColors.primaryRed, width: 2),
+                  borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
                 ),
                 contentPadding: const EdgeInsets.all(16),
               ),
@@ -1206,7 +1206,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.gesture,
                               color: Colors.white38,
                               size: 14,
@@ -1324,7 +1324,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                       color: Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.edit_outlined,
                       color: Colors.white38,
                       size: 16,
@@ -1368,7 +1368,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
   Widget _buildEnhancedActions(ProviderControl provider) {
     if (provider.isSubmittingOrUploading)
-      return Center(
+      return const Center(
         child: SizedBox.square(
           dimension: 40,
           child: CircularProgressIndicator(),
@@ -1560,7 +1560,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                 ),
                 child: Text(
                   '${(provider.uploadProgress * 100).toInt()}%',
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.primaryRed,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -1668,7 +1668,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                 color: AppColors.primaryRed.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.help_outline,
                 color: AppColors.primaryRed,
                 size: 24,
@@ -1910,7 +1910,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.gesture, color: Colors.white38, size: 16),
+                        const Icon(Icons.gesture, color: Colors.white38, size: 16),
                         const SizedBox(width: 8),
                         Text(
                           LocaleKeys.sign_here.tr(),
