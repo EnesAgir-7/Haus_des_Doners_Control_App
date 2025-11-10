@@ -113,14 +113,14 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
                 ),
               ),
             ),
-
-            IconButton(
-              icon: const Icon(Icons.broadcast_on_personal),
-              tooltip: LocaleKeys.broadcast_to_all.tr(),
-              onPressed: () {
-                showBroadcastNotificationDialog(context: context);
-              },
-            ),
+            if (remoteConfig.enableNotifications)
+              IconButton(
+                icon: const Icon(Icons.broadcast_on_personal),
+                tooltip: LocaleKeys.broadcast_to_all.tr(),
+                onPressed: () {
+                  showBroadcastNotificationDialog(context: context);
+                },
+              ),
           ],
         ),
       ],
