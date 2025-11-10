@@ -821,5 +821,14 @@
   "november": "November",
   "december": "Dezember",
   "noFcmDescription": "Dieser Benutzer kann keine Benachrichtigungen erhalten, da er abgemeldet ist.",
-  "info_missing_records": "Wenn Sie weniger Datensätze sehen als erwartet, ist es möglich, dass einige Daten in der Datenbank entfernt oder aktualisiert wurden."
+  "info_missing_records": "Wenn Sie weniger Datensätze sehen als erwartet, ist es möglich, dass einige Daten in der Datenbank entfernt oder aktualisiert wurden.",
+  "broadcast_notification": "Broadcast-Benachrichtigung",
+  "recipients": "Empfänger",
+  "all_inspectors": "Alle Inspektoren",
+  "broadcast_button": "Senden",
+  "broadcast_sent_success": "Broadcast erfolgreich an alle Inspektoren gesendet!",
+  "broadcast_sent_failed": "Broadcast-Benachrichtigung konnte nicht gesendet werden",
+  "broadcast_to_all": "An alle senden",
+  "no_inspections_found": "Keine Inspektionen gefunden",
+  "error_loading_data": "Fehler beim Laden der Daten"
 }

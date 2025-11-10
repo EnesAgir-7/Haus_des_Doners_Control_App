@@ -837,5 +837,14 @@
   "november": "November",
   "december": "December",
   "noFcmDescription": "This user cannot receive notifications because they are logged out.",
-  "info_missing_records": "If you see fewer records than expected, it’s possible that some data has been removed or updated in the database."
+  "info_missing_records": "If you see fewer records than expected, it’s possible that some data has been removed or updated in the database.",
+  "broadcast_notification": "Broadcast Notification",
+  "recipients": "Recipients",
+  "all_inspectors": "All Inspectors",
+  "broadcast_button": "Broadcast",
+  "broadcast_sent_success": "Broadcast sent to all inspectors successfully!",
+  "broadcast_sent_failed": "Failed to send broadcast notification",
+  "broadcast_to_all": "Broadcast to All",
+  "no_inspections_found": "No inspections found",
+  "error_loading_data": "Error Loading Data"
 }

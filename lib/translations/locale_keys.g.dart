@@ -826,5 +826,14 @@ abstract class  LocaleKeys {
   static const december = 'december';
   static const noFcmDescription = 'noFcmDescription';
   static const info_missing_records = 'info_missing_records';
+  static const broadcast_notification = 'broadcast_notification';
+  static const recipients = 'recipients';
+  static const all_inspectors = 'all_inspectors';
+  static const broadcast_button = 'broadcast_button';
+  static const broadcast_sent_success = 'broadcast_sent_success';
+  static const broadcast_sent_failed = 'broadcast_sent_failed';
+  static const broadcast_to_all = 'broadcast_to_all';
+  static const no_inspections_found = 'no_inspections_found';
+  static const error_loading_data = 'error_loading_data';
 
 }

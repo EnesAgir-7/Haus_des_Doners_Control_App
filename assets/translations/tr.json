@@ -805,5 +805,15 @@
   "november": "Kasım",
   "december": "Aralık",
   "noFcmDescription": "Bu kullanıcı çıkış yaptığı için bildirim alamaz.",
-  "info_missing_records": "Beklenenden daha az kayıt görüyorsanız, veritabanındaki bazı verilerin silinmiş veya güncellenmiş olması mümkündür."
+  "info_missing_records": "Beklenenden daha az kayıt görüyorsanız, veritabanındaki bazı verilerin silinmiş veya güncellenmiş olması mümkündür.",
+  "broadcast_notification": "Toplu Bildirim",
+  "recipients": "Alıcılar",
+  "all_inspectors": "Tüm Denetçiler",
+  "broadcast_button": "Yayınla",
+  "broadcast_sent_success": "Toplu bildirim tüm denetçilere başarıyla gönderildi!",
+  "broadcast_sent_failed": "Toplu bildirim gönderilemedi",
+  "broadcast_to_all": "Tümüne Yayınla",
+  "no_inspections_found": "Denetim bulunamadı",
+  "no_vehicles_found": "Araç bulunamadı",
+  "error_loading_data": "Veri Yükleme Hatası"
 }

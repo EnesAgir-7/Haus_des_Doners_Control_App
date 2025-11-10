@@ -2,6 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/broadcast_notification_dialog.dart';
+import '../../../common_services/remote_config_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/user_model.dart';
 import '../../../translations/locale_keys.g.dart';
@@ -18,6 +20,8 @@ class ScreenAdminInspectors extends StatefulWidget {
 
 class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
   final _searchController = TextEditingController();
+
+  final remoteConfig = RemoteConfigService();
 
   @override
   void initState() {
@@ -92,20 +96,32 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
           ),
         ),
         const Spacer(),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: AppColors.lightRed,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            '${provider.inspectors.length} ${LocaleKeys.users.tr()}',
-            style: const TextStyle(
-              color: AppColors.primaryRed,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.lightRed,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${provider.inspectors.length} ${LocaleKeys.users.tr()}',
+                style: const TextStyle(
+                  color: AppColors.primaryRed,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          ),
+
+            IconButton(
+              icon: const Icon(Icons.broadcast_on_personal),
+              tooltip: LocaleKeys.broadcast_to_all.tr(),
+              onPressed: () {
+                showBroadcastNotificationDialog(context: context);
+              },
+            ),
+          ],
         ),
       ],
     );
@@ -184,7 +200,11 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          const Icon(
+            Icons.error_outline,
+            size: 60,
+            color: AppColors.primaryRed,
+          ),
           const SizedBox(height: 16),
           Text(
             LocaleKeys.error_occurred.tr(),
@@ -265,7 +285,10 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
       icon: const Icon(Icons.add, color: Colors.white),
       label: Text(
         LocaleKeys.create_user.tr(),
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

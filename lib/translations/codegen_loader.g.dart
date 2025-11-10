@@ -837,7 +837,16 @@ class CodegenLoader extends AssetLoader{
   "november": "November",
   "december": "Dezember",
   "noFcmDescription": "Dieser Benutzer kann keine Benachrichtigungen erhalten, da er abgemeldet ist.",
-  "info_missing_records": "Wenn Sie weniger Datensätze sehen als erwartet, ist es möglich, dass einige Daten in der Datenbank entfernt oder aktualisiert wurden."
+  "info_missing_records": "Wenn Sie weniger Datensätze sehen als erwartet, ist es möglich, dass einige Daten in der Datenbank entfernt oder aktualisiert wurden.",
+  "broadcast_notification": "Broadcast-Benachrichtigung",
+  "recipients": "Empfänger",
+  "all_inspectors": "Alle Inspektoren",
+  "broadcast_button": "Senden",
+  "broadcast_sent_success": "Broadcast erfolgreich an alle Inspektoren gesendet!",
+  "broadcast_sent_failed": "Broadcast-Benachrichtigung konnte nicht gesendet werden",
+  "broadcast_to_all": "An alle senden",
+  "no_inspections_found": "Keine Inspektionen gefunden",
+  "error_loading_data": "Fehler beim Laden der Daten"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -1678,7 +1687,16 @@ static const Map<String,dynamic> _en = {
   "november": "November",
   "december": "December",
   "noFcmDescription": "This user cannot receive notifications because they are logged out.",
-  "info_missing_records": "If you see fewer records than expected, it’s possible that some data has been removed or updated in the database."
+  "info_missing_records": "If you see fewer records than expected, it’s possible that some data has been removed or updated in the database.",
+  "broadcast_notification": "Broadcast Notification",
+  "recipients": "Recipients",
+  "all_inspectors": "All Inspectors",
+  "broadcast_button": "Broadcast",
+  "broadcast_sent_success": "Broadcast sent to all inspectors successfully!",
+  "broadcast_sent_failed": "Failed to send broadcast notification",
+  "broadcast_to_all": "Broadcast to All",
+  "no_inspections_found": "No inspections found",
+  "error_loading_data": "Error Loading Data"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2487,7 +2505,17 @@ static const Map<String,dynamic> _tr = {
   "november": "Kasım",
   "december": "Aralık",
   "noFcmDescription": "Bu kullanıcı çıkış yaptığı için bildirim alamaz.",
-  "info_missing_records": "Beklenenden daha az kayıt görüyorsanız, veritabanındaki bazı verilerin silinmiş veya güncellenmiş olması mümkündür."
+  "info_missing_records": "Beklenenden daha az kayıt görüyorsanız, veritabanındaki bazı verilerin silinmiş veya güncellenmiş olması mümkündür.",
+  "broadcast_notification": "Toplu Bildirim",
+  "recipients": "Alıcılar",
+  "all_inspectors": "Tüm Denetçiler",
+  "broadcast_button": "Yayınla",
+  "broadcast_sent_success": "Toplu bildirim tüm denetçilere başarıyla gönderildi!",
+  "broadcast_sent_failed": "Toplu bildirim gönderilemedi",
+  "broadcast_to_all": "Tümüne Yayınla",
+  "no_inspections_found": "Denetim bulunamadı",
+  "no_vehicles_found": "Araç bulunamadı",
+  "error_loading_data": "Veri Yükleme Hatası"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }
