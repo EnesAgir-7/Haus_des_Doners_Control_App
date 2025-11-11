@@ -1,20 +1,21 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/translations/locale_keys.g.dart';
-import 'package:haus_des_control/core/constants/app_colors.dart';
+
 import 'notification_helper.dart';
 
 /// Global method to show a broadcast notification dialog for all inspectors
 Future<void> showBroadcastNotificationDialog({
-  required BuildContext context,
+  required BuildContext parentContext,
 }) async {
   final titleController = TextEditingController();
   final bodyController = TextEditingController();
 
   await showDialog(
-    context: context,
+    context: parentContext,
     builder: (context) {
       return Dialog(
         backgroundColor: Colors.transparent,
@@ -152,12 +153,12 @@ Future<void> showBroadcastNotificationDialog({
 
                           if (success) {
                             showSnakBarr(
-                              context,
+                              parentContext,
                               LocaleKeys.broadcast_sent_success.tr(),
                             );
                           } else {
                             showSnakBarr(
-                              context,
+                              parentContext,
                               LocaleKeys.broadcast_sent_failed.tr(),
                             );
                           }

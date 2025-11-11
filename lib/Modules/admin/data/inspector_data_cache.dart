@@ -1,5 +1,3 @@
-import 'package:haus_des_control/core/console.dart';
-
 import '../../../models/inspection_model.dart';
 import '../../../models/task_model.dart';
 import '../../../models/vehicle_model.dart';
@@ -66,7 +64,6 @@ class InspectorDataCache {
 
   // Clear all cache
   static void clearAll() {
-    console("Cache Cleared");
     _tasksCache.clear();
     _inspectionsCache.clear();
     _vehiclesCache.clear();
