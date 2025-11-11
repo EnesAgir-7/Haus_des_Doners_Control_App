@@ -113,7 +113,7 @@ class _ScreenAdminInspectorsState extends State<ScreenAdminInspectors> {
                 ),
               ),
             ),
-            if (remoteConfig.enableNotifications)
+            if (remoteConfig.showBroadCastNotification)
               IconButton(
                 icon: const Icon(Icons.notifications_active_outlined),
                 tooltip: LocaleKeys.broadcast_to_all.tr(),

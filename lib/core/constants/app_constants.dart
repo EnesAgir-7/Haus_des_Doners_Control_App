@@ -38,4 +38,5 @@ class AppConstants {
   static const inspectorBranchEdit = 'inspectorBranchEdit';
   static const useOldHome = 'useOldHome';
   static const showInspectorHomeGraph = 'showInspectorHomeGraph';
+  static const showBroadCastNotification = 'showBroadCastNotification';
 }

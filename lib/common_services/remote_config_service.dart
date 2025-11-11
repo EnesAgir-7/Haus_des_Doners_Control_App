@@ -32,6 +32,7 @@ class RemoteConfigService {
       AppConstants.inspectorBranchEdit: true,
       AppConstants.useOldHome: false,
       AppConstants.showInspectorHomeGraph: true,
+      AppConstants.showBroadCastNotification: true,
     });
 
     try {
@@ -48,6 +49,8 @@ class RemoteConfigService {
       _remoteConfig.getBool(AppConstants.showInspectorNotification);
   bool get inspectorBranchEdit =>
       _remoteConfig.getBool(AppConstants.inspectorBranchEdit);
+  bool get showBroadCastNotification =>
+      _remoteConfig.getBool(AppConstants.showBroadCastNotification);
 
   bool get enableNotifications =>
       _remoteConfig.getBool(AppConstants.enableNotifications);
