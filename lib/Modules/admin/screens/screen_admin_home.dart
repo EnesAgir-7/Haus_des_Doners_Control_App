@@ -69,9 +69,7 @@ class _ScreenAdminHomeState extends State<ScreenAdminHome>
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: const SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
+            physics: AlwaysScrollableScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

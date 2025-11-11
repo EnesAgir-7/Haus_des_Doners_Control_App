@@ -41,7 +41,11 @@ class InspectorBranchCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 if (branch.totalInspections > 0) _buildTotalInspections(),
-                if (branch.stop != null) _buildNextInspectionInfo(),
+                if (branch.stop != null)
+                  buildNextInspectionInfo(
+                    daysUntilNextInspection: branch.daysUntilNextInspection,
+                    isNextInspectionToday: branch.isNextInspectionToday,
+                  ),
               ],
             ),
           ],
@@ -181,20 +185,4 @@ class InspectorBranchCard extends StatelessWidget {
   }
 
   /// Builds the section showing the next inspection details.
-  Widget _buildNextInspectionInfo() {
-    return Row(
-      children: [
-        const Icon(Icons.next_plan, size: 14.0, color: Colors.green),
-        const SizedBox(width: 6.0),
-        Text(
-          branch.isNextInspectionToday
-              ? LocaleKeys.today.tr()
-              : branch.daysUntilNextInspection == 0
-              ? LocaleKeys.tomorrow.tr()
-              : "${branch.daysUntilNextInspection} ${LocaleKeys.daysLeft.tr()}",
-          style: const TextStyle(fontSize: 12.0, color: Colors.white70),
-        ),
-      ],
-    );
-  }
 }

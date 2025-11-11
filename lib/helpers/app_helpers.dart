@@ -77,8 +77,6 @@ String calculatePerformancePercent(String totalScoreStr) {
   return '${percentage.toStringAsFixed(0)}';
 }
 
-
-
 List<String> getInspectorTokens(String inspectorId, BuildContext context) {
   try {
     if (inspectorId.isEmpty) {
@@ -153,4 +151,40 @@ List<String> generateLast12Months() {
   }
 
   return months;
+}
+
+
+Widget buildNextInspectionInfo({
+  required int? daysUntilNextInspection,
+  required bool isNextInspectionToday,
+  Color textColor = Colors.white70,
+}) {
+  String text;
+
+  if (isNextInspectionToday) {
+    text = LocaleKeys.today.tr();
+  } else if (daysUntilNextInspection == 1) {
+    text = LocaleKeys.tomorrow.tr();
+  } else if (daysUntilNextInspection != null && daysUntilNextInspection < 0) {
+    text =
+        "${LocaleKeys.daysOverdue.tr().replaceAll("{days}", daysUntilNextInspection.abs().toString())}";
+  } else if (daysUntilNextInspection != null) {
+    text = "$daysUntilNextInspection ${LocaleKeys.daysLeft.tr()}";
+  } else {
+    text = "-";
+  }
+
+  // Color logic for overdue
+  final Color statusColor =
+      (daysUntilNextInspection != null && daysUntilNextInspection < 0)
+      ? Colors.redAccent
+      : Colors.green;
+
+  return Row(
+    children: [
+      Icon(Icons.next_plan, size: 14.0, color: statusColor),
+      const SizedBox(width: 6.0),
+      Text(text, style: TextStyle(fontSize: 12.0, color: textColor)),
+    ],
+  );
 }

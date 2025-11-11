@@ -376,7 +376,11 @@ class PerformanceSection extends StatelessWidget {
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.trending_up, color: Colors.green, size: 20),
+                child: const Icon(
+                  Icons.trending_up,
+                  color: Colors.green,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -424,7 +428,11 @@ class PerformanceSection extends StatelessWidget {
                 padding: const EdgeInsets.all(40),
                 child: Column(
                   children: [
-                    const Icon(Icons.inbox_outlined, size: 48, color: Colors.white38),
+                    const Icon(
+                      Icons.inbox_outlined,
+                      size: 48,
+                      color: Colors.white38,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       LocaleKeys.noDataForSelectedMonth.tr(),
@@ -452,51 +460,67 @@ class PerformanceSection extends StatelessWidget {
     return Column(
       children: [
         // First Row - 2 items
-        Row(
-          children: [
-            Expanded(
-              child: _buildCompactStatCard(
-                label: LocaleKeys.branchesVisitedReported.tr(),
-                value: stats.totalInspections.toString(),
-                icon: Icons.assignment_turned_in_outlined,
-                gradientColors: [const Color(0xFF4CAF50), const Color(0xFF388E3C)],
+        IntrinsicHeight(
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildCompactStatCard(
+                  label: LocaleKeys.branchesVisitedReported.tr(),
+                  value: stats.totalInspections.toString(),
+                  icon: Icons.assignment_turned_in_outlined,
+                  gradientColors: [
+                    const Color(0xFF4CAF50),
+                    const Color(0xFF388E3C),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildCompactStatCard(
-                label: LocaleKeys.vehicles.tr(),
-                value: stats.vehicleIds.length.toString(),
-                icon: Icons.directions_car_outlined,
-                gradientColors: [const Color(0xFF2196F3), const Color(0xFF1976D2)],
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildCompactStatCard(
+                  label: LocaleKeys.vehicles.tr(),
+                  value: stats.vehicleIds.length.toString(),
+                  icon: Icons.directions_car_outlined,
+                  gradientColors: [
+                    const Color(0xFF2196F3),
+                    const Color(0xFF1976D2),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 12),
 
         // Second Row - 2 items
-        Row(
-          children: [
-            Expanded(
-              child: _buildCompactStatCard(
-                label: LocaleKeys.tasksCompleted.tr(),
-                value: "${stats.tasksCompleted}/${stats.tasksTotal}",
-                icon: Icons.check_circle_outline,
-                gradientColors: [const Color(0xFF0F766E), const Color(0xFF115E59)],
-                subtitle: "$completionRate%",
+        IntrinsicHeight(
+          child: Row(
+            children: [
+              Expanded(
+                child: _buildCompactStatCard(
+                  label: LocaleKeys.tasksCompleted.tr(),
+                  value: "${stats.tasksCompleted}/${stats.tasksTotal}",
+                  icon: Icons.check_circle_outline,
+                  gradientColors: [
+                    const Color(0xFF0F766E),
+                    const Color(0xFF115E59),
+                  ],
+                  subtitle: "$completionRate%",
+                ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildCompactStatCard(
-                label: LocaleKeys.branchesAssigned.tr(),
-                value: stats.branchesIds.length.toString(),
-                icon: Icons.store_outlined,
-                gradientColors: [const Color(0xFF9333EA), const Color(0xFF7E22CE)],
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildCompactStatCard(
+                  label: LocaleKeys.branchesAssigned.tr(),
+                  value: stats.branchesIds.length.toString(),
+                  icon: Icons.store_outlined,
+                  gradientColors: [
+                    const Color(0xFF9333EA),
+                    const Color(0xFF7E22CE),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
 
         const SizedBox(height: 16),
