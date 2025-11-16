@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:haus_des_control/translations/locale_keys.g.dart';
+// import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -110,7 +110,7 @@ class InspectionPDFGenerator {
             pw.Header(
               level: 0,
               child: pw.Text(
-                LocaleKeys.inspection_photos.tr(),
+                "Inspektionsfotos",
                 style: pw.TextStyle(
                   fontSize: 20,
                   fontWeight: pw.FontWeight.bold,
@@ -163,9 +163,9 @@ class InspectionPDFGenerator {
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Text(
-                    LocaleKeys.inspection_report.tr(),
+                    "INSPEKTIONSBERICHT",
                     style: pw.TextStyle(
-                      fontSize: 18,
+                      fontSize: 14,
                       fontWeight: pw.FontWeight.bold,
                       color: PdfColors.white,
                     ),
@@ -225,15 +225,19 @@ class InspectionPDFGenerator {
                         color: PdfColors.red700,
                         borderRadius: pw.BorderRadius.circular(3),
                       ),
-                      child: pw.Icon(
-                        const pw.IconData(0xe0c8),
-                        color: PdfColors.white,
-                        size: 12,
+                      child: pw.SvgImage(
+                        svg: '''
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" fill="white"/>
+    </svg>
+  ''',
+                        width: 12,
+                        height: 12,
                       ),
                     ),
                     pw.SizedBox(width: 6),
                     pw.Text(
-                      LocaleKeys.branch.tr(),
+                      "Filiale",
                       style: pw.TextStyle(
                         fontSize: 10,
                         fontWeight: pw.FontWeight.bold,
@@ -277,7 +281,7 @@ class InspectionPDFGenerator {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Text(
-                  LocaleKeys.inspector.tr(),
+                  "Inspektor",
                   style: const pw.TextStyle(
                     fontSize: 9,
                     color: PdfColors.grey700,
@@ -293,7 +297,7 @@ class InspectionPDFGenerator {
                 ),
                 pw.SizedBox(height: 8),
                 pw.Text(
-                  LocaleKeys.questionnaire.tr(),
+                  "Fragebogen",
                   style: const pw.TextStyle(
                     fontSize: 9,
                     color: PdfColors.grey700,
@@ -301,7 +305,7 @@ class InspectionPDFGenerator {
                 ),
                 pw.SizedBox(height: 4),
                 pw.Text(
-                  templateName ?? LocaleKeys.notAvailable.tr(),
+                  templateName ?? "N/V",
                   style: pw.TextStyle(
                     fontSize: 11,
                     fontWeight: pw.FontWeight.bold,
@@ -343,7 +347,7 @@ class InspectionPDFGenerator {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                LocaleKeys.overall_score.tr(),
+                "Gesamtpunktzahl",
                 style: const pw.TextStyle(fontSize: 11, color: PdfColors.white),
               ),
               pw.SizedBox(height: 4),
@@ -409,7 +413,7 @@ class InspectionPDFGenerator {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          LocaleKeys.categoryBreakdown.tr(),
+          "Kategorieaufschlüsselung",
           style: pw.TextStyle(
             fontSize: 14,
             fontWeight: pw.FontWeight.bold,
@@ -429,14 +433,14 @@ class InspectionPDFGenerator {
             pw.TableRow(
               decoration: const pw.BoxDecoration(color: PdfColors.grey200),
               children: [
-                _buildTableCell(LocaleKeys.category.tr(), isHeader: true),
+                _buildTableCell("Kategorie", isHeader: true),
                 _buildTableCell(
-                  LocaleKeys.score.tr(),
+                  "Bewertung",
                   isHeader: true,
                   align: pw.Alignment.center,
                 ),
                 _buildTableCell(
-                  LocaleKeys.status.tr(),
+                  "Status",
                   isHeader: true,
                   align: pw.Alignment.center,
                 ),
@@ -535,7 +539,7 @@ class InspectionPDFGenerator {
           if (photoCount > 0) ...[
             pw.SizedBox(height: 2),
             pw.Text(
-              '$photoCount ${LocaleKeys.photos.tr()}',
+              '$photoCount Fotos',
               style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
             ),
           ],
@@ -549,7 +553,7 @@ class InspectionPDFGenerator {
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
         pw.Text(
-          LocaleKeys.additionalInformation.tr(),
+          "Zusätzliche Informationen",
           style: pw.TextStyle(
             fontSize: 12,
             fontWeight: pw.FontWeight.bold,
@@ -575,15 +579,9 @@ class InspectionPDFGenerator {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        _buildSignatureBox(
-          LocaleKeys.inspectorSignature.tr(),
-          inspectorSignature,
-        ),
+        _buildSignatureBox("Inspektor-Unterschrift", inspectorSignature),
         pw.SizedBox(width: 16),
-        _buildSignatureBox(
-          LocaleKeys.branchRepresentative.tr(),
-          branchSignature,
-        ),
+        _buildSignatureBox("Filialvertreter", branchSignature),
       ],
     );
   }
@@ -619,7 +617,7 @@ class InspectionPDFGenerator {
                   )
                 : pw.Center(
                     child: pw.Text(
-                      LocaleKeys.not_signed.tr(),
+                      "Nicht unterschrieben",
                       style: const pw.TextStyle(
                         fontSize: 9,
                         color: PdfColors.grey500,
@@ -643,7 +641,7 @@ class InspectionPDFGenerator {
         ),
       ),
       child: pw.Text(
-        '${LocaleKeys.page.tr()} ${context.pageNumber} ${LocaleKeys.of.tr()} ${context.pagesCount}',
+        'Seite ${context.pageNumber} von ${context.pagesCount}',
         style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
       ),
     );
@@ -718,37 +716,29 @@ class InspectionPDFGenerator {
   Map<String, dynamic> _getPerformanceLevel(int percentage) {
     if (percentage >= 90) {
       return {
-        'label': LocaleKeys.excellent.tr(),
+        'label': "Ausgezeichnet",
         'emoji': '😃',
         'color': PdfColors.green700,
       };
     } else if (percentage >= 75) {
-      return {
-        'label': LocaleKeys.good.tr(),
-        'emoji': '🙂',
-        'color': PdfColors.lightGreen700,
-      };
+      return {'label': "Gut", 'emoji': '🙂', 'color': PdfColors.lightGreen700};
     } else if (percentage >= 60) {
       return {
-        'label': LocaleKeys.fair.tr(),
+        'label': "Befriedigend",
         'emoji': '😐',
         'color': PdfColors.orange700,
       };
     } else if (percentage >= 40) {
       return {
-        'label': LocaleKeys.belowAverage.tr(),
+        'label': "Unterdurchschnittlich",
         'emoji': '😕',
         'color': PdfColors.deepOrange700,
       };
     } else if (percentage >= 20) {
-      return {
-        'label': LocaleKeys.poor.tr(),
-        'emoji': '😞',
-        'color': PdfColors.red700,
-      };
+      return {'label': "Schlecht", 'emoji': '😞', 'color': PdfColors.red700};
     } else {
       return {
-        'label': LocaleKeys.veryPoor.tr(),
+        'label': "Sehr schwach",
         'emoji': '😢',
         'color': PdfColors.red900,
       };
