@@ -255,21 +255,17 @@ class AdminBranchCard extends StatelessWidget {
   /// Next inspection info (if scheduled)
   Widget _buildNextInspectionInfo() {
     final daysUntil = branch.daysUntilNextInspection;
-    final isToday = branch.isNextInspectionToday;
-
     String statusText;
     Color color;
     IconData icon;
 
-    if (isToday) {
-      statusText = LocaleKeys.scheduledToday.tr();
-      color = Colors.orangeAccent;
-      icon = Icons.today;
-    } else if (daysUntil == null) {
+    if (daysUntil == null) {
+      // No scheduled date
       statusText = LocaleKeys.inRouteScheduledSoon.tr();
       color = Colors.blueAccent;
       icon = Icons.route;
     } else if (daysUntil < 0) {
+      // Overdue
       statusText = LocaleKeys.daysOverdue.tr().replaceAll(
         '{days}',
         daysUntil.abs().toString(),
@@ -277,14 +273,17 @@ class AdminBranchCard extends StatelessWidget {
       color = Colors.redAccent;
       icon = Icons.warning;
     } else if (daysUntil == 0) {
-      statusText = LocaleKeys.dueToday.tr();
+      // Today
+      statusText = LocaleKeys.scheduledToday.tr();
       color = Colors.orangeAccent;
       icon = Icons.today;
     } else if (daysUntil == 1) {
+      // Tomorrow
       statusText = LocaleKeys.tomorrow.tr();
       color = Colors.greenAccent;
       icon = Icons.schedule;
-    } else if (daysUntil <= 7) {
+    } else if (daysUntil > 1 && daysUntil <= 7) {
+      // In X days
       statusText = LocaleKeys.inDays.tr().replaceAll(
         '{days}',
         daysUntil.toString(),
@@ -292,9 +291,10 @@ class AdminBranchCard extends StatelessWidget {
       color = Colors.greenAccent;
       icon = Icons.schedule;
     } else {
+      // In weeks
       statusText = LocaleKeys.inWeeks.tr().replaceAll(
         '{weeks}',
-        (daysUntil / 7).ceil().toString(),
+        (daysUntil ~/ 7).toString(),
       );
       color = Colors.blueAccent;
       icon = Icons.schedule;

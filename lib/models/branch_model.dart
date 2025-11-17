@@ -320,10 +320,19 @@ class BranchModel {
 
   int? get daysUntilNextInspection {
     if (stop?.timeSlot == null || stop!.timeSlot.isEmpty) return null;
+
     try {
-      final nextDate = DateTime.parse(stop!.timeSlot);
-      final difference = nextDate.difference(DateTime.now());
-      return difference.inDays;
+      final nextDate = DateTime.parse(stop!.timeSlot).toLocal();
+
+      final today = DateTime.now().toLocal();
+      final todayDate = DateTime(today.year, today.month, today.day);
+      final nextOnlyDate = DateTime(
+        nextDate.year,
+        nextDate.month,
+        nextDate.day,
+      );
+
+      return nextOnlyDate.difference(todayDate).inDays;
     } catch (e) {
       return null;
     }
@@ -334,7 +343,8 @@ class BranchModel {
     final days = daysSinceLastInspection!;
     if (days == 0) return LocaleKeys.inspected_today.tr();
     if (days == 1) return LocaleKeys.inspected_yesterday.tr();
-    if (days < 7) return "${days} ${LocaleKeys.days_ago.tr()}";
+    if (days < 7)
+      return "${LocaleKeys.days_ago.tr().replaceAll("{count}", days.toString())}";
     if (days < 30) return "${(days / 7).floor()} ${LocaleKeys.weeks_ago.tr()}";
     return "${(days / 30).floor()} ${LocaleKeys.months_ago.tr()}";
   }
