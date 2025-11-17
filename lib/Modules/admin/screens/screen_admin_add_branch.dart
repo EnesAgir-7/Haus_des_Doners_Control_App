@@ -35,6 +35,9 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
 
   // New controllers
   final _branchEmailController = TextEditingController();
+  final _branchPasswordController = TextEditingController();
+  // Confirm password controller for double-entry validation
+  final _branchPasswordConfirmController = TextEditingController();
   final _openingTimeController = TextEditingController();
   final _closingTimeController = TextEditingController();
   final _donerPricesController = TextEditingController();
@@ -73,6 +76,8 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
     _latitudeController.dispose();
     _longitudeController.dispose();
     _branchEmailController.dispose();
+    _branchPasswordController.dispose();
+    _branchPasswordConfirmController.dispose();
     _openingTimeController.dispose();
     _closingTimeController.dispose();
     _donerPricesController.dispose();
@@ -126,6 +131,46 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                         }
                         if (!value.contains('@')) {
                           return LocaleKeys.enterValidEmail.tr();
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+                    _buildTextField(
+                      controller: _branchPasswordController,
+                      label: LocaleKeys.password.tr(),
+                      hint: LocaleKeys.password_hint.tr(),
+                      icon: Icons.lock,
+                      keyboardType: TextInputType.visiblePassword,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return LocaleKeys.password_required.tr();
+                        }
+                        if (value.trim().length < 6) {
+                          return LocaleKeys.password_min_length.tr();
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+                    // Confirm password field to ensure admin enters password twice
+                    _buildTextField(
+                      controller: _branchPasswordConfirmController,
+                      label: LocaleKeys.reenter_password.tr(),
+                      hint: LocaleKeys.password_hint.tr(),
+                      icon: Icons.lock,
+                      keyboardType: TextInputType.visiblePassword,
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return LocaleKeys.password_required.tr();
+                        }
+                        if (value.trim().length < 6) {
+                          return LocaleKeys.password_min_length.tr();
+                        }
+                        if (value.trim() != _branchPasswordController.text.trim()) {
+                          return LocaleKeys.passwords_not_match.tr();
                         }
                         return null;
                       },
@@ -1292,6 +1337,9 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
         // New fields
         branchEmail: _branchEmailController.text.trim().isNotEmpty
             ? _branchEmailController.text.trim()
+            : null,
+        branchPassword: _branchPasswordController.text.trim().isNotEmpty
+            ? _branchPasswordController.text.trim()
             : null,
         openingHours:
             _openingTimeController.text.isNotEmpty &&

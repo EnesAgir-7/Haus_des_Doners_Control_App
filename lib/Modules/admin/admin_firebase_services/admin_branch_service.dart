@@ -5,10 +5,13 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/admin_firebase_services/admin_user_service.dart';
 import 'package:haus_des_control/core/console.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../common_services/notification_helper.dart';
 import '../../../core/constants/firebase_constants.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../models/branch_model.dart';
+import '../../../models/user_model.dart';
 import '../../../translations/locale_keys.g.dart';
 
 class AdminBranchService {
@@ -79,16 +82,46 @@ class AdminBranchService {
 
   /// Add a new branch
   Future<void> addBranch(BranchModel branch, BuildContext context) async {
+    // Enforce branch email & password presence — branch user must be created
+    if (branch.branchEmail == null || branch.branchPassword == null) {
+      throw Exception('Branch email and password are required');
+    }
+
+    UserCredential? createdCredential;
+    final String branchEmail = branch.branchEmail!;
+    final String branchPassword = branch.branchPassword!;
+    final String? region = branch.region;
+    String branchUserId;
+
     try {
-      // Create a batch
+      // 1️⃣ Create Firebase Auth user
+      createdCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: branchEmail,
+            password: branchPassword,
+          );
+
+      branchUserId = createdCredential.user!.uid;
+
+      // 2️⃣ Create Firestore user document for branch (role = branch)
+      final branchUser = UserModel(
+        id: branchUserId,
+        name: branch.name,
+        serviceAccount: branchEmail,
+        role: AppConstants.branch,
+        active: true,
+        region: region,
+        fcmTokens: null,
+        createdAt: DateTime.now().toIso8601String(),
+        updatedAt: DateTime.now().toIso8601String(),
+      );
+
+      await _userService.createUser(branchUserId, branchUser);
+
+      // 3️⃣ Create branch document using the created user's UID as doc ID
       final batch = _db.batch();
+      final docRef = _db.collection(_collectionBranches).doc(branchUserId);
 
-      // Use branch.id as doc id, or generate new one if empty
-      final docRef = branch.id.isNotEmpty
-          ? _db.collection(_collectionBranches).doc(branch.id)
-          : _db.collection(_collectionBranches).doc();
-
-      // Add branch to batch
       batch.set(docRef, {
         BranchFields.id: docRef.id,
         BranchFields.name: branch.name,
@@ -113,7 +146,7 @@ class AdminBranchService {
         BranchFields.createdAt: Timestamp.now(),
         BranchFields.updatedAt: Timestamp.now(),
         // New fields
-        BranchFields.branchEmail: branch.branchEmail,
+        BranchFields.branchEmail: branchEmail,
         BranchFields.openingHours: branch.openingHours?.toMap(),
         BranchFields.openingDays: branch.openingDays,
         BranchFields.openingDay: branch.openingDay != null
@@ -144,13 +177,12 @@ class AdminBranchService {
         );
       }
 
-      // Commit the batch
       await batch.commit();
       console('✅ Branch added successfully: ${docRef.id}');
 
-      // ✅ Send notification if inspector is assigned
+      // Notify inspector if assigned
       if (branch.assignedInspector != null) {
-         NotificationHelper.instance.sendToInspector(
+        NotificationHelper.instance.sendToInspector(
           context: context,
           inspectorId: branch.assignedInspector!.id,
           title: LocaleKeys.branch_assigned_title.tr(),
@@ -169,6 +201,24 @@ class AdminBranchService {
       }
     } catch (e) {
       console('❌ Error adding branch: $e', type: DebugType.error);
+
+      // Rollback: if auth user created, delete Firestore user doc and auth user
+      try {
+        if (createdCredential?.user != null) {
+          final createdUid = createdCredential!.user!.uid;
+          try {
+            // Branch user documents are saved in branch_users collection
+            await _db
+                .collection(Collections.branchUsers)
+                .doc(createdUid)
+                .delete();
+          } catch (_) {}
+          try {
+            await createdCredential.user!.delete();
+          } catch (_) {}
+        }
+      } catch (_) {}
+
       rethrow;
     }
   }
