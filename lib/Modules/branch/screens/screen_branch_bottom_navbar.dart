@@ -38,7 +38,7 @@ class ScreenBranchBottomNavBar extends StatelessWidget {
           child: Scaffold(
             appBar: const CustomAppBar(showSettings: true),
             body: IndexedStack(
-              key: Key("stack${context.locale.languageCode}"),
+              key: Key("branchstack${context.locale.languageCode}"),
               index: controller.selectedIndex,
               children: controller.screens,
             ),
