@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 
 import '../../../common_services/firebase_auth_service.dart';
 import '../../../common_services/fcm_helper.dart';
@@ -64,7 +65,11 @@ class ProviderAuth extends ChangeNotifier {
     }
   }
 
-  Future<bool> login({required String email, required String password}) async {
+  Future<bool> login({
+    required String email,
+    required String password,
+    required String role,
+  }) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -76,29 +81,43 @@ class ProviderAuth extends ChangeNotifier {
         return false;
       }
 
-      // Fetch from Firestore
-      var doc = await _firestore
-          .collection(Collections.inspectors)
-          .doc(user.uid)
-          .get();
-      if (!doc.exists) {
-        doc = await _firestore
-            .collection(Collections.admins)
-            .doc(user.uid)
-            .get();
+      // Fetch from Firestore based on selected role only
+      String collectionToQuery;
+      if (role == AppConstants.admin) {
+        collectionToQuery = Collections.admins;
+      } else if (role == AppConstants.branch) {
+        // branch user profile is stored in branch_users collection
+        collectionToQuery = Collections.branchUsers;
+      } else {
+        collectionToQuery = Collections.inspectors;
       }
 
+      final doc = await _firestore
+          .collection(collectionToQuery)
+          .doc(user.uid)
+          .get();
+
       if (!doc.exists) {
-        _error = LocaleKeys.userProfileNotFound.tr();
+        // Role-specific not found
+        if (role == AppConstants.admin)
+          _error = LocaleKeys.userProfileNotFound.tr();
+        else if (role == AppConstants.branch)
+          _error = LocaleKeys.branchNotFound.tr();
+        else
+          _error = LocaleKeys.inspector_not_found.tr();
+
         await _authHelper.signOut();
         return false;
       }
 
+      // Use UserModel for branch as well (stored in branch_users)
       userModel = UserModel.fromFirestore(doc);
       loggedInUser = userModel;
 
       // Subscribe to FCM topics based on role
-      await NotificationHelper.instance.subscribeUserToRoleTopics(userModel!.role);
+      await NotificationHelper.instance.subscribeUserToRoleTopics(
+        userModel!.role,
+      );
 
       // Start listener FIRST (before sync)
       _startTokenRefreshListener();
@@ -106,7 +125,7 @@ class ProviderAuth extends ChangeNotifier {
       // Sync FCM token
       final fcmToken = FCMHelper.instance.fcmToken;
       if (fcmToken != null) {
-        await _syncFCMToken(user.uid, fcmToken, userModel!.role);
+        await _syncFCMToken(user.uid, fcmToken, role);
       } else {
         console('⚠️ FCM token not available');
       }
@@ -168,9 +187,11 @@ class ProviderAuth extends ChangeNotifier {
     _isSyncing = true;
 
     try {
-      final collection = role == 'admin'
+      final collection = role == AppConstants.admin
           ? Collections.admins
-          : Collections.inspectors;
+          : (role == AppConstants.branch
+                ? Collections.branchUsers
+                : Collections.inspectors);
 
       // ✅ Single transaction (fast & atomic)
       final needsUpdate = await _firestore.runTransaction<bool>((
@@ -229,9 +250,11 @@ class ProviderAuth extends ChangeNotifier {
 
   Future<void> _removeFCMToken(String uid, String token, String role) async {
     try {
-      final collection = role == 'admin'
+      final collection = role == AppConstants.admin
           ? Collections.admins
-          : Collections.inspectors;
+          : (role == AppConstants.branch
+                ? Collections.branchUsers
+                : Collections.inspectors);
 
       await _firestore.runTransaction((transaction) async {
         final docRef = _firestore.collection(collection).doc(uid);
@@ -283,7 +306,9 @@ class ProviderAuth extends ChangeNotifier {
 
       // Unsubscribe from topics
       if (userModel != null) {
-        await NotificationHelper.instance.unsubscribeFromAllTopics(userModel!.role);
+        await NotificationHelper.instance.unsubscribeFromAllTopics(
+          userModel!.role,
+        );
       }
 
       // Remove current token

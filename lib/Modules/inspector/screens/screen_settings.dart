@@ -95,11 +95,7 @@ class ScreenSettings extends StatelessWidget {
     if (shouldLogout != true) return;
 
     try {
-      await authProvider.logout();
-
-      if (context.mounted) {
-        Navigator.of(context).pop();
-      }
+      await authProvider.logout(context: context);
     } catch (e) {
       if (context.mounted) {
         showSnakBarr(context, e.toString());

@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/app_assets.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../translations/locale_keys.g.dart';
@@ -22,6 +23,7 @@ class _ScreenAuthState extends State<ScreenAuth> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
+  String _selectedRole = AppConstants.inspector;
 
   @override
   void initState() {
@@ -72,7 +74,91 @@ class _ScreenAuthState extends State<ScreenAuth> {
                             fontSize: 15,
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 12),
+
+                        // Role selector
+                        DropdownButtonFormField<String>(
+                          initialValue: _selectedRole,
+                          decoration: InputDecoration(
+                            labelText: "Login as",
+                            hintText: "Select role",
+                            prefixIcon: const Icon(
+                              Icons.person_outline,
+                              color: AppColors.lightGrey,
+                            ),
+                            labelStyle: const TextStyle(
+                              color: AppColors.lightGrey,
+                            ),
+                            hintStyle: const TextStyle(
+                              color: AppColors.lightGrey,
+                            ),
+
+                            filled: true,
+                            fillColor: AppColors.lightBlack,
+
+                            // Same borders as CustomField
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: AppColors.lightRed,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryRed,
+                                width: 1.5,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Colors.redAccent,
+                              ),
+                            ),
+
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                          ),
+
+                          dropdownColor: AppColors.lightBlack,
+                          style: const TextStyle(color: AppColors.white),
+
+                          icon: const Icon(
+                            Icons.keyboard_arrow_down,
+                            color: AppColors.lightGrey,
+                          ),
+
+                          items: [
+                            DropdownMenuItem(
+                              value: AppConstants.inspector,
+                              child: Text(LocaleKeys.inspector.tr()),
+                            ),
+                            DropdownMenuItem(
+                              value: AppConstants.admin,
+                              child: Text(LocaleKeys.admin.tr()),
+                            ),
+                            DropdownMenuItem(
+                              value: AppConstants.branch,
+                              child: Text(LocaleKeys.branch.tr()),
+                            ),
+                          ],
+
+                          onChanged: (v) {
+                            if (v != null) setState(() => _selectedRole = v);
+                          },
+                        ),
+
+                        const SizedBox(height: 16),
 
                         CustomField(
                           controller: _emailController,
@@ -129,14 +215,19 @@ class _ScreenAuthState extends State<ScreenAuth> {
                               bool success = await provider.login(
                                 email: _emailController.text.trim(),
                                 password: _passwordController.text.trim(),
+                                role: _selectedRole,
                               );
 
-                              if (!success && provider.error != null) {
-                                showSnakBarr(context, provider.error!);
+                              if (!success) {
+                                if (provider.error != null)
+                                  showSnakBarr(context, provider.error!);
+                                return;
                               }
                             }
                           },
                         ),
+
+                        const SizedBox(height: 80),
                       ],
                     ),
                   ),
