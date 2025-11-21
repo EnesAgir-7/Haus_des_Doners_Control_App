@@ -45,6 +45,7 @@ import 'routes/app_routes.dart';
 
 //V2 Started
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+// this is main
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
