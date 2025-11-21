@@ -11,6 +11,7 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_field.dart';
 import '../widgets/custom_toast.dart';
 
+//TODO: locale
 class ScreenAuth extends StatefulWidget {
   const ScreenAuth({super.key});
 
@@ -74,6 +75,79 @@ class _ScreenAuthState extends State<ScreenAuth> {
                         ),
                         const SizedBox(height: 32),
 
+                        // ✅ Role Dropdown
+                        DropdownButtonFormField<String>(
+                          initialValue: provider.selectedRole,
+                          decoration: InputDecoration(
+                            labelText: 'Login As',
+                            hintText: 'Select role',
+                            prefixIcon: const Icon(
+                              Icons.person_outline,
+                              color: AppColors.lightGrey,
+                            ),
+                            labelStyle: const TextStyle(
+                              color: AppColors.lightGrey,
+                            ),
+                            hintStyle: const TextStyle(
+                              color: AppColors.lightGrey,
+                            ),
+                            filled: true,
+                            fillColor: AppColors.lightBlack,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: AppColors.lightRed,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: AppColors.primaryRed,
+                                width: 1.5,
+                              ),
+                            ),
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                            focusedErrorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14),
+                              borderSide: const BorderSide(
+                                color: Colors.redAccent,
+                              ),
+                            ),
+                          ),
+                          dropdownColor: AppColors.lightBlack,
+                          style: const TextStyle(color: AppColors.white),
+                          icon: const Icon(
+                            Icons.arrow_drop_down,
+                            color: AppColors.lightGrey,
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'admin',
+                              child: Text('Admin'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'inspector',
+                              child: Text('Inspector'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'branch',
+                              child: Text('Branch'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              provider.setSelectedRole(value);
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 16),
+
                         CustomField(
                           controller: _emailController,
                           label: LocaleKeys.email.tr(),
@@ -129,6 +203,7 @@ class _ScreenAuthState extends State<ScreenAuth> {
                               bool success = await provider.login(
                                 email: _emailController.text.trim(),
                                 password: _passwordController.text.trim(),
+                                role: provider.selectedRole,
                               );
 
                               if (!success && provider.error != null) {
@@ -137,6 +212,8 @@ class _ScreenAuthState extends State<ScreenAuth> {
                             }
                           },
                         ),
+
+                        const SizedBox(height: 80),
                       ],
                     ),
                   ),

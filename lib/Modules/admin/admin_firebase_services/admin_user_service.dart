@@ -162,6 +162,10 @@ class AdminUserService {
         case AppConstants.admin:
           collectionName = Collections.admins;
           break;
+        case AppConstants.branch:
+          // Branch users stored in dedicated collection for easier fetching
+          collectionName = Collections.branchUsers;
+          break;
         default:
           throw Exception('Invalid user role: ${user.role}');
       }

@@ -14,6 +14,7 @@ import 'package:haus_des_control/Modules/inspector/providers/provider_auth.dart'
 import 'package:haus_des_control/Modules/inspector/providers/provider_route.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_vehicle.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,8 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'Modules/admin/admin_providers/provider_admin_bottombar.dart';
 import 'Modules/admin/admin_providers/provider_admin_inspections.dart';
 import 'Modules/admin/admin_providers/provider_admin_tasks.dart';
+import 'Modules/branch/screens/branch_providers/provider_branch_bottom_navbar.dart';
+import 'Modules/branch/screens/screen_branch_bottom_navbar.dart';
 import 'Modules/inspector/providers/provider_bottom_nav_bar.dart';
 import 'Modules/inspector/providers/provider_branches.dart';
 import 'Modules/inspector/providers/provider_control.dart';
@@ -40,6 +43,7 @@ import 'core/global_focus_manager.dart';
 import 'core/theme/app_theme.dart';
 import 'routes/app_routes.dart';
 
+//V2 Started
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
@@ -112,6 +116,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdminBottomNavProvider()),
         ChangeNotifierProvider(create: (_) => ProviderAdminInspections()),
         ChangeNotifierProvider(create: (_) => ProviderAdminTasks()),
+        ChangeNotifierProvider(create: (_) => ProviderBranchBottomNavBar()),
       ],
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
@@ -192,9 +197,18 @@ class AuthWrapper extends StatelessWidget {
         if (auth.userModel == null) return const ScreenAuth();
 
         loggedInUser = auth.userModel;
-        return auth.userModel!.isAdmin
-            ? AdminBottomNavBar()
-            : ScreenBottomNavBar();
+
+        switch (auth.userModel!.role) {
+          case AppConstants.admin:
+            return AdminBottomNavBar();
+
+          case AppConstants.branch:
+            return ScreenBranchBottomNavBar();
+
+          case AppConstants.inspector:
+          default:
+            return ScreenBottomNavBar();
+        }
       },
     );
   }
