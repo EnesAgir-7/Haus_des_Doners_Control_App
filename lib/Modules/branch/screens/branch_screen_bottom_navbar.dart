@@ -7,11 +7,11 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_toast.dart';
-import 'branch_providers/provider_branch_bottom_navbar.dart';
+import '../branch_providers/provider_branch_bottom_navbar.dart';
 
 // ignore: must_be_immutable
-class ScreenBranchBottomNavBar extends StatelessWidget {
-  ScreenBranchBottomNavBar({super.key});
+class BranchScreenBottomNavBar extends StatelessWidget {
+  BranchScreenBottomNavBar({super.key});
   DateTime? lastBackPressed;
 
   @override

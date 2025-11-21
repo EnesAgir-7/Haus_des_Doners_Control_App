@@ -23,8 +23,8 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'Modules/admin/admin_providers/provider_admin_bottombar.dart';
 import 'Modules/admin/admin_providers/provider_admin_inspections.dart';
 import 'Modules/admin/admin_providers/provider_admin_tasks.dart';
-import 'Modules/branch/screens/branch_providers/provider_branch_bottom_navbar.dart';
-import 'Modules/branch/screens/screen_branch_bottom_navbar.dart';
+import 'Modules/branch/branch_providers/provider_branch_bottom_navbar.dart';
+import 'Modules/branch/screens/branch_screen_bottom_navbar.dart';
 import 'Modules/inspector/providers/provider_bottom_nav_bar.dart';
 import 'Modules/inspector/providers/provider_branches.dart';
 import 'Modules/inspector/providers/provider_control.dart';
@@ -203,7 +203,7 @@ class AuthWrapper extends StatelessWidget {
             return AdminBottomNavBar();
 
           case AppConstants.branch:
-            return ScreenBranchBottomNavBar();
+            return BranchScreenBottomNavBar();
 
           case AppConstants.inspector:
           default:
