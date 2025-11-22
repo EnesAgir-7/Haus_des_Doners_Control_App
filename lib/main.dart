@@ -64,7 +64,7 @@ void main() async {
     ),
   );
   // Initialize FCM
-  await FCMHelper.instance.initialize(
+  FCMHelper.instance.initialize(
     onMessageReceived: (RemoteMessage message) {
       // console('Message received: ${message.notification?.title}');
     },
