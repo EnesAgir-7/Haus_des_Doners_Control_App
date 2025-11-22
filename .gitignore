@@ -28,4 +28,5 @@ key.properties
 .flutter-plugins-dependencies
 .env
 *.env
-/ios/Runner/Secrets.xcconfig
+ios/Flutter/Debug.xcconfig
+ios/Flutter/Release.xcconfig
