@@ -24,7 +24,6 @@ import '../screens/pdf_preview.dart';
 import '../widgets/custom_toast.dart';
 import '../widgets/widgets_reports_screen.dart';
 
-
 /// Provider for Control (Inspection Form) screen
 /// Handles creating and submitting inspections with photo uploads
 class ProviderControl extends ChangeNotifier {
@@ -418,6 +417,7 @@ class ProviderControl extends ChangeNotifier {
       resetForm();
       return true;
     } catch (e, st) {
+      debugPrintStack(label: 'Submit Inspection Error', stackTrace: st);
       _errorMessage =
           '${LocaleKeys.errorSavingInspection.tr()}: ${e.toString()}';
 
@@ -572,8 +572,7 @@ class ProviderControl extends ChangeNotifier {
     } catch (e) {
       console('Error generating PDF: $e');
       if (context.mounted) {
-       showSnakBarr(context, LocaleKeys.errorGeneratingPDF.tr());
-
+        showSnakBarr(context, LocaleKeys.errorGeneratingPDF.tr());
       }
     }
   }
