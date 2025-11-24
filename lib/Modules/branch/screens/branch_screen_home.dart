@@ -14,18 +14,18 @@ class ScreenBranchDashboard extends StatefulWidget {
 }
 
 class _ScreenBranchDashboardState extends State<ScreenBranchDashboard> {
+  late ProviderBranchDashboard provider;
   @override
   void initState() {
     super.initState();
+      provider = context.read<ProviderBranchDashboard>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProviderBranchDashboard>().initialize();
+      provider.initialize();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<ProviderBranchDashboard>(context);
-
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(

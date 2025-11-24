@@ -22,10 +22,6 @@ class ProviderBranchDashboard extends ChangeNotifier {
   int _totalTrainings = 0;
   List<dynamic> _recentReports = [];
 
-  // Stream subscriptions
-  StreamSubscription? _dashboardSubscription;
-  String? _currentBranchId;
-
   // Getters
   BranchModel? get branchInfo => _branchInfo;
   bool get isLoading => _isLoading;
@@ -40,46 +36,20 @@ class ProviderBranchDashboard extends ChangeNotifier {
   Future<void> initialize() async {
     final branchId = loggedInUser!.id;
 
-    if (_dashboardSubscription != null && _currentBranchId == branchId) {
-      console("Same branch and stream is already active");
-      return;
-    }
-
-    _currentBranchId = branchId;
-    _dashboardSubscription?.cancel();
-
     _isLoading = true;
     notifyListeners();
 
     try {
       // Load branch info
       _branchInfo = await _dashboardService.getBranchInfo(branchId);
-
-      // Start listening to dashboard stats
-      _dashboardSubscription = _dashboardService
-          .getDashboardStatsStream(branchId)
-          .listen(
-            (stats) {
-              _totalReports = stats['totalReports'] ?? 0;
-              _unreadNotifications = stats['unreadNotifications'] ?? 0;
-              _totalDocuments = stats['totalDocuments'] ?? 0;
-              _totalTrainings = stats['totalTrainings'] ?? 0;
-              _recentReports = stats['recentReports'] ?? [];
-              _isLoading = false;
-              notifyListeners();
-            },
-            onError: (error) {
-              _errorMessage = 'Stream Error: $error';
-              _isLoading = false;
-              notifyListeners();
-              console(_errorMessage);
-            },
-          );
     } catch (e) {
       _errorMessage = 'Initialization Error: $e';
       _isLoading = false;
       notifyListeners();
       console(_errorMessage);
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
   }
 
@@ -98,7 +68,6 @@ class ProviderBranchDashboard extends ChangeNotifier {
   // Cleanup
   @override
   void dispose() {
-    _dashboardSubscription?.cancel();
     super.dispose();
   }
 }

@@ -70,48 +70,62 @@ class BranchScreenBottomNavBar extends StatelessWidget {
                 elevation: 4,
                 indicatorColor: AppColors.primaryRed.withValues(alpha: 0.15),
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                maintainBottomViewPadding: true,
 
-                destinations: [
+                destinations: const [
+                  // 0 - Branch Info
                   NavigationDestination(
-                    icon: const Icon(Icons.dashboard, color: Colors.white70),
-                    selectedIcon: const Icon(
-                      Icons.dashboard,
+                    icon: Icon(Icons.home, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.home,
                       color: AppColors.primaryRed,
                     ),
-                    label: LocaleKeys.panel.tr(),
+                    label: "Branch Info",
                   ),
+
+                  // 1 - Control Reports
                   NavigationDestination(
-                    icon: const Icon(Icons.apartment, color: Colors.white70),
-                    selectedIcon: const Icon(
-                      Icons.apartment,
+                    icon: Icon(Icons.assignment, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.assignment,
                       color: AppColors.primaryRed,
                     ),
-                    label: LocaleKeys.my_branches.tr(),
+                    label: "Reports",
                   ),
+
+                  // 2 - Notifications (letters, announcements)
                   NavigationDestination(
-                    icon: const Icon(Icons.alt_route, color: Colors.white70),
-                    selectedIcon: const Icon(
-                      Icons.alt_route,
+                    icon: Icon(
+                      Icons.notifications,
+                      color: Colors.white70,
+                    ),
+                    selectedIcon: Icon(
+                      Icons.notifications,
                       color: AppColors.primaryRed,
                     ),
-                    label: LocaleKeys.route.tr(),
+                    label: "Notifications",
                   ),
+
+                  // 3 - Documents
                   NavigationDestination(
-                    icon: const Icon(Icons.car_rental, color: Colors.white70),
-                    selectedIcon: const Icon(
-                      Icons.car_rental,
+                    icon: Icon(Icons.folder, color: Colors.white70),
+                    selectedIcon: Icon(
+                      Icons.folder,
                       color: AppColors.primaryRed,
                     ),
-                    label: LocaleKeys.fleet.tr(),
+                    label: "Documents",
                   ),
+
+                  // 4 - Training Videos
                   NavigationDestination(
-                    icon: const Icon(Icons.task, color: Colors.white70),
-                    selectedIcon: const Icon(
-                      Icons.task,
+                    icon: Icon(
+                      Icons.video_library,
+                      color: Colors.white70,
+                    ),
+                    selectedIcon: Icon(
+                      Icons.video_library,
                       color: AppColors.primaryRed,
                     ),
-                    label: LocaleKeys.tasks.tr(),
+                    label: "Training",
                   ),
                 ],
               ),

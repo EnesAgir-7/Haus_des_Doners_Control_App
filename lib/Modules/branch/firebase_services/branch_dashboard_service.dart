@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/models/branch_model.dart';
 
 import '../../../core/console.dart';
@@ -9,7 +10,7 @@ class BranchDashboardService {
   // Get branch information
   Future<BranchModel?> getBranchInfo(String branchId) async {
     try {
-      final doc = await _db.collection('branches').doc(branchId).get();
+      final doc = await _db.collection(Collections.branches).doc(branchId).get();
 
       if (!doc.exists) {
         console("No branch found with id $branchId");

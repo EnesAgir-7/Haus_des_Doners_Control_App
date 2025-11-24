@@ -94,6 +94,8 @@ class NotificationHelper {
 
     if (role == AppConstants.admin) {
       await subscribeToTopic(AppConstants.adminTopic);
+    } else if (role == AppConstants.branch) {
+      await subscribeToTopic(AppConstants.branch);
     } else if (role == AppConstants.inspector) {
       await subscribeToTopic(AppConstants.inspectorTopic);
     }
@@ -106,6 +108,9 @@ class NotificationHelper {
       await unsubscribeFromTopic(AppConstants.adminTopic);
     if (role == AppConstants.inspector)
       await unsubscribeFromTopic(AppConstants.inspectorTopic);
+
+    if (role == AppConstants.branch)
+      await unsubscribeFromTopic(AppConstants.branch);
   }
 
   /// Get environment-prefixed topic
