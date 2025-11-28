@@ -6,6 +6,7 @@ import 'package:haus_des_control/Modules/admin/widgets/performance_chart.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_assets.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../branch_providers/provider_branch_dashboard.dart';
 import '../../../models/branch_model.dart';
@@ -116,10 +117,7 @@ class BranchDetailsTab extends StatelessWidget {
   Widget _buildCompactHeader(BranchModel branch) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: commonDeco,
       child: Row(
         children: [
           Container(
@@ -249,10 +247,7 @@ class BranchDetailsTab extends StatelessWidget {
   ) {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: commonDeco.copyWith(),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -281,10 +276,7 @@ class BranchDetailsTab extends StatelessWidget {
   Widget _buildQuickInfoCard(BranchModel branch, BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: commonDeco.copyWith(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -363,10 +355,7 @@ class BranchDetailsTab extends StatelessWidget {
   Widget _buildContactCard(BranchModel branch) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: commonDeco.copyWith(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -409,10 +398,7 @@ class BranchDetailsTab extends StatelessWidget {
   Widget _buildEmailCard(BranchModel branch) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: commonDeco.copyWith(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -439,10 +425,7 @@ class BranchDetailsTab extends StatelessWidget {
   Widget _buildOperatingHoursCard(BranchModel branch) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: commonDeco.copyWith(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -510,10 +493,7 @@ class BranchDetailsTab extends StatelessWidget {
   }) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: commonDeco.copyWith(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -607,10 +587,7 @@ class BranchDetailsTab extends StatelessWidget {
   Widget _buildAdditionalInfoCard(BranchModel branch) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: commonDeco.copyWith(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -674,10 +651,7 @@ class BranchDetailsTab extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: commonDeco.copyWith(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -768,10 +742,7 @@ class BranchDetailsTab extends StatelessWidget {
   Widget _buildInspectorCard(BranchModel branch) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: commonDeco.copyWith(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -808,6 +779,7 @@ class BranchDetailsTab extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(child: Text(branch.assignedInspector!.name)),
+                  // We intentionally do not show route operations on branch side
                   Text(
                     branch.stop != null ? LocaleKeys.branchInRoute.tr() : '',
                   ),
