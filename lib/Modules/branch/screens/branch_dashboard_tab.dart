@@ -6,60 +6,43 @@ import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../branch_providers/provider_branch_dashboard.dart';
 
-class ScreenBranchDashboard extends StatefulWidget {
-  const ScreenBranchDashboard({super.key});
+class ScreenBranchDashboardTab extends StatefulWidget {
+  const ScreenBranchDashboardTab({super.key});
 
   @override
-  State<ScreenBranchDashboard> createState() => _ScreenBranchDashboardState();
+  State<ScreenBranchDashboardTab> createState() =>
+      Screen_BranchDashboardTabState();
 }
 
-class _ScreenBranchDashboardState extends State<ScreenBranchDashboard> {
+class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
   late ProviderBranchDashboard provider;
   @override
   void initState() {
-    super.initState();
-      provider = context.read<ProviderBranchDashboard>();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    provider = context.read<ProviderBranchDashboard>();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
       provider.initialize();
     });
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppColors.primaryRed.withValues(alpha: 0.08),
-              AppColors.primaryDark,
-              AppColors.primaryDark,
-            ],
-            stops: const [0.0, 0.25, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: RefreshIndicator(
-            color: AppColors.primaryRed,
-            onRefresh: provider.refresh,
-            child: CustomScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              slivers: [
-                _buildHeader(provider),
-                if (provider.isLoading)
-                  const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else if (provider.errorMessage != null)
-                  _buildErrorView(provider)
-                else
-                  _buildDashboardContent(provider),
-              ],
-            ),
-          ),
-        ),
+    return RefreshIndicator(
+      color: AppColors.primaryRed,
+      onRefresh: provider.refresh,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          _buildHeader(provider),
+          if (provider.isLoading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (provider.errorMessage != null)
+            _buildErrorView(provider)
+          else
+            _buildDashboardContent(provider),
+        ],
       ),
     );
   }

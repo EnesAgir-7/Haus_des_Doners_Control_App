@@ -75,57 +75,28 @@ class BranchScreenBottomNavBar extends StatelessWidget {
                   // 0 - Branch Info
                   NavigationDestination(
                     icon: Icon(Icons.home, color: Colors.white70),
-                    selectedIcon: Icon(
-                      Icons.home,
-                      color: AppColors.primaryRed,
-                    ),
+                    selectedIcon: Icon(Icons.home, color: AppColors.primaryRed),
                     label: "Branch Info",
                   ),
 
                   // 1 - Control Reports
                   NavigationDestination(
-                    icon: Icon(Icons.assignment, color: Colors.white70),
+                    icon: Icon(Icons.dashboard, color: Colors.white70),
                     selectedIcon: Icon(
-                      Icons.assignment,
+                      Icons.dashboard,
                       color: AppColors.primaryRed,
                     ),
-                    label: "Reports",
+                    label: "Branch Dashboard",
                   ),
 
                   // 2 - Notifications (letters, announcements)
                   NavigationDestination(
-                    icon: Icon(
-                      Icons.notifications,
-                      color: Colors.white70,
-                    ),
+                    icon: Icon(Icons.more_horiz, color: Colors.white70),
                     selectedIcon: Icon(
-                      Icons.notifications,
+                      Icons.more_horiz,
                       color: AppColors.primaryRed,
                     ),
-                    label: "Notifications",
-                  ),
-
-                  // 3 - Documents
-                  NavigationDestination(
-                    icon: Icon(Icons.folder, color: Colors.white70),
-                    selectedIcon: Icon(
-                      Icons.folder,
-                      color: AppColors.primaryRed,
-                    ),
-                    label: "Documents",
-                  ),
-
-                  // 4 - Training Videos
-                  NavigationDestination(
-                    icon: Icon(
-                      Icons.video_library,
-                      color: Colors.white70,
-                    ),
-                    selectedIcon: Icon(
-                      Icons.video_library,
-                      color: AppColors.primaryRed,
-                    ),
-                    label: "Training",
+                    label: "More",
                   ),
                 ],
               ),

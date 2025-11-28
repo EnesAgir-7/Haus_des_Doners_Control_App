@@ -24,90 +24,9 @@ class BranchDashboardService {
     }
   }
 
-  // Get dashboard stats stream
-  Stream<Map<String, dynamic>> getDashboardStatsStream(String branchId) async* {
-    try {
-      // Listen to multiple collections and combine the data
-      await for (var _ in Stream.periodic(const Duration(seconds: 1))) {
-        final stats = await _getDashboardStats(branchId);
-        yield stats;
-      }
-    } catch (e) {
-      console('Error in dashboard stats stream: $e');
-      yield {
-        'totalReports': 0,
-        'unreadNotifications': 0,
-        'totalDocuments': 0,
-        'totalTrainings': 0,
-        'recentReports': [],
-      };
-    }
-  }
+  
 
-  // Helper method to get dashboard stats
-  Future<Map<String, dynamic>> _getDashboardStats(String branchId) async {
-    try {
-      // Get total reports count
-      final reportsSnapshot = await _db
-          .collection('control_reports')
-          .where('branchId', isEqualTo: branchId)
-          .get();
-
-      // Get unread notifications count
-      final notificationsSnapshot = await _db
-          .collection('notifications')
-          .where('branchId', isEqualTo: branchId)
-          .where('isRead', isEqualTo: false)
-          .get();
-
-      // Get total documents count
-      final documentsSnapshot = await _db
-          .collection('documents')
-          .where('targetBranches', arrayContains: branchId)
-          .get();
-
-      // Get total training videos count
-      final trainingsSnapshot = await _db
-          .collection('training_videos')
-          .where('targetBranches', arrayContains: branchId)
-          .get();
-
-      // Get recent reports (last 5)
-      final recentReportsSnapshot = await _db
-          .collection('control_reports')
-          .where('branchId', isEqualTo: branchId)
-          .orderBy('createdAt', descending: true)
-          .limit(5)
-          .get();
-
-      final recentReports = recentReportsSnapshot.docs.map((doc) {
-        final data = doc.data();
-        return {
-          'id': doc.id,
-          'title': data['title'] ?? 'Control Report',
-          'date': (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          'status': data['status'] ?? 'pending',
-        };
-      }).toList();
-
-      return {
-        'totalReports': reportsSnapshot.docs.length,
-        'unreadNotifications': notificationsSnapshot.docs.length,
-        'totalDocuments': documentsSnapshot.docs.length,
-        'totalTrainings': trainingsSnapshot.docs.length,
-        'recentReports': recentReports,
-      };
-    } catch (e) {
-      console('Error getting dashboard stats: $e');
-      return {
-        'totalReports': 0,
-        'unreadNotifications': 0,
-        'totalDocuments': 0,
-        'totalTrainings': 0,
-        'recentReports': [],
-      };
-    }
-  }
+  
 
   // Get branch notifications stream
   Stream<List<Map<String, dynamic>>> getNotificationsStream(String branchId) {
