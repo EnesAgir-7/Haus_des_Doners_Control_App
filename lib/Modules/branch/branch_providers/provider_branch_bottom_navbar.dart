@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../screens/branch_dashboard_tab.dart';
 import '../screens/branch_screen_details.dart';
+import '../screens/branch_screen_inspections.dart';
 
 class ProviderBranchBottomNavBar extends ChangeNotifier {
   int _selectedIndex = 0;
@@ -9,8 +10,8 @@ class ProviderBranchBottomNavBar extends ChangeNotifier {
 
   final List<Widget> screens = [
     const BranchDetailsTab(),
+    const ScreenBranchInspections(),
     const ScreenBranchDashboardTab(),
-    const Center(child: SizedBox.shrink()),
     //   BranchInfoScreen(),
     // BranchReportsScreen(),
     // BranchNotificationsScreen(),

@@ -19,6 +19,7 @@ class ScreenBranchDashboardTab extends StatefulWidget {
 
 class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
   late ProviderBranchDashboard provider;
+
   @override
   void initState() {
     provider = context.read<ProviderBranchDashboard>();
@@ -39,7 +40,9 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
           _buildHeader(provider),
           if (provider.isLoading)
             const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
+              child: Center(
+                child: CircularProgressIndicator(color: AppColors.primaryRed),
+              ),
             )
           else if (provider.errorMessage != null)
             _buildErrorView(provider)
@@ -53,45 +56,60 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
   Widget _buildHeader(ProviderBranchDashboard provider) {
     return SliverToBoxAdapter(
       child: Container(
+        margin: const EdgeInsets.all(16),
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryRed.withValues(alpha: 0.3),
+              AppColors.primaryDark.withValues(alpha: 0.5),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        child: Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primaryRed.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.business,
+                color: AppColors.primaryRed,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    provider.branchInfo?.name ??
+                        LocaleKeys.branch_dashboard.tr(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  child: const Icon(Icons.store, color: Colors.white, size: 28),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        provider.branchInfo?.name ??
-                            LocaleKeys.branch_dashboard.tr(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 22,
-                        ),
-                      ),
-                      Text(
-                        DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now()),
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 4),
+                  Text(
+                    DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now()),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 13,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -101,40 +119,59 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
 
   Widget _buildDashboardContent(ProviderBranchDashboard provider) {
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      sliver: SliverToBoxAdapter(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              LocaleKeys.branch_dashboard.tr(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Select an action',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
-            ),
-            const SizedBox(height: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      sliver: SliverList(
+        delegate: SliverChildListDelegate([
+          const SizedBox(height: 8),
 
-            // Clean, friendly grid with only the four requested actions
-            _buildQuickActionsGrid(provider),
-          ],
-        ),
+          const Text(
+            "Quick Actions",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Select an action to continue',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 13,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+          _buildActionsList(provider),
+
+          const SizedBox(height: 80),
+        ]),
       ),
     );
   }
 
-  Widget _buildQuickActionsGrid(ProviderBranchDashboard provider) {
+  Widget _buildActionsList(ProviderBranchDashboard provider) {
     final actions = [
       {
-        'icon': Icons.notifications,
+        'icon': Icons.campaign_outlined,
+        'label': "Announcements",
+        'description': 'View important updates and announcements',
+        'color': Colors.blue,
+        'badge': 3, // Mock badge count
+        'onTap': () {
+          // Navigate to announcements
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Announcements coming soon'),
+              backgroundColor: AppColors.primaryRed,
+            ),
+          );
+        },
+      },
+      {
+        'icon': Icons.notifications_outlined,
         'label': LocaleKeys.notifications.tr(),
-        'subtitle': 'View your notifications',
+        'description': 'Check your latest notifications',
         'color': Colors.orange,
         'badge': provider.unreadNotifications,
         'onTap': () {
@@ -145,10 +182,10 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
         },
       },
       {
-        'icon': Icons.video_library,
+        'icon': Icons.video_library_outlined,
         'label': LocaleKeys.training_videos.tr(),
-        'subtitle': 'Learn and train',
-        'color': Colors.red,
+        'description': 'Access training materials and videos',
+        'color': AppColors.primaryRed,
         'badge': 0,
         'onTap': () {
           Navigator.push(
@@ -158,19 +195,9 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
         },
       },
       {
-        'icon': Icons.edit_note,
-        'label': LocaleKeys.update_request.tr(),
-        'subtitle': 'Request updates',
-        'color': Colors.teal,
-        'badge': 0,
-        'onTap': () {
-          // Navigate to update request
-        },
-      },
-      {
-        'icon': Icons.folder,
+        'icon': Icons.folder_outlined,
         'label': LocaleKeys.documents.tr(),
-        'subtitle': 'Access documents',
+        'description': 'Browse and download documents',
         'color': Colors.purple,
         'badge': 0,
         'onTap': () {
@@ -180,20 +207,29 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
           );
         },
       },
+      {
+        'icon': Icons.edit_note_outlined,
+        'label': LocaleKeys.update_request.tr(),
+        'description': 'Request changes or updates',
+        'color': Colors.teal,
+        'badge': 0,
+        'onTap': () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Update requests coming soon'),
+              backgroundColor: AppColors.primaryRed,
+            ),
+          );
+        },
+      },
     ];
 
-    return GridView.count(
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      crossAxisCount: 2,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.15,
+    return Column(
       children: actions.map((action) {
-        return _buildActionCard(
+        return _buildActionItem(
           icon: action['icon'] as IconData,
           label: action['label'] as String,
-          subtitle: action['subtitle'] as String,
+          description: action['description'] as String,
           color: action['color'] as Color,
           badgeCount: action['badge'] as int,
           onTap: action['onTap'] as VoidCallback,
@@ -202,79 +238,99 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
     );
   }
 
-  Widget _buildActionCard({
+  Widget _buildActionItem({
     required IconData icon,
     required String label,
-    required String subtitle,
+    required String description,
     required Color color,
     required int badgeCount,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: AppColors.primaryDark.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(14),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: AppColors.primaryDark.withValues(alpha: 0.35),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.15),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(icon, color: color, size: 26),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const Spacer(),
-                  if (badgeCount > 0)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                  child: Icon(icon, color: color, size: 28),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              label,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          if (badgeCount > 0) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryRed,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '$badgeCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
-                      decoration: BoxDecoration(
-                        color: Colors.red,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '$badgeCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
+                      const SizedBox(height: 4),
+                      Text(
+                        description,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 13,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 12,
+                const SizedBox(width: 12),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.white.withValues(alpha: 0.3),
+                  size: 16,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -284,22 +340,45 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
   Widget _buildErrorView(ProviderBranchDashboard provider) {
     return SliverFillRemaining(
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              provider.errorMessage!,
-              style: const TextStyle(color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: provider.refresh,
-              child: Text(LocaleKeys.retry.tr()),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 60,
+                color: AppColors.primaryRed,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                LocaleKeys.error_occurred.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                provider.errorMessage!,
+                style: const TextStyle(color: Colors.white70),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: provider.refresh,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryRed,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                child: Text(LocaleKeys.retry.tr()),
+              ),
+            ],
+          ),
         ),
       ),
     );
