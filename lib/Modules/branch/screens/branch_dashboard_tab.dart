@@ -23,33 +23,26 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
   @override
   void initState() {
     provider = context.read<ProviderBranchDashboard>();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      provider.initialize();
-    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      color: AppColors.primaryRed,
-      onRefresh: provider.refresh,
-      child: CustomScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        slivers: [
-          _buildHeader(provider),
-          if (provider.isLoading)
-            const SliverFillRemaining(
-              child: Center(
-                child: CircularProgressIndicator(color: AppColors.primaryRed),
-              ),
-            )
-          else if (provider.errorMessage != null)
-            _buildErrorView(provider)
-          else
-            _buildDashboardContent(provider),
-        ],
-      ),
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        _buildHeader(provider),
+        if (provider.isLoading)
+          const SliverFillRemaining(
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.primaryRed),
+            ),
+          )
+        else if (provider.errorMessage != null)
+          _buildErrorView(provider)
+        else
+          _buildDashboardContent(provider),
+      ],
     );
   }
 
