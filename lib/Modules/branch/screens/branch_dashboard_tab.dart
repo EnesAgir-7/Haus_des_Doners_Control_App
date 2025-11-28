@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../branch_providers/provider_branch_dashboard.dart';
+import 'screen_documents.dart';
+import 'screen_notifications.dart';
+import 'screen_trainings.dart';
 
 class ScreenBranchDashboardTab extends StatefulWidget {
   const ScreenBranchDashboardTab({super.key});
@@ -19,7 +22,7 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
   @override
   void initState() {
     provider = context.read<ProviderBranchDashboard>();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       provider.initialize();
     });
     super.initState();
@@ -98,213 +101,30 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
 
   Widget _buildDashboardContent(ProviderBranchDashboard provider) {
     return SliverPadding(
-      padding: const EdgeInsets.all(16),
-      sliver: SliverList(
-        delegate: SliverChildListDelegate([
-          _buildQuickStatsCard(provider),
-          const SizedBox(height: 16),
-          _buildRecentReportsCard(provider),
-          const SizedBox(height: 16),
-          _buildQuickActionsGrid(provider),
-          const SizedBox(height: 16),
-          _buildUnreadNotificationsCard(provider),
-        ]),
-      ),
-    );
-  }
-
-  Widget _buildQuickStatsCard(ProviderBranchDashboard provider) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      sliver: SliverToBoxAdapter(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              LocaleKeys.quick_overview.tr(),
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              LocaleKeys.branch_dashboard.tr(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    icon: Icons.assignment,
-                    label: LocaleKeys.total_reports.tr(),
-                    value: '${provider.totalReports}',
-                    color: Colors.blue,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatItem(
-                    icon: Icons.notifications_active,
-                    label: LocaleKeys.notifications.tr(),
-                    value: '${provider.unreadNotifications}',
-                    color: Colors.orange,
-                  ),
-                ),
-              ],
+            const SizedBox(height: 8),
+            Text(
+              'Select an action',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    icon: Icons.folder,
-                    label: LocaleKeys.documents.tr(),
-                    value: '${provider.totalDocuments}',
-                    color: Colors.green,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildStatItem(
-                    icon: Icons.video_library,
-                    label: LocaleKeys.trainings.tr(),
-                    value: '${provider.totalTrainings}',
-                    color: Colors.purple,
-                  ),
-                ),
-              ],
-            ),
+            const SizedBox(height: 20),
+
+            // Clean, friendly grid with only the four requested actions
+            _buildQuickActionsGrid(provider),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecentReportsCard(ProviderBranchDashboard provider) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  LocaleKeys.recent_reports.tr(),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Navigate to full reports screen
-                  },
-                  child: Text(LocaleKeys.view_all.tr()),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (provider.recentReports.isEmpty)
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text(
-                    LocaleKeys.no_reports_yet.tr(),
-                    style: TextStyle(color: Colors.grey.shade600),
-                  ),
-                ),
-              )
-            else
-              ...provider.recentReports
-                  .take(3)
-                  .map((report) => _buildReportListItem(report)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReportListItem(dynamic report) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.primaryRed.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.assignment,
-              color: AppColors.primaryRed,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  report['title'] ?? 'Control Report',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  DateFormat('MMM d, yyyy').format(report['date']),
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                ),
-              ],
-            ),
-          ),
-          Icon(Icons.chevron_right, color: Colors.grey.shade400),
-        ],
       ),
     );
   }
@@ -312,170 +132,148 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
   Widget _buildQuickActionsGrid(ProviderBranchDashboard provider) {
     final actions = [
       {
-        'icon': Icons.info_outline,
-        'label': LocaleKeys.branch_info.tr(),
-        'color': Colors.blue,
-        'onTap': () {
-          // Navigate to branch info
-        },
-      },
-      {
-        'icon': Icons.assignment,
-        'label': LocaleKeys.control_reports.tr(),
-        'color': Colors.green,
-        'onTap': () {
-          // Navigate to reports
-        },
-      },
-      {
         'icon': Icons.notifications,
         'label': LocaleKeys.notifications.tr(),
+        'subtitle': 'View your notifications',
         'color': Colors.orange,
+        'badge': provider.unreadNotifications,
         'onTap': () {
-          // Navigate to notifications
-        },
-      },
-      {
-        'icon': Icons.folder,
-        'label': LocaleKeys.documents.tr(),
-        'color': Colors.purple,
-        'onTap': () {
-          // Navigate to documents
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ScreenNotifications()),
+          );
         },
       },
       {
         'icon': Icons.video_library,
         'label': LocaleKeys.training_videos.tr(),
+        'subtitle': 'Learn and train',
         'color': Colors.red,
+        'badge': 0,
         'onTap': () {
-          // Navigate to trainings
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ScreenTrainings()),
+          );
         },
       },
       {
         'icon': Icons.edit_note,
         'label': LocaleKeys.update_request.tr(),
+        'subtitle': 'Request updates',
         'color': Colors.teal,
+        'badge': 0,
         'onTap': () {
           // Navigate to update request
         },
       },
+      {
+        'icon': Icons.folder,
+        'label': LocaleKeys.documents.tr(),
+        'subtitle': 'Access documents',
+        'color': Colors.purple,
+        'badge': 0,
+        'onTap': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ScreenDocuments()),
+          );
+        },
+      },
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
+    return GridView.count(
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.3,
-      ),
-      itemCount: actions.length,
-      itemBuilder: (context, index) {
-        final action = actions[index];
+      shrinkWrap: true,
+      crossAxisCount: 2,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 1.15,
+      children: actions.map((action) {
         return _buildActionCard(
           icon: action['icon'] as IconData,
           label: action['label'] as String,
+          subtitle: action['subtitle'] as String,
           color: action['color'] as Color,
+          badgeCount: action['badge'] as int,
           onTap: action['onTap'] as VoidCallback,
         );
-      },
+      }).toList(),
     );
   }
 
   Widget _buildActionCard({
     required IconData icon,
     required String label,
+    required String subtitle,
     required Color color,
+    required int badgeCount,
     required VoidCallback onTap,
   }) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 2,
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: AppColors.primaryDark.withValues(alpha: 0.35),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
+          ),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, color: color, size: 32),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(icon, color: color, size: 26),
+                  ),
+                  const Spacer(),
+                  if (badgeCount > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '$badgeCount',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 12),
               Text(
                 label,
-                textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUnreadNotificationsCard(ProviderBranchDashboard provider) {
-    if (provider.unreadNotifications == 0) return const SizedBox.shrink();
-
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 4,
-      color: Colors.orange.shade50,
-      child: InkWell(
-        onTap: () {
-          // Navigate to notifications
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
-                  color: Colors.orange,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.notifications_active,
                   color: Colors.white,
-                  size: 24,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
                 ),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      LocaleKeys.unread_notifications.tr(),
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${LocaleKeys.you_have.tr()} ${provider.unreadNotifications} ${LocaleKeys.unread_messages.tr()}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 6),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 12,
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey.shade600),
             ],
           ),
         ),
