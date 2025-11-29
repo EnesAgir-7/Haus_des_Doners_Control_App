@@ -5,6 +5,7 @@ import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../translations/locale_keys.g.dart';
+import '../../../core/constants/app_constants.dart';
 import '../providers/provider_auth.dart';
 import '../widgets/app_button.dart';
 import '../widgets/custom_app_bar.dart';
@@ -126,18 +127,18 @@ class _ScreenAuthState extends State<ScreenAuth> {
                             Icons.arrow_drop_down,
                             color: AppColors.lightGrey,
                           ),
-                          items: const [
+                          items:  [
                             DropdownMenuItem(
-                              value: 'admin',
-                              child: Text('Admin'),
+                              value: AppConstants.admin,
+                              child: Text(LocaleKeys.admin.tr()),
                             ),
                             DropdownMenuItem(
-                              value: 'inspector',
-                              child: Text('Inspector'),
+                              value: AppConstants.inspector,
+                              child: Text(LocaleKeys.inspector.tr()),
                             ),
                             DropdownMenuItem(
-                              value: 'branch',
-                              child: Text('Branch'),
+                              value: AppConstants.branch,
+                              child: Text(LocaleKeys.branch.tr()),
                             ),
                           ],
                           onChanged: (value) {
