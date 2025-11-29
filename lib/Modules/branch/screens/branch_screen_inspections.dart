@@ -10,15 +10,15 @@ import '../../admin/widgets/admin_inspection_card.dart';
 import '../../inspector/screens/screen_inspection_details.dart';
 import '../branch_providers/provider_branch_inspections.dart';
 
-class ScreenBranchInspections extends StatefulWidget {
-  const ScreenBranchInspections({super.key});
+class BranchScreenInspections extends StatefulWidget {
+  const BranchScreenInspections({super.key});
 
   @override
-  State<ScreenBranchInspections> createState() =>
-      _ScreenBranchInspectionsState();
+  State<BranchScreenInspections> createState() =>
+      _BranchScreenInspectionsState();
 }
 
-class _ScreenBranchInspectionsState extends State<ScreenBranchInspections> {
+class _BranchScreenInspectionsState extends State<BranchScreenInspections> {
   final ScrollController _scrollController = ScrollController();
 
   @override

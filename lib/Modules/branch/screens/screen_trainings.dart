@@ -6,6 +6,7 @@ import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
+import 'screen_video_player.dart';
 
 class ScreenTrainings extends StatelessWidget {
   const ScreenTrainings({super.key});
@@ -137,7 +138,19 @@ class ScreenTrainings extends StatelessWidget {
 
     return InkWell(
       onTap: () {
-        // Handle video tap
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ScreenVideoPlayer(
+              videoTitle: trainingTitles[index],
+              videoUrl: 'https://www.youtube.com/watch?v=a5igbIVMXYg',
+
+              moduleNumber: index + 1,
+              icon: icons[index],
+              videoDescription: 'Watch training video to improve your skills',
+            ),
+          ),
+        );
       },
       borderRadius: BorderRadius.circular(16),
       child: Container(
@@ -286,7 +299,6 @@ class ScreenTrainings extends StatelessWidget {
                         ),
                       ],
                     ),
-
                   ],
                 ),
               ),

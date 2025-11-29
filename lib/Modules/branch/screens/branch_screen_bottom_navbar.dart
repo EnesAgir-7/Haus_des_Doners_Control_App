@@ -89,12 +89,12 @@ class BranchScreenBottomNavBar extends StatelessWidget {
                     label: "Inspections",
                   ),
                   NavigationDestination(
-                    icon: Icon(Icons.dashboard, color: Colors.white70),
+                    icon: Icon(Icons.more_horiz, color: Colors.white70),
                     selectedIcon: Icon(
-                      Icons.dashboard,
+                      Icons.more_horiz,
                       color: AppColors.primaryRed,
                     ),
-                    label: "Branch Dashboard",
+                    label: "More",
                   ),
                 ],
               ),

@@ -9,15 +9,14 @@ import 'screen_documents.dart';
 import 'screen_notifications.dart';
 import 'screen_trainings.dart';
 
-class ScreenBranchDashboardTab extends StatefulWidget {
-  const ScreenBranchDashboardTab({super.key});
+class BranchScreenMore extends StatefulWidget {
+  const BranchScreenMore({super.key});
 
   @override
-  State<ScreenBranchDashboardTab> createState() =>
-      Screen_BranchDashboardTabState();
+  State<BranchScreenMore> createState() => Screen_BranchDashboardTabState();
 }
 
-class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
+class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
   late ProviderBranchDashboard provider;
 
   @override
@@ -151,15 +150,7 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
         'description': 'View important updates and announcements',
         'color': Colors.blue,
         'badge': 3, // Mock badge count
-        'onTap': () {
-          // Navigate to announcements
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Announcements coming soon'),
-              backgroundColor: AppColors.primaryRed,
-            ),
-          );
-        },
+        'onTap': () {},
       },
       {
         'icon': Icons.notifications_outlined,
@@ -206,14 +197,7 @@ class Screen_BranchDashboardTabState extends State<ScreenBranchDashboardTab> {
         'description': 'Request changes or updates',
         'color': Colors.teal,
         'badge': 0,
-        'onTap': () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Update requests coming soon'),
-              backgroundColor: AppColors.primaryRed,
-            ),
-          );
-        },
+        'onTap': () {},
       },
     ];
 

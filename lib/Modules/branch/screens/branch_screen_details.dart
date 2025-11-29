@@ -14,24 +14,24 @@ import '../../../core/constants/app_constants.dart';
 import '../../../helpers/app_helpers.dart';
 import '../../../core/extensions.dart';
 
-class BranchDetailsTab extends StatefulWidget {
-  const BranchDetailsTab({super.key});
+class BranchScreenDetails extends StatefulWidget {
+  const BranchScreenDetails({super.key});
 
   @override
-  State<BranchDetailsTab> createState() => _BranchDetailsTabState();
+  State<BranchScreenDetails> createState() => _BranchScreenDetailsState();
 }
 
-class _BranchDetailsTabState extends State<BranchDetailsTab> {
+class _BranchScreenDetailsState extends State<BranchScreenDetails> {
   late ProviderBranchDashboard provider;
   @override
   void initState() {
-      provider = context.read<ProviderBranchDashboard>();
+    provider = context.read<ProviderBranchDashboard>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       provider.initialize();
     });
     super.initState();
-    
   }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ProviderBranchDashboard>();

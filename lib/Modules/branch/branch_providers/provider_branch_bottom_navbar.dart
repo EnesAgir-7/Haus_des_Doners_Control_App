@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../screens/branch_dashboard_tab.dart';
+import '../screens/branch_screen_more.dart';
 import '../screens/branch_screen_details.dart';
 import '../screens/branch_screen_inspections.dart';
 
@@ -9,9 +9,9 @@ class ProviderBranchBottomNavBar extends ChangeNotifier {
   int get selectedIndex => _selectedIndex;
 
   final List<Widget> screens = [
-    const BranchDetailsTab(),
-    const ScreenBranchInspections(),
-    const ScreenBranchDashboardTab(),
+    const BranchScreenDetails(),
+    const BranchScreenInspections(),
+    const BranchScreenMore(),
     //   BranchInfoScreen(),
     // BranchReportsScreen(),
     // BranchNotificationsScreen(),
