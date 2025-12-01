@@ -71,29 +71,33 @@ class BranchScreenBottomNavBar extends StatelessWidget {
                 indicatorColor: AppColors.primaryRed.withValues(alpha: 0.15),
                 labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
 
-                destinations: const [
+                destinations: [
                   // 0 - Branch Info
                   NavigationDestination(
-                    icon: Icon(Icons.home, color: Colors.white70),
-                    selectedIcon: Icon(Icons.home, color: AppColors.primaryRed),
-                    label: "Branch Info",
+                    icon: const Icon(Icons.home, color: Colors.white70),
+                    selectedIcon: const Icon(
+                      Icons.home,
+                      color: AppColors.primaryRed,
+                    ),
+                    label: LocaleKeys.branchInfo.tr(),
                   ),
 
                   // 1 - Control Reports
                   NavigationDestination(
-                    icon: Icon(Icons.dashboard, color: Colors.white70),
-                    selectedIcon: Icon(
+                    icon: const Icon(Icons.dashboard, color: Colors.white70),
+                    selectedIcon: const Icon(
                       Icons.dashboard,
                       color: AppColors.primaryRed,
                     ),
-                    label: "Inspections",
+                    label: LocaleKeys.inspections.tr(),
                   ),
-                  NavigationDestination(
+                  const NavigationDestination(
                     icon: Icon(Icons.more_horiz, color: Colors.white70),
                     selectedIcon: Icon(
                       Icons.more_horiz,
                       color: AppColors.primaryRed,
                     ),
+                    //TODO: locale
                     label: "More",
                   ),
                 ],

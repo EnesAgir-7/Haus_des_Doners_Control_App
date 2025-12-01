@@ -162,14 +162,14 @@ class _BranchScreenInspectionsState extends State<BranchScreenInspections> {
       child: Row(
         children: [
           _buildSortChip(
-            label: "Latest",
+            label: LocaleKeys.latest.tr(),
             value: AppConstants.date,
             icon: Icons.calendar_today,
             provider: provider,
           ),
           const SizedBox(width: 8),
           _buildSortChip(
-            label: "Highest Score",
+            label: LocaleKeys.highest_score.tr(),
             value: AppConstants.score,
             icon: Icons.star,
             provider: provider,
@@ -359,7 +359,7 @@ class _BranchScreenInspectionsState extends State<BranchScreenInspections> {
               ),
               const SizedBox(height: 8),
               Text(
-                "It looks like there are no inspections for this branch yet. ",
+                LocaleKeys.no_inspections_message.tr(),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.6),
                   fontSize: 14,

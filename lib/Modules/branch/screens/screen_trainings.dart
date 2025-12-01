@@ -63,7 +63,7 @@ class ScreenTrainings extends StatelessWidget {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Watch training videos to improve your skills',
+                                  LocaleKeys.watch_training_videos.tr(),
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.7),
                                     fontSize: 13,
@@ -291,7 +291,7 @@ class ScreenTrainings extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Module ${index + 1}',
+                          '${LocaleKeys.module.tr()} ${index + 1}',
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.6),
                             fontSize: 11,

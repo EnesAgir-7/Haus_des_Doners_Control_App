@@ -1,9 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../translations/locale_keys.g.dart';
 
 class ScreenVideoPlayer extends StatefulWidget {
   final String videoTitle;
@@ -154,7 +156,7 @@ class _ScreenVideoPlayerState extends State<ScreenVideoPlayer> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'Module ${widget.moduleNumber}',
+                                    '${LocaleKeys.module.tr()} ${widget.moduleNumber}',
                                     style: TextStyle(
                                       color: Colors.white.withValues(
                                         alpha: 0.6,
@@ -171,9 +173,9 @@ class _ScreenVideoPlayerState extends State<ScreenVideoPlayer> {
                         const SizedBox(height: 24),
 
                         // Description Section
-                        const Text(
-                          'About this video',
-                          style: TextStyle(
+                        Text(
+                          LocaleKeys.about_this_video.tr(),
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,

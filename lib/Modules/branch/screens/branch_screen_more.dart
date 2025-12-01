@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../branch_providers/provider_branch_dashboard.dart';
+import 'screen_branch_request_edit.dart';
 import 'screen_documents.dart';
 import 'screen_notifications.dart';
 import 'screen_trainings.dart';
@@ -116,9 +117,9 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
         delegate: SliverChildListDelegate([
           const SizedBox(height: 8),
 
-          const Text(
-            "Quick Actions",
-            style: TextStyle(
+          Text(
+            LocaleKeys.quick_actions.tr(),
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -126,7 +127,7 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Select an action to continue',
+            LocaleKeys.select_action_to_continue.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.6),
               fontSize: 13,
@@ -146,8 +147,16 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
     final actions = [
       {
         'icon': Icons.campaign_outlined,
-        'label': "Announcements",
-        'description': 'View important updates and announcements',
+        'label': LocaleKeys.announcements.tr(),
+        'description': LocaleKeys.view_important_updates.tr(),
+        'color': Colors.blue,
+        'badge': 3, // Mock badge count
+        'onTap': () {},
+      },
+      {
+        'icon': Icons.campaign_outlined,
+        'label': LocaleKeys.announcements.tr(),
+        'description': LocaleKeys.view_important_updates.tr(),
         'color': Colors.blue,
         'badge': 3, // Mock badge count
         'onTap': () {},
@@ -155,7 +164,7 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
       {
         'icon': Icons.notifications_outlined,
         'label': LocaleKeys.notifications.tr(),
-        'description': 'Check your latest notifications',
+        'description': LocaleKeys.check_latest_notifications.tr(),
         'color': Colors.orange,
         'badge': provider.unreadNotifications,
         'onTap': () {
@@ -168,7 +177,7 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
       {
         'icon': Icons.video_library_outlined,
         'label': LocaleKeys.training_videos.tr(),
-        'description': 'Access training materials and videos',
+        'description': LocaleKeys.access_training_materials.tr(),
         'color': AppColors.primaryRed,
         'badge': 0,
         'onTap': () {
@@ -181,7 +190,7 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
       {
         'icon': Icons.folder_outlined,
         'label': LocaleKeys.documents.tr(),
-        'description': 'Browse and download documents',
+        'description': LocaleKeys.browse_download_documents.tr(),
         'color': Colors.purple,
         'badge': 0,
         'onTap': () {
@@ -194,10 +203,18 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
       {
         'icon': Icons.edit_note_outlined,
         'label': LocaleKeys.update_request.tr(),
-        'description': 'Request changes or updates',
+        'description': LocaleKeys.request_changes_updates.tr(),
         'color': Colors.teal,
         'badge': 0,
-        'onTap': () {},
+        'onTap': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  ScreenBranchRequestEdit(branch: provider.branchInfo!),
+            ),
+          );
+        },
       },
     ];
 

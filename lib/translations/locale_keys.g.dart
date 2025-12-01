@@ -835,51 +835,31 @@ abstract class  LocaleKeys {
   static const broadcast_to_all = 'broadcast_to_all';
   static const no_inspections_found = 'no_inspections_found';
   static const error_loading_data = 'error_loading_data';
-
-
-
-
-
-
-
-    static const branch_dashboard = 'branch_dashboard';
-  static const quick_overview = 'quick_overview';
-  static const total_reports = 'total_reports';
+  static const quick_actions = 'quick_actions';
+  static const select_action_to_continue = 'select_action_to_continue';
+  static const announcements = 'announcements';
+  static const view_important_updates = 'view_important_updates';
+  static const check_latest_notifications = 'check_latest_notifications';
+  static const access_training_materials = 'access_training_materials';
+  static const browse_download_documents = 'browse_download_documents';
+  static const request_changes_updates = 'request_changes_updates';
+  static const branch_data_not_available = 'branch_data_not_available';
+  static const branch_dashboard = 'branch_dashboard';
   static const notifications = 'notifications';
-  static const documents = 'documents';
-  static const trainings = 'trainings';
-  static const recent_reports = 'recent_reports';
-  static const view_all = 'view_all';
-  static const no_reports_yet = 'no_reports_yet';
-  static const branch_info = 'branch_info';
-  static const control_reports = 'control_reports';
   static const training_videos = 'training_videos';
+  static const documents = 'documents';
   static const update_request = 'update_request';
-  static const unread_notifications = 'unread_notifications';
-  static const you_have = 'you_have';
-  static const unread_messages = 'unread_messages';
-
-  // Branch Information
-  static const branch_details = 'branch_details';
-  static const branch_name = 'branch_name';
-  static const city = 'city';
-  static const contact_information = 'contact_information';
-  static const manager_information = 'manager_information';
-  static const manager_name = 'manager_name';
-  static const manager_phone = 'manager_phone';
-  static const request_information_update = 'request_information_update';
-  static const pending_update_requests = 'pending_update_requests';
-  static const admin_response = 'admin_response';
-
-  // Update Request
-  static const update_request_info = 'update_request_info';
-  static const additional_notes = 'additional_notes';
-  static const add_notes_for_admin = 'add_notes_for_admin';
-  static const submitting = 'submitting';
-  static const submit_request = 'submit_request';
-  static const please_enter = 'please_enter';
-  static const request_submitted_successfully =
-      'request_submitted_successfully';
+  static const latest = 'latest';
+  static const highest_score = 'highest_score';
+  static const no_inspections_message = 'no_inspections_message';
+  static const role_optional = 'role_optional';
+  static const already_pending_request = 'already_pending_request';
+  static const request_submitted_successfully = 'request_submitted_successfully';
   static const error_submitting_request = 'error_submitting_request';
+  static const submitting = 'submitting';
+  static const enter_valid_email = 'enter_valid_email';
+  static const watch_training_videos = 'watch_training_videos';
+  static const module = 'module';
+  static const about_this_video = 'about_this_video';
 
 }
