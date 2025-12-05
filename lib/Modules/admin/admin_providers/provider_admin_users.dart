@@ -72,8 +72,9 @@ class ProviderAdminUsers extends ChangeNotifier {
         notifyListeners();
       },
       onError: (error) {
-        _error = LocaleKeys.inspectors_stream_error.tr(
-          args: [error.toString()],
+        _error = LocaleKeys.inspectors_stream_error.tr().replaceAll(
+          "{error}",
+          error.toString(),
         );
         notifyListeners();
       },

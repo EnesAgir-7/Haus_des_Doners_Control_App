@@ -1,0 +1,99 @@
+import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/app_colors.dart';
+import '../../common/menu_button.dart';
+
+class BranchMenuButton extends StatelessWidget {
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final VoidCallback onSendNotification;
+  final VoidCallback onUploadDocument;
+  final VoidCallback onTrainingVideos;
+
+  const BranchMenuButton({
+    Key? key,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onSendNotification,
+    required this.onUploadDocument,
+    required this.onTrainingVideos,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return PopupMenuButton<String>(
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        child: const Icon(Icons.more_vert, color: Colors.white, size: 20),
+      ),
+      color: AppColors.lightBlack,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      offset: const Offset(0, 50),
+
+      itemBuilder: (context) => [
+        buildMenuItem(
+          value: 'edit',
+          icon: Icons.edit_outlined,
+          title: 'Edit Branch',
+          color: Colors.blue,
+        ),
+        buildDivider(),
+        buildMenuItem(
+          value: 'notification',
+          icon: Icons.notifications_active_outlined,
+          title: 'Send Notification',
+          color: AppColors.primaryRed,
+        ),
+        buildDivider(),
+        buildMenuItem(
+          value: 'documents',
+          icon: Icons.upload_file_outlined,
+          title: 'Documents',
+          color: Colors.green,
+        ),
+        buildDivider(),
+        buildMenuItem(
+          value: 'training',
+          icon: Icons.video_library_outlined,
+          title: 'Training Videos',
+          color: Colors.orange,
+        ),
+        buildDivider(),
+        buildMenuItem(
+          value: 'delete',
+          icon: Icons.delete_outline,
+          title: 'Delete Branch',
+          color: Colors.red,
+        ),
+      ],
+
+      // Handle selections
+      onSelected: (value) {
+        switch (value) {
+          case 'edit':
+            onEdit();
+            break;
+          case 'delete':
+            onDelete();
+            break;
+          case 'notification':
+            onSendNotification();
+            break;
+          case 'documents':
+            onUploadDocument();
+            break;
+          case 'training':
+            onTrainingVideos();
+            break;
+        }
+      },
+    );
+  }
+}

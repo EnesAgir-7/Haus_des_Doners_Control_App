@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/providers/provider_auth.dart';
+import '../../inspector/widgets/custom_toast.dart';
 import '../../inspector/widgets/language_button.dart';
 import 'screen_admin_templates.dart';
 
@@ -22,7 +23,9 @@ class ScreenAdminSettings extends StatelessWidget {
       builder: (context, authProvider, child) {
         return Scaffold(
           appBar: const CustomAppBar(),
-          persistentFooterDecoration: const BoxDecoration(color: Colors.transparent),
+          persistentFooterDecoration: const BoxDecoration(
+            color: Colors.transparent,
+          ),
           persistentFooterButtons: [
             Container(
               margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
@@ -146,13 +149,7 @@ class ScreenAdminSettings extends StatelessWidget {
     } catch (e) {
       // Show error if logout fails
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        showSnakBarr(context, '$e');
       }
     }
   }
@@ -236,7 +233,11 @@ class ScreenAdminSettings extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
+            const Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white54,
+              size: 16,
+            ),
           ],
         ),
       ),

@@ -65,6 +65,7 @@ class BranchFields {
   static const String shopInformation = 'shopInformation';
   static const String branchOwners = 'branchOwners';
   static const String branchManagers = 'branchManagers';
+  static const String fcmTokens = 'fcmTokens';
   // branchPassword removed — do not store passwords in Firestore
 }
 

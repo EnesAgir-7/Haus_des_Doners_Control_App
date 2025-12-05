@@ -39,7 +39,7 @@ class NotificationHelper {
         '📤 Sending notification to inspector $inspectorId (${inspectorTokens.length} device(s))',
       );
 
-      final result = await _sendNotificationToMultipleTokens(
+      final result = await sendNotificationToMultipleTokens(
         fcmTokens: inspectorTokens,
         title: title,
         body: body,
@@ -187,7 +187,7 @@ class NotificationHelper {
   }
 
   /// Send notifications to multiple tokens (batch)
-  Future<Map<String, dynamic>> _sendNotificationToMultipleTokens({
+  Future<Map<String, dynamic>> sendNotificationToMultipleTokens({
     required List<String> fcmTokens,
     required String title,
     required String body,

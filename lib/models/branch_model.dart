@@ -80,6 +80,7 @@ class BranchModel {
   final List<ContactPerson>? branchManagers;
   final String? branchEmail;
   final String? branchPassword;
+  final List<String>? fcmTokens;
 
   BranchModel({
     required this.id,
@@ -113,6 +114,7 @@ class BranchModel {
     this.branchManagers,
     this.branchEmail,
     this.branchPassword,
+    this.fcmTokens,
   });
 
   factory BranchModel.fromMap(Map<String, dynamic> data, {String? id}) {
@@ -197,6 +199,9 @@ class BranchModel {
                 .toList()
           : null,
       branchEmail: data[BranchFields.branchEmail],
+      fcmTokens: data[BranchFields.fcmTokens] != null
+          ? List<String>.from(data[BranchFields.fcmTokens])
+          : null,
       // branchPassword intentionally not read from Firestore (never stored)
     );
   }
@@ -237,6 +242,7 @@ class BranchModel {
     List<ContactPerson>? branchManagers,
     String? branchEmail,
     String? branchPassword,
+    List<String>? fcmTokens,
   }) {
     return BranchModel(
       id: id ?? this.id,
@@ -269,6 +275,7 @@ class BranchModel {
       branchManagers: branchManagers ?? this.branchManagers,
       branchEmail: branchEmail ?? this.branchEmail,
       branchPassword: branchPassword ?? this.branchPassword,
+      fcmTokens: fcmTokens ?? this.fcmTokens,
     );
   }
 
@@ -314,6 +321,8 @@ class BranchModel {
           ?.map((e) => e.toMap())
           .toList(),
       BranchFields.branchEmail: branchEmail,
+      BranchFields.fcmTokens: fcmTokens,
+
       // Note: branchPassword intentionally omitted from toMap — password must not be stored in Firestore
     };
   }

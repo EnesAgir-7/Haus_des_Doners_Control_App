@@ -4,10 +4,12 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admin_add_branch.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/broadcast_notification_dialog.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../admin_providers/provider_admin_branches.dart';
+import '../widgets/admin_all_branches_menu_button.dart';
 import '../widgets/admin_branch_card.dart';
 
 class ScreenAdminBranches extends StatefulWidget {
@@ -48,7 +50,9 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const ScreenAdminAddBranch()),
+            MaterialPageRoute(
+              builder: (context) => const ScreenAdminAddBranch(),
+            ),
           );
         },
         child: const Icon(Icons.add_business_outlined),
@@ -62,7 +66,24 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
 
       child: Column(
         children: [
-          _buildSearchBar(),
+          Row(
+            children: [
+              Expanded(child: _buildSearchBar()),
+              BranchActionsMenuButton(
+                onCreateAnnouncement: () {
+                  showBroadcastNotificationDialog(
+                    parentContext: context,
+                    topic: AppConstants.branch,
+                    recipientLabel: LocaleKeys.branches.tr(),
+                  );
+                },
+                onUpdateRequests: () {
+                  // Handle update requests
+                  print('Update Requests tapped');
+                },
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           _buildStatsRow(),
         ],
@@ -123,7 +144,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
           children: [
             _buildStatCard(
               icon: Icons.store,
-              label: LocaleKeys.totalBranches.tr(), 
+              label: LocaleKeys.totalBranches.tr(),
               value: allBranches.toString(),
               color: AppColors.primaryRed,
             ),
@@ -223,7 +244,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
           ),
           const SizedBox(width: 8),
           _buildSortChip(
-            label: LocaleKeys.nextInspection.tr(), 
+            label: LocaleKeys.nextInspection.tr(),
             value: AppConstants.nextInspection,
             icon: Icons.event,
             provider: provider,
@@ -237,7 +258,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
           ),
           const SizedBox(width: 8),
           _buildSortChip(
-            label: LocaleKeys.region.tr(), 
+            label: LocaleKeys.region.tr(),
             value: AppConstants.region,
             icon: Icons.location_on,
             provider: provider,
@@ -356,7 +377,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
                   const Icon(Icons.error_outline, color: Colors.red, size: 48),
                   const SizedBox(height: 16),
                   Text(
-                   '${LocaleKeys.error.tr()}: ${provider.error}', 
+                    '${LocaleKeys.error.tr()}: ${provider.error}',
                     style: const TextStyle(color: Colors.red),
                     textAlign: TextAlign.center,
                   ),

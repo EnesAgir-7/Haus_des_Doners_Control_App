@@ -7,6 +7,7 @@ import 'package:haus_des_control/core/extensions.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+import '../../../common_services/show_branch_notify_dialog.dart';
 import '../../../common_services/user_selection_sheet.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
@@ -17,6 +18,7 @@ import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/app_button.dart';
 import '../../inspector/widgets/custom_toast.dart';
 import '../admin_providers/provider_admin_branches.dart';
+import '../widgets/admin_branch_menu_button.dart';
 import '../widgets/performance_chart.dart';
 import '../widgets/widgets_admin_branch_details.dart';
 import 'screen_admin_branch_edit.dart';
@@ -116,7 +118,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.red,
+              size: 28,
+            ),
             const SizedBox(width: 12),
             Text(
               LocaleKeys.deleteBranch.tr(),
@@ -264,45 +270,77 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     return Scaffold(
       appBar: CustomAppBar(
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.white),
-            color: AppColors.lightBlack,
-            onSelected: (value) {
-              if (value == AppConstants.edit) {
-                _navigateToEditScreen();
-              } else if (value == AppConstants.delete) {
-                _deleteBranch();
-              }
+          BranchMenuButton(
+            onEdit: () {
+              _navigateToEditScreen();
             },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: AppConstants.edit,
-                child: Row(
-                  children: [
-                    const Icon(Icons.edit, color: AppColors.primaryRed, size: 20),
-                    const SizedBox(width: 12),
-                    Text(
-                      LocaleKeys.editBranch.tr(),
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuItem(
-                value: AppConstants.delete,
-                child: Row(
-                  children: [
-                    const Icon(Icons.delete_outline, color: Colors.red, size: 20),
-                    const SizedBox(width: 12),
-                    Text(
-                      LocaleKeys.deleteBranch.tr() + '',
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            onDelete: () {
+              _deleteBranch();
+            },
+            onSendNotification: () {
+              showBranchNotifyDialog(
+                context: context,
+                branchName: widget.branch.name,
+                fcmTokens: widget.branch.fcmTokens,
+              );
+            },
+            onUploadDocument: () {
+              print("Upload Documents clicked");
+              // open document picker
+            },
+            onTrainingVideos: () {
+              print("Training Videos clicked");
+              // open training videos list
+            },
           ),
+
+          // PopupMenuButton<String>(
+          //   icon: const Icon(Icons.more_vert, color: Colors.white),
+          //   color: AppColors.lightBlack,
+          //   onSelected: (value) {
+          //     if (value == AppConstants.edit) {
+          //       _navigateToEditScreen();
+          //     } else if (value == AppConstants.delete) {
+          //       _deleteBranch();
+          //     }
+          //   },
+          //   itemBuilder: (context) => [
+          //     PopupMenuItem(
+          //       value: AppConstants.edit,
+          //       child: Row(
+          //         children: [
+          //           const Icon(
+          //             Icons.edit,
+          //             color: AppColors.primaryRed,
+          //             size: 20,
+          //           ),
+          //           const SizedBox(width: 12),
+          //           Text(
+          //             LocaleKeys.editBranch.tr(),
+          //             style: const TextStyle(color: Colors.white),
+          //           ),
+          //         ],
+          //       ),
+          //     ),
+          //     PopupMenuItem(
+          //       value: AppConstants.delete,
+          //       child: Row(
+          //         children: [
+          //           const Icon(
+          //             Icons.delete_outline,
+          //             color: Colors.red,
+          //             size: 20,
+          //           ),
+          //           const SizedBox(width: 12),
+          //           Text(
+          //             LocaleKeys.deleteBranch.tr() + '',
+          //             style: const TextStyle(color: Colors.red),
+          //           ),
+          //         ],
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
       body: SafeArea(
@@ -493,7 +531,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              const Icon(Icons.analytics, color: AppColors.primaryRed, size: 20),
+              const Icon(
+                Icons.analytics,
+                color: AppColors.primaryRed,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.twelveMonthSummary.tr(),
@@ -567,7 +609,10 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
             ),
           ),
           const SizedBox(height: 4),
-          Text(label, style: const TextStyle(color: Colors.white60, fontSize: 11)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white60, fontSize: 11),
+          ),
         ],
       ),
     );
@@ -768,7 +813,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              const Icon(Icons.info_outline, color: AppColors.primaryRed, size: 20),
+              const Icon(
+                Icons.info_outline,
+                color: AppColors.primaryRed,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.branchInfo.tr(),
@@ -791,7 +840,10 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.content_copy, color: AppColors.primaryRed),
+                icon: const Icon(
+                  Icons.content_copy,
+                  color: AppColors.primaryRed,
+                ),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: widget.branch.id));
                   showSnakBarr(context, LocaleKeys.copiedToClipboard.tr());
@@ -843,7 +895,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              const Icon(Icons.contact_phone, color: AppColors.primaryRed, size: 20),
+              const Icon(
+                Icons.contact_phone,
+                color: AppColors.primaryRed,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.contact.tr(),
@@ -1232,7 +1288,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.description, color: Colors.white38, size: 18),
+                      const Icon(
+                        Icons.description,
+                        color: Colors.white38,
+                        size: 18,
+                      ),
                       const SizedBox(width: 12),
                       Text(
                         LocaleKeys.shopInformation.tr(),
@@ -1270,7 +1330,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         children: [
           Row(
             children: [
-              const Icon(Icons.person_outline, color: AppColors.primaryRed, size: 20),
+              const Icon(
+                Icons.person_outline,
+                color: AppColors.primaryRed,
+                size: 20,
+              ),
               const SizedBox(width: 8),
               Text(
                 LocaleKeys.assigned_to.tr(),
@@ -1304,7 +1368,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           ),
           child: Column(
             children: [
-              const Icon(Icons.person_off_outlined, size: 40, color: Colors.white24),
+              const Icon(
+                Icons.person_off_outlined,
+                size: 40,
+                color: Colors.white24,
+              ),
               const SizedBox(height: 8),
               Text(
                 LocaleKeys.unassigned.tr(),
@@ -1469,7 +1537,11 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+            const Icon(
+              Icons.error_outline,
+              size: 60,
+              color: AppColors.primaryRed,
+            ),
             const SizedBox(height: 16),
             Text(
               LocaleKeys.error_occurred.tr(),

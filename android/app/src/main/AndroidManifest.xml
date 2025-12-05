@@ -11,7 +11,7 @@
 
     
     <application
-        android:label="Haus Inspect"
+        android:label="HdD Control"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
 

@@ -7,9 +7,11 @@ import 'package:haus_des_control/translations/locale_keys.g.dart';
 
 import 'notification_helper.dart';
 
-/// Global method to show a broadcast notification dialog for all inspectors
+/// Global method to show a broadcast notification dialog for a topic
 Future<void> showBroadcastNotificationDialog({
   required BuildContext parentContext,
+  String topic = AppConstants.inspectorTopic,
+  String? recipientLabel,
 }) async {
   final titleController = TextEditingController();
   final bodyController = TextEditingController();
@@ -94,7 +96,159 @@ Future<void> showBroadcastNotificationDialog({
               // Content
               Padding(
                 padding: const EdgeInsets.all(20),
-                child: _buildBroadcastForm(titleController, bodyController),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Info Card (uses recipientsText)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryRed.withValues(
+                                alpha: 0.15,
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.group,
+                              color: AppColors.primaryRed,
+                              size: 18,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  LocaleKeys.recipients.tr(),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white.withValues(alpha: 0.5),
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  recipientLabel ??
+                                      LocaleKeys.all_inspectors.tr(),
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Title Field
+                    TextField(
+                      controller: titleController,
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      decoration: InputDecoration(
+                        labelText: LocaleKeys.titleLabel.tr(),
+                        labelStyle: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 13,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.title,
+                          color: AppColors.primaryRed.withValues(alpha: 0.7),
+                          size: 20,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white.withValues(alpha: 0.05),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: AppColors.primaryRed.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Body Field
+                    TextField(
+                      controller: bodyController,
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        labelText: LocaleKeys.bodyLabel.tr(),
+                        labelStyle: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 13,
+                        ),
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.only(bottom: 60),
+                          child: Icon(
+                            Icons.message,
+                            color: AppColors.primaryRed.withValues(alpha: 0.7),
+                            size: 20,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white.withValues(alpha: 0.05),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: AppColors.primaryRed.withValues(alpha: 0.5),
+                            width: 1.5,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        alignLabelWithHint: true,
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               // Actions
@@ -142,7 +296,7 @@ Future<void> showBroadcastNotificationDialog({
 
                           final success = await NotificationHelper.instance
                               .sendNotificationToTopic(
-                                topic: AppConstants.inspectorTopic,
+                                topic: topic,
                                 title: title,
                                 body: body,
                                 data: {
@@ -216,151 +370,5 @@ Future<void> showBroadcastNotificationDialog({
         ),
       );
     },
-  );
-}
-
-Widget _buildBroadcastForm(
-  TextEditingController titleController,
-  TextEditingController bodyController,
-) {
-  return Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      // Info Card
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.primaryRed.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(
-                Icons.group,
-                color: AppColors.primaryRed,
-                size: 18,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    LocaleKeys.recipients.tr(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: Colors.white.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    LocaleKeys.all_inspectors.tr(),
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 20),
-
-      // Title Field
-      TextField(
-        controller: titleController,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        decoration: InputDecoration(
-          labelText: LocaleKeys.titleLabel.tr(),
-          labelStyle: TextStyle(
-            color: Colors.white.withValues(alpha: 0.5),
-            fontSize: 13,
-          ),
-          prefixIcon: Icon(
-            Icons.title,
-            color: AppColors.primaryRed.withValues(alpha: 0.7),
-            size: 20,
-          ),
-          filled: true,
-          fillColor: Colors.white.withValues(alpha: 0.05),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: AppColors.primaryRed.withValues(alpha: 0.5),
-              width: 1.5,
-            ),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-        ),
-      ),
-      const SizedBox(height: 16),
-
-      // Body Field
-      TextField(
-        controller: bodyController,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        maxLines: 4,
-        decoration: InputDecoration(
-          labelText: LocaleKeys.bodyLabel.tr(),
-          labelStyle: TextStyle(
-            color: Colors.white.withValues(alpha: 0.5),
-            fontSize: 13,
-          ),
-          prefixIcon: Padding(
-            padding: const EdgeInsets.only(bottom: 60),
-            child: Icon(
-              Icons.message,
-              color: AppColors.primaryRed.withValues(alpha: 0.7),
-              size: 20,
-            ),
-          ),
-          filled: true,
-          fillColor: Colors.white.withValues(alpha: 0.05),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(
-              color: AppColors.primaryRed.withValues(alpha: 0.5),
-              width: 1.5,
-            ),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-          alignLabelWithHint: true,
-        ),
-      ),
-    ],
   );
 }

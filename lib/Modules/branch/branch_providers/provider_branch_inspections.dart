@@ -9,6 +9,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/inspection_model.dart';
 import '../firebase_services/branch_inspection_service.dart';
+
 class ProviderBranchInspections extends ChangeNotifier {
   final BranchInspectionService _inspectionService = BranchInspectionService();
 
