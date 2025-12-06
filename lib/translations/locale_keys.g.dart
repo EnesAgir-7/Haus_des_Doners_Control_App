@@ -898,5 +898,7 @@ abstract class  LocaleKeys {
   static const upload_failed = 'upload_failed';
   static const document_deleted_successfully = 'document_deleted_successfully';
   static const document_updated_successfully = 'document_updated_successfully';
+  static const video_deleted_successfully = 'video_deleted_successfully';
+  static const error_deleting_video = 'error_deleting_video';
 
 }

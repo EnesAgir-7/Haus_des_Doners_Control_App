@@ -909,7 +909,9 @@ class CodegenLoader extends AssetLoader{
   "document_uploaded_successfully": "Dokument erfolgreich hochgeladen!",
   "upload_failed": "Hochladen fehlgeschlagen: ",
   "document_deleted_successfully": "Dokument erfolgreich gelöscht",
-  "document_updated_successfully": "Dokument erfolgreich aktualisiert"
+  "document_updated_successfully": "Dokument erfolgreich aktualisiert",
+  "video_deleted_successfully": "Video erfolgreich gelöscht",
+  "error_deleting_video": "Fehler beim Löschen des Videos: "
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -1822,7 +1824,9 @@ static const Map<String,dynamic> _en = {
   "document_uploaded_successfully": "Document uploaded successfully!",
   "upload_failed": "Upload failed: ",
   "document_deleted_successfully": "Document deleted successfully",
-  "document_updated_successfully": "Document updated successfully"
+  "document_updated_successfully": "Document updated successfully",
+  "video_deleted_successfully": "Video deleted successfully",
+  "error_deleting_video": "Error deleting video: "
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2705,7 +2709,9 @@ static const Map<String,dynamic> _tr = {
   "document_uploaded_successfully": "Belge başarıyla yüklendi!",
   "upload_failed": "Yükleme başarısız: ",
   "document_deleted_successfully": "Belge başarıyla silindi",
-  "document_updated_successfully": "Belge başarıyla güncellendi"
+  "document_updated_successfully": "Belge başarıyla güncellendi",
+  "video_deleted_successfully": "Video başarıyla silindi",
+  "error_deleting_video": "Video silinirken hata: "
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

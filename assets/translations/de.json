@@ -893,5 +893,7 @@
   "document_uploaded_successfully": "Dokument erfolgreich hochgeladen!",
   "upload_failed": "Hochladen fehlgeschlagen: ",
   "document_deleted_successfully": "Dokument erfolgreich gelöscht",
-  "document_updated_successfully": "Dokument erfolgreich aktualisiert"
+  "document_updated_successfully": "Dokument erfolgreich aktualisiert",
+  "video_deleted_successfully": "Video erfolgreich gelöscht",
+  "error_deleting_video": "Fehler beim Löschen des Videos: "
 }

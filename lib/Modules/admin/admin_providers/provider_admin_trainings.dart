@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import '../../../models/training_video_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../admin_firebase_services/admin_training_service.dart';
 
 class AdminTrainingVideosProvider extends ChangeNotifier {
@@ -82,9 +84,7 @@ class AdminTrainingVideosProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error adding video: $e')));
+        showSnakBarr(context, e.toString());
       }
       return false;
     }
@@ -103,7 +103,7 @@ class AdminTrainingVideosProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, 'Video deleted successfully');
+        showSnakBarr(context, LocaleKeys.video_deleted_successfully.tr());
       }
 
       return true;
@@ -112,7 +112,7 @@ class AdminTrainingVideosProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, 'Error deleting video: $e');
+        showSnakBarr(context, '${LocaleKeys.error_deleting_video.tr()}$e');
       }
       return false;
     }

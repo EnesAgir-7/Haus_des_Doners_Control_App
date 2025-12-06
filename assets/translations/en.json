@@ -909,5 +909,7 @@
   "document_uploaded_successfully": "Document uploaded successfully!",
   "upload_failed": "Upload failed: ",
   "document_deleted_successfully": "Document deleted successfully",
-  "document_updated_successfully": "Document updated successfully"
+  "document_updated_successfully": "Document updated successfully",
+  "video_deleted_successfully": "Video deleted successfully",
+  "error_deleting_video": "Error deleting video: "
 }

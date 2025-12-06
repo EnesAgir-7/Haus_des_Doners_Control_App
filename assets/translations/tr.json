@@ -879,5 +879,7 @@
   "document_uploaded_successfully": "Belge başarıyla yüklendi!",
   "upload_failed": "Yükleme başarısız: ",
   "document_deleted_successfully": "Belge başarıyla silindi",
-  "document_updated_successfully": "Belge başarıyla güncellendi"
+  "document_updated_successfully": "Belge başarıyla güncellendi",
+  "video_deleted_successfully": "Video başarıyla silindi",
+  "error_deleting_video": "Video silinirken hata: "
 }
