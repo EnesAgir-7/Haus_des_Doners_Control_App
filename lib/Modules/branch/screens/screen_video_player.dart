@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../core/constants/app_assets.dart';
@@ -12,7 +13,7 @@ class ScreenVideoPlayer extends StatefulWidget {
   final String videoUrl;
   final String videoDescription;
   final int moduleNumber;
-  final IconData icon;
+  final IconData? icon;
 
   const ScreenVideoPlayer({
     super.key,
@@ -20,7 +21,7 @@ class ScreenVideoPlayer extends StatefulWidget {
     required this.videoUrl,
     required this.videoDescription,
     required this.moduleNumber,
-    required this.icon,
+    this.icon,
   });
 
   @override
@@ -94,22 +95,7 @@ class _ScreenVideoPlayerState extends State<ScreenVideoPlayer> {
       builder: (context, player) {
         return Scaffold(
           backgroundColor: AppColors.primaryDark,
-          appBar: AppBar(
-            backgroundColor: AppColors.primaryDark,
-            elevation: 0,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
-            ),
-            title: Text(
-              widget.videoTitle,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
+          appBar: CustomAppBar(title: widget.videoTitle),
           body: SafeArea(
             child: SingleChildScrollView(
               child: Column(
@@ -136,35 +122,20 @@ class _ScreenVideoPlayerState extends State<ScreenVideoPlayer> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
-                                widget.icon,
+                                widget.icon ?? Icons.play_arrow,
                                 color: AppColors.primaryRed,
                                 size: 20,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    widget.videoTitle,
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '${LocaleKeys.module.tr()} ${widget.moduleNumber}',
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.6,
-                                      ),
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                widget.videoTitle,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ],

@@ -13,6 +13,7 @@ class Collections {
   static const String inspectors = 'inspectors';
   static const String admins = 'admins';
   static const String inspectorStats = 'inspector_history';
+  static const String trainingVideos = 'training_videos';
 }
 
 class VehicleFields {
@@ -123,6 +124,16 @@ class RouteStopFields {
   static const String expiryDate = 'expiryDate';
   static const String inspectionScore = 'inspectionScore';
   static const String branchAddress = 'branchAddress';
+}
+
+
+class TrainingVideoFields {
+  static const id = 'id';
+  static const branchId = 'branchId';
+  static const name = 'name';
+  static const description = 'description';
+  static const videoUrl = 'videoUrl';
+  static const createdAt = 'createdAt';
 }
 
 class TaskFields {

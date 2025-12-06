@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:haus_des_control/Modules/admin/screens/screen_admin_branch_trainings.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/core/extensions.dart';
@@ -21,6 +22,7 @@ import '../admin_providers/provider_admin_branches.dart';
 import '../widgets/admin_branch_menu_button.dart';
 import '../widgets/performance_chart.dart';
 import '../widgets/widgets_admin_branch_details.dart';
+import 'screen_admin_branch_docs.dart';
 import 'screen_admin_branch_edit.dart';
 import 'screen_admin_inspections.dart';
 
@@ -285,12 +287,21 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               );
             },
             onUploadDocument: () {
-              print("Upload Documents clicked");
-              // open document picker
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ScreenAdminDocumentsScreen(),
+                ),
+              );
             },
             onTrainingVideos: () {
-              print("Training Videos clicked");
-              // open training videos list
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      ScreenAdminBranchTrainings(branchId: widget.branch.id),
+                ),
+              );
             },
           ),
 

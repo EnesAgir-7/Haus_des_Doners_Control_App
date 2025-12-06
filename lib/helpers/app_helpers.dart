@@ -188,3 +188,23 @@ Widget buildNextInspectionInfo({
     ],
   );
 }
+
+String? getThumbnailUrl(String videoUrl) {
+  try {
+    final uri = Uri.parse(videoUrl);
+    String? videoId;
+
+    if (uri.host.contains('youtube.com')) {
+      videoId = uri.queryParameters['v'];
+    } else if (uri.host.contains('youtu.be')) {
+      videoId = uri.pathSegments.first;
+    }
+
+    if (videoId != null && videoId.isNotEmpty) {
+      return 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}

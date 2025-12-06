@@ -1,14 +1,14 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../branch_providers/provider_branch_dashboard.dart';
 import 'screen_branch_request_edit.dart';
+import 'screen_branch_trainings.dart';
 import 'screen_documents.dart';
-import 'screen_notifications.dart';
-import 'screen_trainings.dart';
 
 class BranchScreenMore extends StatefulWidget {
   const BranchScreenMore({super.key});
@@ -145,35 +145,27 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
 
   Widget _buildActionsList(ProviderBranchDashboard provider) {
     final actions = [
-      {
-        'icon': Icons.campaign_outlined,
-        'label': LocaleKeys.announcements.tr(),
-        'description': LocaleKeys.view_important_updates.tr(),
-        'color': Colors.blue,
-        'badge': 3, // Mock badge count
-        'onTap': () {},
-      },
-      {
-        'icon': Icons.campaign_outlined,
-        'label': LocaleKeys.announcements.tr(),
-        'description': LocaleKeys.view_important_updates.tr(),
-        'color': Colors.blue,
-        'badge': 3, // Mock badge count
-        'onTap': () {},
-      },
-      {
-        'icon': Icons.notifications_outlined,
-        'label': LocaleKeys.notifications.tr(),
-        'description': LocaleKeys.check_latest_notifications.tr(),
-        'color': Colors.orange,
-        'badge': provider.unreadNotifications,
-        'onTap': () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const ScreenNotifications()),
-          );
-        },
-      },
+      // {
+      //   'icon': Icons.campaign_outlined,
+      //   'label': LocaleKeys.announcements.tr(),
+      //   'description': LocaleKeys.view_important_updates.tr(),
+      //   'color': Colors.blue,
+      //   'badge': 3, // Mock badge count
+      //   'onTap': () {},
+      // },
+      // {
+      //   'icon': Icons.notifications_outlined,
+      //   'label': LocaleKeys.notifications.tr(),
+      //   'description': LocaleKeys.check_latest_notifications.tr(),
+      //   'color': Colors.orange,
+      //   'badge': provider.unreadNotifications,
+      //   'onTap': () {
+      //     Navigator.push(
+      //       context,
+      //       MaterialPageRoute(builder: (_) => const ScreenNotifications()),
+      //     );
+      //   },
+      // },
       {
         'icon': Icons.video_library_outlined,
         'label': LocaleKeys.training_videos.tr(),
@@ -183,7 +175,9 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
         'onTap': () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ScreenTrainings()),
+            MaterialPageRoute(
+              builder: (_) => ScreenBranchTrainings(branchId: loggedInUser!.id),
+            ),
           );
         },
       },
