@@ -8,7 +8,7 @@ import '../../../translations/locale_keys.g.dart';
 import '../branch_providers/provider_branch_dashboard.dart';
 import 'screen_branch_request_edit.dart';
 import 'screen_branch_trainings.dart';
-import 'screen_documents.dart';
+import 'screen_branch_documents.dart';
 
 class BranchScreenMore extends StatefulWidget {
   const BranchScreenMore({super.key});
@@ -190,7 +190,9 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
         'onTap': () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ScreenDocuments()),
+            MaterialPageRoute(builder: (_) => ScreenBranchDocuments(
+              branchId: loggedInUser!.id,
+            )),
           );
         },
       },

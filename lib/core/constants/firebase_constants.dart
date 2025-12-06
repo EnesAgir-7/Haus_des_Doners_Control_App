@@ -14,6 +14,8 @@ class Collections {
   static const String admins = 'admins';
   static const String inspectorStats = 'inspector_history';
   static const String trainingVideos = 'training_videos';
+  static const String documents = 'documents';
+  static const String documentsSubCollection = 'documents';
 }
 
 class VehicleFields {
@@ -125,7 +127,6 @@ class RouteStopFields {
   static const String inspectionScore = 'inspectionScore';
   static const String branchAddress = 'branchAddress';
 }
-
 
 class TrainingVideoFields {
   static const id = 'id';

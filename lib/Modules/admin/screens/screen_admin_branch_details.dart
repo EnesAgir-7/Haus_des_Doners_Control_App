@@ -290,7 +290,12 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const ScreenAdminDocumentsScreen(),
+                  builder: (_) => ScreenAdminDocumentsScreen(
+                    branchId: widget.branch.id,
+                    uploadedBy: "",
+                    uploadedByName: "",
+
+                  ),
                 ),
               );
             },

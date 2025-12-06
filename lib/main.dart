@@ -21,6 +21,7 @@ import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import 'Modules/admin/admin_providers/provider_admin_bottombar.dart';
+import 'Modules/admin/admin_providers/provider_admin_documents.dart';
 import 'Modules/admin/admin_providers/provider_admin_inspections.dart';
 import 'Modules/admin/admin_providers/provider_admin_tasks.dart';
 import 'Modules/admin/admin_providers/provider_admin_trainings.dart';
@@ -124,6 +125,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderBranchBottomNavBar()),
         ChangeNotifierProvider(create: (_) => ProviderBranchInspections()),
         ChangeNotifierProvider(create: (_) => AdminTrainingVideosProvider()),
+        ChangeNotifierProvider(create: (_) => AdminDocumentsProvider()),
       ],
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,

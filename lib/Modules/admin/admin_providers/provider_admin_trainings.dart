@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import '../../../models/training_video_model.dart';
 import '../admin_firebase_services/admin_training_service.dart';
 
@@ -102,9 +103,7 @@ class AdminTrainingVideosProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Video deleted successfully')),
-        );
+        showSnakBarr(context, 'Video deleted successfully');
       }
 
       return true;
@@ -113,9 +112,7 @@ class AdminTrainingVideosProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error deleting video: $e')));
+        showSnakBarr(context, 'Error deleting video: $e');
       }
       return false;
     }

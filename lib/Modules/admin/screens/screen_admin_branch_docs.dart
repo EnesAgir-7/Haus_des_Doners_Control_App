@@ -1,12 +1,23 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'dart:io';
+import '../../../models/document_model.dart';
+import '../admin_providers/provider_admin_documents.dart';
 
 class ScreenAdminDocumentsScreen extends StatefulWidget {
-  const ScreenAdminDocumentsScreen({Key? key}) : super(key: key);
+  final String branchId;
+  final String uploadedBy; // Admin user ID
+  final String uploadedByName; // Admin name
+
+  const ScreenAdminDocumentsScreen({
+    Key? key,
+    required this.branchId,
+    required this.uploadedBy,
+    required this.uploadedByName,
+  }) : super(key: key);
 
   @override
   State<ScreenAdminDocumentsScreen> createState() =>
@@ -15,48 +26,37 @@ class ScreenAdminDocumentsScreen extends StatefulWidget {
 
 class _ScreenAdminDocumentsScreenState
     extends State<ScreenAdminDocumentsScreen> {
-  List<DocumentModel> documents = [];
-  bool isLoading = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _loadDocuments();
+    _scrollController.addListener(_onScroll);
   }
 
-  Future<void> _loadDocuments() async {
-    setState(() => isLoading = true);
-    // Example:
-    // final docs = await FirebaseFirestore.instance.collection('documents').get();
-    // setState(() {
-    //   documents = docs.docs.map((doc) => DocumentModel.fromFirestore(doc)).toList();
-    // });
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
-    // Dummy data for now
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      documents = [
-        DocumentModel(
-          id: '1',
-          name: 'Safety Guidelines 2024',
-          description: 'Updated safety protocols for all branches',
-          fileUrl: 'https://example.com/doc1.pdf',
-          fileName: 'safety_guidelines.pdf',
-          uploadedAt: DateTime.now().subtract(const Duration(days: 5)),
-          uploadedBy: 'Admin Name',
-        ),
-        DocumentModel(
-          id: '2',
-          name: 'Training Manual',
-          description: 'Complete training manual for new employees',
-          fileUrl: 'https://example.com/doc2.pdf',
-          fileName: 'training_manual.pdf',
-          uploadedAt: DateTime.now().subtract(const Duration(days: 12)),
-          uploadedBy: 'Admin Name',
-        ),
-      ];
-      isLoading = false;
+  void _loadDocuments() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AdminDocumentsProvider>().loadBranchDocuments(
+        widget.branchId,
+      );
     });
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final provider = context.read<AdminDocumentsProvider>();
+      if (!provider.isLoading && provider.hasMore) {
+        provider.loadMoreDocuments();
+      }
+    }
   }
 
   void _showUploadBottomSheet() {
@@ -65,9 +65,9 @@ class _ScreenAdminDocumentsScreenState
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => UploadDocumentBottomSheet(
-        onDocumentUploaded: () {
-          _loadDocuments(); // Refresh the list
-        },
+        branchId: widget.branchId,
+        uploadedBy: widget.uploadedBy,
+        uploadedByName: widget.uploadedByName,
       ),
     );
   }
@@ -76,21 +76,70 @@ class _ScreenAdminDocumentsScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: "Documents"),
-      body: isLoading
-          ? const Center(
+      body: Consumer<AdminDocumentsProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading && provider.documents.isEmpty) {
+            return const Center(
               child: CircularProgressIndicator(color: AppColors.primaryRed),
-            )
-          : documents.isEmpty
-          ? _buildEmptyState()
-          : _buildDocumentsList(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showUploadBottomSheet,
-        backgroundColor: AppColors.primaryRed,
-        icon: const Icon(Icons.upload_file, color: Colors.white),
-        label: const Text(
-          'Upload Document',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+            );
+          }
+
+          if (provider.documents.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          return RefreshIndicator(
+            onRefresh: () => provider.refreshDocuments(),
+            color: AppColors.primaryRed,
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              itemCount: provider.documents.length + (provider.hasMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == provider.documents.length) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryRed,
+                      ),
+                    ),
+                  );
+                }
+
+                final doc = provider.documents[index];
+                return _buildDocumentCard(doc, provider);
+              },
+            ),
+          );
+        },
+      ),
+      floatingActionButton: Consumer<AdminDocumentsProvider>(
+        builder: (context, provider, child) {
+          return FloatingActionButton.extended(
+            onPressed: provider.isUploading ? null : _showUploadBottomSheet,
+            backgroundColor: provider.isUploading
+                ? Colors.grey
+                : AppColors.primaryRed,
+            icon: provider.isUploading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Icon(Icons.upload_file, color: Colors.white),
+            label: Text(
+              provider.isUploading ? 'Uploading...' : 'Upload Document',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -134,18 +183,10 @@ class _ScreenAdminDocumentsScreenState
     );
   }
 
-  Widget _buildDocumentsList() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: documents.length,
-      itemBuilder: (context, index) {
-        final doc = documents[index];
-        return _buildDocumentCard(doc);
-      },
-    );
-  }
-
-  Widget _buildDocumentCard(DocumentModel doc) {
+  Widget _buildDocumentCard(
+    DocumentModel doc,
+    AdminDocumentsProvider provider,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -164,7 +205,9 @@ class _ScreenAdminDocumentsScreenState
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () {},
+          onTap: () {
+            // TODO: Open document
+          },
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -175,8 +218,8 @@ class _ScreenAdminDocumentsScreenState
                     color: AppColors.primaryRed.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
-                    Icons.description,
+                  child: Icon(
+                    _getFileIcon(doc.fileExtension),
                     color: AppColors.primaryRed,
                     size: 24,
                   ),
@@ -228,7 +271,7 @@ class _ScreenAdminDocumentsScreenState
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            doc.fileName,
+                            doc.formattedFileSize,
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 11,
@@ -239,10 +282,34 @@ class _ScreenAdminDocumentsScreenState
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white.withValues(alpha: 0.3),
-                  size: 16,
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Icons.more_vert,
+                    color: Colors.white.withValues(alpha: 0.5),
+                  ),
+                  color: AppColors.lightBlack,
+                  onSelected: (value) {
+                    if (value == 'delete') {
+                      _showDeleteConfirmation(doc, provider);
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete, color: Colors.red, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Delete',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -250,6 +317,59 @@ class _ScreenAdminDocumentsScreenState
         ),
       ),
     );
+  }
+
+  void _showDeleteConfirmation(
+    DocumentModel doc,
+    AdminDocumentsProvider provider,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.lightBlack,
+        title: const Text(
+          'Delete Document',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${doc.name}"?',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              provider.deleteDocument(doc.id, doc.fileUrl, context: context);
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  IconData _getFileIcon(String extension) {
+    switch (extension.toLowerCase()) {
+      case 'pdf':
+        return Icons.picture_as_pdf;
+      case 'doc':
+      case 'docx':
+        return Icons.description;
+      case 'xls':
+      case 'xlsx':
+        return Icons.table_chart;
+      case 'txt':
+        return Icons.text_snippet;
+      default:
+        return Icons.insert_drive_file;
+    }
   }
 
   String _getTimeAgo(DateTime date) {
@@ -262,10 +382,16 @@ class _ScreenAdminDocumentsScreenState
 }
 
 class UploadDocumentBottomSheet extends StatefulWidget {
-  final VoidCallback onDocumentUploaded;
+  final String branchId;
+  final String uploadedBy;
+  final String uploadedByName;
 
-  const UploadDocumentBottomSheet({Key? key, required this.onDocumentUploaded})
-    : super(key: key);
+  const UploadDocumentBottomSheet({
+    Key? key,
+    required this.branchId,
+    required this.uploadedBy,
+    required this.uploadedByName,
+  }) : super(key: key);
 
   @override
   State<UploadDocumentBottomSheet> createState() =>
@@ -277,7 +403,6 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
   final _descriptionController = TextEditingController();
   File? _selectedFile;
   String? _fileName;
-  bool _isUploading = false;
 
   @override
   void dispose() {
@@ -300,9 +425,11 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
         });
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error picking file: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error picking file: $e')));
+      }
     }
   }
 
@@ -328,28 +455,21 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
       return;
     }
 
-    setState(() => _isUploading = true);
+    final provider = context.read<AdminDocumentsProvider>();
 
-    try {
-      // Example:
-      // 1. Upload file to Firebase Storage
-      // 2. Get download URL
-      // 3. Save document info to Firestore
+    final success = await provider.uploadDocument(
+      file: _selectedFile!,
+      fileName: _fileName!,
+      name: _nameController.text.trim(),
+      description: _descriptionController.text.trim(),
+      branchId: widget.branchId,
+      uploadedBy: widget.uploadedBy,
+      uploadedByName: widget.uploadedByName,
+      context: context,
+    );
 
-      await Future.delayed(const Duration(seconds: 2)); // Simulate upload
-
-      widget.onDocumentUploaded();
+    if (success && mounted) {
       Navigator.pop(context);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Document uploaded successfully!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
-    } finally {
-      setState(() => _isUploading = false);
     }
   }
 
@@ -627,76 +747,84 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                     const SizedBox(height: 24),
 
                     // Upload Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: Material(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(12),
-                          onTap: _isUploading ? null : _uploadDocument,
-                          child: Ink(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: _isUploading
-                                    ? [
-                                        Colors.grey.withValues(alpha: 0.5),
-                                        Colors.grey.withValues(alpha: 0.3),
-                                      ]
-                                    : [
-                                        AppColors.primaryRed,
-                                        AppColors.primaryRed.withValues(
-                                          alpha: 0.8,
-                                        ),
-                                      ],
-                              ),
+                    Consumer<AdminDocumentsProvider>(
+                      builder: (context, provider, child) {
+                        return SizedBox(
+                          width: double.infinity,
+                          child: Material(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                            child: InkWell(
                               borderRadius: BorderRadius.circular(12),
-                              boxShadow: _isUploading
-                                  ? []
-                                  : [
-                                      BoxShadow(
-                                        color: AppColors.primaryRed.withValues(
-                                          alpha: 0.4,
-                                        ),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: _isUploading
-                                ? const Center(
-                                    child: SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
-                                  )
-                                : const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.cloud_upload,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Upload Document',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
+                              onTap: provider.isUploading
+                                  ? null
+                                  : _uploadDocument,
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: provider.isUploading
+                                        ? [
+                                            Colors.grey.withValues(alpha: 0.5),
+                                            Colors.grey.withValues(alpha: 0.3),
+                                          ]
+                                        : [
+                                            AppColors.primaryRed,
+                                            AppColors.primaryRed.withValues(
+                                              alpha: 0.8,
+                                            ),
+                                          ],
                                   ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: provider.isUploading
+                                      ? []
+                                      : [
+                                          BoxShadow(
+                                            color: AppColors.primaryRed
+                                                .withValues(alpha: 0.4),
+                                            blurRadius: 8,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                child: provider.isUploading
+                                    ? const Center(
+                                        child: SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      )
+                                    : const Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.cloud_upload,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'Upload Document',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -709,51 +837,3 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
     );
   }
 }
-
-// Model class for Document
-class DocumentModel {
-  final String id;
-  final String name;
-  final String description;
-  final String fileUrl;
-  final String fileName;
-  final DateTime uploadedAt;
-  final String uploadedBy;
-
-  DocumentModel({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.fileUrl,
-    required this.fileName,
-    required this.uploadedAt,
-    required this.uploadedBy,
-  });
-
-  factory DocumentModel.fromFirestore(Map<String, dynamic> data, String id) {
-    return DocumentModel(
-      id: id,
-      name: data['name'] ?? '',
-      description: data['description'] ?? '',
-      fileUrl: data['fileUrl'] ?? '',
-      fileName: data['fileName'] ?? '',
-      uploadedAt: (data['uploadedAt'] as Timestamp).toDate(),
-      uploadedBy: data['uploadedBy'] ?? '',
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'name': name,
-      'description': description,
-      'fileUrl': fileUrl,
-      'fileName': fileName,
-      'uploadedAt': Timestamp.fromDate(uploadedAt),
-      'uploadedBy': uploadedBy,
-    };
-  }
-}
-
-// Don't forget to add this to your pubspec.yaml:
-// dependencies:
-//   file_picker: ^8.1.4
