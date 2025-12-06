@@ -873,5 +873,11 @@
   "error_opening_document": "Belge açılırken hata: ",
   "open_document": "Belgeyi Aç",
   "copy_link": "Bağlantıyı Kopyala",
-  "share": "Paylaş"
+  "share": "Paylaş",
+  "file_size_limit": "Dosya boyutu 10MB'tan küçük olmalıdır",
+  "invalid_file_type": "Geçersiz dosya türü. İzin verilenler: ",
+  "document_uploaded_successfully": "Belge başarıyla yüklendi!",
+  "upload_failed": "Yükleme başarısız: ",
+  "document_deleted_successfully": "Belge başarıyla silindi",
+  "document_updated_successfully": "Belge başarıyla güncellendi"
 }

@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 import '../../../models/document_model.dart';
 import '../admin_firebase_services/admin_document_service.dart';
 
@@ -99,7 +101,7 @@ class AdminDocumentsProvider extends ChangeNotifier {
       // Validate file size (max 10MB)
       final fileSize = await file.length();
       if (fileSize > 10 * 1024 * 1024) {
-        throw Exception('File size must be less than 10MB');
+        throw Exception(LocaleKeys.file_size_limit.tr());
       }
 
       // Get file extension
@@ -109,7 +111,7 @@ class AdminDocumentsProvider extends ChangeNotifier {
       const allowedExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt'];
       if (!allowedExtensions.contains(fileExtension)) {
         throw Exception(
-          'Invalid file type. Allowed: ${allowedExtensions.join(", ")}',
+          '${LocaleKeys.invalid_file_type.tr()}${allowedExtensions.join(", ")}',
         );
       }
 
@@ -155,7 +157,7 @@ class AdminDocumentsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, 'Document uploaded successfully!');
+        showSnakBarr(context, LocaleKeys.document_uploaded_successfully.tr());
       }
 
       return true;
@@ -165,11 +167,9 @@ class AdminDocumentsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Upload failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
+        showSnakBarr(
+          context,
+          '${LocaleKeys.upload_failed.tr()}${e.toString()}',
         );
       }
       return false;
@@ -198,12 +198,7 @@ class AdminDocumentsProvider extends ChangeNotifier {
       await _service.deleteDocument(_currentBranchId!, documentId, fileUrl);
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Document deleted successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showSnakBarr(context, LocaleKeys.document_deleted_successfully.tr());
       }
 
       return true;
@@ -214,12 +209,7 @@ class AdminDocumentsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error deleting document: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showSnakBarr(context, e.toString());
       }
       return false;
     }
@@ -251,12 +241,7 @@ class AdminDocumentsProvider extends ChangeNotifier {
       }
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Document updated successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showSnakBarr(context, LocaleKeys.document_updated_successfully.tr());
       }
 
       return true;
@@ -265,12 +250,7 @@ class AdminDocumentsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error updating document: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        showSnakBarr(context, e.toString());
       }
       return false;
     }
@@ -295,7 +275,7 @@ class AdminDocumentsProvider extends ChangeNotifier {
       _hasMore = false; // Disable pagination for search results
     } catch (e) {
       _errorMessage = e.toString();
-      debugPrint('Error searching documents: $e');
+      debugPrint('Error searching documents $e');
     } finally {
       _isLoading = false;
       notifyListeners();

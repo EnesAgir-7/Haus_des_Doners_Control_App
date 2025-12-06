@@ -892,5 +892,11 @@ abstract class  LocaleKeys {
   static const open_document = 'open_document';
   static const copy_link = 'copy_link';
   static const share = 'share';
+  static const file_size_limit = 'file_size_limit';
+  static const invalid_file_type = 'invalid_file_type';
+  static const document_uploaded_successfully = 'document_uploaded_successfully';
+  static const upload_failed = 'upload_failed';
+  static const document_deleted_successfully = 'document_deleted_successfully';
+  static const document_updated_successfully = 'document_updated_successfully';
 
 }

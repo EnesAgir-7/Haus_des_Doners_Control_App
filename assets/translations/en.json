@@ -903,5 +903,11 @@
   "error_opening_document": "Error opening document: ",
   "open_document": "Open Document",
   "copy_link": "Copy Link",
-  "share": "Share"
+  "share": "Share",
+  "file_size_limit": "File size must be less than 10MB",
+  "invalid_file_type": "Invalid file type. Allowed: ",
+  "document_uploaded_successfully": "Document uploaded successfully!",
+  "upload_failed": "Upload failed: ",
+  "document_deleted_successfully": "Document deleted successfully",
+  "document_updated_successfully": "Document updated successfully"
 }

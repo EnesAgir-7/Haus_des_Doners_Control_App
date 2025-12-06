@@ -887,5 +887,11 @@
   "error_opening_document": "Fehler beim Öffnen des Dokuments: ",
   "open_document": "Dokument öffnen",
   "copy_link": "Link kopieren",
-  "share": "Teilen"
+  "share": "Teilen",
+  "file_size_limit": "Die Dateigröße muss kleiner als 10 MB sein",
+  "invalid_file_type": "Ungültiger Dateityp. Erlaubt: ",
+  "document_uploaded_successfully": "Dokument erfolgreich hochgeladen!",
+  "upload_failed": "Hochladen fehlgeschlagen: ",
+  "document_deleted_successfully": "Dokument erfolgreich gelöscht",
+  "document_updated_successfully": "Dokument erfolgreich aktualisiert"
 }

@@ -903,7 +903,13 @@ class CodegenLoader extends AssetLoader{
   "error_opening_document": "Fehler beim Öffnen des Dokuments: ",
   "open_document": "Dokument öffnen",
   "copy_link": "Link kopieren",
-  "share": "Teilen"
+  "share": "Teilen",
+  "file_size_limit": "Die Dateigröße muss kleiner als 10 MB sein",
+  "invalid_file_type": "Ungültiger Dateityp. Erlaubt: ",
+  "document_uploaded_successfully": "Dokument erfolgreich hochgeladen!",
+  "upload_failed": "Hochladen fehlgeschlagen: ",
+  "document_deleted_successfully": "Dokument erfolgreich gelöscht",
+  "document_updated_successfully": "Dokument erfolgreich aktualisiert"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -1810,7 +1816,13 @@ static const Map<String,dynamic> _en = {
   "error_opening_document": "Error opening document: ",
   "open_document": "Open Document",
   "copy_link": "Copy Link",
-  "share": "Share"
+  "share": "Share",
+  "file_size_limit": "File size must be less than 10MB",
+  "invalid_file_type": "Invalid file type. Allowed: ",
+  "document_uploaded_successfully": "Document uploaded successfully!",
+  "upload_failed": "Upload failed: ",
+  "document_deleted_successfully": "Document deleted successfully",
+  "document_updated_successfully": "Document updated successfully"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2687,7 +2699,13 @@ static const Map<String,dynamic> _tr = {
   "error_opening_document": "Belge açılırken hata: ",
   "open_document": "Belgeyi Aç",
   "copy_link": "Bağlantıyı Kopyala",
-  "share": "Paylaş"
+  "share": "Paylaş",
+  "file_size_limit": "Dosya boyutu 10MB'tan küçük olmalıdır",
+  "invalid_file_type": "Geçersiz dosya türü. İzin verilenler: ",
+  "document_uploaded_successfully": "Belge başarıyla yüklendi!",
+  "upload_failed": "Yükleme başarısız: ",
+  "document_deleted_successfully": "Belge başarıyla silindi",
+  "document_updated_successfully": "Belge başarıyla güncellendi"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }
