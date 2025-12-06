@@ -47,7 +47,7 @@ class ScreenBranchTrainings extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Error loading videos',
+                      LocaleKeys.error_loading_videos.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 16,
@@ -89,7 +89,7 @@ class ScreenBranchTrainings extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'No Training Videos',
+                      LocaleKeys.no_training_videos.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 18,
@@ -98,7 +98,7 @@ class ScreenBranchTrainings extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Training videos will appear here once added',
+                      LocaleKeys.videos_will_appear.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 14,
@@ -167,7 +167,7 @@ class ScreenBranchTrainings extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${videos.length} ${videos.length == 1 ? 'video' : 'videos'} available',
+                                      '${videos.length} ${videos.length == 1 ? LocaleKeys.video.tr() : LocaleKeys.videos.tr()} ${LocaleKeys.available.tr()}',
                                       style: TextStyle(
                                         color: Colors.white.withValues(
                                           alpha: 0.7,
@@ -228,7 +228,7 @@ class ScreenBranchTrainings extends StatelessWidget {
               moduleNumber: index + 1,
               videoDescription: video.description.isNotEmpty
                   ? video.description
-                  : 'Training Video',
+                  : LocaleKeys.training_video.tr(),
             ),
           ),
         );

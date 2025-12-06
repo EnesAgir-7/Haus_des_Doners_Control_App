@@ -313,7 +313,7 @@ Widget _buildLoggedOutContent(String branchName) {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  'Branch', // You can add this to LocaleKeys
+                  LocaleKeys.branch.tr(),
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white.withValues(alpha: 0.6),
@@ -394,7 +394,7 @@ Widget _buildNotificationForm(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Branch', // You can add this to LocaleKeys
+                    LocaleKeys.branch.tr(),
                     style: TextStyle(
                       fontSize: 11,
                       color: Colors.white.withValues(alpha: 0.5),

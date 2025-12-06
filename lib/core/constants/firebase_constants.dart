@@ -16,6 +16,7 @@ class Collections {
   static const String trainingVideos = 'training_videos';
   static const String documents = 'documents';
   static const String documentsSubCollection = 'documents';
+  static const String notifications = 'notifications';
 }
 
 class VehicleFields {

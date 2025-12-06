@@ -12,7 +12,6 @@ import '../widgets/custom_app_bar.dart';
 import '../widgets/custom_field.dart';
 import '../widgets/custom_toast.dart';
 
-//TODO: locale
 class ScreenAuth extends StatefulWidget {
   const ScreenAuth({super.key});
 
@@ -80,8 +79,8 @@ class _ScreenAuthState extends State<ScreenAuth> {
                         DropdownButtonFormField<String>(
                           initialValue: provider.selectedRole,
                           decoration: InputDecoration(
-                            labelText: 'Login As',
-                            hintText: 'Select role',
+                            labelText: LocaleKeys.login_as.tr(),
+                            hintText: LocaleKeys.select_role.tr(),
                             prefixIcon: const Icon(
                               Icons.person_outline,
                               color: AppColors.lightGrey,
@@ -127,7 +126,7 @@ class _ScreenAuthState extends State<ScreenAuth> {
                             Icons.arrow_drop_down,
                             color: AppColors.lightGrey,
                           ),
-                          items:  [
+                          items: [
                             DropdownMenuItem(
                               value: AppConstants.admin,
                               child: Text(LocaleKeys.admin.tr()),

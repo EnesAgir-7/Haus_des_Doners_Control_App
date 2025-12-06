@@ -1,6 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/branch/firebase_services/branch_service.dart';
 import 'package:haus_des_control/models/branch_model.dart';
+
+import '../../../translations/locale_keys.g.dart';
 
 class ProviderBranchView extends ChangeNotifier {
   BranchModel? branch;
@@ -15,7 +18,7 @@ class ProviderBranchView extends ChangeNotifier {
 
       final result = await BranchService.fetchBranchByUserId(userId);
       if (result == null) {
-        error = 'Branch not found';
+        error = LocaleKeys.branchNotFound.tr();
         branch = null;
       } else {
         branch = result;

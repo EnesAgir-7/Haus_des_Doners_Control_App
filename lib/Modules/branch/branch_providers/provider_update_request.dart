@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../models/branch_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../firebase_services/branch_dashboard_service.dart';
 
 class ProviderUpdateRequest extends ChangeNotifier {
@@ -32,41 +34,10 @@ class ProviderUpdateRequest extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _errorMessage = 'Error loading branch info: $e';
+      _errorMessage = '${LocaleKeys.errorLoadingBranches.tr()}: $e';
       _isLoading = false;
       notifyListeners();
       console(_errorMessage);
-    }
-  }
-
-  // Submit update request
-  Future<bool> submitUpdateRequest({
-    required Map<String, dynamic> requestedChanges,
-    String? notes,
-  }) async {
-    if (_branchInfo == null) return false;
-
-    _isSubmitting = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    try {
-      await _service.submitUpdateRequest(
-        branchId: _branchInfo!.id,
-        branchName: _branchInfo!.name,
-        requestedChanges: requestedChanges,
-        notes: notes,
-      );
-
-      _isSubmitting = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _errorMessage = 'Error submitting request: $e';
-      _isSubmitting = false;
-      notifyListeners();
-      console(_errorMessage);
-      return false;
     }
   }
 

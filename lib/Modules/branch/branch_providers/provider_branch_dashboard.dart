@@ -43,7 +43,7 @@ class ProviderBranchDashboard extends ChangeNotifier {
       // Load branch info
       _branchInfo = await _dashboardService.getBranchInfo(branchId);
     } catch (e) {
-      _errorMessage = 'Initialization Error: $e';
+      _errorMessage = '$e';
       _isLoading = false;
       notifyListeners();
       console(_errorMessage);

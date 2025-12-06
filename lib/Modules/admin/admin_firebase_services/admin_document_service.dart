@@ -55,9 +55,9 @@ class AdminDocumentService {
 
       return {'fileUrl': downloadUrl, 'storagePath': storagePath};
     } on FirebaseException catch (e) {
-      throw Exception('Firebase Storage error: ${e.message}');
+      throw Exception('${e.message}');
     } catch (e) {
-      throw Exception('Failed to upload file: $e');
+      throw Exception('$e');
     }
   }
 
@@ -89,9 +89,9 @@ class AdminDocumentService {
       ).add(document.toMap());
       return docRef.id;
     } on FirebaseException catch (e) {
-      throw Exception('Firestore error: ${e.message}');
+      throw Exception('${e.message}');
     } catch (e) {
-      throw Exception('Failed to add document: $e');
+      throw Exception('$e');
     }
   }
 
@@ -122,9 +122,9 @@ class AdminDocumentService {
         'hasMore': snapshot.docs.length == pageSize,
       };
     } on FirebaseException catch (e) {
-      throw Exception('Firestore error: ${e.message}');
+      throw Exception('${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch documents: $e');
+      throw Exception('$e');
     }
   }
 
@@ -140,9 +140,9 @@ class AdminDocumentService {
 
       await _getDocumentsCollection(branchId).doc(documentId).update(updates);
     } on FirebaseException catch (e) {
-      throw Exception('Firestore error: ${e.message}');
+      throw Exception('${e.message}');
     } catch (e) {
-      throw Exception('Failed to update document: $e');
+      throw Exception('$e');
     }
   }
 
@@ -162,14 +162,12 @@ class AdminDocumentService {
         await ref.delete();
       } on FirebaseException catch (storageError) {
         // Log but don't throw - document is already deleted from Firestore
-        print(
-          'Warning: Could not delete file from storage: ${storageError.message}',
-        );
+        print('${storageError.message}');
       }
     } on FirebaseException catch (e) {
-      throw Exception('Firestore error: ${e.message}');
+      throw Exception('${e.message}');
     } catch (e) {
-      throw Exception('Failed to delete document: $e');
+      throw Exception('$e');
     }
   }
 
@@ -182,9 +180,9 @@ class AdminDocumentService {
 
       return DocumentModel.fromFirestore(doc, branchId);
     } on FirebaseException catch (e) {
-      throw Exception('Firestore error: ${e.message}');
+      throw Exception('${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch document: $e');
+      throw Exception('$e');
     }
   }
 
@@ -194,10 +192,10 @@ class AdminDocumentService {
       final snapshot = await _getDocumentsCollection(branchId).count().get();
       return snapshot.count ?? 0;
     } on FirebaseException catch (e) {
-      print('Firestore error getting count: ${e.message}');
+      print('${e.message}');
       return 0;
     } catch (e) {
-      print('Error getting document count: $e');
+      print('$e');
       return 0;
     }
   }
@@ -220,35 +218,9 @@ class AdminDocumentService {
           .map((doc) => DocumentModel.fromFirestore(doc, branchId))
           .toList();
     } on FirebaseException catch (e) {
-      throw Exception('Firestore error: ${e.message}');
+      throw Exception('${e.message}');
     } catch (e) {
-      throw Exception('Failed to search documents: $e');
-    }
-  }
-
-  // Get documents by file type
-  Future<List<DocumentModel>> getDocumentsByType(
-    String branchId,
-    List<String> extensions,
-  ) async {
-    try {
-      // Firestore 'in' queries support up to 10 values
-      if (extensions.length > 10) {
-        throw Exception('Cannot filter by more than 10 file types at once');
-      }
-
-      final snapshot = await _getDocumentsCollection(branchId)
-          .where(DocumentFields.fileExtension, whereIn: extensions)
-          .orderBy(DocumentFields.uploadedAt, descending: true)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => DocumentModel.fromFirestore(doc, branchId))
-          .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Firestore error: ${e.message}');
-    } catch (e) {
-      throw Exception('Failed to filter documents: $e');
+      throw Exception('$e');
     }
   }
 
@@ -272,9 +244,9 @@ class AdminDocumentService {
           .map((doc) => DocumentModel.fromFirestore(doc, branchId))
           .toList();
     } on FirebaseException catch (e) {
-      throw Exception('Firestore error: ${e.message}');
+      throw Exception('${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch recent documents: $e');
+      throw Exception('$e');
     }
   }
 
@@ -291,10 +263,10 @@ class AdminDocumentService {
 
       return totalSize;
     } on FirebaseException catch (e) {
-      print('Firestore error calculating storage: ${e.message}');
+      print('${e.message}');
       return 0;
     } catch (e) {
-      print('Error calculating total storage: $e');
+      print('$e');
       return 0;
     }
   }
@@ -322,16 +294,14 @@ class AdminDocumentService {
               final ref = _storage.refFromURL(doc.fileUrl);
               await ref.delete();
             } catch (storageError) {
-              print(
-                'Warning: Could not delete file from storage: $storageError',
-              );
+              print('$storageError');
             }
 
             successfulDeletions.add(docId);
           }
         } catch (e) {
           failedDeletions.add(docId);
-          print('Error processing document $docId: $e');
+          print('$docId: $e');
         }
       }
 
@@ -346,9 +316,9 @@ class AdminDocumentService {
         'totalProcessed': documentIds.length,
       };
     } on FirebaseException catch (e) {
-      throw Exception('Firestore batch error: ${e.message}');
+      throw Exception('${e.message}');
     } catch (e) {
-      throw Exception('Failed to batch delete documents: $e');
+      throw Exception('$e');
     }
   }
 
@@ -401,7 +371,7 @@ class AdminDocumentService {
 
       return await addDocument(newDocument);
     } catch (e) {
-      throw Exception('Failed to duplicate document: $e');
+      throw Exception('$e');
     }
   }
 
@@ -420,9 +390,9 @@ class AdminDocumentService {
           .map((doc) => DocumentModel.fromFirestore(doc, branchId))
           .toList();
     } on FirebaseException catch (e) {
-      throw Exception('Firestore error: ${e.message}');
+      throw Exception('${e.message}');
     } catch (e) {
-      throw Exception('Failed to fetch documents by uploader: $e');
+      throw Exception(' $e');
     }
   }
 }

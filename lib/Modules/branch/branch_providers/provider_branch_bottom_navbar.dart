@@ -12,11 +12,6 @@ class ProviderBranchBottomNavBar extends ChangeNotifier {
     const BranchScreenDetails(),
     const BranchScreenInspections(),
     const BranchScreenMore(),
-    //   BranchInfoScreen(),
-    // BranchReportsScreen(),
-    // BranchNotificationsScreen(),
-    // BranchDocumentsScreen(),
-    // BranchTrainingScreen(),
   ];
 
   void onItemTapped(int index) {

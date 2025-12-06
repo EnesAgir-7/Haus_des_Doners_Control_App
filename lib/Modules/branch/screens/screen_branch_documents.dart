@@ -1,12 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 
 import '../../../helpers/app_helpers.dart';
 import '../../../models/document_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../common/document_helper.dart';
 import '../firebase_services/branch_document_service.dart';
-//TODO: locale
 
 class ScreenBranchDocuments extends StatelessWidget {
   final String branchId;
@@ -19,7 +20,8 @@ class ScreenBranchDocuments extends StatelessWidget {
     final service = BranchDocumentsService();
 
     return Scaffold(
-      appBar: const CustomAppBar(title: "Documents"),
+      appBar: CustomAppBar(title: LocaleKeys.documents.tr()),
+
       body: SafeArea(
         child: StreamBuilder<List<DocumentModel>>(
           stream: service.getBranchDocuments(branchId),
@@ -44,7 +46,7 @@ class ScreenBranchDocuments extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Error loading documents',
+                      LocaleKeys.error_loading_documents.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 16,
@@ -86,7 +88,7 @@ class ScreenBranchDocuments extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'No Documents Available',
+                      LocaleKeys.no_documents_available.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 18,
@@ -95,7 +97,7 @@ class ScreenBranchDocuments extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Documents will appear here once uploaded',
+                      LocaleKeys.documents_will_appear.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 14,
@@ -154,9 +156,9 @@ class ScreenBranchDocuments extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Text(
-                                      'Branch Documents',
-                                      style: TextStyle(
+                                    Text(
+                                      LocaleKeys.branch_documents.tr(),
+                                      style: const TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
@@ -164,7 +166,7 @@ class ScreenBranchDocuments extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${documents.length} ${documents.length == 1 ? 'document' : 'documents'} available',
+                                      '${documents.length} ${documents.length == 1 ? LocaleKeys.document.tr() : LocaleKeys.documents_plural.tr()} ${LocaleKeys.available.tr()}',
                                       style: TextStyle(
                                         color: Colors.white.withValues(
                                           alpha: 0.7,

@@ -91,14 +91,13 @@ class BranchScreenBottomNavBar extends StatelessWidget {
                     ),
                     label: LocaleKeys.inspections.tr(),
                   ),
-                  const NavigationDestination(
-                    icon: Icon(Icons.more_horiz, color: Colors.white70),
-                    selectedIcon: Icon(
+                  NavigationDestination(
+                    icon: const Icon(Icons.more_horiz, color: Colors.white70),
+                    selectedIcon: const Icon(
                       Icons.more_horiz,
                       color: AppColors.primaryRed,
                     ),
-                    //TODO: locale
-                    label: "More",
+                    label: LocaleKeys.more.tr(),
                   ),
                 ],
               ),

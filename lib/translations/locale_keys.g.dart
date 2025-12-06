@@ -861,5 +861,36 @@ abstract class  LocaleKeys {
   static const watch_training_videos = 'watch_training_videos';
   static const module = 'module';
   static const about_this_video = 'about_this_video';
+  static const add_training_video = 'add_training_video';
+  static const title = 'title';
+  static const enter_title = 'enter_title';
+  static const video_url = 'video_url';
+  static const enter_video_url = 'enter_video_url';
+  static const duration_mm_ss = 'duration_mm_ss';
+  static const duration_hint = 'duration_hint';
+  static const enter_description = 'enter_description';
+  static const fill_all_fields = 'fill_all_fields';
+  static const delete_video_confirmation = 'delete_video_confirmation';
+  static const no_videos_found = 'no_videos_found';
+  static const training_video = 'training_video';
+  static const error_loading_documents = 'error_loading_documents';
+  static const no_documents_available = 'no_documents_available';
+  static const documents_will_appear = 'documents_will_appear';
+  static const branch_documents = 'branch_documents';
+  static const document = 'document';
+  static const documents_plural = 'documents_plural';
+  static const more = 'more';
+  static const login_as = 'login_as';
+  static const select_role = 'select_role';
+  static const error_loading_videos = 'error_loading_videos';
+  static const no_training_videos = 'no_training_videos';
+  static const videos_will_appear = 'videos_will_appear';
+  static const video = 'video';
+  static const videos = 'videos';
+  static const could_not_open_document = 'could_not_open_document';
+  static const error_opening_document = 'error_opening_document';
+  static const open_document = 'open_document';
+  static const copy_link = 'copy_link';
+  static const share = 'share';
 
 }

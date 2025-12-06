@@ -24,12 +24,15 @@ Future<void> openDocument(BuildContext context, DocumentModel doc) async {
       );
     } else {
       if (context.mounted) {
-        showSnakBarr(context, "Could not open ${doc.fileName}");
+        showSnakBarr(
+          context,
+          "${LocaleKeys.could_not_open_document.tr()} ${doc.fileName}",
+        );
       }
     }
   } catch (e) {
     if (context.mounted) {
-      showSnakBarr(context, "Error opening document: $e");
+      showSnakBarr(context, "${LocaleKeys.error_opening_document.tr()}$e");
     }
   }
 }
@@ -124,9 +127,9 @@ Future<void> showDocumentOptions(
             // Options
             ListTile(
               leading: const Icon(Icons.open_in_new, color: Colors.white),
-              title: const Text(
-                'Open Document',
-                style: TextStyle(color: Colors.white),
+              title: Text(
+                LocaleKeys.open_document.tr(),
+                style: const TextStyle(color: Colors.white),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -136,9 +139,9 @@ Future<void> showDocumentOptions(
 
             ListTile(
               leading: const Icon(Icons.link, color: Colors.white),
-              title: const Text(
-                'Copy Link',
-                style: TextStyle(color: Colors.white),
+              title: Text(
+                LocaleKeys.copy_link.tr(),
+                style: const TextStyle(color: Colors.white),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -148,7 +151,10 @@ Future<void> showDocumentOptions(
 
             ListTile(
               leading: const Icon(Icons.share, color: Colors.white),
-              title: const Text('Share', style: TextStyle(color: Colors.white)),
+              title: Text(
+                LocaleKeys.share.tr(),
+                style: const TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 shareDocument(context, doc);
@@ -181,10 +187,7 @@ Future<void> copyLink(BuildContext context, String url) async {
 Future<void> shareDocument(BuildContext context, DocumentModel doc) async {
   try {
     await SharePlus.instance.share(
-      ShareParams(
-        uri: Uri.tryParse(doc.fileUrl),
-        title: doc.name,
-      ),
+      ShareParams(uri: Uri.tryParse(doc.fileUrl), title: doc.name),
     );
   } catch (e) {
     if (context.mounted) {

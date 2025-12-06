@@ -13,7 +13,6 @@ import '../../inspector/widgets/custom_app_bar.dart';
 import '../../inspector/widgets/custom_field.dart';
 import '../admin_providers/provider_admin_trainings.dart';
 
-//TODO: locale
 
 class ScreenAdminBranchTrainings extends StatefulWidget {
   final String branchId;
@@ -66,18 +65,18 @@ class _ScreenAdminBranchTrainingsState
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Row(
+                Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.video_library_outlined,
                       color: AppColors.primaryRed,
                       size: 28,
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
-                      "Add Training Video",
-                      style: TextStyle(
+                      LocaleKeys.add_training_video.tr(),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -88,8 +87,8 @@ class _ScreenAdminBranchTrainingsState
                 const SizedBox(height: 12),
                 CustomField(
                   controller: titleController,
-                  label: 'Title',
-                  hint: 'Enter title',
+                  label: LocaleKeys.title.tr(),
+                  hint: LocaleKeys.enter_title.tr(),
                   icon: Icons.title,
                 ),
 
@@ -97,8 +96,8 @@ class _ScreenAdminBranchTrainingsState
 
                 CustomField(
                   controller: urlController,
-                  label: 'Video URL',
-                  hint: 'https://youtube.com/…',
+                  label: LocaleKeys.video_url.tr(),
+                  hint: LocaleKeys.enter_video_url.tr(),
                   icon: Icons.link,
                 ),
 
@@ -106,8 +105,8 @@ class _ScreenAdminBranchTrainingsState
 
                 CustomField(
                   controller: durationController,
-                  label: 'Duration (mm:ss)',
-                  hint: '15:30',
+                  label: LocaleKeys.duration_mm_ss.tr(),
+                  hint: LocaleKeys.duration_hint.tr(),
                   icon: Icons.access_time,
                 ),
 
@@ -115,8 +114,8 @@ class _ScreenAdminBranchTrainingsState
 
                 CustomField(
                   controller: descriptionController,
-                  label: 'Description',
-                  hint: 'Enter description',
+                  label: LocaleKeys.description.tr(),
+                  hint: LocaleKeys.enter_description.tr(),
                   icon: Icons.description,
                 ),
 
@@ -147,7 +146,10 @@ class _ScreenAdminBranchTrainingsState
                         final description = descriptionController.text.trim();
 
                         if (title.isEmpty || url.isEmpty) {
-                          showCustomSnackBar(context, "Fill all fields");
+                          showCustomSnackBar(
+                            context,
+                            LocaleKeys.fill_all_fields.tr(),
+                          );
                           return;
                         }
 
@@ -198,7 +200,8 @@ class _ScreenAdminBranchTrainingsState
       context: context,
       builder: (_) => AlertDialog(
         title: Text(LocaleKeys.delete.tr()),
-        content: const Text("Delete this video?"),
+        content: Text(LocaleKeys.delete_video_confirmation.tr()),
+
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -253,7 +256,7 @@ class _ScreenAdminBranchTrainingsState
             : provider.videos.isEmpty
             ? Center(
                 child: Text(
-                  "No videos found",
+                  LocaleKeys.no_videos_found.tr(),
                   style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
                 ),
               )
@@ -298,7 +301,7 @@ class _ScreenAdminBranchTrainingsState
               moduleNumber: index + 1,
               videoDescription: video.description.isNotEmpty
                   ? video.description
-                  : 'Training Video',
+                  : LocaleKeys.training_video.tr(),
             ),
           ),
         );
