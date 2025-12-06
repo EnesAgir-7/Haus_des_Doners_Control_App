@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../../helpers/app_helpers.dart';
 import '../../../models/document_model.dart';
+import '../../common/document_helper.dart';
 import '../firebase_services/branch_document_service.dart';
 //TODO: locale
 
@@ -219,7 +220,7 @@ class ScreenBranchDocuments extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _openDocument(context, doc),
+          onTap: () => openDocument(context, doc),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
@@ -231,7 +232,7 @@ class ScreenBranchDocuments extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    _getFileIcon(doc.fileExtension),
+                    getFileIcon(doc.fileExtension),
                     color: AppColors.primaryRed,
                     size: 24,
                   ),
@@ -266,7 +267,7 @@ class ScreenBranchDocuments extends StatelessWidget {
                         children: [
                           _buildInfoChip(
                             Icons.access_time,
-                            _getTimeAgo(doc.uploadedAt),
+                            getTimeAgo(doc.uploadedAt),
                           ),
                           _buildInfoChip(
                             Icons.file_present,
@@ -322,51 +323,5 @@ class ScreenBranchDocuments extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  Future<void> _openDocument(BuildContext context, DocumentModel doc) async {
-    try {
-      final uri = Uri.parse(doc.fileUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not open document')),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error opening document: $e')));
-      }
-    }
-  }
-
-  IconData _getFileIcon(String extension) {
-    switch (extension.toLowerCase()) {
-      case 'pdf':
-        return Icons.picture_as_pdf;
-      case 'doc':
-      case 'docx':
-        return Icons.description;
-      case 'xls':
-      case 'xlsx':
-        return Icons.table_chart;
-      case 'txt':
-        return Icons.text_snippet;
-      default:
-        return Icons.insert_drive_file;
-    }
-  }
-
-  String _getTimeAgo(DateTime date) {
-    final diff = DateTime.now().difference(date);
-    if (diff.inDays > 0) return '${diff.inDays}d ago';
-    if (diff.inHours > 0) return '${diff.inHours}h ago';
-    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
-    return 'Just now';
   }
 }

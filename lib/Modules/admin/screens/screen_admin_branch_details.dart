@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admin_branch_trainings.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/core/extensions.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -292,9 +293,8 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                 MaterialPageRoute(
                   builder: (_) => ScreenAdminDocumentsScreen(
                     branchId: widget.branch.id,
-                    uploadedBy: "",
-                    uploadedByName: "",
-
+                    uploadedBy: loggedInUser!.id,
+                    uploadedByName: loggedInUser!.name,
                   ),
                 ),
               );

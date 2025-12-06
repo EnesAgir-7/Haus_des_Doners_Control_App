@@ -1,10 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
-import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/core/constants/app_colors.dart';
+import 'package:provider/provider.dart';
+
+import '../../../helpers/app_helpers.dart';
 import '../../../models/document_model.dart';
+import '../../common/document_helper.dart';
 import '../admin_providers/provider_admin_documents.dart';
 
 class ScreenAdminDocumentsScreen extends StatefulWidget {
@@ -108,7 +113,7 @@ class _ScreenAdminDocumentsScreenState
                 }
 
                 final doc = provider.documents[index];
-                return _buildDocumentCard(doc, provider);
+                return _buildDocumentCard(doc, provider, context);
               },
             ),
           );
@@ -186,6 +191,7 @@ class _ScreenAdminDocumentsScreenState
   Widget _buildDocumentCard(
     DocumentModel doc,
     AdminDocumentsProvider provider,
+    BuildContext context,
   ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -206,7 +212,11 @@ class _ScreenAdminDocumentsScreenState
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            // TODO: Open document
+            // Option 1: Open directly
+            openDocument(context, doc);
+
+            // Option 2: Show options dialog
+            // _showDocumentOptions(context, doc);
           },
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -219,7 +229,7 @@ class _ScreenAdminDocumentsScreenState
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
-                    _getFileIcon(doc.fileExtension),
+                    getFileIcon(doc.fileExtension),
                     color: AppColors.primaryRed,
                     size: 24,
                   ),
@@ -257,7 +267,7 @@ class _ScreenAdminDocumentsScreenState
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            _getTimeAgo(doc.uploadedAt),
+                            getTimeAgo(doc.uploadedAt),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 11,
@@ -289,11 +299,71 @@ class _ScreenAdminDocumentsScreenState
                   ),
                   color: AppColors.lightBlack,
                   onSelected: (value) {
-                    if (value == 'delete') {
+                    if (value == 'open') {
+                      openDocument(context, doc);
+                    } else if (value == 'copy') {
+                      copyLink(context, doc.fileUrl);
+                    } else if (value == 'share') {
+                      shareDocument(context, doc);
+                    } else if (value == 'delete') {
                       _showDeleteConfirmation(doc, provider);
                     }
                   },
                   itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'open',
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.open_in_new,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Open',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'copy',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.link, color: Colors.white, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Copy Link',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'share',
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.share,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Share',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
                     PopupMenuItem(
                       value: 'delete',
                       child: Row(
@@ -354,31 +424,6 @@ class _ScreenAdminDocumentsScreenState
       ),
     );
   }
-
-  IconData _getFileIcon(String extension) {
-    switch (extension.toLowerCase()) {
-      case 'pdf':
-        return Icons.picture_as_pdf;
-      case 'doc':
-      case 'docx':
-        return Icons.description;
-      case 'xls':
-      case 'xlsx':
-        return Icons.table_chart;
-      case 'txt':
-        return Icons.text_snippet;
-      default:
-        return Icons.insert_drive_file;
-    }
-  }
-
-  String _getTimeAgo(DateTime date) {
-    final diff = DateTime.now().difference(date);
-    if (diff.inDays > 0) return '${diff.inDays}d ago';
-    if (diff.inHours > 0) return '${diff.inHours}h ago';
-    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
-    return 'Just now';
-  }
 }
 
 class UploadDocumentBottomSheet extends StatefulWidget {
@@ -426,32 +471,24 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error picking file: $e')));
+        showCustomSnackBar(context, e.toString());
       }
     }
   }
 
   Future<void> _uploadDocument() async {
     if (_nameController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter document name')),
-      );
+      showCustomSnackBar(context, "Please enter document name");
       return;
     }
 
     if (_descriptionController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please enter description')));
+      showCustomSnackBar(context, "Please enter description");
       return;
     }
 
     if (_selectedFile == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Please select a document')));
+      showCustomSnackBar(context, "Please select a document");
       return;
     }
 
@@ -649,6 +686,7 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                     GestureDetector(
                       onTap: _pickDocument,
                       child: Container(
+                        width: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.05),
@@ -670,7 +708,17 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
-                                    'Tap to select document',
+                                    'Tap to select document ',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    'max size: 10 Mbs',
                                     style: TextStyle(
                                       color: Colors.white.withValues(
                                         alpha: 0.7,
@@ -725,7 +773,12 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Ready to upload',
+                                          _selectedFile != null
+                                              ? (_selectedFile!.lengthSync() /
+                                                            (1024 * 1024))
+                                                        .toStringAsFixed(2) +
+                                                    " Mbs"
+                                              : 'Ready to upload',
                                           style: TextStyle(
                                             color: AppColors.primaryRed
                                                 .withValues(alpha: 0.8),

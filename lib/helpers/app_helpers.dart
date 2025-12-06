@@ -208,3 +208,28 @@ String? getThumbnailUrl(String videoUrl) {
   }
   return null;
 }
+
+IconData getFileIcon(String extension) {
+  switch (extension.toLowerCase()) {
+    case 'pdf':
+      return Icons.picture_as_pdf;
+    case 'doc':
+    case 'docx':
+      return Icons.description;
+    case 'xls':
+    case 'xlsx':
+      return Icons.table_chart;
+    case 'txt':
+      return Icons.text_snippet;
+    default:
+      return Icons.insert_drive_file;
+  }
+}
+
+String getTimeAgo(DateTime date) {
+  final diff = DateTime.now().difference(date);
+  if (diff.inDays > 0) return '${diff.inDays}d ago';
+  if (diff.inHours > 0) return '${diff.inHours}h ago';
+  if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
+  return 'Just now';
+}

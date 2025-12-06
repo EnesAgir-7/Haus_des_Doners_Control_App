@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import '../../../models/document_model.dart';
 
 class BranchDocumentsService {
@@ -6,7 +7,7 @@ class BranchDocumentsService {
 
   // Get the documents subcollection reference for a specific branch
   CollectionReference _getDocumentsCollection(String branchId) {
-    return _db.collection('documents').doc(branchId).collection('documents');
+    return _db.collection(Collections.documents).doc(branchId).collection(Collections.documentsSubCollection);
   }
 
   // Stream for real-time updates (perfect for branch side)
