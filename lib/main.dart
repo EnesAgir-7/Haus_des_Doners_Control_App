@@ -28,6 +28,7 @@ import 'Modules/admin/admin_providers/provider_admin_trainings.dart';
 import 'Modules/branch/branch_providers/provider_branch_bottom_navbar.dart';
 import 'Modules/branch/branch_providers/provider_branch_dashboard.dart';
 import 'Modules/branch/branch_providers/provider_branch_inspections.dart';
+import 'Modules/branch/branch_providers/provider_branch_update_request.dart';
 import 'Modules/branch/screens/branch_screen_bottom_navbar.dart';
 import 'Modules/inspector/providers/provider_bottom_nav_bar.dart';
 import 'Modules/inspector/providers/provider_branches.dart';
@@ -126,6 +127,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProviderBranchInspections()),
         ChangeNotifierProvider(create: (_) => AdminTrainingVideosProvider()),
         ChangeNotifierProvider(create: (_) => AdminDocumentsProvider()),
+        ChangeNotifierProvider(create: (_) => BranchUpdateRequestProvider()),
       ],
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,

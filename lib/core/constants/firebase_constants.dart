@@ -17,6 +17,7 @@ class Collections {
   static const String documents = 'documents';
   static const String documentsSubCollection = 'documents';
   static const String notifications = 'notifications';
+  static const String updateRequests = 'update_requests';
 }
 
 class VehicleFields {
@@ -200,6 +201,20 @@ class InspectionCategoryFields {
 class InspectorFields {
   static const String id = 'id';
   static const String name = 'name';
+}
+
+
+class BUF {
+  static const String branchId = 'branchId';
+  static const String branchName = 'branchName';
+  static const String requestedBy = 'requestedBy';
+  static const String requestedByName = 'requestedByName';
+  static const String requestedAt = 'requestedAt';
+  static const String status = 'status';
+  static const String changes = 'changes';
+  static const String adminNote = 'adminNote';
+  static const String reviewedAt = 'reviewedAt';
+  static const String reviewedBy = 'reviewedBy';
 }
 
 UserModel? loggedInUser;

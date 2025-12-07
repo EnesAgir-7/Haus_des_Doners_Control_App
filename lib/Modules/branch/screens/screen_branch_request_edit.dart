@@ -2,16 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:provider/provider.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/Modules/admin/widgets/admin_location_picker.dart';
-import 'package:haus_des_control/translations/locale_keys.g.dart'
-    show LocaleKeys;
-
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_model.dart';
-import '../firebase_services/branch_service.dart';
+import '../branch_providers/provider_branch_update_request.dart';
 
 class ScreenBranchRequestEdit extends StatefulWidget {
   final BranchModel branch;
@@ -30,8 +29,6 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
   late TextEditingController _contactPhoneController;
   late TextEditingController _latitudeController;
   late TextEditingController _longitudeController;
-
-  // New controllers
   late TextEditingController _branchEmailController;
   late TextEditingController _openingTimeController;
   late TextEditingController _closingTimeController;
@@ -39,14 +36,11 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
   late TextEditingController _softwareController;
   late TextEditingController _shopInformationController;
 
-  // Lists / extras
   List<String> _selectedOpeningDays = [];
   DateTime? _selectedOpeningDay;
   List<ContactPerson> _branchOwners = [];
   List<ContactPerson> _branchManagers = [];
   List<ContactPerson> _suppliers = [];
-
-  bool _isSubmitting = false;
 
   final List<String> _daysOfWeek = [
     LocaleKeys.monday.tr(),
@@ -61,7 +55,11 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
+    _checkPendingRequest();
+  }
 
+  void _initializeControllers() {
     final b = widget.branch;
     _nameController = TextEditingController(text: b.name);
     _addressController = TextEditingController(text: b.address);
@@ -73,7 +71,6 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     _longitudeController = TextEditingController(
       text: b.gps.longitude.toString(),
     );
-
     _branchEmailController = TextEditingController(text: b.branchEmail ?? '');
     _openingTimeController = TextEditingController(
       text: b.openingHours?.openingTime ?? '',
@@ -92,6 +89,14 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     _branchOwners = List.from(b.branchOwners ?? []);
     _branchManagers = List.from(b.branchManagers ?? []);
     _suppliers = List.from(b.suppliers ?? []);
+  }
+
+  void _checkPendingRequest() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BranchUpdateRequestProvider>().checkPendingRequest(
+        widget.branch.id,
+      );
+    });
   }
 
   @override
@@ -114,80 +119,56 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
   Future<void> _submitRequest() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSubmitting = true);
-
     final userId = loggedInUser?.id ?? '';
+    final userName = loggedInUser?.name ?? '';
+
     if (userId.isEmpty) {
-      showCustomSnackBar(
-        context,
-        LocaleKeys.user_not_authenticated.tr(),
-        isError: true,
-      );
-      setState(() => _isSubmitting = false);
+      showSnakBarr(context, LocaleKeys.user_not_authenticated.tr());
       return;
     }
 
-    try {
-      final exists = await BranchService.hasExistingRequestForUser(userId);
-      if (exists) {
-        showCustomSnackBar(
-          context,
-          LocaleKeys.already_pending_request.tr(),
-          isError: true,
-        );
-        setState(() => _isSubmitting = false);
-        return;
-      }
+    // Create updated branch with new values
+    final updatedBranch = widget.branch.copyWith(
+      name: _nameController.text.trim(),
+      address: _addressController.text.trim(),
+      contactName: _contactNameController.text.trim(),
+      contactPhone: _contactPhoneController.text.trim(),
+      branchEmail: _branchEmailController.text.trim(),
+      gps:
+          (double.tryParse(_latitudeController.text.trim()) != null &&
+              double.tryParse(_longitudeController.text.trim()) != null)
+          ? GeoPoint(
+              double.parse(_latitudeController.text.trim()),
+              double.parse(_longitudeController.text.trim()),
+            )
+          : widget.branch.gps,
+      openingHours: OpeningHours(
+        openingTime: _openingTimeController.text.trim(),
+        closingTime: _closingTimeController.text.trim(),
+      ),
+      openingDays: _selectedOpeningDays,
+      openingDay: _selectedOpeningDay,
+      donerPrices: _donerPricesController.text.trim(),
+      software: _softwareController.text.trim(),
+      shopInformation: _shopInformationController.text.trim(),
+      branchOwners: _branchOwners,
+      branchManagers: _branchManagers,
+      suppliers: _suppliers,
+      updatedAt: DateTime.now(),
+    );
 
-      final updatedBranch = widget.branch.copyWith(
-        name: _nameController.text.trim(),
-        address: _addressController.text.trim(),
-        contactName: _contactNameController.text.trim(),
-        contactPhone: _contactPhoneController.text.trim(),
-        branchEmail: _branchEmailController.text.trim(),
-        gps:
-            (double.tryParse(_latitudeController.text.trim()) != null &&
-                double.tryParse(_longitudeController.text.trim()) != null)
-            ? GeoPoint(
-                double.parse(_latitudeController.text.trim()),
-                double.parse(_longitudeController.text.trim()),
-              )
-            : widget.branch.gps,
-        openingHours: OpeningHours(
-          openingTime: _openingTimeController.text.trim(),
-          closingTime: _closingTimeController.text.trim(),
-        ),
-        openingDays: _selectedOpeningDays,
-        openingDay: _selectedOpeningDay,
-        donerPrices: _donerPricesController.text.trim(),
-        software: _softwareController.text.trim(),
-        shopInformation: _shopInformationController.text.trim(),
-        branchOwners: _branchOwners,
-        branchManagers: _branchManagers,
-        suppliers: _suppliers,
-        updatedAt: DateTime.now(),
-        // IMPORTANT: do not change templateId/templateName here (branch cannot update template)
-      );
+    // Submit via provider
+    final provider = context.read<BranchUpdateRequestProvider>();
+    final success = await provider.submitUpdateRequest(
+      oldBranch: widget.branch,
+      newBranch: updatedBranch,
+      requestedBy: userId,
+      requestedByName: userName,
+      context: context,
+    );
 
-      await BranchService.createBranchRequest(
-        userId: userId,
-        branch: updatedBranch,
-      );
-
-      if (!mounted) return;
-      showCustomSnackBar(
-        context,
-        LocaleKeys.request_submitted_successfully.tr(),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      showCustomSnackBar(
-        context,
-        '${LocaleKeys.error_submitting_request.tr()}$e',
-        isError: true,
-      );
-    } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+    if (success && mounted) {
+      Navigator.pop(context, true); // Return true to indicate success
     }
   }
 
@@ -219,22 +200,33 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(title),
+        backgroundColor: AppColors.primaryDark,
+        title: Text(title, style: const TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameC,
-              decoration: InputDecoration(labelText: LocaleKeys.name.tr()),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: LocaleKeys.name.tr(),
+                labelStyle: const TextStyle(color: Colors.white70),
+              ),
             ),
             TextField(
               controller: phoneC,
-              decoration: InputDecoration(labelText: LocaleKeys.phone.tr()),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: LocaleKeys.phone.tr(),
+                labelStyle: const TextStyle(color: Colors.white70),
+              ),
             ),
             TextField(
               controller: roleC,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: LocaleKeys.role_optional.tr(),
+                labelStyle: const TextStyle(color: Colors.white70),
               ),
             ),
           ],
@@ -246,6 +238,9 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryRed,
+            ),
             child: Text(LocaleKeys.save.tr()),
           ),
         ],
@@ -275,22 +270,33 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(title),
+        backgroundColor: AppColors.primaryDark,
+        title: Text(title, style: const TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameC,
-              decoration: InputDecoration(labelText: LocaleKeys.name.tr()),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: LocaleKeys.name.tr(),
+                labelStyle: const TextStyle(color: Colors.white70),
+              ),
             ),
             TextField(
               controller: phoneC,
-              decoration: InputDecoration(labelText: LocaleKeys.phone.tr()),
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: LocaleKeys.phone.tr(),
+                labelStyle: const TextStyle(color: Colors.white70),
+              ),
             ),
             TextField(
               controller: roleC,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: LocaleKeys.role_optional.tr(),
+                labelStyle: const TextStyle(color: Colors.white70),
               ),
             ),
           ],
@@ -302,6 +308,9 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryRed,
+            ),
             child: Text(LocaleKeys.save.tr()),
           ),
         ],
@@ -317,6 +326,88 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
       onSave(cp);
       setState(() {});
     }
+  }
+
+  Widget _buildPendingRequestBanner() {
+    return Consumer<BranchUpdateRequestProvider>(
+      builder: (context, provider, child) {
+        if (!provider.hasPendingRequest) return const SizedBox.shrink();
+
+        return Container(
+          margin: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.orange.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.orange),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.pending_actions, color: Colors.orange, size: 32),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Pending Update Request',
+                      style: TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${provider.pendingChangesCount} changes waiting for approval',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: () => _showDeleteRequestConfirmation(provider),
+                icon: const Icon(Icons.delete, color: Colors.red),
+                tooltip: 'Delete Request',
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteRequestConfirmation(BranchUpdateRequestProvider provider) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.primaryDark,
+        title: const Text(
+          'Delete Request',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Are you sure you want to delete your pending update request?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(LocaleKeys.cancel.tr()),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              provider.deletePendingRequest(context);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSectionHeader(String title, IconData icon) {
@@ -336,6 +427,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
         ),
       ],
@@ -400,47 +492,23 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     );
   }
 
-  Widget _buildDateField({
-    required String label,
-    required String hint,
-    required IconData icon,
-    DateTime? selectedDate,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            Icon(icon, color: Colors.white70),
-            const SizedBox(width: 12),
-            Text(
-              selectedDate != null
-                  ? DateFormat.yMMMd().format(selectedDate)
-                  : hint,
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildOpeningDaysSelector() {
     return Wrap(
       spacing: 8,
+      runSpacing: 8,
       children: _daysOfWeek.map((d) {
         final selected = _selectedOpeningDays.contains(d);
         return FilterChip(
           label: Text(d),
           selected: selected,
+          selectedColor: AppColors.primaryRed,
           onSelected: (v) {
             setState(() {
-              if (v)
+              if (v) {
                 _selectedOpeningDays.add(d);
-              else
+              } else {
                 _selectedOpeningDays.remove(d);
+              }
             });
           },
         );
@@ -449,6 +517,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
   }
 
   Widget _buildContactPersonList({
+    required String title,
     required List<ContactPerson> persons,
     required VoidCallback onAdd,
     required Function(int, ContactPerson) onEdit,
@@ -461,54 +530,80 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              LocaleKeys.branchOwners.tr(),
+              title,
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            TextButton(onPressed: onAdd, child: Text(LocaleKeys.add.tr())),
+            TextButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(Icons.add, color: AppColors.primaryRed),
+              label: Text(
+                LocaleKeys.add.tr(),
+                style: const TextStyle(color: AppColors.primaryRed),
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
-        Column(
-          children: persons.asMap().entries.map((e) {
-            final idx = e.key;
-            final p = e.value;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.primaryDark.withValues(alpha: 0.25),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${p.name} (${p.role ?? ''})',
-                      style: const TextStyle(color: Colors.white),
-                    ),
+        ...persons.asMap().entries.map((e) {
+          final idx = e.key;
+          final p = e.value;
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primaryDark.withValues(alpha: 0.35),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        p.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        p.phone,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      if (p.role != null && p.role!.isNotEmpty)
+                        Text(
+                          p.role!,
+                          style: TextStyle(
+                            color: AppColors.primaryRed.withValues(alpha: 0.8),
+                            fontSize: 12,
+                          ),
+                        ),
+                    ],
                   ),
-                  IconButton(
-                    onPressed: () async {
-                      await _showEditContactPersonDialog(
-                        title: LocaleKeys.edit.tr(),
-                        initial: p,
-                        onSave: (newP) => onEdit(idx, newP),
-                      );
-                    },
-                    icon: const Icon(Icons.edit, color: Colors.white),
+                ),
+                IconButton(
+                  onPressed: () => _showEditContactPersonDialog(
+                    title: LocaleKeys.edit.tr(),
+                    initial: p,
+                    onSave: (newP) => onEdit(idx, newP),
                   ),
-                  IconButton(
-                    onPressed: () => onRemove(idx),
-                    icon: const Icon(Icons.delete, color: Colors.white),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
+                  icon: const Icon(Icons.edit, color: Colors.white70),
+                ),
+                IconButton(
+                  onPressed: () => onRemove(idx),
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ],
     );
   }
@@ -518,17 +613,20 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
       appBar: CustomAppBar(title: LocaleKeys.update_request.tr()),
-
       body: Form(
         key: _formKey,
         child: Column(
           children: [
+            // Pending request banner
+            _buildPendingRequestBanner(),
+
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Branch Information
                     _buildSectionHeader(
                       LocaleKeys.branchInformation.tr(),
                       Icons.store,
@@ -540,8 +638,9 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                       hint: LocaleKeys.enterBranchName.tr(),
                       icon: Icons.business,
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty)
+                        if (value == null || value.trim().isEmpty) {
                           return LocaleKeys.branchNameRequired.tr();
+                        }
                         return null;
                       },
                     ),
@@ -553,15 +652,18 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                       icon: Icons.email,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty)
+                        if (value == null || value.trim().isEmpty) {
                           return LocaleKeys.branchEmailRequired.tr();
-                        if (!value.contains('@'))
+                        }
+                        if (!value.contains('@')) {
                           return LocaleKeys.enterValidEmail.tr();
+                        }
                         return null;
                       },
                     ),
 
                     const SizedBox(height: 24),
+                    // Location
                     _buildSectionHeader(
                       LocaleKeys.location.tr(),
                       Icons.location_on,
@@ -600,13 +702,15 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                       icon: Icons.location_on,
                       maxLines: 3,
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty)
+                        if (value == null || value.trim().isEmpty) {
                           return LocaleKeys.addressRequired.tr();
+                        }
                         return null;
                       },
                     ),
 
                     const SizedBox(height: 24),
+                    // Contact Information
                     _buildSectionHeader(
                       LocaleKeys.contactInformation.tr(),
                       Icons.contact_phone,
@@ -618,8 +722,9 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                       hint: LocaleKeys.enterContactPersonName.tr(),
                       icon: Icons.person,
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty)
+                        if (value == null || value.trim().isEmpty) {
                           return LocaleKeys.contactNameRequired.tr();
+                        }
                         return null;
                       },
                     ),
@@ -631,13 +736,15 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                       icon: Icons.phone,
                       keyboardType: TextInputType.phone,
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty)
+                        if (value == null || value.trim().isEmpty) {
                           return LocaleKeys.contactPhoneRequired.tr();
+                        }
                         return null;
                       },
                     ),
 
                     const SizedBox(height: 24),
+                    // Opening Hours
                     _buildSectionHeader(
                       LocaleKeys.openingHoursDays.tr(),
                       Icons.schedule,
@@ -667,11 +774,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                     const SizedBox(height: 16),
                     _buildOpeningDaysSelector(),
                     const SizedBox(height: 16),
-                    _buildDateField(
-                      label: LocaleKeys.openingDay.tr(),
-                      hint: LocaleKeys.selectOpeningDay.tr(),
-                      icon: Icons.calendar_today,
-                      selectedDate: _selectedOpeningDay,
+                    InkWell(
                       onTap: () async {
                         final date = await showDatePicker(
                           context: context,
@@ -679,78 +782,103 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),
                         );
-                        if (date != null)
+                        if (date != null) {
                           setState(() => _selectedOpeningDay = date);
+                        }
                       },
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryDark.withValues(alpha: 0.35),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.calendar_today,
+                              color: Colors.white70,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              _selectedOpeningDay != null
+                                  ? DateFormat.yMMMd().format(
+                                      _selectedOpeningDay!,
+                                    )
+                                  : LocaleKeys.selectOpeningDay.tr(),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
 
                     const SizedBox(height: 24),
+                    // Branch Owners
                     _buildSectionHeader(
                       LocaleKeys.branchOwners.tr(),
                       Icons.business_center,
                     ),
                     const SizedBox(height: 16),
                     _buildContactPersonList(
+                      title: '',
                       persons: _branchOwners,
                       onAdd: () => _showAddContactPersonDialog(
                         title: LocaleKeys.addBranchOwner.tr(),
-                        onSave: (person) {
-                          setState(() => _branchOwners.add(person));
-                        },
+                        onSave: (person) =>
+                            setState(() => _branchOwners.add(person)),
                       ),
-                      onEdit: (index, person) {
-                        setState(() => _branchOwners[index] = person);
-                      },
-                      onRemove: (index) {
-                        setState(() => _branchOwners.removeAt(index));
-                      },
+                      onEdit: (index, person) =>
+                          setState(() => _branchOwners[index] = person),
+                      onRemove: (index) =>
+                          setState(() => _branchOwners.removeAt(index)),
                     ),
 
                     const SizedBox(height: 24),
+                    // Branch Managers
                     _buildSectionHeader(
                       LocaleKeys.branchManagers.tr(),
                       Icons.manage_accounts,
                     ),
                     const SizedBox(height: 16),
                     _buildContactPersonList(
+                      title: '',
                       persons: _branchManagers,
                       onAdd: () => _showAddContactPersonDialog(
                         title: LocaleKeys.addBranchManager.tr(),
-                        onSave: (person) {
-                          setState(() => _branchManagers.add(person));
-                        },
+                        onSave: (person) =>
+                            setState(() => _branchManagers.add(person)),
                       ),
-                      onEdit: (index, person) {
-                        setState(() => _branchManagers[index] = person);
-                      },
-                      onRemove: (index) {
-                        setState(() => _branchManagers.removeAt(index));
-                      },
+                      onEdit: (index, person) =>
+                          setState(() => _branchManagers[index] = person),
+                      onRemove: (index) =>
+                          setState(() => _branchManagers.removeAt(index)),
                     ),
 
                     const SizedBox(height: 24),
+                    // Suppliers
                     _buildSectionHeader(
                       LocaleKeys.suppliers.tr(),
                       Icons.local_shipping,
                     ),
                     const SizedBox(height: 16),
                     _buildContactPersonList(
+                      title: '',
                       persons: _suppliers,
                       onAdd: () => _showAddContactPersonDialog(
                         title: LocaleKeys.addSupplier.tr(),
-                        onSave: (person) {
-                          setState(() => _suppliers.add(person));
-                        },
+                        onSave: (person) =>
+                            setState(() => _suppliers.add(person)),
                       ),
-                      onEdit: (index, person) {
-                        setState(() => _suppliers[index] = person);
-                      },
-                      onRemove: (index) {
-                        setState(() => _suppliers.removeAt(index));
-                      },
+                      onEdit: (index, person) =>
+                          setState(() => _suppliers[index] = person),
+                      onRemove: (index) =>
+                          setState(() => _suppliers.removeAt(index)),
                     ),
 
                     const SizedBox(height: 24),
+                    // Additional Information
                     _buildSectionHeader(
                       LocaleKeys.additionalInformation.tr(),
                       Icons.info_outline,
@@ -778,23 +906,42 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                       maxLines: 3,
                     ),
 
-                    const SizedBox(height: 28),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isSubmitting ? null : _submitRequest,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryRed,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          child: Text(
-                            _isSubmitting
-                                ? LocaleKeys.submitting.tr()
-                                : LocaleKeys.update_request.tr(),
+                    const SizedBox(height: 32),
+                    // Submit Button
+                    Consumer<BranchUpdateRequestProvider>(
+                      builder: (context, provider, child) {
+                        return SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: provider.isSubmitting
+                                ? null
+                                : _submitRequest,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryRed,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: provider.isSubmitting
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(
+                                    LocaleKeys.update_request.tr(),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 24),
                   ],

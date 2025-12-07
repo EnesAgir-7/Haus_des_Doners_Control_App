@@ -30,19 +30,7 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
   Widget build(BuildContext context) {
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
-      slivers: [
-        _buildHeader(provider),
-        if (provider.isLoading)
-          const SliverFillRemaining(
-            child: Center(
-              child: CircularProgressIndicator(color: AppColors.primaryRed),
-            ),
-          )
-        else if (provider.errorMessage != null)
-          _buildErrorView(provider)
-        else
-          _buildDashboardContent(provider),
-      ],
+      slivers: [_buildHeader(provider), _buildDashboardContent(provider)],
     );
   }
 
@@ -190,9 +178,9 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
         'onTap': () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => ScreenBranchDocuments(
-              branchId: loggedInUser!.id,
-            )),
+            MaterialPageRoute(
+              builder: (_) => ScreenBranchDocuments(branchId: loggedInUser!.id),
+            ),
           );
         },
       },
@@ -321,53 +309,6 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorView(ProviderBranchDashboard provider) {
-    return SliverFillRemaining(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                size: 60,
-                color: AppColors.primaryRed,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                LocaleKeys.error_occurred.tr(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                provider.errorMessage!,
-                style: const TextStyle(color: Colors.white70),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: provider.refresh,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryRed,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-                child: Text(LocaleKeys.retry.tr()),
-              ),
-            ],
           ),
         ),
       ),
