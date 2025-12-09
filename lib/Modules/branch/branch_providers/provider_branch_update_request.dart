@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import '../../../models/branch_update_request_model.dart';
 import '../../../models/branch_model.dart';
+import '../../inspector/widgets/custom_toast.dart';
 import '../firebase_services/branch_update_request_service.dart';
 
 class BranchUpdateRequestProvider extends ChangeNotifier {

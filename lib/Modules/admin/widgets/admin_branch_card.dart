@@ -214,17 +214,6 @@ class AdminBranchCard extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              if (days > 30) ...[
-                const SizedBox(height: 2.0),
-                Text(
-                  '⚠️ ${LocaleKeys.overdueBy.tr()} ${days - 30} ${LocaleKeys.days.tr()}',
-                  style: const TextStyle(
-                    color: Colors.redAccent,
-                    fontSize: 11.0,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
             ],
           ),
         ),

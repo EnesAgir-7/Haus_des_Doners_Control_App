@@ -217,4 +217,13 @@ class BUF {
   static const String reviewedBy = 'reviewedBy';
 }
 
+class FCFields {
+  static const String fieldName = 'fieldName';
+  static const String fieldKey = 'fieldKey';
+  static const String oldValue = 'oldValue';
+  static const String newValue = 'newValue';
+  static const String fieldType = 'fieldType';
+
+}
+
 UserModel? loggedInUser;

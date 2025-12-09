@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../core/constants/firebase_constants.dart';
+import 'package:haus_des_control/Modules/branch/firebase_services/branch_update_request_service.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 class BranchUpdateRequestModel {
   final String id;
@@ -44,18 +44,18 @@ class BranchUpdateRequestModel {
 
     return BranchUpdateRequestModel(
       id: doc.id,
-      branchId: data['branchId'] ?? '',
-      branchName: data['branchName'] ?? '',
-      requestedBy: data['requestedBy'] ?? '',
-      requestedByName: data['requestedByName'] ?? '',
-      requestedAt: (data['requestedAt'] as Timestamp).toDate(),
-      status: data['status'] ?? 'pending',
+      branchId: data[BUF.branchId] ?? '',
+      branchName: data[BUF.branchName] ?? '',
+      requestedBy: data[BUF.requestedBy] ?? '',
+      requestedByName: data[BUF.requestedByName] ?? '',
+      requestedAt: (data[BUF.requestedAt] as Timestamp).toDate(),
+      status: data[BUF.status] ?? 'pending',
       changes: changes,
-      adminNote: data['adminNote'],
-      reviewedAt: data['reviewedAt'] != null
-          ? (data['reviewedAt'] as Timestamp).toDate()
+      adminNote: data[BUF.adminNote],
+      reviewedAt: data[BUF.reviewedAt] != null
+          ? (data[BUF.reviewedAt] as Timestamp).toDate()
           : null,
-      reviewedBy: data['reviewedBy'],
+      reviewedBy: data[BUF.reviewedBy],
     );
   }
 
@@ -74,7 +74,9 @@ class BranchUpdateRequestModel {
       BUF.status: status,
       BUF.changes: changesMap,
       BUF.adminNote: adminNote,
-      BUF.reviewedAt: reviewedAt != null ? Timestamp.fromDate(reviewedAt!) : null,
+      BUF.reviewedAt: reviewedAt != null
+          ? Timestamp.fromDate(reviewedAt!)
+          : null,
       BUF.reviewedBy: reviewedBy,
     };
   }
@@ -87,12 +89,14 @@ class BranchUpdateRequestModel {
 }
 
 class FieldChange {
+  final String fieldKey;
   final String fieldName;
   final dynamic oldValue;
   final dynamic newValue;
   final String fieldType; // 'string', 'list', 'map', 'datetime', 'geopoint'
 
   FieldChange({
+    required this.fieldKey,
     required this.fieldName,
     required this.oldValue,
     required this.newValue,
@@ -101,19 +105,21 @@ class FieldChange {
 
   factory FieldChange.fromMap(Map<String, dynamic> map) {
     return FieldChange(
-      fieldName: map['fieldName'] ?? '',
-      oldValue: map['oldValue'],
-      newValue: map['newValue'],
-      fieldType: map['fieldType'] ?? 'string',
+      fieldKey: map[FCFields.fieldKey] ?? '',
+      fieldName: map[FCFields.fieldName] ?? '',
+      oldValue: map[FCFields.oldValue],
+      newValue: map[FCFields.newValue],
+      fieldType: map[FCFields.fieldType] ?? DataTypes.string,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'fieldName': fieldName,
-      'oldValue': _serializeValue(oldValue),
-      'newValue': _serializeValue(newValue),
-      'fieldType': fieldType,
+      FCFields.fieldKey: fieldKey,
+      FCFields.fieldName: fieldName,
+      FCFields.oldValue: _serializeValue(oldValue),
+      FCFields.newValue: _serializeValue(newValue),
+      FCFields.fieldType: fieldType,
     };
   }
 
@@ -142,5 +148,3 @@ class FieldChange {
     return value.toString();
   }
 }
-
-

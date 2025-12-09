@@ -3,6 +3,14 @@ import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_update_request_model.dart';
 import '../../../models/branch_model.dart';
 
+class DataTypes {
+  static const String string = 'string';
+  static const String geopoint = 'geopoint';
+  static const String map = 'map';
+  static const String list = 'list';
+  static const String datetime = 'datetime';
+}
+
 class BranchUpdateRequestService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
@@ -147,7 +155,8 @@ class BranchUpdateRequestService {
 
     // Compare basic fields
     if (oldBranch.name != newBranch.name) {
-      changes['name'] = FieldChange(
+      changes[BranchFields.name] = FieldChange(
+        fieldKey: BranchFields.name,
         fieldName: 'Branch Name',
         oldValue: oldBranch.name,
         newValue: newBranch.name,
@@ -156,49 +165,54 @@ class BranchUpdateRequestService {
     }
 
     if (oldBranch.address != newBranch.address) {
-      changes['address'] = FieldChange(
+      changes[BranchFields.address] = FieldChange(
+        fieldKey: BranchFields.address,
         fieldName: 'Address',
         oldValue: oldBranch.address,
         newValue: newBranch.address,
-        fieldType: 'string',
+        fieldType: DataTypes.string,
       );
     }
 
     if (oldBranch.contactName != newBranch.contactName) {
-      changes['contactName'] = FieldChange(
+      changes[BranchFields.contactName] = FieldChange(
+        fieldKey: BranchFields.contactName,
         fieldName: 'Contact Name',
         oldValue: oldBranch.contactName,
         newValue: newBranch.contactName,
-        fieldType: 'string',
+        fieldType: DataTypes.string,
       );
     }
 
     if (oldBranch.contactPhone != newBranch.contactPhone) {
-      changes['contactPhone'] = FieldChange(
+      changes[BranchFields.contactPhone] = FieldChange(
+        fieldKey: BranchFields.contactPhone,
         fieldName: 'Contact Phone',
         oldValue: oldBranch.contactPhone,
         newValue: newBranch.contactPhone,
-        fieldType: 'string',
+        fieldType: DataTypes.string,
       );
     }
 
     if (oldBranch.branchEmail != newBranch.branchEmail) {
-      changes['branchEmail'] = FieldChange(
+      changes[BranchFields.branchEmail] = FieldChange(
+        fieldKey: BranchFields.branchEmail,
         fieldName: 'Branch Email',
         oldValue: oldBranch.branchEmail ?? '',
         newValue: newBranch.branchEmail ?? '',
-        fieldType: 'string',
+        fieldType: DataTypes.string,
       );
     }
 
     // Compare GPS
     if (oldBranch.gps.latitude != newBranch.gps.latitude ||
         oldBranch.gps.longitude != newBranch.gps.longitude) {
-      changes['gps'] = FieldChange(
+      changes[BranchFields.gps] = FieldChange(
+        fieldKey: BranchFields.gps,
         fieldName: 'GPS Location',
         oldValue: oldBranch.gps,
         newValue: newBranch.gps,
-        fieldType: 'geopoint',
+        fieldType: DataTypes.geopoint,
       );
     }
 
@@ -207,61 +221,67 @@ class BranchUpdateRequestService {
             newBranch.openingHours?.openingTime ||
         oldBranch.openingHours?.closingTime !=
             newBranch.openingHours?.closingTime) {
-      changes['openingHours'] = FieldChange(
+      changes[BranchFields.openingHours] = FieldChange(
+        fieldKey: BranchFields.openingHours,
         fieldName: 'Opening Hours',
         oldValue: oldBranch.openingHours?.toMap(),
         newValue: newBranch.openingHours?.toMap(),
-        fieldType: 'map',
+        fieldType: DataTypes.map,
       );
     }
 
     // Compare opening days
     if (!_listEquals(oldBranch.openingDays, newBranch.openingDays)) {
-      changes['openingDays'] = FieldChange(
+      changes[BranchFields.openingDays] = FieldChange(
+        fieldKey: BranchFields.openingDays,
         fieldName: 'Opening Days',
         oldValue: oldBranch.openingDays ?? [],
         newValue: newBranch.openingDays ?? [],
-        fieldType: 'list',
+        fieldType: DataTypes.list,
       );
     }
 
     // Compare opening day
     if (oldBranch.openingDay != newBranch.openingDay) {
-      changes['openingDay'] = FieldChange(
+      changes[BranchFields.openingDay] = FieldChange(
+        fieldKey: BranchFields.openingDay,
         fieldName: 'Opening Day',
         oldValue: oldBranch.openingDay,
         newValue: newBranch.openingDay,
-        fieldType: 'datetime',
+        fieldType: DataTypes.datetime,
       );
     }
 
     // Compare doner prices
     if (oldBranch.donerPrices != newBranch.donerPrices) {
-      changes['donerPrices'] = FieldChange(
+      changes[BranchFields.donerPrices] = FieldChange(
+        fieldKey: BranchFields.donerPrices,
         fieldName: 'Doner Prices',
         oldValue: oldBranch.donerPrices ?? '',
         newValue: newBranch.donerPrices ?? '',
-        fieldType: 'string',
+        fieldType: DataTypes.string,
       );
     }
 
     // Compare software
     if (oldBranch.software != newBranch.software) {
-      changes['software'] = FieldChange(
+      changes[BranchFields.software] = FieldChange(
+        fieldKey: BranchFields.software,
         fieldName: 'Software',
         oldValue: oldBranch.software ?? '',
         newValue: newBranch.software ?? '',
-        fieldType: 'string',
+        fieldType: DataTypes.string,
       );
     }
 
     // Compare shop information
     if (oldBranch.shopInformation != newBranch.shopInformation) {
-      changes['shopInformation'] = FieldChange(
+      changes[BranchFields.shopInformation] = FieldChange(
+        fieldKey: BranchFields.shopInformation,
         fieldName: 'Shop Information',
         oldValue: oldBranch.shopInformation ?? '',
         newValue: newBranch.shopInformation ?? '',
-        fieldType: 'string',
+        fieldType: DataTypes.string,
       );
     }
 
@@ -270,11 +290,12 @@ class BranchUpdateRequestService {
       oldBranch.branchOwners,
       newBranch.branchOwners,
     )) {
-      changes['branchOwners'] = FieldChange(
+      changes[BranchFields.branchOwners] = FieldChange(
+        fieldKey: BranchFields.branchOwners,
         fieldName: 'Branch Owners',
         oldValue: oldBranch.branchOwners?.map((e) => e.toMap()).toList() ?? [],
         newValue: newBranch.branchOwners?.map((e) => e.toMap()).toList() ?? [],
-        fieldType: 'list',
+        fieldType: DataTypes.list,
       );
     }
 
@@ -283,23 +304,25 @@ class BranchUpdateRequestService {
       oldBranch.branchManagers,
       newBranch.branchManagers,
     )) {
-      changes['branchManagers'] = FieldChange(
+      changes[BranchFields.branchManagers] = FieldChange(
+        fieldKey: BranchFields.branchManagers,
         fieldName: 'Branch Managers',
         oldValue:
             oldBranch.branchManagers?.map((e) => e.toMap()).toList() ?? [],
         newValue:
             newBranch.branchManagers?.map((e) => e.toMap()).toList() ?? [],
-        fieldType: 'list',
+        fieldType: DataTypes.list,
       );
     }
 
     // Compare suppliers
     if (!_contactPersonListEquals(oldBranch.suppliers, newBranch.suppliers)) {
-      changes['suppliers'] = FieldChange(
+      changes[BranchFields.suppliers] = FieldChange(
+        fieldKey: BranchFields.suppliers,
         fieldName: 'Suppliers',
         oldValue: oldBranch.suppliers?.map((e) => e.toMap()).toList() ?? [],
         newValue: newBranch.suppliers?.map((e) => e.toMap()).toList() ?? [],
-        fieldType: 'list',
+        fieldType: DataTypes.list,
       );
     }
 

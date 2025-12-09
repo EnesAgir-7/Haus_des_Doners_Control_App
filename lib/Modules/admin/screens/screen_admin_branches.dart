@@ -11,6 +11,7 @@ import '../../../translations/locale_keys.g.dart';
 import '../admin_providers/provider_admin_branches.dart';
 import '../widgets/admin_all_branches_menu_button.dart';
 import '../widgets/admin_branch_card.dart';
+import 'screen_admin_update_requests.dart';
 
 class ScreenAdminBranches extends StatefulWidget {
   const ScreenAdminBranches({super.key});
@@ -78,8 +79,12 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
                   );
                 },
                 onUpdateRequests: () {
-                  // Handle update requests
-                  print('Update Requests tapped');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ScreenAdminUpdateRequests(),
+                    ),
+                  );
                 },
               ),
             ],
