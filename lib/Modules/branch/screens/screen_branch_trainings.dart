@@ -25,7 +25,7 @@ class ScreenBranchTrainings extends StatelessWidget {
       appBar: CustomAppBar(title: LocaleKeys.training_videos.tr()),
       body: SafeArea(
         child: StreamBuilder<List<TrainingVideoModel>>(
-          stream: service.getBranchTrainingVideos(branchId),
+          stream: service.getAllTrainingVideos(),
           builder: (context, snapshot) {
             // Loading State
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -67,7 +67,16 @@ class ScreenBranchTrainings extends StatelessWidget {
               );
             }
 
-            final videos = snapshot.data ?? [];
+            final allVideos = snapshot.data ?? [];
+            // filter client-side for branch ownership (branchId field may be null for global videos)
+            final videos = allVideos
+                .where(
+                  (v) =>
+                      v.branchId == null ||
+                      v.branchId == branchId ||
+                      v.branchId!.isEmpty,
+                )
+                .toList();
 
             // Empty State
             if (videos.isEmpty) {

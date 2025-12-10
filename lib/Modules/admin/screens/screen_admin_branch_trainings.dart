@@ -13,10 +13,8 @@ import '../../inspector/widgets/custom_app_bar.dart';
 import '../../inspector/widgets/custom_field.dart';
 import '../admin_providers/provider_admin_trainings.dart';
 
-
 class ScreenAdminBranchTrainings extends StatefulWidget {
-  final String branchId;
-  const ScreenAdminBranchTrainings({super.key, required this.branchId});
+  const ScreenAdminBranchTrainings({super.key});
 
   @override
   State<ScreenAdminBranchTrainings> createState() =>
@@ -32,7 +30,7 @@ class _ScreenAdminBranchTrainingsState
       Provider.of<AdminTrainingVideosProvider>(
         context,
         listen: false,
-      ).loadBranchVideos(widget.branchId);
+      ).loadVideos();
     });
   }
 
@@ -166,7 +164,6 @@ class _ScreenAdminBranchTrainingsState
                             id: DateTime.now().millisecondsSinceEpoch
                                 .toString(),
                             videoUrl: url,
-                            branchId: widget.branchId,
                             createdAt: DateTime.now(),
                           ),
                           context: context,

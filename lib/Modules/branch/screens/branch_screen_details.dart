@@ -527,7 +527,7 @@ class _BranchScreenDetailsState extends State<BranchScreenDetails> {
           ),
           const SizedBox(height: 16),
           SizedBox(
-            height: 120,
+            height: 100,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: contacts.length,

@@ -166,16 +166,16 @@ class AdminBranchService {
             .toList(),
       });
 
-      // If inspector is assigned, update their history
-      if (branch.assignedInspector != null) {
-        await _userService.updateInspectorHistoryBatch(
-          batch: batch,
-          inspectorId: branch.assignedInspector!.id,
-          updates: {
-            IHF.branchesIds: FieldValue.arrayUnion([docRef.id]),
-          },
-        );
-      }
+      // // If inspector is assigned, update their history
+      // if (branch.assignedInspector != null) {
+      //   await _userService.updateInspectorHistoryBatch(
+      //     batch: batch,
+      //     inspectorId: branch.assignedInspector!.id,
+      //     updates: {
+      //       IHF.branchesIds: FieldValue.arrayUnion([docRef.id]),
+      //     },
+      //   );
+      // }
 
       await batch.commit();
       console('✅ Branch added successfully: ${docRef.id}');

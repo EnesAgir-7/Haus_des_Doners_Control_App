@@ -22,14 +22,12 @@ class AdminTrainingVideosProvider extends ChangeNotifier {
   bool _hasMore = true;
   bool get hasMore => _hasMore;
 
-  String? _currentBranchId;
-
-  Future<void> loadBranchVideos(String branchId, {bool refresh = false}) async {
-    if (_currentBranchId != branchId || refresh) {
+  // Load videos for all branches (global collection)
+  Future<void> loadVideos({bool refresh = false}) async {
+    if (refresh) {
       _videos = [];
       _lastDocument = null;
       _hasMore = true;
-      _currentBranchId = branchId;
     }
 
     if (_isLoading || !_hasMore) return;
@@ -40,7 +38,6 @@ class AdminTrainingVideosProvider extends ChangeNotifier {
 
     try {
       final result = await _service.getTrainingVideos(
-        branchId: branchId,
         pageSize: 20,
         lastDocument: _lastDocument,
       );
@@ -57,15 +54,11 @@ class AdminTrainingVideosProvider extends ChangeNotifier {
   }
 
   Future<void> loadMoreVideos() async {
-    if (_currentBranchId != null) {
-      await loadBranchVideos(_currentBranchId!);
-    }
+    await loadVideos();
   }
 
   Future<void> refreshVideos() async {
-    if (_currentBranchId != null) {
-      await loadBranchVideos(_currentBranchId!, refresh: true);
-    }
+    await loadVideos(refresh: true);
   }
 
   Future<bool> addVideo(
@@ -94,10 +87,9 @@ class AdminTrainingVideosProvider extends ChangeNotifier {
     String videoId, {
     required BuildContext context,
   }) async {
-    if (_currentBranchId == null) return false;
-
     try {
-      await _service.deleteTrainingVideo(_currentBranchId!, videoId);
+      // delete by video id from global collection
+      await _service.deleteTrainingVideo(videoId);
 
       _videos.removeWhere((v) => v.id == videoId);
       notifyListeners();
@@ -124,7 +116,6 @@ class AdminTrainingVideosProvider extends ChangeNotifier {
     _videos = [];
     _lastDocument = null;
     _hasMore = true;
-    _currentBranchId = null;
     _errorMessage = null;
     _isLoading = false;
     notifyListeners();

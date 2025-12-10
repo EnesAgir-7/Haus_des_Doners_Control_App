@@ -7,11 +7,13 @@ import '../../../core/constants/firebase_constants.dart';
 class BranchActionsMenuButton extends StatelessWidget {
   final VoidCallback onCreateAnnouncement;
   final VoidCallback onUpdateRequests;
+  final VoidCallback onTrainingVideos;
 
   const BranchActionsMenuButton({
     Key? key,
     required this.onCreateAnnouncement,
     required this.onUpdateRequests,
+    required this.onTrainingVideos,
   }) : super(key: key);
 
   @override
@@ -107,7 +109,40 @@ class BranchActionsMenuButton extends StatelessWidget {
             ),
           ),
         ),
-
+        PopupMenuItem<String>(
+          value: 'training_videos',
+          padding: EdgeInsets.zero,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryRed.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.video_library_outlined,
+                    color: AppColors.primaryRed,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Training Videos',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
         // Divider
         PopupMenuItem<String>(
           enabled: false,
@@ -197,6 +232,9 @@ class BranchActionsMenuButton extends StatelessWidget {
             break;
           case 'requests':
             onUpdateRequests();
+            break;
+          case 'training_videos':
+            onTrainingVideos();
             break;
         }
       },

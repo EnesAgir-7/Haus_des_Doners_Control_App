@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:haus_des_control/Modules/admin/screens/screen_admin_branch_trainings.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
@@ -300,13 +299,13 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               );
             },
             onTrainingVideos: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      ScreenAdminBranchTrainings(branchId: widget.branch.id),
-                ),
-              );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (_) =>
+              //         ScreenAdminBranchTrainings(branchId: widget.branch.id),
+              //   ),
+              // );
             },
           ),
 

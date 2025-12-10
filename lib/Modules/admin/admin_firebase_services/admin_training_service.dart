@@ -5,56 +5,47 @@ import '../../../models/training_video_model.dart';
 class AdminTrainingVideosService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // Get the videos subcollection reference for a specific branch
-  CollectionReference _getVideosCollection(String branchId) {
-    return _db
-        .collection(Collections.trainingVideos)
-        .doc(branchId)
-        .collection(Collections.trainingVideos);
-  }
+  // Global collection for training videos (flat structure)
+  CollectionReference get _globalVideos =>
+      _db.collection(Collections.trainingVideos);
 
   Future<void> addTrainingVideo(TrainingVideoModel video) async {
     try {
       final data = video.toMap();
-      // Override createdAt with server timestamp for consistency
       data[TrainingVideoFields.createdAt] = FieldValue.serverTimestamp();
-
-      await _getVideosCollection(video.branchId).doc(video.id).set(data);
+      await _globalVideos.doc(video.id).set(data);
     } catch (e) {
       print("Error adding training video: $e");
       rethrow;
     }
   }
 
-  Future<void> deleteTrainingVideo(String branchId, String videoId) async {
+  Future<void> deleteTrainingVideo(String videoId) async {
     try {
-      await _getVideosCollection(branchId).doc(videoId).delete();
+      await _globalVideos.doc(videoId).delete();
+      print("Training video deleted: $videoId");
     } catch (e) {
-      print("Error deleting video: $e");
+      print("Error deleting training video: $e");
       rethrow;
     }
   }
 
-  Stream<List<TrainingVideoModel>> getBranchTrainingVideos(String branchId) {
-    return _getVideosCollection(branchId)
-        .orderBy(TrainingVideoFields.createdAt, descending: true)
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs
-              .map((doc) => TrainingVideoModel.fromFirestore(doc, branchId))
-              .toList();
-        });
-  }
-
   Future<Map<String, dynamic>> getTrainingVideos({
-    required String branchId,
+    String? branchId,
     int pageSize = 20,
     DocumentSnapshot? lastDocument,
   }) async {
     try {
-      Query query = _getVideosCollection(branchId)
+      Query query = _globalVideos
           .orderBy(TrainingVideoFields.createdAt, descending: true)
           .limit(pageSize);
+
+      if (branchId != null && branchId.isNotEmpty) {
+        query = _globalVideos
+            .where(TrainingVideoFields.branchId, isEqualTo: branchId)
+            .orderBy(TrainingVideoFields.createdAt, descending: true)
+            .limit(pageSize);
+      }
 
       if (lastDocument != null) {
         query = query.startAfterDocument(lastDocument);
@@ -63,7 +54,7 @@ class AdminTrainingVideosService {
       final snapshot = await query.get();
 
       final videos = snapshot.docs
-          .map((doc) => TrainingVideoModel.fromFirestore(doc, branchId))
+          .map((doc) => TrainingVideoModel.fromFirestore(doc))
           .toList();
 
       return {
