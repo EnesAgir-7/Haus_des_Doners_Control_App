@@ -1,10 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:haus_des_control/Modules/branch/firebase_services/branch_update_request_service.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
+import '../../../common_services/notification_helper.dart';
+import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_update_request_model.dart';
 
 class AdminUpdateRequestService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  static const String _collectionName = 'update_requests';
+  static const String _collectionName = Collections.updateRequests;
+
+  final String _collectionBranches = Collections.branches;
 
   CollectionReference get _collection => _db.collection(_collectionName);
 
@@ -121,6 +128,7 @@ class AdminUpdateRequestService {
         'reviewedAt': Timestamp.now(),
         'adminNote': adminNote ?? '',
       });
+      print('✅ Request rejected successfully');
     } on FirebaseException catch (e) {
       throw Exception('Firebase error: ${e.message}');
     } catch (e) {
@@ -130,33 +138,91 @@ class AdminUpdateRequestService {
 
   // Approve request (update branch + mark as approved)
   Future<void> approveRequest(
-    String requestId,
-    String branchId,
-    Map<String, FieldChange> changes, {
+    String requestId, {
+    required String branchId,
+    required Map<String, FieldChange> changes,
     required String adminId,
     String? adminNote,
   }) async {
     try {
-      // Prepare update data for branch
-      final updateData = <String, dynamic>{};
+      // ---------------------------------------------------------
+      // Step 1: Run transaction (update branch + update request)
+      // ---------------------------------------------------------
+      await _db.runTransaction((transaction) async {
+        final branchRef = _db.collection(_collectionBranches).doc(branchId);
+        final requestRef = _collection.doc(requestId);
 
-      changes.forEach((key, change) {
-        updateData[change.fieldKey] = change.newValue;
+        final branchSnapshot = await transaction.get(branchRef);
+        if (!branchSnapshot.exists) {
+          throw Exception(LocaleKeys.branchNotFound.tr());
+        }
+
+        // Prepare update map
+        final Map<String, dynamic> branchUpdates = {
+          'updatedAt': Timestamp.now(),
+        };
+
+        // Apply field changes
+        changes.forEach((key, fieldChange) {
+          branchUpdates[fieldChange.fieldKey] = _prepareValueForFirestore(
+            fieldChange.newValue,
+            fieldChange.fieldType,
+          );
+        });
+
+        // Update branch
+        transaction.update(branchRef, branchUpdates);
+
+        // Update request
+        transaction.update(requestRef, {
+          'status': 'approved',
+          'reviewedBy': adminId,
+          'reviewedAt': Timestamp.now(),
+          'adminNote': adminNote ?? 'Approved',
+        });
       });
 
-      // Add updated timestamp
-      updateData['updatedAt'] = Timestamp.now();
+      // ---------------------------------------------------------
+      // Step 2: Fetch branch after transaction to get fcmTokens
+      // ---------------------------------------------------------
+      final branchSnapshot = await _db
+          .collection(_collectionBranches)
+          .doc(branchId)
+          .get();
 
-      // Update branch document
-      await _db.collection('branches').doc(branchId).update(updateData);
+      if (!branchSnapshot.exists) {
+        throw Exception(LocaleKeys.branchNotFound.tr());
+      }
 
-      // Mark request as approved
-      await _collection.doc(requestId).update({
-        'status': 'approved',
-        'reviewedBy': adminId,
-        'reviewedAt': Timestamp.now(),
-        'adminNote': adminNote ?? '',
-      });
+      // Extract fcmTokens safely
+      final data = branchSnapshot.data() as Map<String, dynamic>;
+      final List<dynamic>? tokensRaw =
+          data[BranchFields.fcmTokens] as List<dynamic>?;
+
+      final List<String> fcmTokens = tokensRaw != null
+          ? tokensRaw.map((t) => t.toString()).toList()
+          : [];
+
+      // If no tokens exist, you may skip or log
+      if (fcmTokens.isEmpty) {
+        print('⚠ No FCM tokens found for branch $branchId');
+        return;
+      }
+
+      // ---------------------------------------------------------
+      // Step 3: Send notification
+      // ---------------------------------------------------------
+      NotificationHelper.instance.sendNotificationToMultipleTokens(
+        title: "Update Request Approved",
+        body: "Your update request for branch has been approved.",
+        fcmTokens: fcmTokens,
+        data: {
+          'type': 'branch_notification',
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+
+      print('✅ Request approved, branch updated, and notification sent.');
     } on FirebaseException catch (e) {
       throw Exception('Firebase error: ${e.message}');
     } catch (e) {
@@ -177,24 +243,45 @@ class AdminUpdateRequestService {
       return 0;
     }
   }
+}
 
-  // Get requests by branch
-  Future<List<BranchUpdateRequestModel>> getRequestsByBranch(
-    String branchId,
-  ) async {
-    try {
-      final snapshot = await _collection
-          .where('branchId', isEqualTo: branchId)
-          .orderBy('requestedAt', descending: true)
-          .get();
+dynamic _prepareValueForFirestore(dynamic value, String fieldType) {
+  if (value == null) return null;
 
-      return snapshot.docs
-          .map((doc) => BranchUpdateRequestModel.fromFirestore(doc))
-          .toList();
-    } on FirebaseException catch (e) {
-      throw Exception('Firebase error: ${e.message}');
-    } catch (e) {
-      throw Exception('Error fetching branch requests: $e');
-    }
+  switch (fieldType) {
+    case DataTypes.datetime:
+      if (value is DateTime) {
+        return Timestamp.fromDate(value);
+      } else if (value is Timestamp) {
+        return value;
+      }
+      return value;
+
+    case DataTypes.geopoint:
+      if (value is GeoPoint) {
+        return value;
+      }
+      return value;
+
+    case DataTypes.list:
+      if (value is List) {
+        // Handle list of maps (like contact persons)
+        return value.map((item) {
+          if (item is Map) {
+            return Map<String, dynamic>.from(item);
+          }
+          return item;
+        }).toList();
+      }
+      return value;
+
+    case DataTypes.map:
+      if (value is Map) {
+        return Map<String, dynamic>.from(value);
+      }
+      return value;
+
+    default:
+      return value;
   }
 }

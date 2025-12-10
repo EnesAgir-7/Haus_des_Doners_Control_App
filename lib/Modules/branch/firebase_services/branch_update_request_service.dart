@@ -1,7 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../common_services/notification_helper.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_update_request_model.dart';
 import '../../../models/branch_model.dart';
+
+//TODO: locale
 
 class DataTypes {
   static const String string = 'string';
@@ -22,13 +26,17 @@ class BranchUpdateRequestService {
   // Check if branch has pending request
   Future<bool> hasPendingRequest(String branchId) async {
     try {
-      final snapshot = await _collection
-          .where('branchId', isEqualTo: branchId)
-          .where('status', isEqualTo: 'pending')
-          .limit(1)
-          .get();
+      final doc = await _collection.doc(branchId).get();
 
-      return snapshot.docs.isNotEmpty;
+      if (!doc.exists) {
+        return false;
+      }
+
+      final data = doc.data() as Map<String, dynamic>?;
+
+      if (data == null) return false;
+
+      return data['status'] == 'pending';
     } catch (e) {
       throw Exception('Error checking pending request: $e');
     }
@@ -37,15 +45,17 @@ class BranchUpdateRequestService {
   // Get pending request for branch
   Future<BranchUpdateRequestModel?> getPendingRequest(String branchId) async {
     try {
-      final snapshot = await _collection
-          .where('branchId', isEqualTo: branchId)
-          .where('status', isEqualTo: 'pending')
-          .limit(1)
-          .get();
+      final doc = await _collection.doc(branchId).get();
 
-      if (snapshot.docs.isEmpty) return null;
+      if (!doc.exists) return null;
 
-      return BranchUpdateRequestModel.fromFirestore(snapshot.docs.first);
+      final data = doc.data() as Map<String, dynamic>?; // Proper cast
+      if (data == null) return null;
+
+      if (data['status'] != 'pending') return null;
+
+      // Pass the data + id to your model factory
+      return BranchUpdateRequestModel.fromFirestore(doc);
     } catch (e) {
       throw Exception('Error getting pending request: $e');
     }
@@ -66,7 +76,7 @@ class BranchUpdateRequestService {
         throw Exception('You already have a pending update request');
       }
 
-      // Create request
+      // Create request model
       final request = BranchUpdateRequestModel(
         id: branchId,
         branchId: branchId,
@@ -78,8 +88,20 @@ class BranchUpdateRequestService {
         changes: changes,
       );
 
-      final docRef = await _collection.add(request.toMap());
-      return docRef.id;
+      // Store doc using branchId as document ID
+      await _collection.doc(branchId).set(request.toMap());
+      NotificationHelper.instance.sendNotificationToTopic(
+        topic: AppConstants.adminTopic,
+        title: "Branch Update Request",
+        body: "A new update request has been submitted for branch $branchName.",
+        data: {
+          'type': 'branch_update_request',
+          'branchId': branchId,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+
+      return branchId;
     } on FirebaseException catch (e) {
       throw Exception('Firebase error: ${e.message}');
     } catch (e) {
@@ -90,17 +112,23 @@ class BranchUpdateRequestService {
   // Delete request (only pending requests can be deleted by branch)
   Future<void> deleteRequest(String requestId) async {
     try {
-      // First check if it's pending
+      // Fetch request
       final doc = await _collection.doc(requestId).get();
       if (!doc.exists) {
         throw Exception('Request not found');
       }
 
-      final data = doc.data() as Map<String, dynamic>;
+      final data = doc.data() as Map<String, dynamic>?; // Safe cast
+      if (data == null) {
+        throw Exception('Invalid request format');
+      }
+
+      // Only allow deleting pending requests
       if (data['status'] != 'pending') {
         throw Exception('Only pending requests can be deleted');
       }
 
+      // Delete the request
       await _collection.doc(requestId).delete();
     } on FirebaseException catch (e) {
       throw Exception('Firebase error: ${e.message}');
@@ -131,19 +159,6 @@ class BranchUpdateRequestService {
     } catch (e) {
       throw Exception('Error getting branch requests: $e');
     }
-  }
-
-  // Stream for real-time updates
-  Stream<BranchUpdateRequestModel?> streamPendingRequest(String branchId) {
-    return _collection
-        .where('branchId', isEqualTo: branchId)
-        .where('status', isEqualTo: 'pending')
-        .limit(1)
-        .snapshots()
-        .map((snapshot) {
-          if (snapshot.docs.isEmpty) return null;
-          return BranchUpdateRequestModel.fromFirestore(snapshot.docs.first);
-        });
   }
 
   // Compare two branch models and extract changes

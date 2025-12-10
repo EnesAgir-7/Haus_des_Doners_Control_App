@@ -7,6 +7,7 @@ import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import '../../../models/branch_update_request_model.dart';
 import '../admin_providers/provider_admin_update_requests.dart';
+//TODO: locale
 
 class ScreenRequestDetails extends StatelessWidget {
   final BranchUpdateRequestModel request;

@@ -213,14 +213,19 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                 labelStyle: const TextStyle(color: Colors.white70),
               ),
             ),
+            const SizedBox(height: 16),
+
             TextField(
               controller: phoneC,
               style: const TextStyle(color: Colors.white),
+              keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                 labelText: LocaleKeys.phone.tr(),
                 labelStyle: const TextStyle(color: Colors.white70),
               ),
             ),
+            const SizedBox(height: 16),
+
             TextField(
               controller: roleC,
               style: const TextStyle(color: Colors.white),
@@ -283,14 +288,20 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                 labelStyle: const TextStyle(color: Colors.white70),
               ),
             ),
+
+            const SizedBox(height: 16),
             TextField(
               controller: phoneC,
               style: const TextStyle(color: Colors.white),
+
+              keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                 labelText: LocaleKeys.phone.tr(),
                 labelStyle: const TextStyle(color: Colors.white70),
               ),
             ),
+            const SizedBox(height: 16),
+
             TextField(
               controller: roleC,
               style: const TextStyle(color: Colors.white),
@@ -501,7 +512,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
         return FilterChip(
           label: Text(d),
           selected: selected,
-          selectedColor: AppColors.primaryRed,
+          selectedColor: AppColors.white,
           onSelected: (v) {
             setState(() {
               if (v) {
@@ -774,44 +785,60 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                     const SizedBox(height: 16),
                     _buildOpeningDaysSelector(),
                     const SizedBox(height: 16),
-                    InkWell(
-                      onTap: () async {
-                        final date = await showDatePicker(
-                          context: context,
-                          initialDate: _selectedOpeningDay ?? DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (date != null) {
-                          setState(() => _selectedOpeningDay = date);
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryDark.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.calendar_today,
-                              color: Colors.white70,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            LocaleKeys.openingDay.tr(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(width: 12),
-                            Text(
-                              _selectedOpeningDay != null
-                                  ? DateFormat.yMMMd().format(
-                                      _selectedOpeningDay!,
-                                    )
-                                  : LocaleKeys.selectOpeningDay.tr(),
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () async {
+                            final date = await showDatePicker(
+                              context: context,
+                              initialDate:
+                                  _selectedOpeningDay ?? DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (date != null) {
+                              setState(() => _selectedOpeningDay = date);
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryDark.withValues(
+                                alpha: 0.35,
                               ),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ],
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.calendar_today,
+                                  color: Colors.white70,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  _selectedOpeningDay != null
+                                      ? DateFormat.yMMMd().format(
+                                          _selectedOpeningDay!,
+                                        )
+                                      : LocaleKeys.selectOpeningDay.tr(),
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
 
                     const SizedBox(height: 24),

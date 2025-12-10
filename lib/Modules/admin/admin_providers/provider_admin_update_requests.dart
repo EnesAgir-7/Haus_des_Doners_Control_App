@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import '../../../models/branch_update_request_model.dart';
 import '../admin_firebase_services/admin_update_requests_service.dart';
 
+//TODO: locale
 class AdminUpdateRequestProvider extends ChangeNotifier {
   final AdminUpdateRequestService _service = AdminUpdateRequestService();
 
@@ -106,8 +108,8 @@ class AdminUpdateRequestProvider extends ChangeNotifier {
     try {
       await _service.approveRequest(
         requestId,
-        branchId,
-        changes,
+        branchId: branchId,
+        changes: changes,
         adminNote: adminNote,
         adminId: adminId,
       );
@@ -184,12 +186,7 @@ class AdminUpdateRequestProvider extends ChangeNotifier {
       await loadStats();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Request rejected successfully'),
-            backgroundColor: Colors.orange,
-          ),
-        );
+        showSnakBarr(context, 'Request rejected successfully');
       }
 
       return true;

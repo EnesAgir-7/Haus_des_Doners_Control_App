@@ -13,6 +13,7 @@ import '../../../common_services/user_selection_sheet.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../models/branch_model.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../../common/add_contact_person_dilaog.dart';
 import '../admin_providers/provider_admin_branches.dart';
 import '../widgets/admin_location_picker.dart';
 import '../widgets/admin_template_selection_sheet.dart';
@@ -169,7 +170,8 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                         if (value.trim().length < 6) {
                           return LocaleKeys.password_min_length.tr();
                         }
-                        if (value.trim() != _branchPasswordController.text.trim()) {
+                        if (value.trim() !=
+                            _branchPasswordController.text.trim()) {
                           return LocaleKeys.passwords_not_match.tr();
                         }
                         return null;
@@ -335,7 +337,8 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                     const SizedBox(height: 16),
                     _buildContactPersonList(
                       persons: _branchOwners,
-                      onAdd: () => _showAddContactPersonDialog(
+                      onAdd: () => showAddContactPersonDialog(
+                        context: context,
                         title: LocaleKeys.addBranchOwner.tr(),
                         onSave: (person) {
                           setState(() => _branchOwners.add(person));
@@ -354,7 +357,8 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                     const SizedBox(height: 16),
                     _buildContactPersonList(
                       persons: _branchManagers,
-                      onAdd: () => _showAddContactPersonDialog(
+                      onAdd: () => showAddContactPersonDialog(
+                        context: context,
                         title: LocaleKeys.addBranchManager.tr(),
                         onSave: (person) {
                           setState(() => _branchManagers.add(person));
@@ -372,7 +376,8 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                     const SizedBox(height: 16),
                     _buildContactPersonList(
                       persons: _suppliers,
-                      onAdd: () => _showAddContactPersonDialog(
+                      onAdd: () => showAddContactPersonDialog(
+                        context: context,
                         showRole: true,
                         title: LocaleKeys.addSupplier.tr(),
                         onSave: (person) {
@@ -504,7 +509,10 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
+              borderSide: const BorderSide(
+                color: AppColors.primaryRed,
+                width: 2,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -875,7 +883,11 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.description, color: AppColors.primaryRed, size: 20),
+                const Icon(
+                  Icons.description,
+                  color: AppColors.primaryRed,
+                  size: 20,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -1038,7 +1050,10 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
                 ),
                 child: Text(
                   LocaleKeys.cancel.tr(),
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
@@ -1178,115 +1193,6 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
     );
   }
 
-  void _showAddContactPersonDialog({
-    required String title,
-    bool showRole = false,
-    required Function(ContactPerson) onSave,
-  }) {
-    final nameController = TextEditingController();
-    final phoneController = TextEditingController();
-    final roleController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppColors.primaryDark,
-          title: Text(title, style: const TextStyle(color: Colors.white)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: LocaleKeys.name.tr(),
-                  labelStyle: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primaryRed),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: phoneController,
-                style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  labelText: LocaleKeys.phone.tr(),
-                  labelStyle: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColors.primaryRed),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              if (showRole)
-                TextField(
-                  controller: roleController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: LocaleKeys.role.tr(),
-                    labelStyle: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.white.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(color: AppColors.primaryRed),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(LocaleKeys.cancel.tr()),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty &&
-                    phoneController.text.isNotEmpty &&
-                    (!showRole || roleController.text.isNotEmpty)) {
-                  onSave(
-                    ContactPerson(
-                      name: nameController.text,
-                      phone: phoneController.text,
-                      role: roleController.text,
-                    ),
-                  );
-                  Navigator.pop(context);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryRed,
-              ),
-              child: Text(LocaleKeys.save.tr()),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -1368,7 +1274,10 @@ class _ScreenAdminAddBranchState extends State<ScreenAdminAddBranch> {
       );
 
       final provider = context.read<ProviderAdminBranches>();
-      final success = await provider.addBranch(branch: branch, context: context);
+      final success = await provider.addBranch(
+        branch: branch,
+        context: context,
+      );
 
       if (mounted) {
         setState(() => _isSubmitting = false);
