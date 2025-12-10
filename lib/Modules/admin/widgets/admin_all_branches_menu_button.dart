@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 
 import '../../../core/constants/firebase_constants.dart';
+//TODO: locale
 
 class BranchActionsMenuButton extends StatelessWidget {
   final VoidCallback onCreateAnnouncement;
@@ -97,7 +98,7 @@ class BranchActionsMenuButton extends StatelessWidget {
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
-                    'Announcement',
+                    'Announcements',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 14,

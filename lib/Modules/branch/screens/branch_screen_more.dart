@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/admin/screens/screen_admin_announcements.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
@@ -138,14 +140,21 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
     final int updateBadge =
         (reqProv.hasPendingRequest || reqProv.rejectedCount > 0) ? 1 : 0;
     final actions = [
-      // {
-      //   'icon': Icons.campaign_outlined,
-      //   'label': LocaleKeys.announcements.tr(),
-      //   'description': LocaleKeys.view_important_updates.tr(),
-      //   'color': Colors.blue,
-      //   'badge': 3, // Mock badge count
-      //   'onTap': () {},
-      // },
+      {
+        'icon': Icons.campaign_outlined,
+        'label': LocaleKeys.announcements.tr(),
+        'description': LocaleKeys.view_important_updates.tr(),
+        'color': Colors.blue,
+        'badge': 0, // Mock badge count
+        'onTap': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ScreenAdminAnnouncements(
+              role: AppConstants.branch,
+            )),
+          );
+        },
+      },
       // {
       //   'icon': Icons.notifications_outlined,
       //   'label': LocaleKeys.notifications.tr(),

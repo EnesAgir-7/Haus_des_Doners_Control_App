@@ -18,7 +18,7 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-
+import 'Modules/admin/admin_providers/provider_admin_announcements.dart';
 import 'Modules/admin/admin_providers/provider_admin_bottombar.dart';
 import 'Modules/admin/admin_providers/provider_admin_documents.dart';
 import 'Modules/admin/admin_providers/provider_admin_inspections.dart';
@@ -130,6 +130,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdminDocumentsProvider()),
         ChangeNotifierProvider(create: (_) => BranchUpdateRequestProvider()),
         ChangeNotifierProvider(create: (_) => AdminUpdateRequestProvider()),
+        ChangeNotifierProvider(create: (_) => AdminAnnouncementsProvider()),
       ],
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,

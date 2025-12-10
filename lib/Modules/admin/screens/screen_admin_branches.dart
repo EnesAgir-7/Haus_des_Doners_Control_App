@@ -4,13 +4,13 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admin_add_branch.dart';
 import 'package:provider/provider.dart';
 
-import '../../../common_services/broadcast_notification_dialog.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../admin_providers/provider_admin_branches.dart';
 import '../widgets/admin_all_branches_menu_button.dart';
 import '../widgets/admin_branch_card.dart';
+import 'screen_admin_announcements.dart';
 import 'screen_admin_branch_trainings.dart';
 import 'screen_admin_update_requests.dart';
 
@@ -73,11 +73,14 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
               Expanded(child: _buildSearchBar()),
               const SizedBox(width: 12),
               BranchActionsMenuButton(
-                onCreateAnnouncement: () {
-                  showBroadcastNotificationDialog(
-                    parentContext: context,
-                    topic: AppConstants.branch,
-                    recipientLabel: LocaleKeys.branches.tr(),
+                onCreateAnnouncement: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ScreenAdminAnnouncements(
+                        role: AppConstants.admin,
+                      ),
+                    ),
                   );
                 },
                 onUpdateRequests: () {

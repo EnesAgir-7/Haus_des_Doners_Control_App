@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import '../../common/menu_button.dart';
-
+//TODO: locale
 class BranchMenuButton extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -58,13 +58,13 @@ class BranchMenuButton extends StatelessWidget {
           title: 'Documents',
           color: Colors.green,
         ),
-        buildDivider(),
-        buildMenuItem(
-          value: 'training',
-          icon: Icons.video_library_outlined,
-          title: 'Training Videos',
-          color: Colors.orange,
-        ),
+        // buildDivider(),
+        // buildMenuItem(
+        //   value: 'training',
+        //   icon: Icons.video_library_outlined,
+        //   title: 'Training Videos',
+        //   color: Colors.orange,
+        // ),
         buildDivider(),
         buildMenuItem(
           value: 'delete',
