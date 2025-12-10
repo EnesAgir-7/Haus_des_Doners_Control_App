@@ -10,7 +10,6 @@ import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_br
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_users.dart';
 import 'package:haus_des_control/Modules/admin/admin_providers/provider_admin_vehicle.dart';
 import 'package:haus_des_control/Modules/admin/screens/admin_bottom_nav_bar.dart';
-import 'package:haus_des_control/Modules/inspector/providers/provider_auth.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_route.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_vehicle.dart';
@@ -31,6 +30,7 @@ import 'Modules/branch/branch_providers/provider_branch_dashboard.dart';
 import 'Modules/branch/branch_providers/provider_branch_inspections.dart';
 import 'Modules/branch/branch_providers/provider_branch_update_request.dart';
 import 'Modules/branch/screens/branch_screen_bottom_navbar.dart';
+import 'Modules/inspector/providers/provider_auth_new.dart';
 import 'Modules/inspector/providers/provider_bottom_nav_bar.dart';
 import 'Modules/inspector/providers/provider_branches.dart';
 import 'Modules/inspector/providers/provider_control.dart';

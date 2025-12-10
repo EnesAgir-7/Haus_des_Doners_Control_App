@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admins_listing.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/app_button.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
-import '../../inspector/providers/provider_auth.dart';
+import '../../inspector/providers/provider_auth_new.dart';
 import '../../inspector/widgets/custom_toast.dart';
 import '../../inspector/widgets/language_button.dart';
 import 'screen_admin_templates.dart';
@@ -86,7 +87,9 @@ class ScreenAdminSettings extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ScreenAdminListing(),
+                          builder: (context) => const ScreenAdminListing(
+                            role: AppConstants.admin,
+                          ),
                         ),
                       );
                     },
@@ -98,7 +101,14 @@ class ScreenAdminSettings extends StatelessWidget {
                     subtitle: "Add, Edit, Remove Branch Users",
                     color: AppColors.primaryRed,
                     onTap: () {
-                      
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ScreenAdminListing(
+                            role: AppConstants.branch,
+                          ),
+                        ),
+                      );
                     },
                   ),
                   _buildSectionTitle(context, LocaleKeys.change_language.tr()),

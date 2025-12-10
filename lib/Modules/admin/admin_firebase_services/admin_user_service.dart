@@ -19,11 +19,16 @@ class AdminUserService {
 
   Stream<List<UserModel>> streamAllInspectors() {
     try {
-      return _db.collection(Collections.inspectors).snapshots().map((snapshot) {
-        return snapshot.docs
-            .map((doc) => UserModel.fromFirestore(doc))
-            .toList();
-      });
+      // ✅ Filter by role to get only inspectors
+      return _db
+          .collection(Collections.inspectors)
+          .where(UserFields.role, isEqualTo: AppConstants.inspector)
+          .snapshots()
+          .map((snapshot) {
+            return snapshot.docs
+                .map((doc) => UserModel.fromFirestore(doc))
+                .toList();
+          });
     } catch (e) {
       print('Error streaming all inspectors: $e');
       // Return an empty stream in case of error
@@ -154,23 +159,10 @@ class AdminUserService {
   // Create user (inspector or admin)
   Future<void> createUser(String userId, UserModel user) async {
     try {
-      String collectionName;
-      switch (user.role.toLowerCase()) {
-        case AppConstants.inspector:
-          collectionName = Collections.inspectors;
-          break;
-        case AppConstants.admin:
-          collectionName = Collections.admins;
-          break;
-        case AppConstants.branch:
-          // Branch users stored in dedicated collection for easier fetching
-          collectionName = Collections.branchUsers;
-          break;
-        default:
-          throw Exception('Invalid user role: ${user.role}');
-      }
-
-      await _db.collection(collectionName).doc(userId).set(user.toMap());
+      await _db
+          .collection(Collections.inspectors)
+          .doc(userId)
+          .set(user.toMap());
     } catch (e) {
       print('Error creating user: $e');
       rethrow;

@@ -179,7 +179,9 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        if (_isEditing)
+                        // Don't show update password for branch users
+                        if (_isEditing &&
+                            widget.user.role != AppConstants.branch)
                           Expanded(child: _buildUpdatePasswordButton(provider)),
                         const SizedBox(width: 16),
                         if (_isEditing)

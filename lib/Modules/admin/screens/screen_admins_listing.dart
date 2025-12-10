@@ -11,7 +11,8 @@ import 'screen_admin_create_user.dart';
 import 'screen_admin_user_details.dart';
 
 class ScreenAdminListing extends StatefulWidget {
-  const ScreenAdminListing({super.key});
+  final String role;
+  const ScreenAdminListing({super.key, required this.role});
 
   @override
   State<ScreenAdminListing> createState() => _ScreenAdminListingState();
@@ -20,7 +21,7 @@ class ScreenAdminListing extends StatefulWidget {
 class _ScreenAdminListingState extends State<ScreenAdminListing> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
-  List<UserModel>? _cachedAdmins;
+  List<UserModel>? _cachedUsers;
   bool _isInitialLoad = true;
 
   @override
@@ -29,14 +30,14 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
     super.dispose();
   }
 
-  List<UserModel> _filterAdmins(List<UserModel> admins) {
-    if (_searchQuery.isEmpty) return admins;
+  List<UserModel> _filterUsers(List<UserModel> users) {
+    if (_searchQuery.isEmpty) return users;
 
     final query = _searchQuery.toLowerCase();
-    return admins.where((admin) {
-      return admin.name.toLowerCase().contains(query) ||
-          admin.serviceAccount.toLowerCase().contains(query) ||
-          (admin.region?.toLowerCase().contains(query) ?? false);
+    return users.where((u) {
+      return u.name.toLowerCase().contains(query) ||
+          u.serviceAccount.toLowerCase().contains(query) ||
+          (u.region?.toLowerCase().contains(query) ?? false);
     }).toList();
   }
 
@@ -60,38 +61,43 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
         child: SafeArea(
           child: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
-                .collection('admins')
-                .where(FieldPath.documentId, isNotEqualTo: loggedInUser?.id)
+                .collection(Collections.inspectors)
+                .where(UserFields.role, isEqualTo: widget.role)
                 .orderBy('name')
                 .snapshots(),
             builder: (context, snapshot) {
               // Cache data on first successful load
               if (snapshot.hasData && _isInitialLoad) {
-                _cachedAdmins = snapshot.data!.docs
+                _cachedUsers = snapshot.data!.docs
                     .map((doc) => UserModel.fromFirestore(doc))
                     .toList();
                 _isInitialLoad = false;
               }
 
               // Use cached data if available during hot reload
-              final admins = snapshot.hasData
+              final users = snapshot.hasData
                   ? snapshot.data!.docs
                         .map((doc) => UserModel.fromFirestore(doc))
                         .toList()
-                  : (_cachedAdmins ?? []);
+                  : (_cachedUsers ?? []);
 
-              final filteredAdmins = _filterAdmins(admins);
+              // Remove the current logged-in user from the list when appropriate
+              if (loggedInUser?.id != null) {
+                users.removeWhere((u) => u.id == loggedInUser!.id);
+              }
+
+              final filteredUsers = _filterUsers(users);
               final isLoading =
                   snapshot.connectionState == ConnectionState.waiting &&
-                  _cachedAdmins == null;
-              final hasError = snapshot.hasError && _cachedAdmins == null;
+                  _cachedUsers == null;
+              final hasError = snapshot.hasError && _cachedUsers == null;
 
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeader(admins.length),
+                    _buildHeader(users.length),
                     const SizedBox(height: 12),
                     _buildSearchBar(),
                     const SizedBox(height: 12),
@@ -99,7 +105,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
                     const SizedBox(height: 12),
                     Expanded(
                       child: _buildAdminsList(
-                        filteredAdmins,
+                        filteredUsers,
                         isLoading,
                         hasError,
                         snapshot.error?.toString(),
@@ -122,7 +128,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
         const Icon(Icons.admin_panel_settings, color: Colors.lightBlueAccent),
         const SizedBox(width: 6),
         Text(
-          LocaleKeys.admins.tr(), 
+          LocaleKeys.admins.tr(),
           style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
@@ -137,7 +143,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            '$totalCount ${LocaleKeys.users.tr()}', 
+            '$totalCount ${LocaleKeys.users.tr()}',
             style: const TextStyle(
               color: AppColors.primaryRed,
               fontSize: 12,
@@ -193,7 +199,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
   }
 
   Widget _buildAdminsList(
-    List<UserModel> admins,
+    List<UserModel> users,
     bool isLoading,
     bool hasError,
     String? errorMessage,
@@ -208,7 +214,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
       return _buildErrorState(errorMessage);
     }
 
-    if (admins.isEmpty) {
+    if (users.isEmpty) {
       return _buildEmptyState();
     }
 
@@ -216,9 +222,9 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
       padding: const EdgeInsets.only(bottom: 80),
       key: const PageStorageKey('adminsList'),
       physics: const AlwaysScrollableScrollPhysics(),
-      itemCount: admins.length,
+      itemCount: users.length,
       itemBuilder: (context, index) {
-        return AdminCard(admin: admins[index]);
+        return AdminCard(admin: users[index]);
       },
     );
   }
@@ -228,7 +234,11 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          const Icon(
+            Icons.error_outline,
+            size: 60,
+            color: AppColors.primaryRed,
+          ),
           const SizedBox(height: 16),
           Text(
             LocaleKeys.error_occurred.tr(),
@@ -242,7 +252,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: Text(
-              errorMessage ?? LocaleKeys.unknownError.tr(), 
+              errorMessage ?? LocaleKeys.unknownError.tr(),
               style: const TextStyle(color: Colors.white70),
               textAlign: TextAlign.center,
             ),
@@ -251,7 +261,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
           ElevatedButton(
             onPressed: () {
               setState(() {
-                _cachedAdmins = null;
+                _cachedUsers = null;
                 _isInitialLoad = true;
               });
             },

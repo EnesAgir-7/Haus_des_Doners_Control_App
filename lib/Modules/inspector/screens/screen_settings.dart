@@ -11,7 +11,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/language_button.dart';
-import '../providers/provider_auth.dart';
+import '../providers/provider_auth_new.dart';
 
 class ScreenSettings extends StatelessWidget {
   const ScreenSettings({super.key});
