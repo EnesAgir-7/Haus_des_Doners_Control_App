@@ -2,7 +2,7 @@
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/Modules/admin/screens/screen_admins_listing.dart';
+import 'package:haus_des_control/Modules/admin/screens/screen_admin_other_users.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/app_button.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
@@ -87,7 +87,7 @@ class ScreenAdminSettings extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ScreenAdminListing(
+                          builder: (context) => const ScreenAdminOtherUser(
                             role: AppConstants.admin,
                           ),
                         ),
@@ -104,7 +104,7 @@ class ScreenAdminSettings extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const ScreenAdminListing(
+                          builder: (context) => const ScreenAdminOtherUser(
                             role: AppConstants.branch,
                           ),
                         ),

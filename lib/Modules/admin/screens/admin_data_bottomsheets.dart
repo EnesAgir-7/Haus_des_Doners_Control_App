@@ -45,7 +45,9 @@ class InspectorDetailsBottomSheets {
                       AppColors.primaryRed.withValues(alpha: 0.1),
                     ],
                   ),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
                 ),
                 child: Column(
                   children: [
@@ -204,7 +206,9 @@ class InspectorDetailsBottomSheets {
                       Colors.green.withValues(alpha: 0.1),
                     ],
                   ),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
                 ),
                 child: Column(
                   children: [
@@ -363,7 +367,9 @@ class InspectorDetailsBottomSheets {
                       Colors.blue.withValues(alpha: 0.1),
                     ],
                   ),
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(20),
+                  ),
                 ),
                 child: Column(
                   children: [
@@ -549,7 +555,11 @@ class InspectorDetailsBottomSheets {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.calendar_today, size: 12, color: Colors.white54),
+                const Icon(
+                  Icons.calendar_today,
+                  size: 12,
+                  color: Colors.white54,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   DateFormat('MMM dd, yyyy').format(task.createdAt),
@@ -609,7 +619,11 @@ class InspectorDetailsBottomSheets {
               color: Colors.green.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.store_outlined, color: Colors.green, size: 24),
+            child: const Icon(
+              Icons.store_outlined,
+              color: Colors.green,
+              size: 24,
+            ),
           ),
           title: Text(
             inspection.branchName,
@@ -625,7 +639,11 @@ class InspectorDetailsBottomSheets {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.calendar_today, size: 12, color: Colors.white54),
+                  const Icon(
+                    Icons.calendar_today,
+                    size: 12,
+                    color: Colors.white54,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     DateFormat(
@@ -761,7 +779,11 @@ class InspectorDetailsBottomSheets {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: AppColors.primaryRed),
+            const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppColors.primaryRed,
+            ),
             const SizedBox(height: 16),
             Text(
               LocaleKeys.error_occurred.tr(),

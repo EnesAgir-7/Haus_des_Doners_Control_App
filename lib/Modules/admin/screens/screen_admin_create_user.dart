@@ -24,7 +24,7 @@ class _ScreenAdminCreateUserState extends State<ScreenAdminCreateUser> {
   final _reenterPasswordController = TextEditingController();
   final _regionController = TextEditingController();
 
-  String _selectedRole = 'inspector';
+  String _selectedRole = AppConstants.inspector;
   bool _showPassword = false;
   bool _showReenterPassword = false;
 

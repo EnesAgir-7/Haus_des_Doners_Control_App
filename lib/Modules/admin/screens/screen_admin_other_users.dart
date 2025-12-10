@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -10,19 +11,41 @@ import '../../../translations/locale_keys.g.dart';
 import 'screen_admin_create_user.dart';
 import 'screen_admin_user_details.dart';
 
-class ScreenAdminListing extends StatefulWidget {
+class ScreenAdminOtherUser extends StatefulWidget {
   final String role;
-  const ScreenAdminListing({super.key, required this.role});
+  const ScreenAdminOtherUser({super.key, required this.role});
 
   @override
-  State<ScreenAdminListing> createState() => _ScreenAdminListingState();
+  State<ScreenAdminOtherUser> createState() => _ScreenAdminOtherUserState();
 }
 
-class _ScreenAdminListingState extends State<ScreenAdminListing> {
+class _ScreenAdminOtherUserState extends State<ScreenAdminOtherUser> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
   List<UserModel>? _cachedUsers;
   bool _isInitialLoad = true;
+  String? _cachedRole; // Track which role the cache is for
+
+  @override
+  void initState() {
+    super.initState();
+    _cachedRole = widget.role;
+  }
+
+  @override
+  void didUpdateWidget(ScreenAdminOtherUser oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset cache if role changes
+    if (oldWidget.role != widget.role) {
+      setState(() {
+        _cachedUsers = null;
+        _isInitialLoad = true;
+        _cachedRole = widget.role;
+        _searchController.clear();
+        _searchQuery = '';
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -66,31 +89,36 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
                 .orderBy('name')
                 .snapshots(),
             builder: (context, snapshot) {
-              // Cache data on first successful load
-              if (snapshot.hasData && _isInitialLoad) {
+              // Only cache data if it's for the current role
+              if (snapshot.hasData &&
+                  _isInitialLoad &&
+                  _cachedRole == widget.role) {
                 _cachedUsers = snapshot.data!.docs
                     .map((doc) => UserModel.fromFirestore(doc))
                     .toList();
                 _isInitialLoad = false;
               }
 
-              // Use cached data if available during hot reload
-              final users = snapshot.hasData
+              // Use cached data only if it matches current role
+              final List<UserModel> users = snapshot.hasData
                   ? snapshot.data!.docs
                         .map((doc) => UserModel.fromFirestore(doc))
                         .toList()
-                  : (_cachedUsers ?? []);
+                  : (_cachedRole == widget.role ? (_cachedUsers ?? []) : []);
 
-              // Remove the current logged-in user from the list when appropriate
-              if (loggedInUser?.id != null) {
+              // Remove the current logged-in admin from the list (only for admin role)
+              if (loggedInUser?.id != null &&
+                  widget.role == AppConstants.admin) {
                 users.removeWhere((u) => u.id == loggedInUser!.id);
               }
 
               final filteredUsers = _filterUsers(users);
               final isLoading =
                   snapshot.connectionState == ConnectionState.waiting &&
-                  _cachedUsers == null;
-              final hasError = snapshot.hasError && _cachedUsers == null;
+                  (_cachedUsers == null || _cachedRole != widget.role);
+              final hasError =
+                  snapshot.hasError &&
+                  (_cachedUsers == null || _cachedRole != widget.role);
 
               return Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -104,7 +132,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
                     Container(height: 1, color: Colors.white24),
                     const SizedBox(height: 12),
                     Expanded(
-                      child: _buildAdminsList(
+                      child: _buildUsersList(
                         filteredUsers,
                         isLoading,
                         hasError,
@@ -118,7 +146,9 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
           ),
         ),
       ),
-      floatingActionButton: _buildFAB(context),
+      floatingActionButton: widget.role == AppConstants.admin
+          ? _buildFAB(context)
+          : null,
     );
   }
 
@@ -128,7 +158,9 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
         const Icon(Icons.admin_panel_settings, color: Colors.lightBlueAccent),
         const SizedBox(width: 6),
         Text(
-          LocaleKeys.admins.tr(),
+          widget.role == AppConstants.admin
+              ? LocaleKeys.admins.tr()
+              : LocaleKeys.branchManagers.tr(),
           style: const TextStyle(
             color: AppColors.primaryRed,
             fontWeight: FontWeight.bold,
@@ -198,7 +230,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
     );
   }
 
-  Widget _buildAdminsList(
+  Widget _buildUsersList(
     List<UserModel> users,
     bool isLoading,
     bool hasError,
@@ -220,7 +252,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
 
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 80),
-      key: const PageStorageKey('adminsList'),
+      key: PageStorageKey('usersList_${widget.role}'),
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: users.length,
       itemBuilder: (context, index) {
@@ -263,6 +295,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
               setState(() {
                 _cachedUsers = null;
                 _isInitialLoad = true;
+                _cachedRole = widget.role;
               });
             },
             style: ElevatedButton.styleFrom(
@@ -276,6 +309,16 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
   }
 
   Widget _buildEmptyState() {
+    // Determine the appropriate message based on role
+    String emptyMessage;
+    if (_searchController.text.isNotEmpty) {
+      emptyMessage = LocaleKeys.no_users_found.tr();
+    } else {
+      emptyMessage = widget.role == AppConstants.admin
+          ? LocaleKeys.noAdminsAvailable.tr()
+          : "No Branch Managers Available";
+    }
+
     return Center(
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
@@ -285,9 +328,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
             const Icon(Icons.people_outline, size: 80, color: Colors.white24),
             const SizedBox(height: 16),
             Text(
-              _searchController.text.isEmpty
-                  ? LocaleKeys.noAdminsAvailable.tr()
-                  : LocaleKeys.no_users_found.tr(),
+              emptyMessage,
               style: const TextStyle(color: Colors.white70, fontSize: 16),
             ),
             if (_searchController.text.isNotEmpty) ...[
@@ -313,7 +354,7 @@ class _ScreenAdminListingState extends State<ScreenAdminListing> {
 
   Widget _buildFAB(BuildContext context) {
     return FloatingActionButton.extended(
-      heroTag: "addAdminFab",
+      heroTag: "addAdminFab_${widget.role}",
       onPressed: () async {
         await Navigator.push(
           context,
@@ -435,12 +476,13 @@ class AdminCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: admin.active
+                color: (admin.fcmTokens != null && admin.fcmTokens!.isNotEmpty)
                     ? Colors.green.withValues(alpha: 0.2)
                     : Colors.red.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: admin.active
+                  color:
+                      (admin.fcmTokens != null && admin.fcmTokens!.isNotEmpty)
                       ? Colors.green.withValues(alpha: 0.3)
                       : Colors.red.withValues(alpha: 0.3),
                 ),
@@ -449,15 +491,26 @@ class AdminCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    admin.active ? Icons.check_circle : Icons.cancel,
+                    (admin.fcmTokens != null && admin.fcmTokens!.isNotEmpty)
+                        ? Icons.check_circle
+                        : Icons.cancel,
                     size: 12,
-                    color: admin.active ? Colors.green : Colors.red,
+                    color:
+                        (admin.fcmTokens != null && admin.fcmTokens!.isNotEmpty)
+                        ? Colors.green
+                        : Colors.red,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    admin.active ? 'Active' : 'Inactive',
+                    (admin.fcmTokens != null && admin.fcmTokens!.isNotEmpty)
+                        ? LocaleKeys.active.tr()
+                        : LocaleKeys.loggedOut.tr(),
                     style: TextStyle(
-                      color: admin.active ? Colors.green : Colors.red,
+                      color:
+                          (admin.fcmTokens != null &&
+                              admin.fcmTokens!.isNotEmpty)
+                          ? Colors.green
+                          : Colors.red,
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                     ),

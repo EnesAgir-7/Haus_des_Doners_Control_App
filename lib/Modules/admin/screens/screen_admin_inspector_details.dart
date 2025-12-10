@@ -14,7 +14,6 @@ import '../../inspector/widgets/custom_app_bar.dart';
 import '../data/inspector_data_cache.dart';
 import '../widgets/performance_chart.dart';
 import 'admin_data_bottomsheets.dart';
-import 'screen_admin_inspector_branches.dart';
 import 'screen_admin_user_details.dart';
 
 class ScreenInspectorDetails extends StatefulWidget {
@@ -144,7 +143,10 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                     const SizedBox(height: 8),
                     Text(
                       provider.error!,
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),
@@ -171,7 +173,11 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.inbox_outlined, size: 64, color: Colors.white38),
+                  const Icon(
+                    Icons.inbox_outlined,
+                    size: 64,
+                    color: Colors.white38,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     LocaleKeys.noStatisticsAvailable.tr(),
@@ -419,7 +425,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
         : 0;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 10),
       child: Column(
         children: [
           Row(
@@ -440,36 +446,13 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   label: LocaleKeys.branchesVisitedReported.tr(),
                   value: stats.totalInspections.toString(),
                   icon: Icons.assignment_turned_in_outlined,
-                  gradientColors: [const Color(0xFF4A5568), const Color(0xFF2D3748)],
+                  gradientColors: [
+                    const Color(0xFF4A5568),
+                    const Color(0xFF2D3748),
+                  ],
                 ),
               ),
               const SizedBox(width: 12),
-              Expanded(
-                child: _buildCompactStatCard(
-                  ontap: () {
-                    // Show Vehicles Bottom Sheet
-                    InspectorDetailsBottomSheets.showVehiclesSheet(
-                      context,
-                      inspectorId: widget.inspector.id,
-                      inspectorName: widget.inspector.name,
-                      year: getYearFromKey(_selectedMonthKey!),
-                      month: getMonthFromKey(_selectedMonthKey!),
-
-                      vehicleIds: stats.vehicleIds,
-                      totalVehicles: stats.vehicleIds.length,
-                    );
-                  },
-                  label: LocaleKeys.assignedVehicles.tr(),
-                  value: stats.vehicleIds.length.toString(),
-                  icon: Icons.star_outline,
-                  gradientColors: [const Color(0xFF0F766E), const Color(0xFF115E59)],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
               Expanded(
                 child: _buildCompactStatCard(
                   ontap: () {
@@ -487,30 +470,86 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   label: LocaleKeys.tasksCompleted.tr(),
                   value: "${stats.tasksCompleted}/${stats.tasksTotal}",
                   icon: Icons.check_circle_outline,
-                  gradientColors: [const Color(0xFF0F766E), const Color(0xFF115E59)],
+                  gradientColors: [
+                    const Color(0xFF0F766E),
+                    const Color(0xFF115E59),
+                  ],
                   subtitle: "$completionRate%",
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildCompactStatCard(
-                  ontap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ScreenAdminInspectorBranches(
-                          inspectorName: widget.inspector.name,
-                          branchIds: stats.branchesIds,
-                        ),
-                      ),
-                    );
-                  },
-                  label: LocaleKeys.branchesAssigned.tr(),
-                  value: stats.branchesIds.length.toString(),
-                  icon: Icons.store_outlined,
-                  gradientColors: [const Color(0xFF9333EA), const Color(0xFF7E22CE)],
-                ),
-              ),
+              // Expanded(
+              //   child: _buildCompactStatCard(
+              //     ontap: () {
+              //       // Show Vehicles Bottom Sheet
+              //       InspectorDetailsBottomSheets.showVehiclesSheet(
+              //         context,
+              //         inspectorId: widget.inspector.id,
+              //         inspectorName: widget.inspector.name,
+              //         year: getYearFromKey(_selectedMonthKey!),
+              //         month: getMonthFromKey(_selectedMonthKey!),
+
+              //         vehicleIds: stats.vehicleIds,
+              //         totalVehicles: stats.vehicleIds.length,
+              //       );
+              //     },
+              //     label: LocaleKeys.assignedVehicles.tr(),
+              //     value: stats.vehicleIds.length.toString(),
+              //     icon: Icons.star_outline,
+              //     gradientColors: [const Color(0xFF0F766E), const Color(0xFF115E59)],
+              //   ),
+              // ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          const Row(
+            children: [
+              // Expanded(
+              //   child: _buildCompactStatCard(
+              //     ontap: () {
+              //       // Show Tasks Bottom Sheet
+              //       InspectorDetailsBottomSheets.showTasksSheet(
+              //         context,
+              //         inspectorId: widget.inspector.id,
+              //         inspectorName: widget.inspector.name,
+              //         year: getYearFromKey(_selectedMonthKey!),
+              //         month: getMonthFromKey(_selectedMonthKey!),
+              //         totalTasks: stats.tasksTotal,
+              //         completedTasks: stats.tasksCompleted,
+              //       );
+              //     },
+              //     label: LocaleKeys.tasksCompleted.tr(),
+              //     value: "${stats.tasksCompleted}/${stats.tasksTotal}",
+              //     icon: Icons.check_circle_outline,
+              //     gradientColors: [
+              //       const Color(0xFF0F766E),
+              //       const Color(0xFF115E59),
+              //     ],
+              //     subtitle: "$completionRate%",
+              //   ),
+              // ),
+              SizedBox(width: 12),
+              // Expanded(
+              //   child: _buildCompactStatCard(
+              //     ontap: () {
+              //       Navigator.push(
+              //         context,
+              //         MaterialPageRoute(
+              //           builder: (context) => ScreenAdminInspectorBranches(
+              //             inspectorName: widget.inspector.name,
+              //             branchIds: stats.branchesIds,
+              //           ),
+              //         ),
+              //       );
+              //     },
+              //     label: LocaleKeys.branchesAssigned.tr(),
+              //     value: stats.branchesIds.length.toString(),
+              //     icon: Icons.store_outlined,
+              //     gradientColors: [
+              //       const Color(0xFF9333EA),
+              //       const Color(0xFF7E22CE),
+              //     ],
+              //   ),
+              // ),
             ],
           ),
         ],

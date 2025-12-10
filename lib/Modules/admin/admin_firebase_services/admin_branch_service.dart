@@ -90,7 +90,7 @@ class AdminBranchService {
     UserCredential? createdCredential;
     final String branchEmail = branch.branchEmail!;
     final String branchPassword = branch.branchPassword!;
-    final String? region = branch.region;
+    final String? region = branch.address;
     String branchUserId;
 
     try {

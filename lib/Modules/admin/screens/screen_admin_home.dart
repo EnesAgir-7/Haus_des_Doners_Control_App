@@ -120,6 +120,7 @@ class DashboardCard extends StatelessWidget {
         children: [
           // Header with admin info
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
@@ -154,7 +155,14 @@ class DashboardCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    Text(
+                      loggedInUser?.serviceAccount ??
+                          LocaleKeys.admin_panel.tr(),
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 13,
+                      ),
+                    ),
                     Text(
                       LocaleKeys.admin_panel.tr(),
                       style: TextStyle(
@@ -167,7 +175,6 @@ class DashboardCard extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 24),
 
           GridView.count(

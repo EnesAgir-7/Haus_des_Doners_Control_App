@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
 
@@ -93,25 +94,27 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
       backgroundColor: AppColors.primaryDark,
       appBar: CustomAppBar(
         title: widget.user.name,
-        actions: [
-          if (!_isEditing)
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.white),
-              onPressed: () {
-                setState(() => _isEditing = true);
-              },
-            ),
-          if (_isEditing)
-            IconButton(
-              icon: const Icon(Icons.close, color: Colors.white),
-              onPressed: () {
-                setState(() {
-                  _isEditing = false;
-                  _initializeControllers();
-                });
-              },
-            ),
-        ],
+        actions: widget.user.role == AppConstants.branch
+            ? []
+            : [
+                if (!_isEditing)
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.white),
+                    onPressed: () {
+                      setState(() => _isEditing = true);
+                    },
+                  ),
+                if (_isEditing)
+                  IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        _isEditing = false;
+                        _initializeControllers();
+                      });
+                    },
+                  ),
+              ],
       ),
       body: Consumer<ProviderAdminUsers>(
         builder: (context, provider, child) {
@@ -175,17 +178,16 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                   if (!provider.isLoading) ...[
                     _buildAccountStatus(),
                     const SizedBox(height: 40),
-                    if (_isEditing) _buildSaveButton(provider),
+                    if (_isEditing && widget.user.role != AppConstants.branch)
+                      _buildSaveButton(provider),
                     const SizedBox(height: 16),
                     Row(
                       children: [
                         // Don't show update password for branch users
-                        if (_isEditing &&
-                            widget.user.role != AppConstants.branch)
-                          Expanded(child: _buildUpdatePasswordButton(provider)),
+                        Expanded(child: _buildUpdatePasswordButton(provider)),
                         const SizedBox(width: 16),
-                        if (_isEditing)
-                          Expanded(child: _buildDeleteAccountButton(provider)),
+
+                        Expanded(child: _buildDeleteAccountButton(provider)),
                       ],
                     ),
                   ] else ...[
@@ -318,6 +320,10 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
         ),
         DropdownMenuItem(
           value: AppConstants.inspector,
+          child: Text(LocaleKeys.inspector.tr()),
+        ),
+        DropdownMenuItem(
+          value: AppConstants.branch,
           child: Text(LocaleKeys.inspector.tr()),
         ),
       ],
