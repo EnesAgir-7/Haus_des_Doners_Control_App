@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../branch_providers/provider_branch_dashboard.dart';
+import '../branch_providers/provider_branch_update_request.dart';
 import 'screen_branch_request_edit.dart';
 import 'screen_branch_trainings.dart';
 import 'screen_branch_documents.dart';
@@ -132,6 +133,10 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
   }
 
   Widget _buildActionsList(ProviderBranchDashboard provider) {
+    // watch branch update request provider to show badge when there's a pending or rejected request
+    final reqProv = context.watch<BranchUpdateRequestProvider>();
+    final int updateBadge =
+        (reqProv.hasPendingRequest || reqProv.rejectedCount > 0) ? 1 : 0;
     final actions = [
       // {
       //   'icon': Icons.campaign_outlined,
@@ -189,7 +194,7 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
         'label': LocaleKeys.update_request.tr(),
         'description': LocaleKeys.request_changes_updates.tr(),
         'color': Colors.teal,
-        'badge': 0,
+        'badge': updateBadge,
         'onTap': () {
           Navigator.push(
             context,

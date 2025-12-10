@@ -70,6 +70,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
           Row(
             children: [
               Expanded(child: _buildSearchBar()),
+              const SizedBox(width: 12),
               BranchActionsMenuButton(
                 onCreateAnnouncement: () {
                   showBroadcastNotificationDialog(
@@ -91,6 +92,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
           ),
           const SizedBox(height: 12),
           _buildStatsRow(),
+          const SizedBox(height: 12),
         ],
       ),
     );

@@ -1,23 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
+import 'package:haus_des_control/Modules/branch/firebase_services/branch_update_request_service.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
-import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:intl/intl.dart';
+
 import '../../../models/branch_update_request_model.dart';
-import '../admin_providers/provider_admin_update_requests.dart';
-//TODO: locale
 
-class ScreenRequestDetails extends StatelessWidget {
+// Read-only request details screen for branch users (no approve/reject buttons)
+class ScreenBranchRequestDetails extends StatelessWidget {
   final BranchUpdateRequestModel request;
-  final bool isAdmin;
 
-  const ScreenRequestDetails({
-    Key? key,
-    required this.request,
-    this.isAdmin = true,
-  }) : super(key: key);
+  const ScreenBranchRequestDetails({Key? key, required this.request})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -30,42 +25,32 @@ class ScreenRequestDetails extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
       appBar: const CustomAppBar(title: "Request Details"),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Request Header
-                  _buildRequestHeader(statusColor),
-                  const SizedBox(height: 24),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildRequestHeader(statusColor),
+            const SizedBox(height: 24),
 
-                  // Changes Section
-                  _buildSectionHeader('Requested Changes', Icons.edit_note),
-                  const SizedBox(height: 16),
-                  ...request.changes.entries.map((entry) {
-                    return _buildChangeCard(entry.value);
-                  }).toList(),
+            // Changes Section
+            _buildSectionHeader('Requested Changes', Icons.edit_note),
+            const SizedBox(height: 16),
+            ...request.changes.entries
+                .map((entry) => _buildChangeCard(entry.value))
+                .toList(),
 
-                  // Admin Note (if exists)
-                  if (request.adminNote != null) ...[
-                    const SizedBox(height: 24),
-                    _buildSectionHeader('Admin Note', Icons.note),
-                    const SizedBox(height: 16),
-                    _buildAdminNote(request.adminNote!),
-                  ],
+            // Admin Note (if exists)
+            if (request.adminNote != null) ...[
+              const SizedBox(height: 24),
+              _buildSectionHeader('Admin Note', Icons.note),
+              const SizedBox(height: 16),
+              _buildAdminNote(request.adminNote!),
+            ],
 
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-          ),
-
-          // Action Buttons (only show for pending requests and only for admin)
-          if (request.isPending && isAdmin) _buildActionButtons(context),
-        ],
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
@@ -376,218 +361,15 @@ class ScreenRequestDetails extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            AppColors.primaryDark.withValues(alpha: 0.0),
-            AppColors.primaryDark,
-          ],
-        ),
-      ),
-      child: Consumer<AdminUpdateRequestProvider>(
-        builder: (context, provider, child) {
-          return Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: provider.isRejecting
-                      ? null
-                      : () => _showRejectDialog(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: provider.isRejecting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Icon(Icons.cancel, color: Colors.white),
-                  label: Text(
-                    provider.isRejecting ? 'Rejecting...' : 'Reject',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: provider.isApproving
-                      ? null
-                      : () => _showApproveDialog(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  icon: provider.isApproving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Icon(Icons.check_circle, color: Colors.white),
-                  label: Text(
-                    provider.isApproving ? 'Approving...' : 'Approve',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _showApproveDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Approve Request'),
-        content: const Text('Are you sure you want to approve this request?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-
-              final adminId = loggedInUser?.id ?? '';
-
-              final success = await context
-                  .read<AdminUpdateRequestProvider>()
-                  .approveRequest(
-                    requestId: request.id,
-                    branchId: request.branchId,
-                    changes: request.changes,
-                    adminNote: 'Approved',
-                    adminId: adminId,
-                    context: context,
-                  );
-
-              if (success && context.mounted) {
-                Navigator.pop(context); // Go back to list
-              }
-            },
-            child: const Text('Approve'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showRejectDialog(BuildContext context) {
-    final noteController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.lightBlack,
-        title: const Text(
-          'Reject Request',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Please provide a reason for rejecting this request:',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: noteController,
-              maxLines: 3,
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Enter reason...',
-                hintStyle: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
-                ),
-                filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.1),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (noteController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(dialogContext).showSnackBar(
-                  const SnackBar(content: Text('Please enter a reason')),
-                );
-                return;
-              }
-
-              Navigator.pop(dialogContext);
-
-              final adminId = loggedInUser?.id ?? '';
-
-              final success = await context
-                  .read<AdminUpdateRequestProvider>()
-                  .rejectRequest(
-                    requestId: request.id,
-                    adminNote: noteController.text.trim(),
-                    adminId: adminId,
-                    context: context,
-                  );
-
-              if (success && context.mounted) {
-                Navigator.pop(context); // Go back to list
-              }
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Reject'),
-          ),
-        ],
-      ),
-    );
-  }
-
   IconData _getFieldIcon(String fieldType) {
     switch (fieldType) {
-      case 'geopoint':
+      case DataTypes.geopoint:
         return Icons.location_on;
-      case 'datetime':
+      case DataTypes.datetime:
         return Icons.calendar_today;
-      case 'list':
+      case DataTypes.list:
         return Icons.list;
-      case 'map':
+      case DataTypes.map:
         return Icons.view_module;
       default:
         return Icons.text_fields;
@@ -598,13 +380,13 @@ class ScreenRequestDetails extends StatelessWidget {
     if (value == null) return 'Not set';
 
     switch (fieldType) {
-      case 'geopoint':
+      case DataTypes.geopoint:
         if (value is GeoPoint) {
           return '${value.latitude.toStringAsFixed(6)}, ${value.longitude.toStringAsFixed(6)}';
         }
         return value.toString();
 
-      case 'datetime':
+      case DataTypes.datetime:
         if (value is Timestamp) {
           return DateFormat('MMM dd, yyyy').format(value.toDate());
         } else if (value is DateTime) {
@@ -612,7 +394,7 @@ class ScreenRequestDetails extends StatelessWidget {
         }
         return value.toString();
 
-      case 'list':
+      case DataTypes.list:
         if (value is List) {
           if (value.isEmpty) return 'Empty list';
 

@@ -91,6 +91,16 @@ class ScreenAdminSettings extends StatelessWidget {
                       );
                     },
                   ),
+                  _buildSettingsTile(
+                    context,
+                    icon: Icons.supervised_user_circle,
+                    title: "Manage Branch Users",
+                    subtitle: "Add, Edit, Remove Branch Users",
+                    color: AppColors.primaryRed,
+                    onTap: () {
+                      
+                    },
+                  ),
                   _buildSectionTitle(context, LocaleKeys.change_language.tr()),
                   const SizedBox(height: 6),
                   const LanguageButton(),

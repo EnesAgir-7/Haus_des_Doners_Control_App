@@ -11,6 +11,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_model.dart';
 import '../branch_providers/provider_branch_update_request.dart';
+import '../../admin/screens/screen_admin_request_details.dart';
 
 class ScreenBranchRequestEdit extends StatefulWidget {
   final BranchModel branch;
@@ -93,9 +94,8 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
 
   void _checkPendingRequest() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BranchUpdateRequestProvider>().checkPendingRequest(
-        widget.branch.id,
-      );
+      // Refresh both pending request and request history so branch can see rejected requests too
+      context.read<BranchUpdateRequestProvider>().refresh(widget.branch.id);
     });
   }
 
@@ -342,50 +342,135 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
   Widget _buildPendingRequestBanner() {
     return Consumer<BranchUpdateRequestProvider>(
       builder: (context, provider, child) {
-        if (!provider.hasPendingRequest) return const SizedBox.shrink();
-
-        return Container(
-          margin: const EdgeInsets.all(16),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.orange.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.pending_actions, color: Colors.orange, size: 32),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Pending Update Request',
-                      style: TextStyle(
-                        color: Colors.orange,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${provider.pendingChangesCount} changes waiting for approval',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ],
+        // If there's a pending request show the pending banner
+        if (provider.hasPendingRequest) {
+          final pr = provider.pendingRequest!;
+          return Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.orange),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.pending_actions,
+                  color: Colors.orange,
+                  size: 32,
                 ),
-              ),
-              IconButton(
-                onPressed: () => _showDeleteRequestConfirmation(provider),
-                icon: const Icon(Icons.delete, color: Colors.red),
-                tooltip: 'Delete Request',
-              ),
-            ],
-          ),
-        );
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Pending Update Request',
+                        style: TextStyle(
+                          color: Colors.orange,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${pr.changeCount} changes waiting for approval',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          ScreenRequestDetails(request: pr, isAdmin: false),
+                    ),
+                  ),
+                  icon: const Icon(Icons.visibility, color: Colors.white70),
+                  tooltip: 'View Details',
+                ),
+                IconButton(
+                  onPressed: () => _showDeleteRequestConfirmation(provider),
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  tooltip: 'Delete Request',
+                ),
+              ],
+            ),
+          );
+        }
+
+        // If there is no pending request but there are rejected requests, show the latest rejected one
+        if (provider.rejectedCount > 0) {
+          final lastRejected = provider.rejectedRequests.first;
+          return Container(
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.6)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.cancel, color: Colors.red, size: 32),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Last Request Rejected',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      if (lastRejected.adminNote != null &&
+                          lastRejected.adminNote!.isNotEmpty)
+                        Text(
+                          lastRejected.adminNote!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        )
+                      else
+                        Text(
+                          'Your last request was rejected by admin.',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ScreenRequestDetails(
+                        request: lastRejected,
+                        isAdmin: false,
+                      ),
+                    ),
+                  ),
+                  icon: const Icon(Icons.visibility, color: Colors.white70),
+                  tooltip: 'View Details',
+                ),
+              ],
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
       },
     );
   }
