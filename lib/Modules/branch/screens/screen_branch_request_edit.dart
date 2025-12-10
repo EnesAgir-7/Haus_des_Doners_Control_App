@@ -12,7 +12,7 @@ import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_model.dart';
 import '../branch_providers/provider_branch_update_request.dart';
 import '../../admin/screens/screen_admin_request_details.dart';
-
+//TODO: locale
 class ScreenBranchRequestEdit extends StatefulWidget {
   final BranchModel branch;
   const ScreenBranchRequestEdit({super.key, required this.branch});

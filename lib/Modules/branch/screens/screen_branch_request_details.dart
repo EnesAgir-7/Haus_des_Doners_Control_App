@@ -6,6 +6,7 @@ import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:intl/intl.dart';
 
 import '../../../models/branch_update_request_model.dart';
+//TODO: locale
 
 // Read-only request details screen for branch users (no approve/reject buttons)
 class ScreenBranchRequestDetails extends StatelessWidget {

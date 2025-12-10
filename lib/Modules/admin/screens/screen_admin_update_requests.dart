@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../models/branch_update_request_model.dart';
 import '../admin_providers/provider_admin_update_requests.dart';
 import 'screen_admin_request_details.dart';
-
+//TODO: locale
 class ScreenAdminUpdateRequests extends StatefulWidget {
   const ScreenAdminUpdateRequests({Key? key}) : super(key: key);
 

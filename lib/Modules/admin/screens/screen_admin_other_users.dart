@@ -10,7 +10,7 @@ import '../../../models/user_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import 'screen_admin_create_user.dart';
 import 'screen_admin_user_details.dart';
-
+//TODO: locale
 class ScreenAdminOtherUser extends StatefulWidget {
   final String role;
   const ScreenAdminOtherUser({super.key, required this.role});

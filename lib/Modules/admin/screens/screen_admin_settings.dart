@@ -14,7 +14,7 @@ import '../../inspector/providers/provider_auth_new.dart';
 import '../../inspector/widgets/custom_toast.dart';
 import '../../inspector/widgets/language_button.dart';
 import 'screen_admin_templates.dart';
-
+//TODO: locale
 class ScreenAdminSettings extends StatelessWidget {
   const ScreenAdminSettings({super.key});
 

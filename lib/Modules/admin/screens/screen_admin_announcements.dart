@@ -12,7 +12,7 @@ import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../admin_providers/provider_admin_announcements.dart';
 import 'screen_announcment_details.dart';
-
+//TODO: locale
 class ScreenAdminAnnouncements extends StatefulWidget {
   final String role;
   const ScreenAdminAnnouncements({super.key, required this.role});

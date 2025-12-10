@@ -8,7 +8,7 @@ import '../../../models/announcement_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../admin_providers/provider_admin_announcements.dart';
-
+//TODO: locale
 class ScreenAnnouncementDetails extends StatelessWidget {
   final AnnouncementModel announcement;
   final String role; // 'admin' or 'branch'
