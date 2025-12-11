@@ -75,7 +75,7 @@ class ScreenSettings extends StatelessWidget {
     // Show confirmation dialog
     final shouldLogout = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         title: Text(LocaleKeys.logout.tr()),
         content: Text(LocaleKeys.confirmLogoutMessage.tr()),
         actions: [
@@ -95,7 +95,7 @@ class ScreenSettings extends StatelessWidget {
     if (shouldLogout != true) return;
 
     try {
-      await authProvider.logout();
+      await authProvider.logout(context: context);
 
       if (context.mounted) {
         Navigator.of(context).pop();

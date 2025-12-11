@@ -5,8 +5,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
-import '../../../common_services/firebase_auth_service.dart';
+import '../../../common_services/cleanup_service.dart';
 import '../../../common_services/fcm_helper.dart';
+import '../../../common_services/firebase_auth_service.dart';
 import '../../../common_services/notification_helper.dart';
 import '../../../core/console.dart';
 import '../../../core/constants/app_constants.dart';
@@ -372,12 +373,12 @@ class ProviderAuth extends ChangeNotifier {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logout({required BuildContext context}) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      // Cancel listener
+      await ProviderCleanupService.cleanupAllProviders(context);
       await _tokenRefreshSubscription?.cancel();
       _tokenRefreshSubscription = null;
 
@@ -397,7 +398,6 @@ class ProviderAuth extends ChangeNotifier {
       userModel = null;
       loggedInUser = null;
       _lastSyncedToken = null;
-
       await _authHelper.signOut();
       await LocalStorageHelper.instance.removeData(cacheUserKey);
 

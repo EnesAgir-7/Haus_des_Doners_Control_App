@@ -131,7 +131,7 @@ class ScreenAdminSettings extends StatelessWidget {
     // Show confirmation dialog
     final shouldLogout = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (_) => AlertDialog(
         backgroundColor: const Color(0xFF212121),
         title: Text(
           LocaleKeys.logout.tr(),
@@ -161,7 +161,7 @@ class ScreenAdminSettings extends StatelessWidget {
     if (shouldLogout != true) return;
 
     try {
-      await authProvider.logout();
+      await authProvider.logout(context: context);
 
       // Only navigate back if logout was successful and context is still mounted
       if (context.mounted) {

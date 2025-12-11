@@ -331,8 +331,29 @@ class ProviderAdminTasks extends ChangeNotifier {
 
   @override
   void dispose() {
-    _tasksSubscription?.cancel();
-    commentController.dispose();
+    cancelAllStreams();
+
     super.dispose();
+  }
+
+  /// Cancel all active streams and reset state
+  void cancelAllStreams() async {
+    console('🛑 Cancelling all streams in ProviderAdminTasks');
+    await _tasksSubscription?.cancel();
+    _tasksSubscription = null;
+    _currentInspectorId = null;
+    _allTasks = [];
+    _selectedTask = null;
+    _statusFilter = AppConstants.all;
+    _priorityFilter = AppConstants.all;
+    _sortBy = AppConstants.dueDate;
+    _commentPhotos = [];
+    _errorMessage = null;
+    _successMessage = null;
+    _isLoading = false;
+    _isUpdating = false;
+    _isAddingComment = false;
+    commentController.clear();
+    notifyListeners();
   }
 }

@@ -79,6 +79,18 @@ class ProviderAdminVehicles extends ChangeNotifier {
     }
   }
 
+  // ✅ NEW: Add cleanup method to cancel all subscriptions
+  void cancelAllStreams() async {
+    await _vehiclesSubscription?.cancel();
+    _vehiclesSubscription = null;
+    _currentInspectorId = null;
+    _vehicles = [];
+    _error = null;
+    _searchQuery = '';
+    _isLoading = false;
+    notifyListeners();
+  }
+
   Future<void> updateVehicleWithBatch({
     required String vehicleId,
     int? newKm,
@@ -137,7 +149,7 @@ class ProviderAdminVehicles extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       notifyListeners();
-      throw e; // Re-throw to show error in UI
+      throw e;
     }
   }
 
@@ -170,5 +182,12 @@ class ProviderAdminVehicles extends ChangeNotifier {
         showSnakBarr(context, '❌ $_error');
       }
     }
+  }
+
+  @override
+  void dispose() {
+    console('🗑️ Disposing ProviderAdminVehicles');
+    cancelAllStreams();
+    super.dispose();
   }
 }

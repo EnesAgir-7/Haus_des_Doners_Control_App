@@ -198,13 +198,6 @@ class ProviderAdminBranches with ChangeNotifier {
     );
   }
 
-  // 🔹 Cancel branch stream when not needed
-  Future<void> cancelBranchStream() async {
-    await _branchesSubscription?.cancel();
-    _branchesSubscription = null;
-    print("🛑 Branch stream cancelled");
-  }
-
   // Assign inspector to branch
   // Update branch (complete update with all fields)
   Future<void> updateBranch(BranchModel branch) async {
@@ -336,7 +329,22 @@ class ProviderAdminBranches with ChangeNotifier {
   // 🔹 Dispose stream safely when provider is destroyed
   @override
   void dispose() {
-    _branchesSubscription?.cancel();
+    cancelAllStreams();
+
     super.dispose();
+  }
+
+  /// Cancel all active streams and reset state
+  void cancelAllStreams() async {
+    console('🛑 Cancelling all streams in ProviderAdminBranches');
+    await _branchesSubscription?.cancel();
+    _branchesSubscription = null;
+    _branches = [];
+    _inspectors = [];
+    _searchQuery = '';
+    _sortBy = AppConstants.name;
+    _error = null;
+    _isLoading = false;
+    notifyListeners();
   }
 }

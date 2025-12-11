@@ -37,7 +37,7 @@ class ProviderAdminUsers extends ChangeNotifier {
   String _searchQuery = '';
 
   List<BranchModel> get unassignedBranches => _unAssignedBranches;
-  // Getters
+
   List<UserModel> get inspectors => _inspectors
       .where(
         (inspector) =>
@@ -81,6 +81,21 @@ class ProviderAdminUsers extends ChangeNotifier {
     );
   }
 
+  // ✅ NEW: Add cleanup method to cancel all subscriptions
+  void cancelAllStreams() async {
+    console('🛑 Cancelling all streams in ProviderAdminUsers');
+    await _inspectorsSubscription?.cancel();
+    _inspectorsSubscription = null;
+    _currentUserId = null;
+    _inspectors = [];
+    _unAssignedBranches = [];
+    _inspectorAllData = null;
+    _currentMonthStats = null;
+    _error = null;
+    _searchQuery = '';
+    notifyListeners();
+  }
+
   // Get inspector details with branches and vehicle
   Future<Map<String, dynamic>> getInspectorDetails(String inspectorId) async {
     try {
@@ -100,7 +115,6 @@ class ProviderAdminUsers extends ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      // Get current month stats
       final now = DateTime.now();
       _currentMonthStats = await _userService.getInspectorMonthStats(
         userId,
@@ -108,10 +122,8 @@ class ProviderAdminUsers extends ChangeNotifier {
         now.month,
       );
 
-      // Get list of available months (lightweight)
       final availableMonths = await _userService.getAvailableMonths(userId);
 
-      // Store inspector ID and available months
       _inspectorAllData = InspectorAllMonthsData(
         inspectorId: userId,
         availableMonths: availableMonths,
@@ -127,7 +139,6 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
-  // Switch month without API call
   Future<void> switchMonth(int year, int month) async {
     try {
       _isLoading = true;
@@ -148,7 +159,6 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
-  // Update inspector
   Future updateInspector(String inspectorId, Map<String, dynamic> data) async {
     _isLoading = true;
     notifyListeners();
@@ -163,7 +173,6 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
-  // Get unassigned branches
   Future<List<BranchModel>> getUnassignedBranches() async {
     try {
       if (_unAssignedBranches.isEmpty) {
@@ -175,7 +184,6 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
-  // Unassign branch from inspector
   Future<void> unassignBranchFromInspector(
     String branchId,
     String inspectionId,
@@ -200,7 +208,6 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
-  // Create new user (inspector or admin)
   Future<void> createUser({
     required String email,
     required String password,
@@ -298,7 +305,7 @@ class ProviderAdminUsers extends ChangeNotifier {
 
       if (parentContext.mounted) {
         showSnakBarr(parentContext, LocaleKeys.inspector_deleted_success.tr());
-        Navigator.of(parentContext).pop(); // go back only on success
+        Navigator.of(parentContext).pop();
       }
     } catch (e) {
       _isLoading = false;
@@ -310,7 +317,6 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
-  // Toggle inspector active status
   Future<void> toggleInspectorActive(String inspectorId, bool active) async {
     try {
       await _userService.updateInspector(inspectorId, {'active': active});
@@ -345,5 +351,12 @@ class ProviderAdminUsers extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    console('🗑️ Disposing ProviderAdminUsers');
+    cancelAllStreams();
+    super.dispose();
   }
 }

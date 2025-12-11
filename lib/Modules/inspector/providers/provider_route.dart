@@ -250,7 +250,24 @@ class ProviderRoute extends ChangeNotifier {
   // 🔹 Cleanup
   @override
   void dispose() {
-    _routeSubscription?.cancel();
+    cancelAllStreams();
     super.dispose();
+  }
+
+  /// Cancel all active streams and reset state
+  void cancelAllStreams() async {
+    console('🛑 Cancelling all streams in ProviderRoute');
+    await _routeSubscription?.cancel();
+    _routeSubscription = null;
+    _currentInspectorId = null;
+    _allRoute = null;
+    _selectedDate = DateTime.now();
+    _filterDate = null;
+    _errorMessage = null;
+    _isLoading = false;
+    todaysStopsList = [];
+    todaysProgressValue = 0.0;
+    todaysCompletedCount = 0;
+    notifyListeners();
   }
 }

@@ -13,7 +13,9 @@ class ProviderBottomNavBar extends ChangeNotifier {
   int get selectedIndex => _selectedIndex;
 
   final List<Widget> screens = [
-    RemoteConfigService().useOldHome ? const ScreenHomeOld() : const ScreenHome(),
+    RemoteConfigService().useOldHome
+        ? const ScreenHomeOld()
+        : const ScreenHome(),
     const ScreenBranches(),
     const ScreenRoutes(),
     const ScreenVehiclesList(),

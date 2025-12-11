@@ -289,8 +289,25 @@ class ProviderBranches extends ChangeNotifier {
 
   @override
   void dispose() {
-    _branchesSubscription?.cancel();
-    _inspectionsSubscription?.cancel();
+    cancelAllStreams();
     super.dispose();
+  }
+
+  /// Cancel all active streams and reset state
+  void cancelAllStreams() async {
+    await _branchesSubscription?.cancel();
+    _branchesSubscription = null;
+    await _inspectionsSubscription?.cancel();
+    _inspectionsSubscription = null;
+    _currentInspectorId = null;
+    _branches = [];
+    _selectedBranch = null;
+    _branchInspections = [];
+    _errorMessage = null;
+    _searchQuery = '';
+    _sortBy = AppConstants.name;
+    _isLoading = false;
+    _isLoadingInspections = false;
+    notifyListeners();
   }
 }

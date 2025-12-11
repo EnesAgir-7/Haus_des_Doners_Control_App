@@ -190,9 +190,24 @@ class ProviderVehicle extends ChangeNotifier {
 
   @override
   void dispose() {
-    _vehiclesSubscription?.cancel();
+    cancelAllStreams();
 
-    kmController.dispose();
     super.dispose();
+  }
+
+  /// Cancel all active streams and reset state
+  void cancelAllStreams() async {
+    console('🛑 Cancelling all streams in ProviderVehicle');
+    await _vehiclesSubscription?.cancel();
+    _vehiclesSubscription = null;
+    _currentInspectorId = null;
+    _vehicles = [];
+    _assignedVehiclee = null;
+    _errorMessage = null;
+    _successMessage = null;
+    _isLoading = false;
+    _isUpdating = false;
+    kmController.clear();
+    notifyListeners();
   }
 }

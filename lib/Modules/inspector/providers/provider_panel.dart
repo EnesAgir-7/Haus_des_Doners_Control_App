@@ -135,9 +135,23 @@ class ProviderPanel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Cancel all active streams and reset state
+  void cancelAllStreams() async {
+    debugPrint('🛑 Cancelling all streams in ProviderPanel');
+    await _statsSubscription?.cancel();
+    _statsSubscription = null;
+    _currentInspectorId = null;
+    _currentMonthStats = null;
+    _availableMonths = [];
+    _selectedMonthKey = null;
+    _errorMessage = null;
+    _isLoading = false;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
-    _statsSubscription?.cancel();
+    cancelAllStreams();
     super.dispose();
   }
 }
