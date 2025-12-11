@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,7 @@ import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../admin_providers/provider_admin_announcements.dart';
 import 'screen_announcment_details.dart';
+
 //TODO: locale
 class ScreenAdminAnnouncements extends StatefulWidget {
   final String role;
@@ -23,6 +25,9 @@ class ScreenAdminAnnouncements extends StatefulWidget {
 }
 
 class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedFilter = 'All';
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +37,12 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
         listen: false,
       ).loadAllAnnouncements();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -134,6 +145,30 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
             }
 
             // Announcements List
+            // Apply search & filter locally to improve UX
+            var _filtered = provider.announcements;
+            final query = _searchController.text.trim().toLowerCase();
+            if (query.isNotEmpty) {
+              _filtered = _filtered
+                  .where(
+                    (a) =>
+                        a.title.toLowerCase().contains(query) ||
+                        a.description.toLowerCase().contains(query),
+                  )
+                  .toList();
+            }
+
+            if (_selectedFilter == 'Recent') {
+              final cutoff = DateTime.now().subtract(const Duration(days: 7));
+              _filtered = _filtered
+                  .where(
+                    (a) => a.createdAt != null && a.createdAt!.isAfter(cutoff),
+                  )
+                  .toList();
+            }
+
+            final displayedCount = _filtered.length;
+
             return CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
@@ -143,7 +178,7 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header Section
+                        // Header Section — now with search and filter
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
@@ -160,52 +195,128 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                               color: Colors.white.withValues(alpha: 0.1),
                             ),
                           ),
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryRed.withValues(
-                                    alpha: 0.2,
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primaryRed.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      Icons.campaign,
+                                      color: AppColors.primaryRed,
+                                      size: 24,
+                                    ),
                                   ),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Icon(
-                                  Icons.campaign,
-                                  color: AppColors.primaryRed,
-                                  size: 24,
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          LocaleKeys.announcements.tr(),
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '$displayedCount ${displayedCount == 1 ? "Announcement" : LocaleKeys.announcements.tr()} ${LocaleKeys.available.tr()}',
+                                          style: TextStyle(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.7,
+                                            ),
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Announcements are shown here. Tap to view details.',
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.6),
+                                  fontSize: 13,
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      LocaleKeys.announcements.tr(),
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '${announcements.length} ${announcements.length == 1 ? "Announcement" : LocaleKeys.announcements.tr()} ${LocaleKeys.available.tr()}',
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.7,
-                                        ),
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ],
+                              const SizedBox(height: 12),
+                              // Search field
+                              TextField(
+                                controller: _searchController,
+                                onChanged: (_) => setState(() {}),
+                                style: const TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  hintText: 'Search announcements',
+                                  hintStyle: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.4),
+                                  ),
+                                  prefixIcon: Icon(
+                                    Icons.search,
+                                    color: Colors.white.withValues(alpha: 0.5),
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.white.withValues(
+                                    alpha: 0.03,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 12,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ChoiceChip(
+                              label: const Text('All'),
+                              selected: _selectedFilter == 'All',
+                              onSelected: (_) =>
+                                  setState(() => _selectedFilter = 'All'),
+                              selectedColor: AppColors.primaryRed,
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.03,
+                              ),
+                              labelStyle: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                            ),
+                            ChoiceChip(
+                              label: const Text('Recent'),
+                              selected: _selectedFilter == 'Recent',
+                              onSelected: (_) =>
+                                  setState(() => _selectedFilter = 'Recent'),
+                              selectedColor: AppColors.primaryRed,
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.03,
+                              ),
+                              labelStyle: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -214,12 +325,12 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                   padding: EdgeInsets.symmetric(horizontal: isTablet ? 24 : 16),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate((context, index) {
-                      final announcement = announcements[index];
+                      final announcement = _filtered[index];
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: _buildAnnouncementCard(context, announcement),
                       );
-                    }, childCount: announcements.length),
+                    }, childCount: _filtered.length),
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 80)),
@@ -258,72 +369,203 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
           ),
         ),
         padding: const EdgeInsets.all(16),
-        child: Row(
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon bubble
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: AppColors.primaryRed.withValues(alpha: 0.9),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.announcement,
-                size: 20,
-                color: Colors.white,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon bubble
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryRed.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.campaign,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+
+                const SizedBox(width: 12),
+
+                // Title and preview
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              announcement.title,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      if (announcement.description.isNotEmpty)
+                        Text(
+                          announcement.description,
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.68),
+                            fontSize: 13,
+                            height: 1.3,
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                    ],
+                  ),
+                ),
+
+                // Actions menu
+                PopupMenuButton<String>(
+                  color: AppColors.primaryDark,
+                  onSelected: (value) async {
+                    final provider = Provider.of<AdminAnnouncementsProvider>(
+                      context,
+                      listen: false,
+                    );
+
+                    if (value == 'view') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ScreenAnnouncementDetails(
+                            announcement: announcement,
+                            role: widget.role,
+                          ),
+                        ),
+                      );
+                    } else if (value == 'copy') {
+                      await Clipboard.setData(
+                        ClipboardData(
+                          text:
+                              '${announcement.title}\n\n${announcement.description}',
+                        ),
+                      );
+                      showCustomSnackBar(context, 'Copied to clipboard');
+                    } else if (value == 'delete') {
+                      // Only allow delete for admins
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (dc) => AlertDialog(
+                          backgroundColor: AppColors.lightBlack,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.08),
+                            ),
+                          ),
+                          title: const Text(
+                            'Delete Announcement',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          content: const Text(
+                            'Do you want to delete this announcement?',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(dc).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.of(dc).pop(true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red.shade700,
+                              ),
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirmed == true) {
+                        await provider.deleteAnnouncement(
+                          announcement.id,
+                          context: context,
+                        );
+                      }
+                    }
+                  },
+                  itemBuilder: (context) {
+                    final items = <PopupMenuEntry<String>>[];
+                    items.add(
+                      const PopupMenuItem(value: 'view', child: Text('View')),
+                    );
+                    items.add(
+                      const PopupMenuItem(value: 'copy', child: Text('Copy')),
+                    );
+                    if (widget.role == AppConstants.admin) {
+                      items.add(
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text('Delete'),
+                        ),
+                      );
+                    }
+                    return items;
+                  },
+                ),
+              ],
             ),
 
-            const SizedBox(width: 14),
+            const SizedBox(height: 12),
 
-            // Content section
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (announcement.createdAt != null)
                   Text(
-                    announcement.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                      color: Colors.white,
+                    DateFormat(
+                      'MMM dd, yyyy • hh:mm a',
+                    ).format(announcement.createdAt!),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.55),
+                      fontSize: 12,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
                   ),
 
-                  const SizedBox(height: 6),
-
-                  // Date
-                  if (announcement.createdAt != null)
-                    Text(
-                      DateFormat(
-                        'MMM dd, yyyy',
-                      ).format(announcement.createdAt!),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        fontSize: 12,
+                // New badge when recent
+                if (announcement.createdAt != null &&
+                    DateTime.now().difference(announcement.createdAt!).inHours <
+                        48)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryRed.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.primaryRed.withValues(alpha: 0.25),
                       ),
                     ),
-
-                  const SizedBox(height: 6),
-
-                  // Description preview
-                  if (announcement.description.isNotEmpty)
-                    Text(
-                      announcement.description,
+                    child: const Text(
+                      'New',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: AppColors.primaryRed,
                         fontSize: 12,
-                        height: 1.3,
+                        fontWeight: FontWeight.w700,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           ],
         ),

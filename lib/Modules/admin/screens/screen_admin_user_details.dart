@@ -323,7 +323,7 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
         ),
         DropdownMenuItem(
           value: AppConstants.branch,
-          child: Text(LocaleKeys.inspector.tr()),
+          child: Text(LocaleKeys.branch.tr()),
         ),
       ],
       onChanged: _isEditing

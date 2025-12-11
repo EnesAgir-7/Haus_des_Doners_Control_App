@@ -106,6 +106,7 @@ class ScreenAdminSettings extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => const ScreenAdminOtherUser(
                             role: AppConstants.branch,
+                            
                           ),
                         ),
                       );

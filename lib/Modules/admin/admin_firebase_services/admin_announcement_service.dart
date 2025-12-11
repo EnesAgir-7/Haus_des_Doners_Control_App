@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+
+import '../../../translations/locale_keys.g.dart';
 
 class AdminAnnouncementService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -19,6 +22,7 @@ class AdminAnnouncementService {
       final announcementData = {
         'title': title,
         'description': description,
+        'createdBy': loggedInUser?.name ?? LocaleKeys.admin.tr(),
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
