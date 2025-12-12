@@ -320,6 +320,34 @@ class ProviderAdminUsers extends ChangeNotifier {
     }
   }
 
+  // New: delete normal user (admin or branch)
+  Future<void> deleteUser({
+    required String userUid,
+    required BuildContext parentContext,
+  }) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      await _authHelper.deleteUserAccount(userUid: userUid);
+
+      _isLoading = false;
+      notifyListeners();
+
+      if (parentContext.mounted) {
+        showSnakBarr(parentContext, LocaleKeys.inspector_deleted_success.tr());
+        Navigator.of(parentContext).pop();
+      }
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+
+      if (parentContext.mounted) {
+        showSnakBarr(parentContext, "$e");
+      }
+    }
+  }
+
   Future<void> toggleInspectorActive(String inspectorId, bool active) async {
     try {
       await _userService.updateInspector(inspectorId, {'active': active});

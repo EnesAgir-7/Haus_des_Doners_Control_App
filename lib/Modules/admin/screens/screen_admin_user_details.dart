@@ -531,6 +531,20 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
 
   Future<void> _showDeleteAccountDialog(
     ProviderAdminUsers provider,
+    UserModel user,
+    BuildContext parentContext,
+  ) async {
+    // Check user type and show appropriate dialog
+    if (user.role == AppConstants.inspector) {
+      return _showDeleteInspectorDialog(provider, user, parentContext);
+    } else {
+      return _showDeleteUserDialog(provider, user, parentContext);
+    }
+  }
+
+  // Dialog for deleting Inspector (with detailed warnings)
+  Future<void> _showDeleteInspectorDialog(
+    ProviderAdminUsers provider,
     UserModel inspectorUser,
     BuildContext parentContext,
   ) async {
@@ -539,42 +553,154 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(LocaleKeys.deleteInspectorAccount.tr()),
+          backgroundColor: AppColors.lightBlack,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.red,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  LocaleKeys.deleteInspectorAccount.tr(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 LocaleKeys.deleteInspectorConfirm.tr(),
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
               ),
-              const SizedBox(height: 12),
-              Text('${LocaleKeys.inspector.tr()}: ${inspectorUser.name}'),
-              Text('${LocaleKeys.email.tr()}: ${inspectorUser.serviceAccount}'),
-              const SizedBox(height: 12),
-              Text(
-                LocaleKeys.deleteActionIrreversible.tr(),
-                style: const TextStyle(color: Colors.red),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInfoRow(
+                      LocaleKeys.inspector.tr(),
+                      inspectorUser.name,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildInfoRow(
+                      LocaleKeys.email.tr(),
+                      inspectorUser.serviceAccount,
+                    ),
+                    if (inspectorUser.region != null &&
+                        inspectorUser.region!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      _buildInfoRow(
+                        LocaleKeys.region.tr(),
+                        inspectorUser.region!,
+                      ),
+                    ],
+                  ],
+                ),
               ),
-              const SizedBox(height: 8),
-              Text(LocaleKeys.inspectorAuthAccount.tr()),
-              Text(LocaleKeys.inspectorUserData.tr()),
-              Text(LocaleKeys.inspectorRouteIfEmpty.tr()),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          color: Colors.red,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          LocaleKeys.deleteActionIrreversible.tr(),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      LocaleKeys.inspectorAuthAccount.tr(),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      LocaleKeys.inspectorUserData.tr(),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      LocaleKeys.inspectorRouteIfEmpty.tr(),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(LocaleKeys.cancel.tr()),
+              child: Text(
+                LocaleKeys.cancel.tr(),
+                style: const TextStyle(color: Colors.white70),
+              ),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               onPressed: () async {
                 Navigator.of(context).pop(); // close confirmation dialog
 
                 await provider.deleteInspector(
                   inspectorUid: inspectorUser.id,
-                  parentContext: parentContext, // pass the screen context here
+                  parentContext: parentContext,
                 );
               },
               child: Text(LocaleKeys.delete.tr()),
@@ -582,6 +708,167 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
           ],
         );
       },
+    );
+  }
+
+  Future<void> _showDeleteUserDialog(
+    ProviderAdminUsers provider,
+    UserModel user,
+    BuildContext parentContext,
+  ) async {
+    final String userTypeLabel = user.role == AppConstants.admin
+        ? LocaleKeys.admin.tr()
+        : LocaleKeys.branch.tr();
+
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppColors.lightBlack,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: Row(
+            children: [
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.red,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '${LocaleKeys.delete.tr()} $userTypeLabel',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${LocaleKeys.deleteInspectorConfirm.tr().replaceAll("inspector", userTypeLabel)}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInfoRow(LocaleKeys.name.tr(), user.name),
+                    const SizedBox(height: 8),
+                    _buildInfoRow(LocaleKeys.email.tr(), user.serviceAccount),
+                    const SizedBox(height: 8),
+                    _buildInfoRow(LocaleKeys.role.tr(), userTypeLabel),
+                    if (user.region != null && user.region!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      _buildInfoRow(LocaleKeys.region.tr(), user.region!),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline, color: Colors.red, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        LocaleKeys.deleteActionIrreversible.tr(),
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                LocaleKeys.cancel.tr(),
+                style: const TextStyle(color: Colors.white70),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () async {
+                Navigator.of(context).pop(); // close confirmation dialog
+
+                await provider.deleteUser(
+                  userUid: user.id,
+                  parentContext: parentContext,
+                );
+              },
+              child: Text(LocaleKeys.delete.tr()),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 80,
+          child: Text(
+            '$label:',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 13,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

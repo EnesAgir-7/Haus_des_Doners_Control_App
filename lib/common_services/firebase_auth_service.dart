@@ -98,6 +98,25 @@ class FirebaseAuthHelper {
     }
   }
 
+  // New: delete a normal user (admin or branch) using the callable cloud function `deleteUser`
+  Future<void> deleteUserAccount({required String userUid}) async {
+    try {
+      final callable = FirebaseFunctions.instance.httpsCallable('deleteUser');
+
+      final result = await callable.call({'uid': userUid});
+
+      if (result.data['success'] != true) {
+        throw Exception(
+          result.data['message'] ?? LocaleKeys.failed_to_delete.tr(),
+        );
+      }
+    } on FirebaseFunctionsException catch (e) {
+      throw Exception(e.message ?? LocaleKeys.failed_to_delete.tr());
+    } catch (e) {
+      throw Exception('${LocaleKeys.failed_to_delete.tr()}: $e');
+    }
+  }
+
   // Get current user
   User? get currentUser => _auth.currentUser;
 }
