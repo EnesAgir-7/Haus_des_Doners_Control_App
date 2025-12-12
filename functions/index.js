@@ -143,7 +143,7 @@ exports.updatePassword = functions.https.onCall(async (request) => {
 
   try {
     // Verify caller is admin
-    const callerDoc = await db.collection("admins").doc(callerUid).get();
+    const callerDoc = await db.collection("inspectors").doc(callerUid).get();
     if (!callerDoc.exists) {
       throw new HttpsError("permission-denied", "Caller user not found");
     }
@@ -207,7 +207,7 @@ exports.deleteInspector = onCall(async (request) => {
 
   try {
     // Verify caller is admin
-    const callerDoc = await db.collection("admins").doc(callerUid).get();
+    const callerDoc = await db.collection("inspectors").doc(callerUid).get();
 
     if (!callerDoc.exists) {
       throw new HttpsError("permission-denied", "Caller user not found");

@@ -285,7 +285,7 @@ class ProviderAdminUsers extends ChangeNotifier {
         showSnakBarr(
           parentContext,
           LocaleKeys.error_updating_password.tr().replaceAll(
-            "error",
+            "{error}",
             e.toString(),
           ),
         );
