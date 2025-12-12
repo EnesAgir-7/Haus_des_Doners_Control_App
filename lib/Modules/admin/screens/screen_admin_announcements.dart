@@ -14,7 +14,6 @@ import '../../inspector/widgets/custom_app_bar.dart';
 import '../admin_providers/provider_admin_announcements.dart';
 import 'screen_announcment_details.dart';
 
-//TODO: locale
 class ScreenAdminAnnouncements extends StatefulWidget {
   final String role;
   const ScreenAdminAnnouncements({super.key, required this.role});
@@ -26,7 +25,7 @@ class ScreenAdminAnnouncements extends StatefulWidget {
 
 class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedFilter = 'All';
+  String _selectedFilter = "All";
 
   @override
   void initState() {
@@ -82,7 +81,7 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      "Error Loading Announcements",
+                      LocaleKeys.error_loading_announcements.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 16,
@@ -124,7 +123,7 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      "No Announcements Yet",
+                      LocaleKeys.no_announcements_yet.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 18,
@@ -133,7 +132,7 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "Upload your first announcement to get started",
+                      LocaleKeys.upload_first_announcement.tr(),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.5),
                         fontSize: 14,
@@ -230,7 +229,7 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          '$displayedCount ${displayedCount == 1 ? "Announcement" : LocaleKeys.announcements.tr()} ${LocaleKeys.available.tr()}',
+                                          '$displayedCount ${displayedCount == 1 ? LocaleKeys.announcement.tr() : LocaleKeys.announcements.tr()} ${LocaleKeys.available.tr()}',
                                           style: TextStyle(
                                             color: Colors.white.withValues(
                                               alpha: 0.7,
@@ -245,7 +244,7 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                               ),
                               const SizedBox(height: 12),
                               Text(
-                                'Announcements are shown here. Tap to view details.',
+                                LocaleKeys.announcements_shown_here.tr(),
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: 0.6),
                                   fontSize: 13,
@@ -258,7 +257,8 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                                 onChanged: (_) => setState(() {}),
                                 style: const TextStyle(color: Colors.white),
                                 decoration: InputDecoration(
-                                  hintText: 'Search announcements',
+                                  hintText: LocaleKeys.search_announcements
+                                      .tr(),
                                   hintStyle: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.4),
                                   ),
@@ -289,7 +289,7 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                           runSpacing: 8,
                           children: [
                             ChoiceChip(
-                              label: const Text('All'),
+                              label: Text(LocaleKeys.all.tr()),
                               selected: _selectedFilter == 'All',
                               onSelected: (_) =>
                                   setState(() => _selectedFilter = 'All'),
@@ -302,7 +302,7 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                               ),
                             ),
                             ChoiceChip(
-                              label: const Text('Recent'),
+                              label: Text(LocaleKeys.recent.tr()),
                               selected: _selectedFilter == 'Recent',
                               onSelected: (_) =>
                                   setState(() => _selectedFilter = 'Recent'),
@@ -457,7 +457,10 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                               '${announcement.title}\n\n${announcement.description}',
                         ),
                       );
-                      showCustomSnackBar(context, 'Copied to clipboard');
+                      showCustomSnackBar(
+                        context,
+                        LocaleKeys.copied_to_clipboard.tr(),
+                      );
                     } else if (value == 'delete') {
                       // Only allow delete for admins
                       final confirmed = await showDialog<bool>(
@@ -470,25 +473,25 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                               color: Colors.white.withValues(alpha: 0.08),
                             ),
                           ),
-                          title: const Text(
-                            'Delete Announcement',
-                            style: TextStyle(color: Colors.white),
+                          title: Text(
+                            LocaleKeys.delete_announcement.tr(),
+                            style: const TextStyle(color: Colors.white),
                           ),
-                          content: const Text(
-                            'Do you want to delete this announcement?',
-                            style: TextStyle(color: Colors.white),
+                          content: Text(
+                            LocaleKeys.delete_confirmation.tr(),
+                            style: const TextStyle(color: Colors.white),
                           ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.of(dc).pop(false),
-                              child: const Text('Cancel'),
+                              child: Text(LocaleKeys.cancel.tr()),
                             ),
                             ElevatedButton(
                               onPressed: () => Navigator.of(dc).pop(true),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red.shade700,
                               ),
-                              child: const Text('Delete'),
+                              child: Text(LocaleKeys.delete.tr()),
                             ),
                           ],
                         ),
@@ -505,16 +508,24 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                   itemBuilder: (context) {
                     final items = <PopupMenuEntry<String>>[];
                     items.add(
-                      const PopupMenuItem(value: 'view', child: Text('View')),
+                      PopupMenuItem(
+                        value: 'view',
+                        child: Text(LocaleKeys.view.tr()),
+                      ),
                     );
                     items.add(
-                      const PopupMenuItem(value: 'copy', child: Text('Copy')),
+                      PopupMenuItem(
+                        value: 'copy',
+                        child: Text(LocaleKeys.copy.tr()),
+                      ),
                     );
                     if (widget.role == AppConstants.admin) {
                       items.add(
-                        const PopupMenuItem(
+                        PopupMenuItem(
                           value: 'delete',
-                          child: Text('Delete'),
+                          child: Text(
+                            LocaleKeys.delete.tr(),
+                          ), // Make sure delete key exists
                         ),
                       );
                     }
@@ -556,9 +567,9 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                         color: AppColors.primaryRed.withValues(alpha: 0.25),
                       ),
                     ),
-                    child: const Text(
-                      'New',
-                      style: TextStyle(
+                    child: Text(
+                      LocaleKeys.new_letter.tr(),
+                      style: const TextStyle(
                         color: AppColors.primaryRed,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -643,10 +654,10 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Text(
-                            "Add Announcement",
-                            style: TextStyle(
+                            LocaleKeys.add_announcement.tr(),
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -704,9 +715,9 @@ class _ScreenAdminAnnouncementsState extends State<ScreenAdminAnnouncements> {
                                       ),
                                     ),
                                     const SizedBox(height: 2),
-                                    const Text(
-                                      "All Branches",
-                                      style: TextStyle(
+                                    Text(
+                                      LocaleKeys.all_branches.tr(),
+                                      style: const TextStyle(
                                         fontSize: 15,
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,

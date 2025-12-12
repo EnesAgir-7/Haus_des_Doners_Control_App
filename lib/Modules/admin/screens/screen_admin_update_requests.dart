@@ -1,12 +1,14 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
+import 'package:haus_des_control/translations/locale_keys.g.dart';
 import 'package:provider/provider.dart';
 
 import '../../../models/branch_update_request_model.dart';
 import '../admin_providers/provider_admin_update_requests.dart';
 import 'screen_admin_request_details.dart';
-//TODO: locale
+
 class ScreenAdminUpdateRequests extends StatefulWidget {
   const ScreenAdminUpdateRequests({Key? key}) : super(key: key);
 
@@ -32,7 +34,8 @@ class _ScreenAdminUpdateRequestsState extends State<ScreenAdminUpdateRequests> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
-      appBar: const CustomAppBar(title: "Branch Update Requests"),
+      appBar: CustomAppBar(title: LocaleKeys.branch_update_requests.tr()),
+
       body: Consumer<AdminUpdateRequestProvider>(
         builder: (context, provider, child) {
           return Column(
@@ -59,7 +62,7 @@ class _ScreenAdminUpdateRequestsState extends State<ScreenAdminUpdateRequests> {
         children: [
           Expanded(
             child: _buildStatCard(
-              'Pending',
+              LocaleKeys.pending.tr(),
               provider.pendingCount.toString(),
               Colors.orange,
               Icons.pending_actions,
@@ -68,7 +71,7 @@ class _ScreenAdminUpdateRequestsState extends State<ScreenAdminUpdateRequests> {
           const SizedBox(width: 12),
           Expanded(
             child: _buildStatCard(
-              'Approved',
+              LocaleKeys.approved.tr(),
               provider.approvedCount.toString(),
               Colors.green,
               Icons.check_circle,
@@ -77,7 +80,7 @@ class _ScreenAdminUpdateRequestsState extends State<ScreenAdminUpdateRequests> {
           const SizedBox(width: 12),
           Expanded(
             child: _buildStatCard(
-              'Rejected',
+              LocaleKeys.rejected.tr(),
               provider.rejectedCount.toString(),
               Colors.red,
               Icons.cancel,
@@ -136,10 +139,10 @@ class _ScreenAdminUpdateRequestsState extends State<ScreenAdminUpdateRequests> {
   Widget _buildFilterTabs(AdminUpdateRequestProvider provider) {
     final filters = ['pending', 'approved', 'rejected', 'all'];
     final filterLabels = {
-      'pending': 'Pending',
-      'approved': 'Approved',
-      'rejected': 'Rejected',
-      'all': 'All',
+      'pending': LocaleKeys.pending.tr(),
+      'approved': LocaleKeys.approved.tr(),
+      'rejected': LocaleKeys.rejected.tr(),
+      'all': LocaleKeys.all.tr(),
     };
 
     return Container(
@@ -232,7 +235,7 @@ class _ScreenAdminUpdateRequestsState extends State<ScreenAdminUpdateRequests> {
           ),
           const SizedBox(height: 24),
           Text(
-            'No Requests Found',
+            LocaleKeys.no_requests_found.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 18,
@@ -241,7 +244,7 @@ class _ScreenAdminUpdateRequestsState extends State<ScreenAdminUpdateRequests> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Branch update requests will appear here',
+            LocaleKeys.requests_will_appear.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.5),
               fontSize: 14,
@@ -315,7 +318,7 @@ class _ScreenAdminUpdateRequestsState extends State<ScreenAdminUpdateRequests> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'By ${request.requestedByName}',
+                            '${LocaleKeys.by.tr()} ${request.requestedByName}',
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.6),
                               fontSize: 13,
@@ -361,7 +364,7 @@ class _ScreenAdminUpdateRequestsState extends State<ScreenAdminUpdateRequests> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '${request.changeCount} ${request.changeCount == 1 ? 'change' : 'changes'} requested',
+                        '${request.changeCount} ${request.changeCount == 1 ? LocaleKeys.change.tr() : LocaleKeys.changes.tr()} ${LocaleKeys.requested.tr()}',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 13,
@@ -398,6 +401,6 @@ class _ScreenAdminUpdateRequestsState extends State<ScreenAdminUpdateRequests> {
     if (diff.inDays > 0) return '${diff.inDays}d ago';
     if (diff.inHours > 0) return '${diff.inHours}h ago';
     if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
-    return 'Just now';
+    return LocaleKeys.just_now.tr();
   }
 }

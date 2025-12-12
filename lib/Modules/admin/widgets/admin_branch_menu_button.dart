@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../common/menu_button.dart';
-//TODO: locale
+
 class BranchMenuButton extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onDelete;
@@ -41,21 +43,21 @@ class BranchMenuButton extends StatelessWidget {
         buildMenuItem(
           value: 'edit',
           icon: Icons.edit_outlined,
-          title: 'Edit Branch',
+          title: LocaleKeys.edit_branch.tr(),
           color: Colors.blue,
         ),
         buildDivider(),
         buildMenuItem(
           value: 'notification',
           icon: Icons.notifications_active_outlined,
-          title: 'Send Notification',
+          title: LocaleKeys.send_notification.tr(),
           color: AppColors.primaryRed,
         ),
         buildDivider(),
         buildMenuItem(
           value: 'documents',
           icon: Icons.upload_file_outlined,
-          title: 'Documents',
+          title: LocaleKeys.documents.tr(),
           color: Colors.green,
         ),
         // buildDivider(),
@@ -69,7 +71,7 @@ class BranchMenuButton extends StatelessWidget {
         buildMenuItem(
           value: 'delete',
           icon: Icons.delete_outline,
-          title: 'Delete Branch',
+          title: LocaleKeys.delete_branch.tr(),
           color: Colors.red,
         ),
       ],

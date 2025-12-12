@@ -284,7 +284,10 @@ class ProviderAdminUsers extends ChangeNotifier {
       if (parentContext.mounted) {
         showSnakBarr(
           parentContext,
-          LocaleKeys.error_updating_password.tr(args: [e.toString()]),
+          LocaleKeys.error_updating_password.tr().replaceAll(
+            "error",
+            e.toString(),
+          ),
         );
       }
     }

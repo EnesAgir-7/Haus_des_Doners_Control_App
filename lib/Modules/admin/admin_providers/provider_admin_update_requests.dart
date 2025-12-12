@@ -1,9 +1,11 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import '../../../core/console.dart';
 import '../../../models/branch_update_request_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../admin_firebase_services/admin_update_requests_service.dart';
 
-//TODO: locale
 class AdminUpdateRequestProvider extends ChangeNotifier {
   final AdminUpdateRequestService _service = AdminUpdateRequestService();
 
@@ -42,10 +44,10 @@ class AdminUpdateRequestProvider extends ChangeNotifier {
 
     try {
       _pendingRequests = await _service.getPendingRequests();
-      debugPrint('Loaded ${_pendingRequests.length} pending requests');
+      console('Loaded ${_pendingRequests.length} pending requests');
     } catch (e) {
       _errorMessage = e.toString();
-      debugPrint('Error loading pending requests: $e');
+      console('Error loading pending requests: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -60,10 +62,10 @@ class AdminUpdateRequestProvider extends ChangeNotifier {
 
     try {
       _allRequests = await _service.getAllRequests(status: status);
-      debugPrint('Loaded ${_allRequests.length} requests');
+      console('Loaded ${_allRequests.length} requests');
     } catch (e) {
       _errorMessage = e.toString();
-      debugPrint('Error loading all requests: $e');
+      console('Error loading all requests: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -76,7 +78,7 @@ class AdminUpdateRequestProvider extends ChangeNotifier {
       _stats = await _service.getRequestStats();
       notifyListeners();
     } catch (e) {
-      debugPrint('Error loading stats: $e');
+      console('Error loading stats: $e');
     }
   }
 
@@ -127,25 +129,18 @@ class AdminUpdateRequestProvider extends ChangeNotifier {
       await loadStats();
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Request approved and branch updated successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showSnakBarr(context, LocaleKeys.request_approved_success.tr());
       }
 
       return true;
     } catch (e) {
       _errorMessage = e.toString();
-      debugPrint('Error approving request: $e');
+      console('Error approving request: $e');
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error approving request: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
+        showSnakBarr(
+          context,
+          '${LocaleKeys.error_approving_request.tr()}${e.toString()}',
         );
       }
       return false;
@@ -186,20 +181,18 @@ class AdminUpdateRequestProvider extends ChangeNotifier {
       await loadStats();
 
       if (context.mounted) {
-        showSnakBarr(context, 'Request rejected successfully');
+        showSnakBarr(context, LocaleKeys.request_rejected_success.tr());
       }
 
       return true;
     } catch (e) {
       _errorMessage = e.toString();
-      debugPrint('Error rejecting request: $e');
+      console('Error rejecting request: $e');
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error rejecting request: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
+        showSnakBarr(
+          context,
+          '${LocaleKeys.error_rejecting_request.tr()}${e.toString()}',
         );
       }
       return false;

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -8,7 +9,7 @@ import '../../../models/announcement_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../admin_providers/provider_admin_announcements.dart';
-//TODO: locale
+
 class ScreenAnnouncementDetails extends StatelessWidget {
   final AnnouncementModel announcement;
   final String role; // 'admin' or 'branch'
@@ -22,10 +23,11 @@ class ScreenAnnouncementDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isTablet = ResponsiveBreakpoints.of(context).isTablet;
-    final isAdmin = role.toLowerCase() == 'admin';
+    final isAdmin = role.toLowerCase() == AppConstants.admin;
 
     return Scaffold(
-      appBar: const CustomAppBar(title: "Announcement Details"),
+      appBar: CustomAppBar(title: LocaleKeys.announcement_details.tr()),
+
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -106,7 +108,7 @@ class ScreenAnnouncementDetails extends StatelessWidget {
                                 ? DateFormat(
                                     'MMMM dd, yyyy - hh:mm a',
                                   ).format(announcement.createdAt!)
-                                : "N/A",
+                                : LocaleKeys.na.tr(),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 13,
@@ -124,7 +126,7 @@ class ScreenAnnouncementDetails extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Created by: ${announcement.createdBy}',
+                            '${LocaleKeys.created_by.tr()} ${announcement.createdBy}',
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 13,
@@ -174,7 +176,7 @@ class ScreenAnnouncementDetails extends StatelessWidget {
                       Text(
                         announcement.description.isNotEmpty
                             ? announcement.description
-                            : "No description provided.",
+                            : LocaleKeys.no_description_provided.tr(),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.8),
                           fontSize: 14,
@@ -193,7 +195,7 @@ class ScreenAnnouncementDetails extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: () => _showDeleteConfirmation(context),
                       icon: const Icon(Icons.delete_outline),
-                      label: const Text("Delete Announcement"),
+                      label: Text(LocaleKeys.delete_announcement.tr()),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red.shade700,
                         foregroundColor: Colors.white,
@@ -229,14 +231,14 @@ class ScreenAnnouncementDetails extends StatelessWidget {
             children: [
               Icon(Icons.warning_amber_rounded, color: Colors.red.shade400),
               const SizedBox(width: 12),
-              const Text(
-                "Delete Announcement",
-                style: TextStyle(color: Colors.white, fontSize: 18),
+              Text(
+                LocaleKeys.delete_announcement.tr(),
+                style: const TextStyle(color: Colors.white, fontSize: 18),
               ),
             ],
           ),
           content: Text(
-            "Do you want to delete this announcement?",
+            LocaleKeys.delete_confirmation.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.8),
               fontSize: 14,

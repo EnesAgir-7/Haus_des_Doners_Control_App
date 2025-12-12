@@ -14,7 +14,6 @@ import '../../inspector/providers/provider_auth_new.dart';
 import '../../inspector/widgets/custom_toast.dart';
 import '../../inspector/widgets/language_button.dart';
 import 'screen_admin_templates.dart';
-//TODO: locale
 class ScreenAdminSettings extends StatelessWidget {
   const ScreenAdminSettings({super.key});
 
@@ -97,8 +96,8 @@ class ScreenAdminSettings extends StatelessWidget {
                   _buildSettingsTile(
                     context,
                     icon: Icons.supervised_user_circle,
-                    title: "Manage Branch Users",
-                    subtitle: "Add, Edit, Remove Branch Users",
+                    title: LocaleKeys.manage_branch_users.tr(), 
+                    subtitle: LocaleKeys.manage_branch_users_subtitle.tr(), 
                     color: AppColors.primaryRed,
                     onTap: () {
                       Navigator.push(

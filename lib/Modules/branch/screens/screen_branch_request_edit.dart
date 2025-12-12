@@ -12,7 +12,7 @@ import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_model.dart';
 import '../branch_providers/provider_branch_update_request.dart';
 import '../../admin/screens/screen_admin_request_details.dart';
-//TODO: locale
+
 class ScreenBranchRequestEdit extends StatefulWidget {
   final BranchModel branch;
   const ScreenBranchRequestEdit({super.key, required this.branch});
@@ -365,9 +365,9 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Pending Update Request',
-                        style: TextStyle(
+                      Text(
+                        LocaleKeys.pending_update_request.tr(),
+                        style: const TextStyle(
                           color: Colors.orange,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -375,7 +375,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${pr.changeCount} changes waiting for approval',
+                        '${pr.changeCount} ${LocaleKeys.changes_waiting_approval.tr()}',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.8),
                         ),
@@ -392,12 +392,12 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                     ),
                   ),
                   icon: const Icon(Icons.visibility, color: Colors.white70),
-                  tooltip: 'View Details',
+                  tooltip: LocaleKeys.view_details.tr(),
                 ),
                 IconButton(
                   onPressed: () => _showDeleteRequestConfirmation(provider),
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  tooltip: 'Delete Request',
+                  tooltip: LocaleKeys.delete_request.tr(),
                 ),
               ],
             ),
@@ -423,9 +423,9 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Last Request Rejected',
-                        style: TextStyle(
+                      Text(
+                        LocaleKeys.last_request_rejected.tr(),
+                        style: const TextStyle(
                           color: Colors.red,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -444,7 +444,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                         )
                       else
                         Text(
-                          'Your last request was rejected by admin.',
+                          LocaleKeys.your_last_request_rejected.tr(),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.8),
                           ),
@@ -463,7 +463,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                     ),
                   ),
                   icon: const Icon(Icons.visibility, color: Colors.white70),
-                  tooltip: 'View Details',
+                  tooltip: LocaleKeys.view_details.tr(),
                 ),
               ],
             ),
@@ -480,13 +480,13 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.primaryDark,
-        title: const Text(
-          'Delete Request',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          LocaleKeys.delete_request.tr(),
+          style: const TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'Are you sure you want to delete your pending update request?',
-          style: TextStyle(color: Colors.white70),
+        content: Text(
+          LocaleKeys.delete_request_confirmation.tr(),
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
@@ -499,7 +499,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
               provider.deletePendingRequest(context);
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(LocaleKeys.delete.tr()),
           ),
         ],
       ),

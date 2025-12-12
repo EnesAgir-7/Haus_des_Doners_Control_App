@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 
 import '../../../core/constants/firebase_constants.dart';
-//TODO: locale
+import '../../../translations/locale_keys.g.dart';
 
 class BranchActionsMenuButton extends StatelessWidget {
   final VoidCallback onCreateAnnouncement;
@@ -96,10 +97,10 @@ class BranchActionsMenuButton extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Announcements',
-                    style: TextStyle(
+                    LocaleKeys.announcements.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -130,10 +131,10 @@ class BranchActionsMenuButton extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Training Videos',
-                    style: TextStyle(
+                    LocaleKeys.training_videos.tr(),
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -189,10 +190,10 @@ class BranchActionsMenuButton extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Update Requests',
-                        style: TextStyle(
+                        LocaleKeys.update_requests.tr(),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,

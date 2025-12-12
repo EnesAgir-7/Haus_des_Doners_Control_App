@@ -1,13 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
+import 'package:haus_des_control/Modules/branch/firebase_services/branch_update_request_service.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
+import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
+import 'package:provider/provider.dart';
+
 import '../../../models/branch_update_request_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../admin_providers/provider_admin_update_requests.dart';
-//TODO: locale
 
 class ScreenRequestDetails extends StatelessWidget {
   final BranchUpdateRequestModel request;
@@ -29,7 +32,7 @@ class ScreenRequestDetails extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
-      appBar: const CustomAppBar(title: "Request Details"),
+      appBar: CustomAppBar(title: LocaleKeys.request_details.tr()),
       body: Column(
         children: [
           Expanded(
@@ -43,7 +46,10 @@ class ScreenRequestDetails extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Changes Section
-                  _buildSectionHeader('Requested Changes', Icons.edit_note),
+                  _buildSectionHeader(
+                    LocaleKeys.requested_changes.tr(),
+                    Icons.edit_note,
+                  ),
                   const SizedBox(height: 16),
                   ...request.changes.entries.map((entry) {
                     return _buildChangeCard(entry.value);
@@ -52,7 +58,7 @@ class ScreenRequestDetails extends StatelessWidget {
                   // Admin Note (if exists)
                   if (request.adminNote != null) ...[
                     const SizedBox(height: 24),
-                    _buildSectionHeader('Admin Note', Icons.note),
+                    _buildSectionHeader(LocaleKeys.admin_note.tr(), Icons.note),
                     const SizedBox(height: 16),
                     _buildAdminNote(request.adminNote!),
                   ],
@@ -113,7 +119,7 @@ class ScreenRequestDetails extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Requested by ${request.requestedByName}',
+                      '${LocaleKeys.requested_by.tr()} ${request.requestedByName}',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 14,
@@ -131,7 +137,7 @@ class ScreenRequestDetails extends StatelessWidget {
             children: [
               _buildInfoChip(
                 Icons.edit_note,
-                '${request.changeCount} ${request.changeCount == 1 ? 'Change' : 'Changes'}',
+                '${request.changeCount} ${request.changeCount == 1 ? LocaleKeys.change.tr() : LocaleKeys.changes.tr()}',
                 AppColors.primaryRed,
               ),
               const SizedBox(width: 12),
@@ -271,7 +277,7 @@ class ScreenRequestDetails extends StatelessWidget {
 
             // Old Value
             _buildValueSection(
-              'Old Value',
+              LocaleKeys.old_value.tr(),
               change.oldValue,
               change.fieldType,
               Colors.red,
@@ -301,7 +307,7 @@ class ScreenRequestDetails extends StatelessWidget {
 
             // New Value
             _buildValueSection(
-              'New Value',
+              LocaleKeys.new_value.tr(),
               change.newValue,
               change.fieldType,
               Colors.green,
@@ -416,7 +422,9 @@ class ScreenRequestDetails extends StatelessWidget {
                         )
                       : const Icon(Icons.cancel, color: Colors.white),
                   label: Text(
-                    provider.isRejecting ? 'Rejecting...' : 'Reject',
+                    provider.isRejecting
+                        ? LocaleKeys.rejecting.tr()
+                        : LocaleKeys.reject.tr(),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -448,7 +456,9 @@ class ScreenRequestDetails extends StatelessWidget {
                         )
                       : const Icon(Icons.check_circle, color: Colors.white),
                   label: Text(
-                    provider.isApproving ? 'Approving...' : 'Approve',
+                    provider.isApproving
+                        ? LocaleKeys.approving.tr()
+                        : LocaleKeys.approve.tr(),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -467,12 +477,12 @@ class ScreenRequestDetails extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Approve Request'),
-        content: const Text('Are you sure you want to approve this request?'),
+        title: Text(LocaleKeys.approve_request.tr()),
+        content: Text(LocaleKeys.approve_confirmation.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(LocaleKeys.cancel.tr()),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -486,7 +496,7 @@ class ScreenRequestDetails extends StatelessWidget {
                     requestId: request.id,
                     branchId: request.branchId,
                     changes: request.changes,
-                    adminNote: 'Approved',
+                    adminNote: LocaleKeys.approved.tr(),
                     adminId: adminId,
                     context: context,
                   );
@@ -495,7 +505,7 @@ class ScreenRequestDetails extends StatelessWidget {
                 Navigator.pop(context); // Go back to list
               }
             },
-            child: const Text('Approve'),
+            child: Text(LocaleKeys.approve.tr()),
           ),
         ],
       ),
@@ -509,15 +519,15 @@ class ScreenRequestDetails extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: AppColors.lightBlack,
-        title: const Text(
-          'Reject Request',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          LocaleKeys.reject_request.tr(),
+          style: const TextStyle(color: Colors.white),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Please provide a reason for rejecting this request:',
+              LocaleKeys.reject_reason.tr(),
               style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
             ),
             const SizedBox(height: 16),
@@ -526,7 +536,7 @@ class ScreenRequestDetails extends StatelessWidget {
               maxLines: 3,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Enter reason...',
+                hintText: LocaleKeys.enter_reason.tr(),
                 hintStyle: TextStyle(
                   color: Colors.white.withValues(alpha: 0.5),
                 ),
@@ -543,13 +553,14 @@ class ScreenRequestDetails extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(LocaleKeys.cancel.tr()),
           ),
           ElevatedButton(
             onPressed: () async {
               if (noteController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(dialogContext).showSnackBar(
-                  const SnackBar(content: Text('Please enter a reason')),
+                showCustomSnackBar(
+                  context,
+                  LocaleKeys.please_enter_reason.tr(),
                 );
                 return;
               }
@@ -572,7 +583,7 @@ class ScreenRequestDetails extends StatelessWidget {
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Reject'),
+            child: Text(LocaleKeys.reject.tr()),
           ),
         ],
       ),
@@ -581,13 +592,13 @@ class ScreenRequestDetails extends StatelessWidget {
 
   IconData _getFieldIcon(String fieldType) {
     switch (fieldType) {
-      case 'geopoint':
+      case DataTypes.geopoint:
         return Icons.location_on;
-      case 'datetime':
+      case DataTypes.datetime:
         return Icons.calendar_today;
-      case 'list':
+      case DataTypes.list:
         return Icons.list;
-      case 'map':
+      case DataTypes.map:
         return Icons.view_module;
       default:
         return Icons.text_fields;
@@ -595,16 +606,16 @@ class ScreenRequestDetails extends StatelessWidget {
   }
 
   String _formatValue(dynamic value, String fieldType) {
-    if (value == null) return 'Not set';
+    if (value == null) return LocaleKeys.not_set.tr();
 
     switch (fieldType) {
-      case 'geopoint':
+      case DataTypes.geopoint:
         if (value is GeoPoint) {
           return '${value.latitude.toStringAsFixed(6)}, ${value.longitude.toStringAsFixed(6)}';
         }
         return value.toString();
 
-      case 'datetime':
+      case DataTypes.datetime:
         if (value is Timestamp) {
           return DateFormat('MMM dd, yyyy').format(value.toDate());
         } else if (value is DateTime) {
@@ -612,9 +623,9 @@ class ScreenRequestDetails extends StatelessWidget {
         }
         return value.toString();
 
-      case 'list':
+      case DataTypes.list:
         if (value is List) {
-          if (value.isEmpty) return 'Empty list';
+          if (value.isEmpty) return LocaleKeys.empty_list.tr();
 
           // Check if it's a list of maps (contact persons)
           if (value.first is Map) {
@@ -631,7 +642,7 @@ class ScreenRequestDetails extends StatelessWidget {
         }
         return value.toString();
 
-      case 'map':
+      case DataTypes.map:
         if (value is Map) {
           return value.entries.map((e) => '${e.key}: ${e.value}').join('\n');
         }

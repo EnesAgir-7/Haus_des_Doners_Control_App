@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
@@ -9,9 +10,10 @@ import 'package:provider/provider.dart';
 
 import '../../../helpers/app_helpers.dart';
 import '../../../models/document_model.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../common/document_helper.dart';
 import '../admin_providers/provider_admin_documents.dart';
-//TODO: locale
+
 class ScreenAdminDocumentsScreen extends StatefulWidget {
   final String branchId;
   final String uploadedBy; // Admin user ID
@@ -80,7 +82,7 @@ class _ScreenAdminDocumentsScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: "Documents"),
+      appBar: CustomAppBar(title: LocaleKeys.documents.tr()),
       body: Consumer<AdminDocumentsProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading && provider.documents.isEmpty) {
@@ -137,7 +139,9 @@ class _ScreenAdminDocumentsScreenState
                   )
                 : const Icon(Icons.upload_file, color: Colors.white),
             label: Text(
-              provider.isUploading ? 'Uploading...' : 'Upload Document',
+              provider.isUploading
+                  ? LocaleKeys.uploading.tr()
+                  : LocaleKeys.upload_document.tr(),
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -168,7 +172,7 @@ class _ScreenAdminDocumentsScreenState
           ),
           const SizedBox(height: 24),
           Text(
-            'No Documents Yet',
+            LocaleKeys.no_documents_yet.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 18,
@@ -177,7 +181,7 @@ class _ScreenAdminDocumentsScreenState
           ),
           const SizedBox(height: 8),
           Text(
-            'Upload your first document to get started',
+            LocaleKeys.upload_first_document.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.5),
               fontSize: 14,
@@ -321,7 +325,7 @@ class _ScreenAdminDocumentsScreenState
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Open',
+                            LocaleKeys.open.tr(),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.9),
                             ),
@@ -336,7 +340,7 @@ class _ScreenAdminDocumentsScreenState
                           const Icon(Icons.link, color: Colors.white, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            'Copy Link',
+                            LocaleKeys.copy_link.tr(),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.9),
                             ),
@@ -355,7 +359,7 @@ class _ScreenAdminDocumentsScreenState
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Share',
+                            LocaleKeys.share.tr(),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.9),
                             ),
@@ -371,7 +375,7 @@ class _ScreenAdminDocumentsScreenState
                           const Icon(Icons.delete, color: Colors.red, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            'Delete',
+                            LocaleKeys.delete.tr(),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.9),
                             ),
@@ -397,19 +401,22 @@ class _ScreenAdminDocumentsScreenState
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.lightBlack,
-        title: const Text(
-          'Delete Document',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          LocaleKeys.delete_document.tr(),
+          style: const TextStyle(color: Colors.white),
         ),
         content: Text(
-          'Are you sure you want to delete "${doc.name}"?',
+          LocaleKeys.delete_confirmation_document.tr().replaceAll(
+            '{name}',
+            doc.name,
+          ),
           style: TextStyle(color: Colors.white.withValues(alpha: 0.8)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              LocaleKeys.cancel.tr(),
               style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
             ),
           ),
@@ -418,7 +425,10 @@ class _ScreenAdminDocumentsScreenState
               Navigator.pop(context);
               provider.deleteDocument(doc.id, doc.fileUrl, context: context);
             },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(
+              LocaleKeys.delete.tr(),
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -478,17 +488,17 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
 
   Future<void> _uploadDocument() async {
     if (_nameController.text.trim().isEmpty) {
-      showCustomSnackBar(context, "Please enter document name");
+      showCustomSnackBar(context, LocaleKeys.please_enter_document_name.tr());
       return;
     }
 
     if (_descriptionController.text.trim().isEmpty) {
-      showCustomSnackBar(context, "Please enter description");
+      showCustomSnackBar(context, LocaleKeys.please_enter_description.tr());
       return;
     }
 
     if (_selectedFile == null) {
-      showCustomSnackBar(context, "Please select a document");
+      showCustomSnackBar(context, LocaleKeys.please_select_document.tr());
       return;
     }
 
@@ -565,10 +575,10 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Upload Document',
-                        style: TextStyle(
+                        LocaleKeys.upload_document_header.tr(),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -594,7 +604,7 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                       controller: _nameController,
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       decoration: InputDecoration(
-                        labelText: 'Document Name',
+                        labelText: LocaleKeys.document_name.tr(),
                         labelStyle: TextStyle(
                           color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 13,
@@ -639,7 +649,7 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       maxLines: 3,
                       decoration: InputDecoration(
-                        labelText: 'Description',
+                        labelText: LocaleKeys.description.tr(),
                         labelStyle: TextStyle(
                           color: Colors.white.withValues(alpha: 0.5),
                           fontSize: 13,
@@ -708,7 +718,7 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
-                                    'Tap to select document ',
+                                    LocaleKeys.tap_to_select_document.tr(),
                                     style: TextStyle(
                                       color: Colors.white.withValues(
                                         alpha: 0.7,
@@ -718,7 +728,7 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                                     ),
                                   ),
                                   Text(
-                                    'max size: 10 Mbs',
+                                    LocaleKeys.max_size.tr(),
                                     style: TextStyle(
                                       color: Colors.white.withValues(
                                         alpha: 0.7,
@@ -729,7 +739,7 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    'PDF, DOC, DOCX, XLS, XLSX, TXT',
+                                    LocaleKeys.file_types.tr(),
                                     style: TextStyle(
                                       color: Colors.white.withValues(
                                         alpha: 0.4,
@@ -762,7 +772,7 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          _fileName ?? 'Unknown',
+                                          _fileName ?? LocaleKeys.unknown.tr(),
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 14,
@@ -778,7 +788,7 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                                                             (1024 * 1024))
                                                         .toStringAsFixed(2) +
                                                     " Mbs"
-                                              : 'Ready to upload',
+                                              : LocaleKeys.ready_to_upload.tr(),
                                           style: TextStyle(
                                             color: AppColors.primaryRed
                                                 .withValues(alpha: 0.8),
@@ -853,19 +863,19 @@ class _UploadDocumentBottomSheetState extends State<UploadDocumentBottomSheet> {
                                           ),
                                         ),
                                       )
-                                    : const Row(
+                                    : Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         children: [
-                                          Icon(
+                                          const Icon(
                                             Icons.cloud_upload,
                                             color: Colors.white,
                                             size: 20,
                                           ),
-                                          SizedBox(width: 8),
+                                          const SizedBox(width: 8),
                                           Text(
-                                            'Upload Document',
-                                            style: TextStyle(
+                                            LocaleKeys.upload_document.tr(),
+                                            style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold,

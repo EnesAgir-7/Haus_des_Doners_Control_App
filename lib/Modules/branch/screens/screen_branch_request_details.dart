@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/branch/firebase_services/branch_update_request_service.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
-import 'package:intl/intl.dart';
 
 import '../../../models/branch_update_request_model.dart';
-//TODO: locale
+import '../../../translations/locale_keys.g.dart';
 
 // Read-only request details screen for branch users (no approve/reject buttons)
 class ScreenBranchRequestDetails extends StatelessWidget {
@@ -25,7 +25,8 @@ class ScreenBranchRequestDetails extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
-      appBar: const CustomAppBar(title: "Request Details"),
+      appBar: CustomAppBar(title: LocaleKeys.request_details.tr()),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -35,7 +36,10 @@ class ScreenBranchRequestDetails extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Changes Section
-            _buildSectionHeader('Requested Changes', Icons.edit_note),
+            _buildSectionHeader(
+              LocaleKeys.requested_changes.tr(),
+              Icons.edit_note,
+            ),
             const SizedBox(height: 16),
             ...request.changes.entries
                 .map((entry) => _buildChangeCard(entry.value))
@@ -44,7 +48,7 @@ class ScreenBranchRequestDetails extends StatelessWidget {
             // Admin Note (if exists)
             if (request.adminNote != null) ...[
               const SizedBox(height: 24),
-              _buildSectionHeader('Admin Note', Icons.note),
+              _buildSectionHeader(LocaleKeys.admin_note.tr(), Icons.note),
               const SizedBox(height: 16),
               _buildAdminNote(request.adminNote!),
             ],
@@ -99,7 +103,7 @@ class ScreenBranchRequestDetails extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Requested by ${request.requestedByName}',
+                      '${LocaleKeys.requested_by} ${request.requestedByName}',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.6),
                         fontSize: 14,
@@ -117,7 +121,7 @@ class ScreenBranchRequestDetails extends StatelessWidget {
             children: [
               _buildInfoChip(
                 Icons.edit_note,
-                '${request.changeCount} ${request.changeCount == 1 ? 'Change' : 'Changes'}',
+                '${request.changeCount} ${request.changeCount == 1 ? LocaleKeys.change.tr() : LocaleKeys.changes.tr()}',
                 AppColors.primaryRed,
               ),
               const SizedBox(width: 12),
@@ -257,7 +261,7 @@ class ScreenBranchRequestDetails extends StatelessWidget {
 
             // Old Value
             _buildValueSection(
-              'Old Value',
+              LocaleKeys.old_value.tr(),
               change.oldValue,
               change.fieldType,
               Colors.red,
@@ -287,7 +291,7 @@ class ScreenBranchRequestDetails extends StatelessWidget {
 
             // New Value
             _buildValueSection(
-              'New Value',
+              LocaleKeys.new_value.tr(),
               change.newValue,
               change.fieldType,
               Colors.green,
@@ -378,7 +382,7 @@ class ScreenBranchRequestDetails extends StatelessWidget {
   }
 
   String _formatValue(dynamic value, String fieldType) {
-    if (value == null) return 'Not set';
+    if (value == null) return LocaleKeys.not_set.tr();
 
     switch (fieldType) {
       case DataTypes.geopoint:
@@ -397,7 +401,7 @@ class ScreenBranchRequestDetails extends StatelessWidget {
 
       case DataTypes.list:
         if (value is List) {
-          if (value.isEmpty) return 'Empty list';
+          if (value.isEmpty) return LocaleKeys.empty_list.tr();
 
           // Check if it's a list of maps (contact persons)
           if (value.first is Map) {
