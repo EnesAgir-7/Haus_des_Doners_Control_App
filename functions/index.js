@@ -183,11 +183,7 @@ exports.updatePassword = functions.https.onCall(async (request) => {
   }
 });
 
-/**
- * Callable function to delete an inspector account.
- * Only admins can call this function.
- * Deletes user from Auth, Firestore users collection, and routes collection.
- */
+
 exports.deleteInspector = onCall(async (request) => {
   // Check if user is authenticated
   if (!request.auth) {
@@ -295,6 +291,55 @@ exports.deleteInspector = onCall(async (request) => {
     throw new HttpsError(
         "internal",
         `Failed to delete inspector: ${error.message}`,
+    );
+  }
+});
+
+// New: delete normal user (admin/branch) — no inspector-specific checks
+exports.deleteUser = onCall(async (request) => {
+  // Ensure caller is authenticated
+  if (!request.auth) {
+    throw new HttpsError(
+        "unauthenticated",
+        "User must be logged in to perform this action",
+    );
+  }
+
+  const userUid = request.data && request.data.uid;
+  if (!userUid) {
+    throw new HttpsError("invalid-argument", "User UID is required");
+  }
+
+  try {
+    const batch = db.batch();
+
+    const userRef = db.collection("inspectors").doc(userUid);
+    batch.delete(userRef);
+
+    const routeRef = db.collection("routes").doc(userUid);
+    const routeDoc = await routeRef.get();
+    if (routeDoc.exists) {
+      batch.delete(routeRef);
+    }
+
+    await batch.commit();
+    console.log(`✅ Deleted Firestore data for user: ${userUid}`);
+
+    // Delete from Firebase Auth
+    await auth.deleteUser(userUid);
+    console.log(`✅ Deleted Auth account for user: ${userUid}`);
+
+    return {success: true, message: "User deleted successfully"};
+  } catch (error) {
+    console.error("❌ Error deleting user:", error);
+
+    if (error instanceof HttpsError) {
+      throw error;
+    }
+
+    throw new HttpsError(
+        "internal",
+        `Failed to delete user: ${error.message}`,
     );
   }
 });
