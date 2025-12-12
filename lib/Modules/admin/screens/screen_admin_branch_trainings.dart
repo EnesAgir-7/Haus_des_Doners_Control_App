@@ -37,7 +37,6 @@ class _ScreenAdminBranchTrainingsState
   Future<void> _showAddVideoDialog(BuildContext context) async {
     final titleController = TextEditingController();
     final urlController = TextEditingController();
-    final durationController = TextEditingController();
     final descriptionController = TextEditingController();
 
     await showModalBottomSheet(
@@ -102,15 +101,6 @@ class _ScreenAdminBranchTrainingsState
                 const SizedBox(height: 8),
 
                 CustomField(
-                  controller: durationController,
-                  label: LocaleKeys.duration_mm_ss.tr(),
-                  hint: LocaleKeys.duration_hint.tr(),
-                  icon: Icons.access_time,
-                ),
-
-                const SizedBox(height: 8),
-
-                CustomField(
                   controller: descriptionController,
                   label: LocaleKeys.description.tr(),
                   hint: LocaleKeys.enter_description.tr(),
@@ -139,8 +129,6 @@ class _ScreenAdminBranchTrainingsState
                       onPressed: () async {
                         final title = titleController.text.trim();
                         final url = urlController.text.trim();
-                        // ignore: unused_local_variable
-                        final duration = durationController.text.trim();
                         final description = descriptionController.text.trim();
 
                         if (title.isEmpty || url.isEmpty) {
@@ -157,7 +145,7 @@ class _ScreenAdminBranchTrainingsState
                               listen: false,
                             );
 
-                        final ok = await provider.addVideo(
+                        await provider.addVideo(
                           TrainingVideoModel(
                             description: description,
                             name: title,
@@ -168,11 +156,7 @@ class _ScreenAdminBranchTrainingsState
                           ),
                           context: context,
                         );
-
                         Navigator.pop(context);
-                        if (!ok) {
-                          // provider already shows error
-                        }
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -218,10 +202,7 @@ class _ScreenAdminBranchTrainingsState
         listen: false,
       );
 
-      final ok = await provider.deleteVideo(id, context: context);
-      if (!ok) {
-        // provider already showed error via snack
-      }
+      await provider.deleteVideo(id, context: context);
     }
   }
 
