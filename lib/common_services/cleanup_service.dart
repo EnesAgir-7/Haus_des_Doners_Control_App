@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/branch/branch_providers/provider_branch_dashboard.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_branches.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_panel.dart';
 import 'package:provider/provider.dart';
@@ -123,7 +124,9 @@ class ProviderCleanupService {
 
     try {
       // Cancel all streams in parallel
-      // futures.add(Future(() => context.read<ProviderBranchInspectors>().cancelAllStreams()));
+      futures.add(
+        Future(() => context.read<ProviderBranchDashboard>().closeAllStreams()),
+      );
       // futures.add(Future(() => context.read<ProviderBranchInspections>().cancelAllStreams()));
       // futures.add(Future(() => context.read<ProviderBranchTasks>().cancelAllStreams()));
       // futures.add(Future(() => context.read<ProviderBranchAnnouncements>().cancelAllStreams()));

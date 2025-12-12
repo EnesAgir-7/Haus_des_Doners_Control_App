@@ -26,4 +26,20 @@ class BranchDashboardService {
       return null;
     }
   }
+
+  /// Stream real-time updates for a single branch document.
+  Stream<BranchModel?> streamBranch(String branchId) {
+    try {
+      return _db.collection(Collections.branches).doc(branchId).snapshots().map(
+        (doc) {
+          if (!doc.exists) return null;
+          return BranchModel.fromFirestore(doc);
+        },
+      );
+    } catch (e) {
+      console('Error creating branch stream: $e');
+      // Return a single-event stream with null so listeners get a value instead of throwing.
+      return Stream.value(null);
+    }
+  }
 }
