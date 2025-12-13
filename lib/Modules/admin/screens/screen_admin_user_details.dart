@@ -641,11 +641,13 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
                           size: 20,
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          LocaleKeys.deleteActionIrreversible.tr(),
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold,
+                        Flexible(
+                          child: Text(
+                            LocaleKeys.deleteActionIrreversible.tr(),
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
