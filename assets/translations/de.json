@@ -984,6 +984,8 @@
   "last_request_rejected": "Letzte Anfrage abgelehnt",
   "your_last_request_rejected": "Ihre letzte Anfrage wurde vom Administrator abgelehnt.",
   "delete_request": "Anfrage löschen",
-  "delete_request_confirmation": "Sind Sie sicher, dass Sie Ihre ausstehende Aktualisierungsanfrage löschen möchten?", 
-    "view_details": "Details anzeigen"
+  "delete_request_confirmation": "Sind Sie sicher, dass Sie Ihre ausstehende Aktualisierungsanfrage löschen möchten?",
+  "view_details": "Details anzeigen",
+  "inspection_completed": "Inspektion abgeschlossen",
+  "inspection_completed_body": "Die Inspektion für Ihre Filiale ist nun abgeschlossen."
 }

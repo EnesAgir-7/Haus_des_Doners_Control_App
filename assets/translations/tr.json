@@ -971,5 +971,7 @@
   "your_last_request_rejected": "Son isteğiniz yönetici tarafından reddedildi.",
   "delete_request": "İsteği Sil",
   "delete_request_confirmation": "Bekleyen güncelleme isteğinizi silmek istediğinizden emin misiniz?",
-  "view_details": "Detayları Görüntüle"
+  "view_details": "Detayları Görüntüle",
+  "inspection_completed": "Denetim Tamamlandı",
+  "inspection_completed_body": "Şubeniz için denetim şimdi tamamlandı."
 }

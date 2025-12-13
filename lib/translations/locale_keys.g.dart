@@ -990,5 +990,7 @@ abstract class  LocaleKeys {
   static const delete_request = 'delete_request';
   static const delete_request_confirmation = 'delete_request_confirmation';
   static const view_details = 'view_details';
+  static const inspection_completed = 'inspection_completed';
+  static const inspection_completed_body = 'inspection_completed_body';
 
 }

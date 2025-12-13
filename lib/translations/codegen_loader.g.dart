@@ -1001,7 +1001,9 @@ class CodegenLoader extends AssetLoader{
   "your_last_request_rejected": "Ihre letzte Anfrage wurde vom Administrator abgelehnt.",
   "delete_request": "Anfrage löschen",
   "delete_request_confirmation": "Sind Sie sicher, dass Sie Ihre ausstehende Aktualisierungsanfrage löschen möchten?",
-  "view_details": "Details anzeigen"
+  "view_details": "Details anzeigen",
+  "inspection_completed": "Inspektion abgeschlossen",
+  "inspection_completed_body": "Die Inspektion für Ihre Filiale ist nun abgeschlossen."
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -2006,7 +2008,9 @@ static const Map<String,dynamic> _en = {
   "your_last_request_rejected": "Your last request was rejected by admin.",
   "delete_request": "Delete Request",
   "delete_request_confirmation": "Are you sure you want to delete your pending update request?",
-  "view_details": "View Details"
+  "view_details": "View Details",
+  "inspection_completed": "Inspection Completed",
+  "inspection_completed_body": "The inspection for your branch is now complete."
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2981,7 +2985,9 @@ static const Map<String,dynamic> _tr = {
   "your_last_request_rejected": "Son isteğiniz yönetici tarafından reddedildi.",
   "delete_request": "İsteği Sil",
   "delete_request_confirmation": "Bekleyen güncelleme isteğinizi silmek istediğinizden emin misiniz?",
-  "view_details": "Detayları Görüntüle"
+  "view_details": "Detayları Görüntüle",
+  "inspection_completed": "Denetim Tamamlandı",
+  "inspection_completed_body": "Şubeniz için denetim şimdi tamamlandı."
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

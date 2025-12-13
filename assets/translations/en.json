@@ -1001,5 +1001,7 @@
   "your_last_request_rejected": "Your last request was rejected by admin.",
   "delete_request": "Delete Request",
   "delete_request_confirmation": "Are you sure you want to delete your pending update request?",
-  "view_details": "View Details"
+  "view_details": "View Details",
+  "inspection_completed": "Inspection Completed",
+  "inspection_completed_body": "The inspection for your branch is now complete."
 }

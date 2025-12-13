@@ -401,7 +401,10 @@ class ProviderControl extends ChangeNotifier {
       );
 
       // 🔹 Save to Firestore atomically
-      await _inspectionService.createInspection(inspection);
+      await _inspectionService.createInspection(
+        inspection,
+        _selectedBranch?.fcmTokens ?? [],
+      );
 
       // 🔹 Cleanup local PDF
       if (await pdfFile.exists()) await pdfFile.delete();
