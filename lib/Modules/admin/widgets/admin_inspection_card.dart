@@ -90,7 +90,11 @@ class AdminInspectionCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.apartment, size: 20.0, color: Colors.lightBlueAccent),
+          const Icon(
+            Icons.apartment,
+            size: 20.0,
+            color: Colors.lightBlueAccent,
+          ),
           const SizedBox(width: 10.0),
           Expanded(
             child: Column(
@@ -139,7 +143,7 @@ class AdminInspectionCard extends StatelessWidget {
         Icon(Icons.person, size: 16.0, color: Colors.grey.shade500),
         const SizedBox(width: 6.0),
         Text(
-          inspection.inspectorName ?? LocaleKeys.unknown.tr(),
+          "${LocaleKeys.inspector.tr()} - ${inspection.inspectorName}",
           style: TextStyle(
             color: Colors.grey.shade500,
             fontSize: 13.0,
