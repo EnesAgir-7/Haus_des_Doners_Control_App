@@ -334,8 +334,6 @@ class _BranchScreenDetailsState extends State<BranchScreenDetails> {
           const SizedBox(height: 12),
           _infoRow(LocaleKeys.status.tr(), branch.status.toUpperCase()),
           const SizedBox(height: 12),
-          _infoRow(LocaleKeys.subsidiaries.tr(), branch.name),
-          const SizedBox(height: 12),
           _infoRow(LocaleKeys.region.tr(), branch.address),
           const SizedBox(height: 12),
           _infoRow(

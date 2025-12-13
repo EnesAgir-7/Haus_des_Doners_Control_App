@@ -6,7 +6,6 @@ class Collections {
   static const String inspections = 'inspections';
   static const String routes = 'routes';
   static const String tasks = 'tasks';
-  // Separate collection for branch authentication users
   static const String branchUsers = 'branch_users';
   static const String vehicles = 'vehicles';
   static const String inspectors = 'inspectors';
