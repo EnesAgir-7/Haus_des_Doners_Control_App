@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -81,7 +82,10 @@ class FCMHelper {
       FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
         console('Foreground message received: ${message.messageId}');
 
-        await _showLocalNotification(message);
+        if (Platform.isAndroid) {
+          await _showLocalNotification(message);
+        }
+
         // Just call the callback for data handling
         onMessageReceived(message);
       });
@@ -117,6 +121,12 @@ class FCMHelper {
       carPlay: false,
       criticalAlert: false,
       provisional: false,
+      sound: true,
+    );
+
+    await messaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
       sound: true,
     );
 
@@ -200,6 +210,8 @@ class FCMHelper {
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
+      presentBanner: true,
+      presentList: true,
     );
 
     const NotificationDetails notificationDetails = NotificationDetails(
