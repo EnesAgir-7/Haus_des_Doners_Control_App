@@ -2,24 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Dev Environment",
+            "name": "Flutter",
             "request": "launch",
             "type": "dart",
-            "program": "lib/main.dart",
-            "args": [
-                "--dart-define=environment=dev",
-                "--dart-define-from-file=config/dev.json"
-            ]
-        },
-        {
-            "name": "Prod Environment",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": [
-                "--dart-define=environment=prod",
-                "--dart-define-from-file=config/prod.json"
-            ]
+            "program": "lib/main.dart"
         }
     ]
 }

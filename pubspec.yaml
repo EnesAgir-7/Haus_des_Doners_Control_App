@@ -120,6 +120,7 @@ flutter:
   assets:
     - assets/
     - assets/translations/
+    - assets/config/
     - assets/fonts/
     - assets/map_styles/
     - .env

@@ -49,13 +49,14 @@ import 'core/global_focus_manager.dart';
 import 'core/theme/app_theme.dart';
 import 'routes/app_routes.dart';
 
-//V2 Started
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-// this is main
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Print and load environment config
   AppEnvironment.printEnvironment();
+  await AppEnvironment.loadConfig(); // 👈 Load config from JSON file
 
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(options: AppEnvironment.firebaseOptions);
@@ -63,12 +64,14 @@ void main() async {
   await RemoteConfigService().initialize();
   await EasyLocalization.ensureInitialized();
   await dotenv.load(fileName: ".env");
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       systemNavigationBarColor: AppColors.primaryDark,
       systemNavigationBarIconBrightness: Brightness.light,
     ),
   );
+
   // Initialize FCM
   FCMHelper.instance.initialize(
     onMessageReceived: (RemoteMessage message) {
@@ -79,6 +82,7 @@ void main() async {
       // Navigate based on message.data
     },
   );
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -168,7 +172,6 @@ class MyApp extends StatelessWidget {
               ),
             );
           },
-
           darkTheme: AppTheme.dark,
           themeMode: ThemeMode.dark,
           home: const AuthWrapper(),
