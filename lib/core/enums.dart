@@ -1,4 +1,11 @@
 enum TimeRange { daily, weekly, monthly }
 
 enum UploadStage { uploadingPhotos, uploadingPDF, submitting }
-enum EnvironmentType { dev, prod }
+
+enum Environment {
+  dev('dev'),
+  prod('prod');
+
+  final String value;
+  const Environment(this.value);
+}

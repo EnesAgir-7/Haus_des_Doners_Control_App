@@ -205,7 +205,7 @@ class InspectorInspectionService {
         },
       );
 
-      // await batch.commit();
+      await batch.commit();
       if (remoteConfig.enableNotifications) {
         NotificationHelper.instance.sendNotificationToMultipleTokens(
           title: LocaleKeys.inspection_completed.tr(),

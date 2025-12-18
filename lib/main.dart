@@ -54,9 +54,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Print and load environment config
   AppEnvironment.printEnvironment();
-  await AppEnvironment.loadConfig(); // 👈 Load config from JSON file
 
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(options: AppEnvironment.firebaseOptions);
