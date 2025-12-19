@@ -129,9 +129,10 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
                   inspection.branchName,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 22,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -509,7 +510,11 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+            const Icon(
+              Icons.error_outline,
+              size: 60,
+              color: AppColors.primaryRed,
+            ),
             const SizedBox(height: 16),
             Text(
               LocaleKeys.error_occurred.tr(),
