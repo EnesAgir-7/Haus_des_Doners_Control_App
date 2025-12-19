@@ -973,5 +973,15 @@
   "delete_request_confirmation": "Bekleyen güncelleme isteğinizi silmek istediğinizden emin misiniz?",
   "view_details": "Detayları Görüntüle",
   "inspection_completed": "Denetim Tamamlandı",
-  "inspection_completed_body": "Şubeniz için denetim şimdi tamamlandı."
+  "inspection_completed_body": "Şubeniz için denetim şimdi tamamlandı.",
+  "error_user_not_found": "Bu e-posta adresiyle kayıtlı hesap bulunamadı",
+  "error_wrong_password": "Yanlış şifre. Lütfen tekrar deneyin",
+  "error_invalid_email": "Geçersiz e-posta adresi formatı",
+  "error_user_disabled": "Bu hesap devre dışı bırakılmış",
+  "error_invalid_credentials": "Geçersiz e-posta veya şifre",
+  "error_too_many_requests": "Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin",
+  "error_operation_not_allowed": "E-posta/şifre ile giriş etkin değil",
+  "error_branch_credentials_required": "Şube e-postası ve şifresi gereklidir",
+  "total_vehicles": "Toplam Araçlar",
+  "submitted_by": "Gönderen"
 }

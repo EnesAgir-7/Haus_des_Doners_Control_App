@@ -20,7 +20,26 @@ class FirebaseAuthHelper {
       );
       return result.user;
     } on FirebaseAuthException catch (e) {
-      throw e.message ?? LocaleKeys.error_occurred.tr();
+      switch (e.code) {
+        case 'user-not-found':
+          throw LocaleKeys.error_user_not_found.tr();
+        case 'wrong-password':
+          throw LocaleKeys.error_wrong_password.tr();
+        case 'invalid-email':
+          throw LocaleKeys.error_invalid_email.tr();
+        case 'user-disabled':
+          throw LocaleKeys.error_user_disabled.tr();
+        case 'invalid-credential':
+          throw LocaleKeys.error_invalid_credentials.tr();
+        case 'too-many-requests':
+          throw LocaleKeys.error_too_many_requests.tr();
+        case 'operation-not-allowed':
+          throw LocaleKeys.error_operation_not_allowed.tr();
+        default:
+          throw e.message ?? LocaleKeys.error_occurred.tr();
+      }
+    } catch (e) {
+      throw LocaleKeys.error_occurred.tr();
     }
   }
 

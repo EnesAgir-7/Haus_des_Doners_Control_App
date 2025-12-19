@@ -84,7 +84,7 @@ class AdminBranchService {
   Future<void> addBranch(BranchModel branch, BuildContext context) async {
     // Enforce branch email & password presence — branch user must be created
     if (branch.branchEmail == null || branch.branchPassword == null) {
-      throw Exception('Branch email and password are required');
+      throw Exception(LocaleKeys.error_branch_credentials_required.tr());
     }
 
     UserCredential? createdCredential;

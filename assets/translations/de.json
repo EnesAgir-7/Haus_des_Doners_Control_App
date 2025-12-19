@@ -987,5 +987,15 @@
   "delete_request_confirmation": "Sind Sie sicher, dass Sie Ihre ausstehende Aktualisierungsanfrage löschen möchten?",
   "view_details": "Details anzeigen",
   "inspection_completed": "Inspektion abgeschlossen",
-  "inspection_completed_body": "Die Inspektion für Ihre Filiale ist nun abgeschlossen."
+  "inspection_completed_body": "Die Inspektion für Ihre Filiale ist nun abgeschlossen.",
+  "error_user_not_found": "Kein Konto mit dieser E-Mail-Adresse gefunden",
+  "error_wrong_password": "Falsches Passwort. Bitte versuchen Sie es erneut",
+  "error_invalid_email": "Ungültiges E-Mail-Adressformat",
+  "error_user_disabled": "Dieses Konto wurde deaktiviert",
+  "error_invalid_credentials": "Ungültige E-Mail oder Passwort",
+  "error_too_many_requests": "Zu viele fehlgeschlagene Versuche. Bitte versuchen Sie es später erneut",
+  "error_operation_not_allowed": "E-Mail/Passwort-Anmeldung ist nicht aktiviert",
+  "error_branch_credentials_required": "Filial-E-Mail und Passwort sind erforderlich",
+  "total_vehicles": "Gesamtfahrzeuge",
+  "submitted_by": "Eingereicht von"
 }

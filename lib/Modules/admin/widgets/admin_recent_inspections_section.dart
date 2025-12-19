@@ -167,27 +167,53 @@ class _InspectionSectionState extends State<InspectionSection> {
                       ),
                     ),
                     child: Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: AppColors.lightBlack.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.08),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.lightBlack.withValues(alpha: 0.6),
+                            AppColors.lightBlack.withValues(alpha: 0.4),
+                          ],
                         ),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                                 colors: [
-                                  AppColors.primaryRed.withValues(alpha: 0.3),
-                                  AppColors.primaryRed.withValues(alpha: 0.15),
+                                  AppColors.primaryRed.withValues(alpha: 0.4),
+                                  AppColors.primaryRed.withValues(alpha: 0.2),
                                 ],
                               ),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryRed.withValues(
+                                    alpha: 0.2,
+                                  ),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: const Icon(
                               Icons.assignment_outlined,
@@ -195,7 +221,7 @@ class _InspectionSectionState extends State<InspectionSection> {
                               size: 18,
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 16),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,24 +230,72 @@ class _InspectionSectionState extends State<InspectionSection> {
                                   inspection.branchName,
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w700,
                                     fontSize: 14,
+                                    letterSpacing: 0.3,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  DateFormat(
-                                    'dd MMM yyyy, hh:mm a',
-                                  ).format(inspection.updatedAt),
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.6),
-                                    fontSize: 12,
-                                  ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.person_outline,
+                                      color: AppColors.primaryRed.withValues(
+                                        alpha: 0.8,
+                                      ),
+                                      size: 13,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Text(
+                                        '${LocaleKeys.submitted_by.tr()}: ${inspection.inspectorName}',
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.75,
+                                          ),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.access_time_rounded,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
+                                      size: 12,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      DateFormat(
+                                        'dd MMM yyyy, hh:mm a',
+                                      ).format(inspection.updatedAt),
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.6,
+                                        ),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
+                          ),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: Colors.white.withValues(alpha: 0.3),
+                            size: 16,
                           ),
                         ],
                       ),

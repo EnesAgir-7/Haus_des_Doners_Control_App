@@ -992,5 +992,15 @@ abstract class  LocaleKeys {
   static const view_details = 'view_details';
   static const inspection_completed = 'inspection_completed';
   static const inspection_completed_body = 'inspection_completed_body';
+  static const error_user_not_found = 'error_user_not_found';
+  static const error_wrong_password = 'error_wrong_password';
+  static const error_invalid_email = 'error_invalid_email';
+  static const error_user_disabled = 'error_user_disabled';
+  static const error_invalid_credentials = 'error_invalid_credentials';
+  static const error_too_many_requests = 'error_too_many_requests';
+  static const error_operation_not_allowed = 'error_operation_not_allowed';
+  static const error_branch_credentials_required = 'error_branch_credentials_required';
+  static const total_vehicles = 'total_vehicles';
+  static const submitted_by = 'submitted_by';
 
 }

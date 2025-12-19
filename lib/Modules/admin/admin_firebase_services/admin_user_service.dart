@@ -271,7 +271,6 @@ class AdminUserService {
         IHF.inspectorId: inspectorId,
         IHF.lastUpdated: FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
-      console('✅ Created inspector document for $inspectorId');
     } else {
       batch.update(inspectorRef, {
         IHF.lastUpdated: FieldValue.serverTimestamp(),

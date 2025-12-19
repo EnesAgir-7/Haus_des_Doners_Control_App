@@ -1003,5 +1003,15 @@
   "delete_request_confirmation": "Are you sure you want to delete your pending update request?",
   "view_details": "View Details",
   "inspection_completed": "Inspection Completed",
-  "inspection_completed_body": "The inspection for your branch is now complete."
+  "inspection_completed_body": "The inspection for your branch is now complete.",
+  "error_user_not_found": "No account found with this email address",
+  "error_wrong_password": "Incorrect password. Please try again",
+  "error_invalid_email": "Invalid email address format",
+  "error_user_disabled": "This account has been disabled",
+  "error_invalid_credentials": "Invalid email or password",
+  "error_too_many_requests": "Too many failed attempts. Please try again later",
+  "error_operation_not_allowed": "Email/password sign-in is not enabled",
+  "error_branch_credentials_required": "Branch email and password are required",
+  "total_vehicles": "Total Vehicles",
+  "submitted_by": "Submitted By"
 }

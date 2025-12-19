@@ -1003,7 +1003,17 @@ class CodegenLoader extends AssetLoader{
   "delete_request_confirmation": "Sind Sie sicher, dass Sie Ihre ausstehende Aktualisierungsanfrage löschen möchten?",
   "view_details": "Details anzeigen",
   "inspection_completed": "Inspektion abgeschlossen",
-  "inspection_completed_body": "Die Inspektion für Ihre Filiale ist nun abgeschlossen."
+  "inspection_completed_body": "Die Inspektion für Ihre Filiale ist nun abgeschlossen.",
+  "error_user_not_found": "Kein Konto mit dieser E-Mail-Adresse gefunden",
+  "error_wrong_password": "Falsches Passwort. Bitte versuchen Sie es erneut",
+  "error_invalid_email": "Ungültiges E-Mail-Adressformat",
+  "error_user_disabled": "Dieses Konto wurde deaktiviert",
+  "error_invalid_credentials": "Ungültige E-Mail oder Passwort",
+  "error_too_many_requests": "Zu viele fehlgeschlagene Versuche. Bitte versuchen Sie es später erneut",
+  "error_operation_not_allowed": "E-Mail/Passwort-Anmeldung ist nicht aktiviert",
+  "error_branch_credentials_required": "Filial-E-Mail und Passwort sind erforderlich",
+  "total_vehicles": "Gesamtfahrzeuge",
+  "submitted_by": "Eingereicht von"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -2010,7 +2020,17 @@ static const Map<String,dynamic> _en = {
   "delete_request_confirmation": "Are you sure you want to delete your pending update request?",
   "view_details": "View Details",
   "inspection_completed": "Inspection Completed",
-  "inspection_completed_body": "The inspection for your branch is now complete."
+  "inspection_completed_body": "The inspection for your branch is now complete.",
+  "error_user_not_found": "No account found with this email address",
+  "error_wrong_password": "Incorrect password. Please try again",
+  "error_invalid_email": "Invalid email address format",
+  "error_user_disabled": "This account has been disabled",
+  "error_invalid_credentials": "Invalid email or password",
+  "error_too_many_requests": "Too many failed attempts. Please try again later",
+  "error_operation_not_allowed": "Email/password sign-in is not enabled",
+  "error_branch_credentials_required": "Branch email and password are required",
+  "total_vehicles": "Total Vehicles",
+  "submitted_by": "Submitted By"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2987,7 +3007,17 @@ static const Map<String,dynamic> _tr = {
   "delete_request_confirmation": "Bekleyen güncelleme isteğinizi silmek istediğinizden emin misiniz?",
   "view_details": "Detayları Görüntüle",
   "inspection_completed": "Denetim Tamamlandı",
-  "inspection_completed_body": "Şubeniz için denetim şimdi tamamlandı."
+  "inspection_completed_body": "Şubeniz için denetim şimdi tamamlandı.",
+  "error_user_not_found": "Bu e-posta adresiyle kayıtlı hesap bulunamadı",
+  "error_wrong_password": "Yanlış şifre. Lütfen tekrar deneyin",
+  "error_invalid_email": "Geçersiz e-posta adresi formatı",
+  "error_user_disabled": "Bu hesap devre dışı bırakılmış",
+  "error_invalid_credentials": "Geçersiz e-posta veya şifre",
+  "error_too_many_requests": "Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin",
+  "error_operation_not_allowed": "E-posta/şifre ile giriş etkin değil",
+  "error_branch_credentials_required": "Şube e-postası ve şifresi gereklidir",
+  "total_vehicles": "Toplam Araçlar",
+  "submitted_by": "Gönderen"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

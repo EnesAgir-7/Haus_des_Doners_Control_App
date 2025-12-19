@@ -268,7 +268,7 @@ class DashboardCard extends StatelessWidget {
                     number: isLoading
                         ? LocaleKeys.loading.tr()
                         : count.toString(),
-                    label: LocaleKeys.total_fleet.tr(),
+                    label: LocaleKeys.total_vehicles.tr(),
                     icon: Icons.directions_car_outlined,
                     color: AppColors.amber,
                     gradient: LinearGradient(
