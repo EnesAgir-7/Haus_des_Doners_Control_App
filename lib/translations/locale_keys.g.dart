@@ -213,9 +213,6 @@ abstract class  LocaleKeys {
   static const n_a = 'n_a';
   static const inspection_details = 'inspection_details';
   static const no_signature = 'no_signature';
-  static const gorev_durumu_guncellendi = 'gorev_durumu_guncellendi';
-  static const lutfen_yorum_veya_fotograf_ekleyin = 'lutfen_yorum_veya_fotograf_ekleyin';
-  static const yorum_eklendi = 'yorum_eklendi';
   static const branch_assigned_successfully = 'branch_assigned_successfully';
   static const branch_unassigned_successfully = 'branch_unassigned_successfully';
   static const filtered = 'filtered';
