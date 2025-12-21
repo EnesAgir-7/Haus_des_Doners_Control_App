@@ -128,7 +128,7 @@ class AdminBranchCard extends StatelessWidget {
               ),
               const SizedBox(width: 8.0),
               Text(
-                LocaleKeys.assignedInspector.tr(),
+                LocaleKeys.inspector.tr(),
                 style: TextStyle(color: Colors.grey.shade500, fontSize: 13.0),
               ),
               const Spacer(),
