@@ -4,6 +4,7 @@ import 'package:haus_des_control/Modules/common/fadded_divider.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_bottom_nav_bar.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_branches.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/core/constants/app_assets.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
@@ -96,6 +97,7 @@ class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
                   const SizedBox(height: 10),
                   // User Info Header
                   const UserInfoHeader(),
+                  const SizedBox(height: 10),
 
                   // SECTION 2: PERFORMANCE METRICS (Dynamic with Time Filter)
                   Consumer<ProviderPanel>(
@@ -106,11 +108,14 @@ class _ScreenHomeState extends State<ScreenHome> with TickerProviderStateMixin {
                       );
                     },
                   ),
+                  const SizedBox(height: 10),
 
                   const FadedDivider(color: AppColors.primaryRed, height: 5),
 
+                  const SizedBox(height: 10),
                   // SECTION 1: TOTAL ASSIGNMENTS (Static Overview)
                   const OverviewSection(),
+                  const SizedBox(height: 10),
                   const FadedDivider(color: AppColors.primaryRed, height: 5),
 
                   // SECTION 3: TODAY'S ROUTE PLAN (with progress)
@@ -134,25 +139,7 @@ class UserInfoHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.lightBlack,
-            AppColors.lightBlack.withValues(alpha: 0.8),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      decoration: commonDeco,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -246,25 +233,7 @@ class OverviewSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      // decoration: BoxDecoration(
-      //   gradient: LinearGradient(
-      //     begin: Alignment.topLeft,
-      //     end: Alignment.bottomRight,
-      //     colors: [
-      //       AppColors.lightBlack,
-      //       AppColors.lightBlack.withValues(alpha: 0.8),
-      //     ],
-      //   ),
-      //   borderRadius: BorderRadius.circular(24),
-      //   border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-      //   boxShadow: [
-      //     BoxShadow(
-      //       color: Colors.black.withValues(alpha: 0.3),
-      //       blurRadius: 20,
-      //       offset: const Offset(0, 10),
-      //     ),
-      //   ],
-      // ),
+      decoration: commonDeco,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -375,6 +344,7 @@ class PerformanceSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      decoration: commonDeco,
       padding: const EdgeInsets.all(12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
