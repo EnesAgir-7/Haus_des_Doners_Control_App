@@ -77,7 +77,7 @@ class _BranchMapScreenState extends State<BranchMapScreen> {
                 onMapCreated: controller.setMapController,
                 markers: controller.markers.values.toSet(),
                 zoomControlsEnabled: false,
-                myLocationButtonEnabled: true,
+                myLocationButtonEnabled: false,
                 compassEnabled: true,
               ),
               Positioned(

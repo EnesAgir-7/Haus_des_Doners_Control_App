@@ -54,6 +54,13 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need permission to save PDF reports to your photo library</string>
 
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We use your location to show your position on the map and help you find nearby branches.</string>
+
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app does not track your location in the background. Location is only used while you are using the app.</string>
+
+
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 

@@ -1,0 +1,2 @@
+DART_DEFINES=environment=dev
+DART_DEFINE_FROM_FILE=config/dev.json
