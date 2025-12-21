@@ -194,6 +194,10 @@ class NotificationHelper {
     Map<String, dynamic>? data,
   }) async {
     try {
+      if (fcmTokens.isEmpty) {
+        console('⚠️ No FCM tokens provided for batch notification');
+        return {'success': false, 'error': 'No FCM tokens provided'};
+      }
       // ✅ Remove duplicates on client side too (belt and suspenders)
       final uniqueTokens = fcmTokens.toSet().toList();
 

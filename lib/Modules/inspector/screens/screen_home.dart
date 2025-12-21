@@ -4,7 +4,6 @@ import 'package:haus_des_control/Modules/common/fadded_divider.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_bottom_nav_bar.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_branches.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
-import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
@@ -155,27 +154,23 @@ class UserInfoHeader extends StatelessWidget {
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: () {
-              console(loggedInUser!.fcmTokens?.toList());
-            },
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primaryRed.withValues(alpha: 0.25),
-                    AppColors.primaryRed.withValues(alpha: 0.15),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(16),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primaryRed.withValues(alpha: 0.25),
+                  AppColors.primaryRed.withValues(alpha: 0.15),
+                ],
               ),
-              child: const Icon(
-                Icons.person_outline,
-                color: AppColors.primaryRed,
-                size: 28,
-              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(
+              Icons.person_outline,
+              color: AppColors.primaryRed,
+              size: 28,
             ),
           ),
           const SizedBox(width: 16),
@@ -195,6 +190,28 @@ class UserInfoHeader extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.email_outlined,
+                      size: 15,
+                      color: AppColors.primaryRed.withValues(alpha: 0.7),
+                    ),
+                    const SizedBox(width: 5),
+                    Expanded(
+                      child: Text(
+                        loggedInUser?.serviceAccount ?? '',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
                 Row(
                   children: [
                     Icon(
@@ -477,26 +494,6 @@ class PerformanceSection extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildCompactStatCard(
-                  label: LocaleKeys.vehicles.tr(),
-                  value: stats.vehicleIds.length.toString(),
-                  icon: Icons.directions_car_outlined,
-                  gradientColors: [
-                    const Color(0xFF2196F3),
-                    const Color(0xFF1976D2),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-
-        // Second Row - 2 items
-        IntrinsicHeight(
-          child: Row(
-            children: [
-              Expanded(
-                child: _buildCompactStatCard(
                   label: LocaleKeys.tasksCompleted.tr(),
                   value: "${stats.tasksCompleted}/${stats.tasksTotal}",
                   icon: Icons.check_circle_outline,
@@ -505,18 +502,6 @@ class PerformanceSection extends StatelessWidget {
                     const Color(0xFF115E59),
                   ],
                   subtitle: "$completionRate%",
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildCompactStatCard(
-                  label: LocaleKeys.branchesAssigned.tr(),
-                  value: stats.branchesIds.length.toString(),
-                  icon: Icons.store_outlined,
-                  gradientColors: [
-                    const Color(0xFF9333EA),
-                    const Color(0xFF7E22CE),
-                  ],
                 ),
               ),
             ],
