@@ -106,93 +106,112 @@ Widget buildPerformanceChart({
               ],
             ),
             const SizedBox(height: 16),
-            // Chart
+            // Chart with dynamic width control
             SizedBox(
               height: 180,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(parsedScores.length, (index) {
-                  final parsedScore = parsedScores[index];
-                  final score = parsedScore.score;
-                  final maxScore = parsedScore.maxScore;
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: _getMaxChartWidth(parsedScores.length),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisSize: MainAxisSize.min,
+                    children: List.generate(parsedScores.length, (index) {
+                      final parsedScore = parsedScores[index];
+                      final score = parsedScore.score;
+                      final maxScore = parsedScore.maxScore;
 
-                  // Calculate percentage using global formula
-                  final percentage = calculatePerformancePercent(
-                    scoresToUse[index],
-                  );
+                      // Calculate percentage using global formula
+                      final percentage = calculatePerformancePercent(
+                        scoresToUse[index],
+                      );
 
-                  final heightRatio = (double.tryParse(percentage)! / 100)
-                      .clamp(0.05, 1.0);
-                  final barHeight = heightRatio * 120;
+                      final heightRatio = (double.tryParse(percentage)! / 100)
+                          .clamp(0.05, 1.0);
+                      final barHeight = heightRatio * 120;
 
-                  // Get color using global formula
-                  final color = getPercentageColor(
-                    double.tryParse(percentage)!,
-                  );
+                      // Get color using global formula
+                      final color = getPercentageColor(
+                        double.tryParse(percentage)!,
+                      );
 
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Text(
-                            '${percentage}%',
-                            style: TextStyle(
-                              color: color,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          Container(
-                            width: double.infinity,
-                            height: barHeight,
-                            decoration: BoxDecoration(
-                              // color: color,
-                              gradient: LinearGradient(
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                                colors: [color, color.withValues(alpha: 0.9)],
-                              ),
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(6),
+                      final barWidth = _getBarWidth(parsedScores.length);
+
+                      return Container(
+                        width: barWidth,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              '${percentage}%',
+                              style: TextStyle(
+                                color: color,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '${score.toInt()}/${maxScore.toInt()}',
-                            style: const TextStyle(
-                              color: Colors.white38,
-                              fontSize: 9,
+                            const SizedBox(height: 6),
+                            Container(
+                              width: double.infinity,
+                              height: barHeight,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: [color, color.withValues(alpha: 0.9)],
+                                ),
+                                borderRadius: const BorderRadius.vertical(
+                                  top: Radius.circular(6),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
+                            const SizedBox(height: 8),
+                            Text(
+                              '${score.toInt()}/${maxScore.toInt()}',
+                              style: const TextStyle(
+                                color: Colors.white38,
+                                fontSize: 9,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 12),
             // Index numbers
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(parsedScores.length, (index) {
-                return Expanded(
-                  child: Text(
-                    '#${parsedScores.length - index}',
-                    style: const TextStyle(
-                      color: Colors.white54,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                );
-              }),
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: _getMaxChartWidth(parsedScores.length),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(parsedScores.length, (index) {
+                    final barWidth = _getBarWidth(parsedScores.length);
+                    return Container(
+                      width: barWidth,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
+                        '#${parsedScores.length - index}',
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }),
+                ),
+              ),
             ),
           ],
         ),
@@ -212,6 +231,23 @@ Widget buildPerformanceChart({
       ],
     ],
   );
+}
+
+/// Calculate the width of each bar based on number of items
+double _getBarWidth(int count) {
+  if (count == 1) return 80.0;
+  if (count == 2) return 70.0;
+  if (count == 3) return 60.0;
+  if (count <= 5) return 50.0;
+  if (count <= 8) return 40.0;
+  return 30.0;
+}
+
+/// Calculate the maximum width for the entire chart
+double _getMaxChartWidth(int count) {
+  final barWidth = _getBarWidth(count);
+  final spacing = 8.0; // horizontal margin on each side
+  return (barWidth + spacing) * count;
 }
 
 Widget _buildLegendItem(Color color, String label) {
