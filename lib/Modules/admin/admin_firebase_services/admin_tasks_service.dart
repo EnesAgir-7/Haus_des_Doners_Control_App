@@ -225,7 +225,7 @@ class AdminTaskService {
       batch.set(docRef, taskData);
 
       // Update inspector's total tasks
-     await adminUserService.updateInspectorHistoryBatch(
+      await adminUserService.updateInspectorHistoryBatch(
         batch: batch,
         inspectorId: task.assignedInspectorId,
         updates: {IHF.tasksTotal: FieldValue.increment(1)},
@@ -260,7 +260,7 @@ class AdminTaskService {
     DateTime? dueDate,
     required BuildContext context,
   }) async {
-     NotificationHelper.instance.sendToInspector(
+    NotificationHelper.instance.sendToInspector(
       context: context,
       inspectorId: inspectorId,
       title: LocaleKeys.task_assigned_title.tr(),
@@ -306,44 +306,49 @@ class AdminTaskService {
         newInspectorId != null &&
         newInspectorId != currentTask.assignedInspectorId;
 
+    // Check if status changed
+    final newStatus = data[TaskFields.status] as String?;
+    final statusChanged = newStatus != null && newStatus != currentTask.status;
+
+    // Determine final status (new status if changed, otherwise current)
+    final finalStatus = newStatus ?? currentTask.status;
+    final isCurrentlyCompleted = currentTask.status == AppConstants.completed;
+    final willBeCompleted = finalStatus == AppConstants.completed;
+
     if (inspectorChanged) {
-      // Decrement from old inspector
+      // Decrement from old inspector (only if they have tasks > 0)
       await adminUserService.updateInspectorHistoryBatch(
         batch: batch,
         inspectorId: currentTask.assignedInspectorId,
         updates: {
           IHF.tasksTotal: FieldValue.increment(-1),
-          if (currentTask.status == AppConstants.completed)
+          if (isCurrentlyCompleted)
             IHF.tasksCompleted: FieldValue.increment(-1),
         },
       );
 
-      // Increment for new inspector
+      // Increment for new inspector (using FINAL status)
       await adminUserService.updateInspectorHistoryBatch(
         batch: batch,
         inspectorId: newInspectorId,
         updates: {
           IHF.tasksTotal: FieldValue.increment(1),
-          if (currentTask.status == AppConstants.completed)
-            IHF.tasksCompleted: FieldValue.increment(1),
+          if (willBeCompleted) IHF.tasksCompleted: FieldValue.increment(1),
         },
       );
     }
-
-    // Check if status changed
-    final newStatus = data[TaskFields.status] as String?;
-    final statusChanged = newStatus != null && newStatus != currentTask.status;
-
-    if (statusChanged && !inspectorChanged) {
-      if (newStatus == AppConstants.completed &&
-          currentTask.status != AppConstants.completed) {
+    // Only handle status changes if inspector didn't change
+    else if (statusChanged) {
+      // Task marked as completed
+      if (willBeCompleted && !isCurrentlyCompleted) {
         await adminUserService.updateInspectorHistoryBatch(
           batch: batch,
           inspectorId: currentTask.assignedInspectorId,
           updates: {IHF.tasksCompleted: FieldValue.increment(1)},
         );
-      } else if (newStatus != AppConstants.completed &&
-          currentTask.status == AppConstants.completed) {
+      }
+      // Task marked as not completed
+      else if (!willBeCompleted && isCurrentlyCompleted) {
         await adminUserService.updateInspectorHistoryBatch(
           batch: batch,
           inspectorId: currentTask.assignedInspectorId,
@@ -360,7 +365,7 @@ class AdminTaskService {
     // ✅ Scenario 1: Inspector was reassigned
     if (inspectorChanged) {
       // Notify OLD inspector (task unassigned)
-       NotificationHelper.instance.sendToInspector(
+      NotificationHelper.instance.sendToInspector(
         inspectorId: currentTask.assignedInspectorId,
         context: context,
         title: LocaleKeys.task_unassigned_title.tr(),
@@ -376,7 +381,7 @@ class AdminTaskService {
       );
 
       // Notify NEW inspector (task assigned)
-       NotificationHelper.instance.sendToInspector(
+      NotificationHelper.instance.sendToInspector(
         inspectorId: newInspectorId,
         context: context,
         title: LocaleKeys.task_assigned_title.tr(),
@@ -396,7 +401,7 @@ class AdminTaskService {
     // ✅ Scenario 2: Task updated (same inspector)
     else {
       // Skip notification if task was completed by inspector
-      if (statusChanged && newStatus == AppConstants.completed) {
+      if (statusChanged && willBeCompleted) {
         console('⏭️ Skipping notification - task completed by inspector');
         return;
       }
@@ -408,7 +413,7 @@ class AdminTaskService {
       if (statusChanged) {
         notificationTitle = LocaleKeys.task_status_changed_title.tr();
         notificationBody = LocaleKeys.task_status_changed_body.tr(
-          namedArgs: {'taskTitle': currentTask.title, 'newStatus': newStatus},
+          namedArgs: {'taskTitle': currentTask.title, 'newStatus': finalStatus},
         );
         notificationType = 'task_status_changed';
       } else {
@@ -419,7 +424,7 @@ class AdminTaskService {
         notificationType = 'task_updated';
       }
 
-       NotificationHelper.instance.sendToInspector(
+      NotificationHelper.instance.sendToInspector(
         inspectorId: currentTask.assignedInspectorId,
         context: context,
         title: notificationTitle,
@@ -434,3 +439,156 @@ class AdminTaskService {
     }
   }
 }
+
+// Future<void> updateTask(
+//   String taskId,
+//   Map<String, dynamic> data,
+//   BuildContext context,
+// ) async {
+//   // Get current task state
+//   final currentTask = await getTaskById(taskId);
+//   if (currentTask == null) {
+//     throw Exception(LocaleKeys.no_tasks_found.tr());
+//   }
+
+//   final batch = _db.batch();
+
+//   // Update task document
+//   final docRef = _db.collection(Collections.tasks).doc(taskId);
+//   final updateData = {...data, TaskFields.updatedAt: Timestamp.now()};
+//   batch.update(docRef, updateData);
+
+//   // Check if inspector was changed
+//   final String? newInspectorId =
+//       data[TaskFields.assignedInspectorId] as String?;
+//   final inspectorChanged =
+//       newInspectorId != null &&
+//       newInspectorId != currentTask.assignedInspectorId;
+
+//   if (inspectorChanged) {
+//     // Decrement from old inspector
+//     await adminUserService.updateInspectorHistoryBatch(
+//       batch: batch,
+//       inspectorId: currentTask.assignedInspectorId,
+//       updates: {
+//         IHF.tasksTotal: FieldValue.increment(-1),
+//         if (currentTask.status == AppConstants.completed)
+//           IHF.tasksCompleted: FieldValue.increment(-1),
+//       },
+//     );
+
+//     // Increment for new inspector
+//     await adminUserService.updateInspectorHistoryBatch(
+//       batch: batch,
+//       inspectorId: newInspectorId,
+//       updates: {
+//         IHF.tasksTotal: FieldValue.increment(1),
+//         if (currentTask.status == AppConstants.completed)
+//           IHF.tasksCompleted: FieldValue.increment(1),
+//       },
+//     );
+//   }
+
+//   // Check if status changed
+//   final newStatus = data[TaskFields.status] as String?;
+//   final statusChanged = newStatus != null && newStatus != currentTask.status;
+
+//   if (statusChanged && !inspectorChanged) {
+//     if (newStatus == AppConstants.completed &&
+//         currentTask.status != AppConstants.completed) {
+//       await adminUserService.updateInspectorHistoryBatch(
+//         batch: batch,
+//         inspectorId: currentTask.assignedInspectorId,
+//         updates: {IHF.tasksCompleted: FieldValue.increment(1)},
+//       );
+//     } else if (newStatus != AppConstants.completed &&
+//         currentTask.status == AppConstants.completed) {
+//       await adminUserService.updateInspectorHistoryBatch(
+//         batch: batch,
+//         inspectorId: currentTask.assignedInspectorId,
+//         updates: {IHF.tasksCompleted: FieldValue.increment(-1)},
+//       );
+//     }
+//   }
+
+//   // Commit batch
+//   await batch.commit();
+//   console('✅ Task $taskId updated successfully');
+
+//   // ✅ NOTIFICATIONS - Now using NotificationHelper
+//   // ✅ Scenario 1: Inspector was reassigned
+//   if (inspectorChanged) {
+//     // Notify OLD inspector (task unassigned)
+//     NotificationHelper.instance.sendToInspector(
+//       inspectorId: currentTask.assignedInspectorId,
+//       context: context,
+//       title: LocaleKeys.task_unassigned_title.tr(),
+//       body: LocaleKeys.task_unassigned_body.tr(
+//         namedArgs: {'taskTitle': currentTask.title},
+//       ),
+//       data: {
+//         'type': 'task_unassigned',
+//         'taskId': taskId,
+//         'taskTitle': currentTask.title,
+//         'reason': 'reassigned',
+//       },
+//     );
+
+//     // Notify NEW inspector (task assigned)
+//     NotificationHelper.instance.sendToInspector(
+//       inspectorId: newInspectorId,
+//       context: context,
+//       title: LocaleKeys.task_assigned_title.tr(),
+//       body: LocaleKeys.task_assigned_body.tr(
+//         namedArgs: {'taskTitle': currentTask.title},
+//       ),
+//       data: {
+//         'type': 'task_assigned',
+//         'taskId': taskId,
+//         'taskTitle': currentTask.title,
+//         'taskDescription': currentTask.description,
+//         'taskPriority': currentTask.priority,
+//         'dueDate': currentTask.dueDate?.toIso8601String() ?? '',
+//       },
+//     );
+//   }
+//   // ✅ Scenario 2: Task updated (same inspector)
+//   else {
+//     // Skip notification if task was completed by inspector
+//     if (statusChanged && newStatus == AppConstants.completed) {
+//       console('⏭️ Skipping notification - task completed by inspector');
+//       return;
+//     }
+
+//     String notificationTitle;
+//     String notificationBody;
+//     String notificationType;
+
+//     if (statusChanged) {
+//       notificationTitle = LocaleKeys.task_status_changed_title.tr();
+//       notificationBody = LocaleKeys.task_status_changed_body.tr(
+//         namedArgs: {'taskTitle': currentTask.title, 'newStatus': newStatus},
+//       );
+//       notificationType = 'task_status_changed';
+//     } else {
+//       notificationTitle = LocaleKeys.task_updated_title.tr();
+//       notificationBody = LocaleKeys.task_updated_body.tr(
+//         namedArgs: {'taskTitle': currentTask.title},
+//       );
+//       notificationType = 'task_updated';
+//     }
+
+//     NotificationHelper.instance.sendToInspector(
+//       inspectorId: currentTask.assignedInspectorId,
+//       context: context,
+//       title: notificationTitle,
+//       body: notificationBody,
+//       data: {
+//         'type': notificationType,
+//         'taskId': taskId,
+//         'taskTitle': currentTask.title,
+//         'updatedFields': data.keys.toList(),
+//       },
+//     );
+//   }
+// }
