@@ -88,7 +88,7 @@ class InspectorTaskService {
         topic: AppConstants.adminTopic,
         title: LocaleKeys.task_comment_added_title.tr(),
         body: LocaleKeys.task_comment_added_body.tr(
-          namedArgs: {'taskId': taskId},
+          // namedArgs: {'taskId': taskId},
         ),
         data: {
           'type': 'task_comment_added',
