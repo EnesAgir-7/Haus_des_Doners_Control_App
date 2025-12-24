@@ -789,7 +789,7 @@
   "task_deleted_admin_title": "🗑️ Aufgabe vom Inspektor gelöscht",
   "task_deleted_admin_body": "Ein Inspektor hat die Aufgabe '{taskTitle}' gelöscht.",
   "task_comment_added_title": "💬 Neuer Aufgabenkommentar",
-  "task_comment_added_body": "Ein neuer Kommentar wurde zur Aufgabe mit der ID {taskId} hinzugefügt.",
+  "task_comment_added_body": "Ein neuer Kommentar wurde zur Aufgabe hinzugefügt.",
   "branch_deleted_title": "🗑️ Filiale gelöscht",
   "branch_deleted_body": "Die Filiale mit der ID: {branchId} wurde gelöscht.",
   "vehicle_deleted_title": "🗑️ Fahrzeug gelöscht",
