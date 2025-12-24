@@ -65,6 +65,6 @@ class DefaultFirebaseOptions {
     projectId: 'controlapp-23df2',
     databaseURL: 'https://controlapp-23df2-default-rtdb.firebaseio.com',
     storageBucket: 'controlapp-23df2.firebasestorage.app',
-    iosBundleId: 'com.example.hausDesControl',
+    iosBundleId: 'com.hausdesdoners.hddcontrol',
   );
 }

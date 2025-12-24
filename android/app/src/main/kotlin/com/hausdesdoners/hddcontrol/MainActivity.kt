@@ -1,4 +1,4 @@
-package com.example.haus_des_control
+package com.hausdesdoners.hddcontrol
 
 import io.flutter.embedding.android.FlutterActivity
 

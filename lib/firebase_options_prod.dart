@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDj8QOlSljI_rfjHfIYFye14hdSLrDLY0k',
-    appId: '1:223722129149:android:cb3216b375af2587936094',
+    appId: '1:223722129149:android:afa2acb8ef9d140b936094',
     messagingSenderId: '223722129149',
     projectId: 'controlapp-production',
     storageBucket: 'controlapp-production.firebasestorage.app',
@@ -59,10 +59,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyANn_JDllR1EFv4VgFZOupq3_r4xoAbklE',
-    appId: '1:223722129149:ios:07bd84be99be0421936094',
+    appId: '1:223722129149:ios:50c6a3c1805feece936094',
     messagingSenderId: '223722129149',
     projectId: 'controlapp-production',
     storageBucket: 'controlapp-production.firebasestorage.app',
-    iosBundleId: 'com.example.hausDesControl',
+    iosBundleId: 'com.hausdesdoners.hddcontrol',
   );
 }

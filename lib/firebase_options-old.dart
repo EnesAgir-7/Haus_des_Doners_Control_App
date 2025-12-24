@@ -70,6 +70,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '190346465365',
     projectId: 'controlapp-23df2',
     storageBucket: 'controlapp-23df2.firebasestorage.app',
-    iosBundleId: 'com.example.hausDesControl',
+    iosBundleId: 'com.hausdesdoners.hddcontrol',
   );
 }

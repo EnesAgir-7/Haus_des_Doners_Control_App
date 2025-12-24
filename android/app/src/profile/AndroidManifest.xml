@@ -10,7 +10,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="msauth"
-                    android:host="com.example.haus_des_control"
+                    android:host="com.hausdesdoners.hddcontrol"
                     android:path="/callback" />
             </intent-filter>
         </activity>
