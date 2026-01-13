@@ -194,7 +194,6 @@ exports.deleteInspector = onCall(async (request) => {
   }
 
   const insUid = request.data.uid;
-  const callerUid = request.auth.uid;
 
   // Validate input
   if (!insUid) {
@@ -202,36 +201,6 @@ exports.deleteInspector = onCall(async (request) => {
   }
 
   try {
-    // Verify caller is admin
-    const callerDoc = await db.collection("inspectors").doc(callerUid).get();
-
-    if (!callerDoc.exists) {
-      throw new HttpsError("permission-denied", "Caller user not found");
-    }
-
-    const callerData = callerDoc.data();
-
-    // Check if caller is admin
-    const isAdmin =
-      callerData.role === "admin" ||
-      callerData.userType === "admin" ||
-      callerData.type === "admin";
-
-    if (!isAdmin) {
-      throw new HttpsError(
-          "permission-denied",
-          "Only admins can delete inspectors",
-      );
-    }
-
-    // Prevent admin from deleting themselves
-    if (insUid === callerUid) {
-      throw new HttpsError(
-          "failed-precondition",
-          "You cannot delete your own account",
-      );
-    }
-
     // Check if inspector exists
     const inspectorDoc = await db.collection("inspectors").doc(insUid).get();
     if (!inspectorDoc.exists) {
