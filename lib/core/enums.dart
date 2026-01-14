@@ -1,6 +1,11 @@
 enum TimeRange { daily, weekly, monthly }
 
-enum UploadStage { uploadingPhotos, uploadingPDF, submitting }
+enum UploadStage {
+  uploadingPhotos,
+  uploadingPDF,
+  submitting,
+  compressingImages,
+}
 
 enum Environment {
   dev('dev'),

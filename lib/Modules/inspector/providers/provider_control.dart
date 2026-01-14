@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:haus_des_control/Modules/inspector/firebase_services/inspector_branch_service.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:path_provider/path_provider.dart';
@@ -41,6 +42,7 @@ class ProviderControl extends ChangeNotifier {
   UploadStage? _currentUploadStage;
   UploadStage? get currentUploadStage => _currentUploadStage;
   bool _isSignatureFromStorage = false;
+  bool shouldCompressImages = true;
 
   bool get isSignatureFromStorage => _isSignatureFromStorage;
 
@@ -116,6 +118,11 @@ class ProviderControl extends ChangeNotifier {
 
   void setTemplate(InspectionTemplate newTemplate) {
     selectedTemplate = newTemplate;
+    notifyListeners();
+  }
+
+  setImageCompressor(bool value) {
+    shouldCompressImages = value;
     notifyListeners();
   }
 
@@ -261,7 +268,7 @@ class ProviderControl extends ChangeNotifier {
       return false;
     }
 
-    // ✅ NEW: Ask to save signature before submitting
+    // ✅ Ask to save signature before submitting
     if (inspectorSignature != null) {
       await _askToSaveSignature(context);
     }
@@ -283,59 +290,89 @@ class ProviderControl extends ChangeNotifier {
         return files.isNotEmpty;
       });
 
-      Map<String, List<String>> uploadedUrls = {};
-
       if (hasPhotos) {
+        // ✅ Compress images first if flag is true
+        if (shouldCompressImages) {
+          _currentUploadStage = UploadStage.compressingImages;
+          notifyListeners();
+
+          int totalImages = 0;
+          int processedImages = 0;
+
+          // Count total images
+          for (var category in selectedTemplate!.categories) {
+            final files = _photos[category.categoryId] ?? [];
+            totalImages += files.length;
+          }
+
+          // Compress all images
+          for (var category in selectedTemplate!.categories) {
+            final files = _photos[category.categoryId] ?? [];
+
+            if (files.isEmpty) continue;
+
+            List<File> compressedFiles = [];
+
+            for (var file in files) {
+              // Compress the image
+              final compressedFile = await _compressImage(file);
+              compressedFiles.add(compressedFile);
+
+              processedImages++;
+              // Update progress for compression (0% - 25%)
+              _uploadProgress = 0.25 * (processedImages / totalImages);
+              notifyListeners();
+            }
+
+            // Replace original files with compressed files
+            _photos[category.categoryId] = compressedFiles;
+          }
+
+          _uploadProgress = 0.25;
+          notifyListeners();
+        }
+
         // ✅ Set stage to uploading photos
         _currentUploadStage = UploadStage.uploadingPhotos;
         notifyListeners();
 
-        // 🔹 Upload all category images first
-        final categoryUploadFutures = selectedTemplate!.categories.map((
-          category,
-        ) async {
-          final files = _photos[category.categoryId] ?? [];
+        // 🔹 Upload all category images to OneDrive only
+        await Future.wait(
+          selectedTemplate!.categories.map((category) async {
+            final files = _photos[category.categoryId] ?? [];
 
-          // ✅ Return early if no files - skip all uploads
-          if (files.isEmpty) {
-            return MapEntry(category.categoryId, <String>[]);
-          }
+            // ✅ Return early if no files - skip upload
+            if (files.isEmpty) return;
 
-          // ✅ Only upload if files exist
-          final results = await Future.wait([
-            _oneDriveService.uploadImages(
+            // ✅ Upload to OneDrive
+            await _oneDriveService.uploadImages(
               images: files,
               branchName: _selectedBranch!.name,
               inspectionId: inspectionId,
               timestamp: now,
               onProgress: (current, total) {
-                // Update progress for photo uploads (0% - 50%)
-                _uploadProgress = 0.5 * (current / total);
+                // Update progress for photo uploads
+                // If compressed: 25% - 62.5%, otherwise 0% - 50%
+                final baseProgress = shouldCompressImages ? 0.25 : 0.0;
+                final progressRange = shouldCompressImages ? 0.375 : 0.5;
+                _uploadProgress =
+                    baseProgress + (progressRange * (current / total));
                 notifyListeners();
               },
-            ),
-            _uploadCategoryPhotos(
-              files,
-              _selectedBranch!.name,
-              category.categoryId,
-              inspectionId,
-              now,
-            ),
-          ]);
-
-          return MapEntry(category.categoryId, results[1] as List<String>);
-        }).toList();
-
-        uploadedUrls = Map.fromEntries(
-          await Future.wait(categoryUploadFutures),
+            );
+          }).toList(),
         );
-        _uploadProgress = 0.5;
+
+        _uploadProgress = shouldCompressImages ? 0.625 : 0.5;
         notifyListeners();
       }
 
       // ✅ Set stage to uploading PDF
       _currentUploadStage = UploadStage.uploadingPDF;
-      _uploadProgress = hasPhotos ? 0.5 : 0.0;
+      final baseProgressForPdf = hasPhotos
+          ? (shouldCompressImages ? 0.625 : 0.5)
+          : 0.0;
+      _uploadProgress = baseProgressForPdf;
       notifyListeners();
 
       // 🔹 Generate and upload PDF
@@ -347,8 +384,11 @@ class ProviderControl extends ChangeNotifier {
           inspectionId: inspectionId,
           timestamp: now,
           onProgress: (progress) {
-            // Update progress for PDF upload (50% - 75%)
-            _uploadProgress = (hasPhotos ? 0.5 : 0.0) + (0.25 * progress);
+            // Update progress for PDF upload
+            final progressRange = shouldCompressImages && hasPhotos
+                ? 0.25
+                : 0.25;
+            _uploadProgress = baseProgressForPdf + (progressRange * progress);
             notifyListeners();
           },
         ),
@@ -356,12 +396,16 @@ class ProviderControl extends ChangeNotifier {
       ]);
 
       final firebasePdfUrl = pdfUploads[1] as String;
-      _uploadProgress = hasPhotos ? 0.75 : 0.25;
+      _uploadProgress = shouldCompressImages && hasPhotos
+          ? 0.875
+          : (hasPhotos ? 0.75 : 0.25);
       notifyListeners();
 
       // ✅ Set stage to submitting inspection
       _currentUploadStage = UploadStage.submitting;
-      _uploadProgress = hasPhotos ? 0.8 : 0.5;
+      _uploadProgress = shouldCompressImages && hasPhotos
+          ? 0.9
+          : (hasPhotos ? 0.8 : 0.5);
       notifyListeners();
 
       // ✅ Calculate total possible score from template
@@ -383,12 +427,10 @@ class ProviderControl extends ChangeNotifier {
           selectedTemplate!.categories.map((cat) {
             final score = _scores[cat.categoryId] ?? "";
             final notes = _notes[cat.categoryId] ?? '';
-            final photos = uploadedUrls[cat.categoryId] ?? [];
             return MapEntry(
               cat.title,
               InspectionCategoryModel(
                 score: "${score}/${cat.maxScore}",
-                photos: photos,
                 notes: notes,
               ),
             );
@@ -433,6 +475,33 @@ class ProviderControl extends ChangeNotifier {
     }
   }
 
+  // ✅ Helper method to compress a single image
+  Future<File> _compressImage(File imageFile) async {
+    try {
+      // You can use flutter_image_compress or any other compression library
+      final compressedBytes = await FlutterImageCompress.compressWithFile(
+        imageFile.absolute.path,
+        quality: 70, // Adjust quality as needed
+        minWidth: 1920,
+        minHeight: 1080,
+      );
+
+      if (compressedBytes == null) return imageFile;
+
+      // Save compressed image to a temp file
+      final tempDir = await getTemporaryDirectory();
+      final compressedFile = File(
+        '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}_compressed.jpg',
+      );
+      await compressedFile.writeAsBytes(compressedBytes);
+
+      return compressedFile;
+    } catch (e) {
+      console('Error compressing image: $e');
+      return imageFile; // Return original if compression fails
+    }
+  }
+
   // Helper method to get month folder name (e.g., "2025-10" or "October-2025")
   String _getMonthFolder(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}';
@@ -440,48 +509,48 @@ class ProviderControl extends ChangeNotifier {
   }
 
   // Upload single photo to Firebase Storage
-  Future<String> _uploadPhoto(File photo, String path) async {
-    try {
-      final storageRef = FirebaseStorage.instance.ref().child(path);
-      final uploadTask = storageRef.putFile(photo);
+  // Future<String> _uploadPhoto(File photo, String path) async {
+  //   try {
+  //     final storageRef = FirebaseStorage.instance.ref().child(path);
+  //     final uploadTask = storageRef.putFile(photo);
 
-      final snapshot = await uploadTask;
-      final downloadUrl = await snapshot.ref.getDownloadURL();
+  //     final snapshot = await uploadTask;
+  //     final downloadUrl = await snapshot.ref.getDownloadURL();
 
-      return downloadUrl;
-    } catch (e) {
-      console('Error uploading photo: $e');
-      rethrow;
-    }
-  }
+  //     return downloadUrl;
+  //   } catch (e) {
+  //     console('Error uploading photo: $e');
+  //     rethrow;
+  //   }
+  // }
 
   // Upload all photos for a category with structured path
-  Future<List<String>> _uploadCategoryPhotos(
-    List<File> photos,
-    String branchName,
-    String categoryId,
-    String inspectionId,
-    DateTime timestamp,
-  ) async {
-    final monthFolder = _getMonthFolder(timestamp);
+  // Future<List<String>> _uploadCategoryPhotos(
+  //   List<File> photos,
+  //   String branchName,
+  //   String categoryId,
+  //   String inspectionId,
+  //   DateTime timestamp,
+  // ) async {
+  //   final monthFolder = _getMonthFolder(timestamp);
 
-    // Upload all photos concurrently
-    final uploadFutures = photos.asMap().entries.map((entry) {
-      final index = entry.key;
-      final photo = entry.value;
+  //   // Upload all photos concurrently
+  //   final uploadFutures = photos.asMap().entries.map((entry) {
+  //     final index = entry.key;
+  //     final photo = entry.value;
 
-      // Structure: inspections/{branchName}/{month}/{inspectionId}/{categoryId}_{index}.jpg
-      final path =
-          'inspections/$branchName/$monthFolder/$inspectionId/${categoryId}_$index.jpg';
+  //     // Structure: inspections/{branchName}/{month}/{inspectionId}/{categoryId}_{index}.jpg
+  //     final path =
+  //         'inspections/$branchName/$monthFolder/$inspectionId/${categoryId}_$index.jpg';
 
-      return _uploadPhoto(photo, path);
-    }).toList();
+  //     return _uploadPhoto(photo, path);
+  //   }).toList();
 
-    // Wait for all uploads to complete
-    final urls = await Future.wait(uploadFutures);
+  //   // Wait for all uploads to complete
+  //   final urls = await Future.wait(uploadFutures);
 
-    return urls;
-  }
+  //   return urls;
+  // }
 
   // Upload PDF to Firebase Storage with structured path
   Future<String> _uploadPDFToFirebase(
@@ -652,3 +721,365 @@ class ProviderControl extends ChangeNotifier {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////
+// Future<bool> submitInspection(BuildContext context) async {
+//   if (selectedTemplate == null) {
+//     _errorMessage = LocaleKeys.noTemplateSelected.tr();
+//     notifyListeners();
+//     return false;
+//   }
+
+//   // ✅ NEW: Ask to save signature before submitting
+//   if (inspectorSignature != null) {
+//     await _askToSaveSignature(context);
+//   }
+//   _isSubmitting = true;
+//   _isUploading = true;
+//   _uploadProgress = 0.0;
+//   _currentUploadStage = null;
+//   _errorMessage = null;
+//   _successMessage = null;
+//   notifyListeners();
+
+//   final inspectionId = DateTime.now().millisecondsSinceEpoch.toString();
+//   final now = DateTime.now();
+
+//   try {
+//     // 🔹 Check if there are any photos to upload
+//     final hasPhotos = selectedTemplate!.categories.any((category) {
+//       final files = _photos[category.categoryId] ?? [];
+//       return files.isNotEmpty;
+//     });
+
+//     Map<String, List<String>> uploadedUrls = {};
+
+//     if (hasPhotos) {
+//       // ✅ Set stage to uploading photos
+//       _currentUploadStage = UploadStage.uploadingPhotos;
+//       notifyListeners();
+
+//       // 🔹 Upload all category images first
+//       final categoryUploadFutures = selectedTemplate!.categories.map((
+//         category,
+//       ) async {
+//         final files = _photos[category.categoryId] ?? [];
+
+//         // ✅ Return early if no files - skip all uploads
+//         if (files.isEmpty) {
+//           return MapEntry(category.categoryId, <String>[]);
+//         }
+
+//         // ✅ Only upload if files exist
+//         final results = await Future.wait([
+//           _oneDriveService.uploadImages(
+//             images: files,
+//             branchName: _selectedBranch!.name,
+//             inspectionId: inspectionId,
+//             timestamp: now,
+//             onProgress: (current, total) {
+//               // Update progress for photo uploads (0% - 50%)
+//               _uploadProgress = 0.5 * (current / total);
+//               notifyListeners();
+//             },
+//           ),
+//           _uploadCategoryPhotos(
+//             files,
+//             _selectedBranch!.name,
+//             category.categoryId,
+//             inspectionId,
+//             now,
+//           ),
+//         ]);
+
+//         return MapEntry(category.categoryId, results[1] as List<String>);
+//       }).toList();
+
+//       uploadedUrls = Map.fromEntries(await Future.wait(categoryUploadFutures));
+//       _uploadProgress = 0.5;
+//       notifyListeners();
+//     }
+
+//     // ✅ Set stage to uploading PDF
+//     _currentUploadStage = UploadStage.uploadingPDF;
+//     _uploadProgress = hasPhotos ? 0.5 : 0.0;
+//     notifyListeners();
+
+//     // 🔹 Generate and upload PDF
+//     final pdfFile = await generatePDFReport(inspectionId);
+//     final pdfUploads = await Future.wait([
+//       _oneDriveService.uploadPDFReport(
+//         pdfFile: pdfFile,
+//         branchName: _selectedBranch!.name,
+//         inspectionId: inspectionId,
+//         timestamp: now,
+//         onProgress: (progress) {
+//           // Update progress for PDF upload (50% - 75%)
+//           _uploadProgress = (hasPhotos ? 0.5 : 0.0) + (0.25 * progress);
+//           notifyListeners();
+//         },
+//       ),
+//       _uploadPDFToFirebase(pdfFile, _selectedBranch!.name, inspectionId, now),
+//     ]);
+
+//     final firebasePdfUrl = pdfUploads[1] as String;
+//     _uploadProgress = hasPhotos ? 0.75 : 0.25;
+//     notifyListeners();
+
+//     // ✅ Set stage to submitting inspection
+//     _currentUploadStage = UploadStage.submitting;
+//     _uploadProgress = hasPhotos ? 0.8 : 0.5;
+//     notifyListeners();
+
+//     // ✅ Calculate total possible score from template
+//     final currentScore = totalScore;
+//     final scoreString = '$currentScore/$maxPossibleScore'; // e.g., "3/12"
+
+//     // 🔹 Only after all uploads succeeded, create inspection object
+//     final inspection = InspectionModel(
+//       id: inspectionId,
+//       branchId: _selectedBranch!.id,
+//       branchName: _selectedBranch!.name,
+//       inspectorId: loggedInUser!.id,
+//       inspectorName: loggedInUser!.name,
+//       scheduledTime: _selectedBranch!.stop!.timeSlot.toString(),
+//       completedTime: now,
+//       status: AppConstants.completed,
+//       score: scoreString,
+//       categories: Map.fromEntries(
+//         selectedTemplate!.categories.map((cat) {
+//           final score = _scores[cat.categoryId] ?? "";
+//           final notes = _notes[cat.categoryId] ?? '';
+//           final photos = uploadedUrls[cat.categoryId] ?? [];
+//           return MapEntry(
+//             cat.title,
+//             InspectionCategoryModel(
+//               score: "${score}/${cat.maxScore}",
+//               photos: photos,
+//               notes: notes,
+//             ),
+//           );
+//         }),
+//       ),
+//       overallNotes: _overallNotes,
+//       pdfReportUrl: firebasePdfUrl,
+//       createdAt: now,
+//       updatedAt: now,
+//     );
+
+//     // 🔹 Save to Firestore atomically
+//     await _inspectionService.createInspection(
+//       inspection,
+//       _selectedBranch?.fcmTokens ?? [],
+//     );
+
+//     // 🔹 Cleanup local PDF
+//     if (await pdfFile.exists()) await pdfFile.delete();
+
+//     _uploadProgress = 1.0;
+//     _isUploading = false;
+//     _isSubmitting = false;
+//     _currentUploadStage = null;
+//     _successMessage = LocaleKeys.inspectionSavedSuccess.tr();
+
+//     notifyListeners();
+
+//     resetForm();
+//     return true;
+//   } catch (e, st) {
+//     debugPrintStack(label: 'Submit Inspection Error', stackTrace: st);
+//     _errorMessage = '${LocaleKeys.errorSavingInspection.tr()}: ${e.toString()}';
+
+//     _isSubmitting = false;
+//     _isUploading = false;
+//     _currentUploadStage = null;
+//     notifyListeners();
+//     console('Submit error: $e\n$st');
+//     return false;
+//   }
+// }
+//////////////////////////////////////////////////////
+///
+///
+///
+
+
+
+
+
+
+
+
+// Future<bool> submitInspection(BuildContext context) async {
+//   if (selectedTemplate == null) {
+//     _errorMessage = LocaleKeys.noTemplateSelected.tr();
+//     notifyListeners();
+//     return false;
+//   }
+
+//   // ✅ Ask to save signature before submitting
+//   if (inspectorSignature != null) {
+//     await _askToSaveSignature(context);
+//   }
+//   _isSubmitting = true;
+//   _isUploading = true;
+//   _uploadProgress = 0.0;
+//   _currentUploadStage = null;
+//   _errorMessage = null;
+//   _successMessage = null;
+//   notifyListeners();
+
+//   final inspectionId = DateTime.now().millisecondsSinceEpoch.toString();
+//   final now = DateTime.now();
+
+//   try {
+//     // 🔹 Check if there are any photos to upload
+//     final hasPhotos = selectedTemplate!.categories.any((category) {
+//       final files = _photos[category.categoryId] ?? [];
+//       return files.isNotEmpty;
+//     });
+
+//     if (hasPhotos) {
+//       // ✅ Set stage to uploading photos
+//       _currentUploadStage = UploadStage.uploadingPhotos;
+//       notifyListeners();
+
+//       // 🔹 Upload all category images to OneDrive only
+//       await Future.wait(
+//         selectedTemplate!.categories.map((category) async {
+//           final files = _photos[category.categoryId] ?? [];
+
+//           // ✅ Return early if no files - skip upload
+//           if (files.isEmpty) return;
+
+//           // ✅ Upload only to OneDrive
+//           await _oneDriveService.uploadImages(
+//             images: files,
+//             branchName: _selectedBranch!.name,
+//             inspectionId: inspectionId,
+//             timestamp: now,
+//             onProgress: (current, total) {
+//               // Update progress for photo uploads (0% - 50%)
+//               _uploadProgress = 0.5 * (current / total);
+//               notifyListeners();
+//             },
+//           );
+//         }).toList(),
+//       );
+//       _uploadProgress = 0.5;
+//       notifyListeners();
+//     }
+
+//     // ✅ Set stage to uploading PDF
+//     _currentUploadStage = UploadStage.uploadingPDF;
+//     _uploadProgress = hasPhotos ? 0.5 : 0.0;
+//     notifyListeners();
+
+//     // 🔹 Generate and upload PDF
+//     final pdfFile = await generatePDFReport(inspectionId);
+//     final pdfUploads = await Future.wait([
+//       _oneDriveService.uploadPDFReport(
+//         pdfFile: pdfFile,
+//         branchName: _selectedBranch!.name,
+//         inspectionId: inspectionId,
+//         timestamp: now,
+//         onProgress: (progress) {
+//           // Update progress for PDF upload (50% - 75%)
+//           _uploadProgress = (hasPhotos ? 0.5 : 0.0) + (0.25 * progress);
+//           notifyListeners();
+//         },
+//       ),
+//       _uploadPDFToFirebase(pdfFile, _selectedBranch!.name, inspectionId, now),
+//     ]);
+
+//     final firebasePdfUrl = pdfUploads[1] as String;
+//     _uploadProgress = hasPhotos ? 0.75 : 0.25;
+//     notifyListeners();
+
+//     // ✅ Set stage to submitting inspection
+//     _currentUploadStage = UploadStage.submitting;
+//     _uploadProgress = hasPhotos ? 0.8 : 0.5;
+//     notifyListeners();
+
+//     // ✅ Calculate total possible score from template
+//     final currentScore = totalScore;
+//     final scoreString = '$currentScore/$maxPossibleScore'; // e.g., "3/12"
+
+//     // 🔹 Only after all uploads succeeded, create inspection object
+//     final inspection = InspectionModel(
+//       id: inspectionId,
+//       branchId: _selectedBranch!.id,
+//       branchName: _selectedBranch!.name,
+//       inspectorId: loggedInUser!.id,
+//       inspectorName: loggedInUser!.name,
+//       scheduledTime: _selectedBranch!.stop!.timeSlot.toString(),
+//       completedTime: now,
+//       status: AppConstants.completed,
+//       score: scoreString,
+//       categories: Map.fromEntries(
+//         selectedTemplate!.categories.map((cat) {
+//           final score = _scores[cat.categoryId] ?? "";
+//           final notes = _notes[cat.categoryId] ?? '';
+//           return MapEntry(
+//             cat.title,
+//             InspectionCategoryModel(
+//               score: "${score}/${cat.maxScore}",
+//               notes: notes,
+//             ),
+//           );
+//         }),
+//       ),
+//       overallNotes: _overallNotes,
+//       pdfReportUrl: firebasePdfUrl,
+//       createdAt: now,
+//       updatedAt: now,
+//     );
+
+//     // 🔹 Save to Firestore atomically
+//     await _inspectionService.createInspection(
+//       inspection,
+//       _selectedBranch?.fcmTokens ?? [],
+//     );
+
+//     // 🔹 Cleanup local PDF
+//     if (await pdfFile.exists()) await pdfFile.delete();
+
+//     _uploadProgress = 1.0;
+//     _isUploading = false;
+//     _isSubmitting = false;
+//     _currentUploadStage = null;
+//     _successMessage = LocaleKeys.inspectionSavedSuccess.tr();
+
+//     notifyListeners();
+
+//     resetForm();
+//     return true;
+//   } catch (e, st) {
+//     debugPrintStack(label: 'Submit Inspection Error', stackTrace: st);
+//     _errorMessage = '${LocaleKeys.errorSavingInspection.tr()}: ${e.toString()}';
+
+//     _isSubmitting = false;
+//     _isUploading = false;
+//     _currentUploadStage = null;
+//     notifyListeners();
+//     console('Submit error: $e\n$st');
+//     return false;
+//   }
+// }
+
+
+
+///////////////////////////////

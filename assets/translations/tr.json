@@ -987,5 +987,6 @@
   "deleteInspectionConfirm": "Bu denetimi silmek istediğinize emin misiniz?",
   "copy_id": "ID'yi Kopyala",
   "user_id": "Kullanıcı ID",
-  "branch_user_id": "Şube Kullanıcı ID"
+  "branch_user_id": "Şube Kullanıcı ID",
+  "compressing_images": "Görseller Sıkıştırılıyor"
 }

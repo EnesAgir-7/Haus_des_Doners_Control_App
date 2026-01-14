@@ -1001,5 +1001,6 @@
   "deleteInspectionConfirm": "Möchten Sie diese Inspektion wirklich löschen?",
   "copy_id": "ID kopieren",
   "user_id": "Benutzer-ID",
-  "branch_user_id": "Filialbenutzer-ID"
+  "branch_user_id": "Filialbenutzer-ID",
+  "compressing_images": "Bilder werden komprimiert"
 }

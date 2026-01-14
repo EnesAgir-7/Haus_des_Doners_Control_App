@@ -38,9 +38,6 @@ class InspectionModel {
   });
 
   /// Factory to load from Firestore
-  // ✅ FIXED: Replace InspectionModel.fromFirestore method
-  // Add import at top of file: import 'package:haus_des_control/core/utils/firestore_helpers.dart';
-
   factory InspectionModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
@@ -59,7 +56,6 @@ class InspectionModel {
       inspectorId: data[InspectionFields.inspectorId] ?? '',
       inspectorName: data[InspectionFields.inspectorName],
       scheduledTime: data[InspectionFields.scheduledTime],
-      // ✅ FIXED: Using FirestoreHelpers
       completedTime: FirestoreHelpers.parseTimestampNullable(
         data[InspectionFields.completedTime],
       ),
@@ -68,7 +64,6 @@ class InspectionModel {
       categories: parsedCategories,
       overallNotes: data[InspectionFields.overallNotes] ?? '',
       pdfReportUrl: data[InspectionFields.pdfReportUrl],
-      // ✅ FIXED: Using FirestoreHelpers
       createdAt: FirestoreHelpers.parseTimestamp(
         data[InspectionFields.createdAt],
       ),
@@ -77,6 +72,7 @@ class InspectionModel {
       ),
     );
   }
+
   Map<String, dynamic> toMap() {
     return {
       InspectionFields.branchId: branchId,
@@ -106,28 +102,146 @@ class InspectionModel {
 
 class InspectionCategoryModel {
   final String score;
-  final List<String> photos;
   final String notes;
 
-  InspectionCategoryModel({
-    required this.score,
-    required this.photos,
-    required this.notes,
-  });
+  InspectionCategoryModel({required this.score, required this.notes});
 
   factory InspectionCategoryModel.fromMap(Map<String, dynamic> data) {
     return InspectionCategoryModel(
       score: data[InspectionFields.score] ?? "0/0",
-      photos: List<String>.from(data[InspectionFields.photos] ?? []),
       notes: data[InspectionFields.notes] ?? '',
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      InspectionFields.score: score,
-      InspectionFields.photos: photos,
-      InspectionFields.notes: notes,
-    };
+    return {InspectionFields.score: score, InspectionFields.notes: notes};
   }
 }
+
+// class InspectionModel {
+//   final String id;
+//   final String branchId;
+//   final String branchName;
+//   final String inspectorId;
+//   final String? inspectorName;
+//   final String scheduledTime;
+//   final DateTime? completedTime;
+//   final String status; // "scheduled" | "completed" | "pending" | "current"
+//   final String score;
+//   final Map<String, InspectionCategoryModel> categories;
+//   final String overallNotes;
+//   final String? pdfReportUrl;
+//   final DateTime createdAt;
+//   final DateTime updatedAt;
+
+//   InspectionModel({
+//     required this.id,
+//     required this.branchId,
+//     required this.branchName,
+//     required this.inspectorId,
+//     required this.inspectorName,
+//     required this.scheduledTime,
+//     this.completedTime,
+//     required this.status,
+//     required this.score,
+//     required this.categories,
+//     required this.overallNotes,
+//     this.pdfReportUrl,
+//     required this.createdAt,
+//     required this.updatedAt,
+//   });
+
+//   /// Factory to load from Firestore
+//   // ✅ FIXED: Replace InspectionModel.fromFirestore method
+//   // Add import at top of file: import 'package:haus_des_control/core/utils/firestore_helpers.dart';
+
+//   factory InspectionModel.fromFirestore(DocumentSnapshot doc) {
+//     final data = doc.data() as Map<String, dynamic>;
+
+//     final rawCategories =
+//         data[InspectionFields.categories] as Map<String, dynamic>? ?? {};
+
+//     final parsedCategories = rawCategories.map(
+//       (key, value) =>
+//           MapEntry(key, InspectionCategoryModel.fromMap(value ?? {})),
+//     );
+
+//     return InspectionModel(
+//       id: doc.id,
+//       branchId: data[InspectionFields.branchId] ?? '',
+//       branchName: data[InspectionFields.branchName] ?? '',
+//       inspectorId: data[InspectionFields.inspectorId] ?? '',
+//       inspectorName: data[InspectionFields.inspectorName],
+//       scheduledTime: data[InspectionFields.scheduledTime],
+//       // ✅ FIXED: Using FirestoreHelpers
+//       completedTime: FirestoreHelpers.parseTimestampNullable(
+//         data[InspectionFields.completedTime],
+//       ),
+//       status: data[InspectionFields.status] ?? AppConstants.pending,
+//       score: (data[InspectionFields.score] ?? "0/0").toString(),
+//       categories: parsedCategories,
+//       overallNotes: data[InspectionFields.overallNotes] ?? '',
+//       pdfReportUrl: data[InspectionFields.pdfReportUrl],
+//       // ✅ FIXED: Using FirestoreHelpers
+//       createdAt: FirestoreHelpers.parseTimestamp(
+//         data[InspectionFields.createdAt],
+//       ),
+//       updatedAt: FirestoreHelpers.parseTimestamp(
+//         data[InspectionFields.updatedAt],
+//       ),
+//     );
+//   }
+//   Map<String, dynamic> toMap() {
+//     return {
+//       InspectionFields.branchId: branchId,
+//       InspectionFields.branchName: branchName,
+//       InspectionFields.inspectorId: inspectorId,
+//       InspectionFields.inspectorName: inspectorName,
+//       InspectionFields.scheduledTime: scheduledTime,
+//       InspectionFields.completedTime: completedTime != null
+//           ? Timestamp.fromDate(completedTime!)
+//           : null,
+//       InspectionFields.status: status,
+//       InspectionFields.score: score,
+//       InspectionFields.categories: categories.map(
+//         (key, value) => MapEntry(key, value.toMap()),
+//       ),
+//       InspectionFields.pdfReportUrl: pdfReportUrl,
+//       InspectionFields.overallNotes: overallNotes,
+//       InspectionFields.createdAt: Timestamp.fromDate(createdAt),
+//       InspectionFields.updatedAt: Timestamp.fromDate(updatedAt),
+//     };
+//   }
+
+//   bool get isCompleted => status == AppConstants.completed;
+//   bool get isPending => status == AppConstants.pending;
+//   bool get isCurrent => status == AppConstants.current;
+// }
+
+// class InspectionCategoryModel {
+//   final String score;
+//   final List<String> photos;
+//   final String notes;
+
+//   InspectionCategoryModel({
+//     required this.score,
+//     required this.photos,
+//     required this.notes,
+//   });
+
+//   factory InspectionCategoryModel.fromMap(Map<String, dynamic> data) {
+//     return InspectionCategoryModel(
+//       score: data[InspectionFields.score] ?? "0/0",
+//       photos: List<String>.from(data[InspectionFields.photos] ?? []),
+//       notes: data[InspectionFields.notes] ?? '',
+//     );
+//   }
+
+//   Map<String, dynamic> toMap() {
+//     return {
+//       InspectionFields.score: score,
+//       InspectionFields.photos: photos,
+//       InspectionFields.notes: notes,
+//     };
+//   }
+// }

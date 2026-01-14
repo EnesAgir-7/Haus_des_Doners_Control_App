@@ -930,7 +930,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primaryRed, width: 2),
+                  borderSide: const BorderSide(
+                    color: AppColors.primaryRed,
+                    width: 2,
+                  ),
                 ),
                 contentPadding: const EdgeInsets.all(16),
               ),
@@ -1463,6 +1466,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         message = LocaleKeys.submittingInspection.tr();
         icon = Icons.send_outlined;
         break;
+      case UploadStage.compressingImages:
+        message = LocaleKeys.compressing_images.tr();
+        icon = Icons.compress_outlined;
+        break;
       default:
         message = LocaleKeys.uploading.tr();
         icon = Icons.cloud_upload_outlined;
@@ -1910,7 +1917,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.gesture, color: Colors.white38, size: 16),
+                        const Icon(
+                          Icons.gesture,
+                          color: Colors.white38,
+                          size: 16,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           LocaleKeys.sign_here.tr(),

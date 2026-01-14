@@ -122,21 +122,27 @@ class InspectorOneDriveService {
     await _ensureToken();
 
     try {
-      final monthFolder = _getMonthFolder(timestamp);
+      final monthFolder = _getMonthFolder(timestamp); 
 
-      await _createFolderIfNotExists(_rootFolder); // ← Changed
-      await _createFolderIfNotExists('$_rootFolder/$branchName'); // ← Changed
-      await _createFolderIfNotExists(
-        '$_rootFolder/$branchName/$monthFolder', // ← Changed
-      );
-      final folderPath =
-          '$_rootFolder/$branchName/$monthFolder/Images'; // ← Changed
-      await _createFolderIfNotExists(folderPath);
+      final dateFolder =
+          '${timestamp.day.toString().padLeft(2, '0')}-'
+          '${timestamp.month.toString().padLeft(2, '0')}-'
+          '${timestamp.year}';
 
-      print('✅ Images folder structure created: $folderPath');
-      return folderPath;
+      await _createFolderIfNotExists(_rootFolder);
+      await _createFolderIfNotExists('$_rootFolder/$branchName');
+      await _createFolderIfNotExists('$_rootFolder/$branchName/$monthFolder');
+
+      final imagesRoot = '$_rootFolder/$branchName/$monthFolder/Images';
+      await _createFolderIfNotExists(imagesRoot);
+
+      final finalPath = '$imagesRoot/$dateFolder';
+      await _createFolderIfNotExists(finalPath);
+
+      print('✅ Images date folder created: $finalPath');
+      return finalPath;
     } catch (e) {
-      print('❌ Error creating images folder structure: $e');
+      print('❌ Error creating Images/date folder: $e');
       rethrow;
     }
   }

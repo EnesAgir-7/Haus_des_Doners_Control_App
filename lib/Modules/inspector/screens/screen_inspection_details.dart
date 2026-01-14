@@ -1,8 +1,6 @@
 // lib/screens/screen_inspection_details.dart
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:haus_des_control/Modules/inspector/screens/screen_full_image.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/app_button.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
@@ -485,65 +483,6 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
                   : LocaleKeys.noNoteProvided.tr(),
               style: const TextStyle(color: Colors.white54, fontSize: 13),
             ),
-
-            // Photos
-            if (data.photos.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Text(
-                LocaleKeys.photos.tr(),
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(height: 8),
-              SizedBox(
-                height: 80,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: data.photos.length,
-                  itemBuilder: (ctx, index) {
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        right: index == data.photos.length - 1 ? 0 : 8,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => FullScreenImageViewer(
-                                  images: data.photos,
-                                  initialIndex: index,
-                                ),
-                              ),
-                            );
-                          },
-                          child: CachedNetworkImage(
-                            imageUrl: data.photos[index],
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                            errorWidget: (context, url, error) => Container(
-                              width: 80,
-                              height: 80,
-                              color: Colors.grey.shade800,
-                              child: const Icon(
-                                Icons.broken_image,
-                                color: Colors.white54,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
           ],
         ),
       ),

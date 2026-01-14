@@ -1017,7 +1017,8 @@ class CodegenLoader extends AssetLoader{
   "deleteInspectionConfirm": "Möchten Sie diese Inspektion wirklich löschen?",
   "copy_id": "ID kopieren",
   "user_id": "Benutzer-ID",
-  "branch_user_id": "Filialbenutzer-ID"
+  "branch_user_id": "Filialbenutzer-ID",
+  "compressing_images": "Bilder werden komprimiert"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -2038,7 +2039,8 @@ static const Map<String,dynamic> _en = {
   "deleteInspectionConfirm": "Are you sure you want to delete this inspection?",
   "copy_id": "Copy ID",
   "user_id": "User ID",
-  "branch_user_id": "Branch User ID"
+  "branch_user_id": "Branch User ID",
+  "compressing_images": "Compressing Images"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -3029,7 +3031,8 @@ static const Map<String,dynamic> _tr = {
   "deleteInspectionConfirm": "Bu denetimi silmek istediğinize emin misiniz?",
   "copy_id": "ID'yi Kopyala",
   "user_id": "Kullanıcı ID",
-  "branch_user_id": "Şube Kullanıcı ID"
+  "branch_user_id": "Şube Kullanıcı ID",
+  "compressing_images": "Görseller Sıkıştırılıyor"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

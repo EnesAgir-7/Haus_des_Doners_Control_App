@@ -1006,5 +1006,6 @@ abstract class  LocaleKeys {
   static const copy_id = 'copy_id';
   static const user_id = 'user_id';
   static const branch_user_id = 'branch_user_id';
+  static const compressing_images = 'compressing_images';
 
 }
