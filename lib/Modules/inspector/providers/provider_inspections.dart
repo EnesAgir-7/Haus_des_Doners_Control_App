@@ -2,6 +2,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/firebase_services/inspector_inspection_service.dart'; // <-- Adjust path as needed
+import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/models/inspection_model.dart';
 
 import '../../../translations/locale_keys.g.dart';
@@ -50,6 +51,24 @@ class ProviderInspection extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> deleteInspection(
+    BuildContext context,
+    String inspectionId,
+  ) async {
+    try {
+      await _inspectionService.deleteInspection(inspectionId);
+
+      if (_inspection?.id == inspectionId) {
+        _inspection = null;
+        notifyListeners();
+      }
+
+      showSnakBarr(context, LocaleKeys.inspectionDeleted.tr());
+    } catch (e) {
+      showSnakBarr(context, LocaleKeys.errorDeletingInspection.tr());
     }
   }
 }

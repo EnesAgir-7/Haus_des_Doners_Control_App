@@ -308,54 +308,6 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               // );
             },
           ),
-
-          // PopupMenuButton<String>(
-          //   icon: const Icon(Icons.more_vert, color: Colors.white),
-          //   color: AppColors.lightBlack,
-          //   onSelected: (value) {
-          //     if (value == AppConstants.edit) {
-          //       _navigateToEditScreen();
-          //     } else if (value == AppConstants.delete) {
-          //       _deleteBranch();
-          //     }
-          //   },
-          //   itemBuilder: (context) => [
-          //     PopupMenuItem(
-          //       value: AppConstants.edit,
-          //       child: Row(
-          //         children: [
-          //           const Icon(
-          //             Icons.edit,
-          //             color: AppColors.primaryRed,
-          //             size: 20,
-          //           ),
-          //           const SizedBox(width: 12),
-          //           Text(
-          //             LocaleKeys.editBranch.tr(),
-          //             style: const TextStyle(color: Colors.white),
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //     PopupMenuItem(
-          //       value: AppConstants.delete,
-          //       child: Row(
-          //         children: [
-          //           const Icon(
-          //             Icons.delete_outline,
-          //             color: Colors.red,
-          //             size: 20,
-          //           ),
-          //           const SizedBox(width: 12),
-          //           Text(
-          //             LocaleKeys.deleteBranch.tr() + '',
-          //             style: const TextStyle(color: Colors.red),
-          //           ),
-          //         ],
-          //       ),
-          //     ),
-          //   ],
-          // ),
         ],
       ),
       body: SafeArea(
@@ -387,7 +339,8 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.all(isTablet ? 24 : 16),
-              child: isTablet ? _buildTabletLayout() : _buildMobileLayout(),
+              // child: isTablet ? _buildTabletLayout() : _buildMobileLayout(),
+              child: _buildMobileLayout(),
             ),
           ),
         ],
@@ -470,49 +423,49 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     );
   }
 
-  Widget _buildTabletLayout() {
-    return Column(
-      children: [
-        _buildCompactHeader(),
-        const SizedBox(height: 20),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              flex: 3,
-              child: Column(
-                children: [
-                  _buildStatsGrid(),
-                  const SizedBox(height: 20),
-                  if (!widget.branch.haveNoScores)
-                    buildPerformanceChart(
-                      scores: widget.branch.last12MonthsScores!,
-                      title: LocaleKeys.last12Inspections.tr(),
-                      icon: Icons.bar_chart,
-                      subtitle: LocaleKeys.oldestToLatest.tr(),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 20),
-            Expanded(
-              flex: 2,
-              child: Column(
-                children: [
-                  _buildQuickInfoCard(),
-                  const SizedBox(height: 20),
-                  _buildContactCard(),
-                  const SizedBox(height: 20),
-                  _buildInspectorCard(),
-                ],
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 80),
-      ],
-    );
-  }
+  // Widget _buildTabletLayout() {
+  //   return Column(
+  //     children: [
+  //       _buildCompactHeader(),
+  //       const SizedBox(height: 20),
+  //       Row(
+  //         crossAxisAlignment: CrossAxisAlignment.start,
+  //         children: [
+  //           Expanded(
+  //             flex: 3,
+  //             child: Column(
+  //               children: [
+  //                 _buildStatsGrid(),
+  //                 const SizedBox(height: 20),
+  //                 if (!widget.branch.haveNoScores)
+  //                   buildPerformanceChart(
+  //                     scores: widget.branch.last12MonthsScores!,
+  //                     title: LocaleKeys.last12Inspections.tr(),
+  //                     icon: Icons.bar_chart,
+  //                     subtitle: LocaleKeys.oldestToLatest.tr(),
+  //                   ),
+  //               ],
+  //             ),
+  //           ),
+  //           const SizedBox(width: 20),
+  //           Expanded(
+  //             flex: 2,
+  //             child: Column(
+  //               children: [
+  //                 _buildQuickInfoCard(),
+  //                 const SizedBox(height: 20),
+  //                 _buildContactCard(),
+  //                 const SizedBox(height: 20),
+  //                 _buildInspectorCard(),
+  //               ],
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 80),
+  //     ],
+  //   );
+  // }
 
   Widget _buildPerformanceSummary() {
     final parsedScores = widget.branch.last12MonthsScores!
@@ -724,8 +677,8 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   }
 
   Widget _buildStatsGrid() {
-    return GridView.count(
-      crossAxisCount: 2,
+    return GridView.extent(
+      maxCrossAxisExtent: 280,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 12,
@@ -748,7 +701,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
           label: LocaleKeys.performance.tr(),
           value: '${widget.branch.averagePercent}%',
           icon: getPercentageIcon(
-            double.tryParse(widget.branch.averagePercent)!,
+            double.tryParse(widget.branch.averagePercent) ?? 0,
           ),
           color: getPercentageColor(
             double.tryParse(widget.branch.averagePercent) ?? 0,

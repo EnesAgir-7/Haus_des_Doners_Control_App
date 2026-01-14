@@ -39,7 +39,24 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(),
+      appBar: CustomAppBar(
+        actions: [
+          IconButton(
+            onPressed: () {
+              showDeleteInspectionDialog(
+                context: context,
+                onConfirm: () {
+                  context.read<ProviderInspection>().deleteInspection(
+                    context,
+                    widget.inspectionId,
+                  );
+                },
+              );
+            },
+            icon: const Icon(Icons.delete),
+          ),
+        ],
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -73,6 +90,36 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
           },
         ),
       ),
+    );
+  }
+
+  Future<void> showDeleteInspectionDialog({
+    required BuildContext context,
+    required VoidCallback onConfirm,
+  }) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(LocaleKeys.confirm.tr()),
+          content: Text(LocaleKeys.deleteInspectionConfirm.tr()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(LocaleKeys.cancel.tr()),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () {
+                Navigator.of(context).pop();
+                onConfirm();
+              },
+              child: Text(LocaleKeys.delete.tr()),
+            ),
+          ],
+        );
+      },
     );
   }
 

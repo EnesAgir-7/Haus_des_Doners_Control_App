@@ -122,6 +122,15 @@ class InspectorInspectionService {
     }
   }
 
+  Future<void> deleteInspection(String inspectionId) async {
+    try {
+      await _db.collection(_collection).doc(inspectionId).delete();
+    } catch (e) {
+      print('Error deleting inspection: $e');
+      rethrow;
+    }
+  }
+
   // Get all inspections (admin)
   Future<List<InspectionModel>> getAllInspections({
     int limit = 100,

@@ -994,5 +994,9 @@
   "error_operation_not_allowed": "E-Mail/Passwort-Anmeldung ist nicht aktiviert",
   "error_branch_credentials_required": "Filial-E-Mail und Passwort sind erforderlich",
   "total_vehicles": "Gesamtfahrzeuge",
-  "submitted_by": "Eingereicht von"
+  "submitted_by": "Eingereicht von",
+  "inspectionDeleted": "Inspektion wurde erfolgreich gelöscht.",
+  "errorDeletingInspection": "Inspektion konnte nicht gelöscht werden.",
+  "confirm": "Bestätigen",
+  "deleteInspectionConfirm": "Möchten Sie diese Inspektion wirklich löschen?"
 }

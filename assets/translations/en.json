@@ -1010,5 +1010,9 @@
   "error_operation_not_allowed": "Email/password sign-in is not enabled",
   "error_branch_credentials_required": "Branch email and password are required",
   "total_vehicles": "Total Vehicles",
-  "submitted_by": "Submitted By"
+  "submitted_by": "Submitted By",
+  "inspectionDeleted": "Inspection deleted successfully.",
+  "errorDeletingInspection": "Failed to delete inspection.",
+  "confirm": "Confirm",
+  "deleteInspectionConfirm": "Are you sure you want to delete this inspection?"
 }
