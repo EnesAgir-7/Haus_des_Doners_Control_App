@@ -819,6 +819,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               ),
             ],
           ),
+
           const SizedBox(height: 12),
           _buildInfoRow(
             LocaleKeys.status.tr(),

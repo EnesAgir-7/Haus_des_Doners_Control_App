@@ -86,7 +86,7 @@ class AdminBottomNavBar extends StatelessWidget {
                       Icons.people,
                       color: AppColors.primaryRed,
                     ),
-                    label: LocaleKeys.users_label.tr(),
+                    label: LocaleKeys.inspectors.tr(),
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.apartment, color: Colors.white70),
@@ -106,7 +106,10 @@ class AdminBottomNavBar extends StatelessWidget {
                   ),
                   NavigationDestination(
                     icon: const Icon(Icons.task, color: Colors.white70),
-                    selectedIcon: const Icon(Icons.task, color: AppColors.primaryRed),
+                    selectedIcon: const Icon(
+                      Icons.task,
+                      color: AppColors.primaryRed,
+                    ),
                     label: LocaleKeys.tasks.tr(),
                   ),
 

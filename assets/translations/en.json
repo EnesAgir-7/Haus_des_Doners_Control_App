@@ -1014,5 +1014,8 @@
   "inspectionDeleted": "Inspection deleted successfully.",
   "errorDeletingInspection": "Failed to delete inspection.",
   "confirm": "Confirm",
-  "deleteInspectionConfirm": "Are you sure you want to delete this inspection?"
+  "deleteInspectionConfirm": "Are you sure you want to delete this inspection?",
+  "copy_id": "Copy ID",
+  "user_id": "User ID",
+  "branch_user_id": "Branch User ID"
 }

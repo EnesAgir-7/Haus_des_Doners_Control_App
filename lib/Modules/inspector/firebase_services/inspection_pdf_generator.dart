@@ -9,7 +9,6 @@ import 'package:printing/printing.dart';
 
 import '../../../helpers/app_helpers.dart';
 
-/// Complete PDF Generator for Inspection Reports with Turkish/German character support
 class InspectionPDFGenerator {
   final String inspectionId;
   final String branchName;
@@ -39,15 +38,11 @@ class InspectionPDFGenerator {
     this.categoryPhotos = const {},
   });
 
-  // Cache the font to avoid loading it multiple times
   static pw.Font? _cachedFont;
 
-  /// Load custom font that supports Turkish/German characters
   Future<void> _loadFonts() async {
     if (_cachedFont != null) return;
-
     try {
-      // Load Roboto font (supports Turkish/German characters)
       final fontData = await rootBundle.load('assets/fonts/Roboto.ttf');
       _cachedFont = pw.Font.ttf(fontData);
     } catch (e) {
@@ -56,16 +51,14 @@ class InspectionPDFGenerator {
     }
   }
 
-  /// Generate PDF document and return pw.Document
   Future<pw.Document> generateDocument() async {
-    await _loadFonts(); // Load fonts first
+    await _loadFonts();
     return await _generateInspectionPDF();
   }
 
-  /// Generate PDF and save as file directly
   Future<File> generateFile() async {
     try {
-      await _loadFonts(); // Load fonts first
+      await _loadFonts();
       final pw.Document pdfDocument = await _generateInspectionPDF();
       final directory = await getTemporaryDirectory();
       final fileName =
@@ -74,7 +67,6 @@ class InspectionPDFGenerator {
       final file = File(filePath);
       final bytes = await pdfDocument.save();
       await file.writeAsBytes(bytes);
-      print('PDF saved to: $filePath');
       return file;
     } catch (e) {
       print('Error generating PDF file: $e');
@@ -87,15 +79,14 @@ class InspectionPDFGenerator {
     final logoImage = await _loadLogo();
     final dateFormat = DateFormat('dd MMM yyyy, HH:mm');
     final now = DateTime.now();
-
-    // Create theme with custom font
     final theme = pw.ThemeData.withFont(base: _cachedFont!, bold: _cachedFont!);
 
+    // Main Report Page
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(24),
-        theme: theme, // Apply custom font theme
+        theme: theme,
         build: (context) => [
           _buildPDFHeader(logoImage, now, dateFormat),
           pw.SizedBox(height: 16),
@@ -105,7 +96,7 @@ class InspectionPDFGenerator {
           pw.SizedBox(height: 16),
           _buildOverallScoreCompact(),
           pw.SizedBox(height: 16),
-          _buildCategoriesSection(),
+          _buildCategoriesSection(), // Refactored to avoid Table
           if (overallNotes.isNotEmpty) ...[
             pw.SizedBox(height: 16),
             _buildOverallNotes(),
@@ -117,12 +108,13 @@ class InspectionPDFGenerator {
       ),
     );
 
+    // Photos Page
     if (_hasPhotos()) {
       pdf.addPage(
         pw.MultiPage(
           pageFormat: PdfPageFormat.a4,
           margin: const pw.EdgeInsets.all(24),
-          theme: theme, // Apply custom font theme
+          theme: theme,
           build: (context) => [
             pw.Header(
               level: 0,
@@ -136,8 +128,9 @@ class InspectionPDFGenerator {
               ),
             ),
             pw.SizedBox(height: 16),
-            ..._buildPhotosSection(),
+            ..._buildPhotosSection(), // Refactored to avoid GridView
           ],
+          footer: (context) => _buildFooter(context),
         ),
       );
     }
@@ -145,19 +138,196 @@ class InspectionPDFGenerator {
     return pdf;
   }
 
+  // --- REFACTORED CATEGORY SECTION (No Table) ---
+  pw.Widget _buildCategoriesSection() {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text(
+          "Kategorieaufschlüsselung",
+          style: pw.TextStyle(
+            fontSize: 14,
+            fontWeight: pw.FontWeight.bold,
+            color: PdfColors.red700,
+          ),
+        ),
+        pw.SizedBox(height: 10),
+        // Header Row
+        pw.Container(
+          color: PdfColors.grey200,
+          padding: const pw.EdgeInsets.all(6),
+          child: pw.Row(
+            children: [
+              pw.Expanded(
+                flex: 3,
+                child: pw.Text(
+                  "Kategorie",
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+              pw.Expanded(
+                flex: 1,
+                child: pw.Text(
+                  "Bewertung",
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+              pw.Expanded(
+                flex: 2,
+                child: pw.Text(
+                  "Status",
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Data Rows
+        ...categories.map((category) {
+          final scoreString = '${category.score}/${category.maxScore}';
+          final percentage = calculatePerformancePercent(scoreString);
+          final percentValue = int.tryParse(percentage) ?? 0;
+          final performanceLevel = _getPerformanceLevel(percentValue);
+
+          return pw.Container(
+            decoration: const pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
+              ),
+            ),
+            padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+            child: pw.Row(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(
+                        category.title,
+                        style: const pw.TextStyle(fontSize: 10),
+                      ),
+                      if (category.notes.isNotEmpty)
+                        pw.Text(
+                          category.notes,
+                          style: const pw.TextStyle(
+                            fontSize: 8,
+                            color: PdfColors.grey700,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Text(
+                    '${category.score}/${category.maxScore}',
+                    textAlign: pw.TextAlign.center,
+                    style: pw.TextStyle(
+                      fontSize: 11,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+                pw.Expanded(
+                  flex: 2,
+                  child: pw.Center(
+                    child: pw.Container(
+                      padding: const pw.EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: pw.BoxDecoration(
+                        color: performanceLevel['color'] as PdfColor,
+                        borderRadius: pw.BorderRadius.circular(3),
+                      ),
+                      child: pw.Text(
+                        '$percentage%',
+                        style: pw.TextStyle(
+                          fontSize: 10,
+                          fontWeight: pw.FontWeight.bold,
+                          color: PdfColors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ],
+    );
+  }
+
+  // --- REFACTORED PHOTOS SECTION (No GridView) ---
+  List<pw.Widget> _buildPhotosSection() {
+    final List<pw.Widget> widgets = [];
+
+    for (final category in categories) {
+      final photos = categoryPhotos[category.categoryId];
+      if (photos == null || photos.isEmpty) continue;
+
+      widgets.add(
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(bottom: 10),
+          child: pw.Text(
+            category.title,
+            style: pw.TextStyle(
+              fontSize: 12,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.red700,
+            ),
+          ),
+        ),
+      );
+
+      widgets.add(
+        pw.Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: photos.map((photo) {
+            return pw.Container(
+              width:
+                  160, // Fixed width helps the wrap engine calculate page breaks
+              height: 160,
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(color: PdfColors.grey400),
+                borderRadius: pw.BorderRadius.circular(6),
+              ),
+              child: pw.ClipRRect(
+                horizontalRadius: 6,
+                verticalRadius: 6,
+                child: pw.Image(
+                  pw.MemoryImage(photo.readAsBytesSync()),
+                  fit: pw.BoxFit.cover,
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      );
+      widgets.add(pw.SizedBox(height: 20));
+    }
+    return widgets;
+  }
+
+  // Helper methods (kept mostly same as your original, but clean)
   Future<pw.ImageProvider> _loadLogo() async {
     try {
       return await imageFromAssetBundle('assets/logo.png');
     } catch (e) {
-      print('Logo not found: $e');
-      rethrow;
+      return pw.MemoryImage(Uint8List(0)); // Fallback
     }
   }
 
   pw.Widget _buildPDFHeader(
-    pw.ImageProvider logoImage,
+    pw.ImageProvider logo,
     DateTime now,
-    DateFormat dateFormat,
+    DateFormat df,
   ) {
     return pw.Container(
       padding: const pw.EdgeInsets.all(12),
@@ -170,10 +340,7 @@ class InspectionPDFGenerator {
         children: [
           pw.Row(
             children: [
-              pw.Container(
-                padding: const pw.EdgeInsets.all(6),
-                child: pw.Image(logoImage, height: 20),
-              ),
+              pw.Image(logo, height: 20),
               pw.SizedBox(width: 12),
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -186,7 +353,6 @@ class InspectionPDFGenerator {
                       color: PdfColors.white,
                     ),
                   ),
-                  pw.SizedBox(height: 2),
                   pw.Text(
                     'ID: #${now.millisecondsSinceEpoch.toString().substring(7)}',
                     style: const pw.TextStyle(
@@ -205,7 +371,7 @@ class InspectionPDFGenerator {
               borderRadius: pw.BorderRadius.circular(4),
             ),
             child: pw.Text(
-              dateFormat.format(now),
+              df.format(now),
               style: pw.TextStyle(
                 fontSize: 11,
                 fontWeight: pw.FontWeight.bold,
@@ -223,115 +389,47 @@ class InspectionPDFGenerator {
       children: [
         pw.Expanded(
           flex: 2,
-          child: pw.Container(
-            padding: const pw.EdgeInsets.all(10),
-            decoration: pw.BoxDecoration(
-              color: PdfColors.grey200,
-              borderRadius: pw.BorderRadius.circular(6),
-              border: pw.Border.all(color: PdfColors.grey400),
-            ),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Row(
-                  children: [
-                    pw.Container(
-                      padding: const pw.EdgeInsets.all(4),
-                      decoration: pw.BoxDecoration(
-                        color: PdfColors.red700,
-                        borderRadius: pw.BorderRadius.circular(3),
-                      ),
-                      child: pw.SvgImage(
-                        svg: '''
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" fill="white"/>
-    </svg>
-  ''',
-                        width: 12,
-                        height: 12,
-                      ),
-                    ),
-                    pw.SizedBox(width: 6),
-                    pw.Text(
-                      "Filiale",
-                      style: pw.TextStyle(
-                        fontSize: 10,
-                        fontWeight: pw.FontWeight.bold,
-                        color: PdfColors.grey700,
-                      ),
-                    ),
-                  ],
-                ),
-                pw.SizedBox(height: 6),
-                pw.Text(
-                  branchName,
-                  style: pw.TextStyle(
-                    fontSize: 12,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.SizedBox(height: 2),
-                pw.Text(
-                  branchAddress,
-                  style: const pw.TextStyle(
-                    fontSize: 9,
-                    color: PdfColors.grey700,
-                  ),
-                  maxLines: 2,
-                  overflow: pw.TextOverflow.clip,
-                ),
-              ],
-            ),
-          ),
+          child: _infoBox("Filiale", branchName, subtitle: branchAddress),
         ),
         pw.SizedBox(width: 12),
         pw.Expanded(
-          child: pw.Container(
-            padding: const pw.EdgeInsets.all(10),
-            decoration: pw.BoxDecoration(
-              color: PdfColors.grey100,
-              borderRadius: pw.BorderRadius.circular(6),
-              border: pw.Border.all(color: PdfColors.grey300),
-            ),
-            child: pw.Column(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text(
-                  "Inspektor",
-                  style: const pw.TextStyle(
-                    fontSize: 9,
-                    color: PdfColors.grey700,
-                  ),
-                ),
-                pw.SizedBox(height: 4),
-                pw.Text(
-                  inspectorName,
-                  style: pw.TextStyle(
-                    fontSize: 11,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-                pw.SizedBox(height: 8),
-                pw.Text(
-                  "Fragebogen",
-                  style: const pw.TextStyle(
-                    fontSize: 9,
-                    color: PdfColors.grey700,
-                  ),
-                ),
-                pw.SizedBox(height: 4),
-                pw.Text(
-                  templateName ?? "N/V",
-                  style: pw.TextStyle(
-                    fontSize: 11,
-                    fontWeight: pw.FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
+          child: _infoBox(
+            "Inspektor",
+            inspectorName,
+            subtitle: templateName ?? "N/V",
           ),
         ),
       ],
+    );
+  }
+
+  pw.Widget _infoBox(String title, String main, {String? subtitle}) {
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(10),
+      decoration: pw.BoxDecoration(
+        color: PdfColors.grey100,
+        borderRadius: pw.BorderRadius.circular(6),
+        border: pw.Border.all(color: PdfColors.grey300),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text(
+            title,
+            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+          ),
+          pw.Text(
+            main,
+            style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+          ),
+          if (subtitle != null)
+            pw.Text(
+              subtitle,
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700),
+              maxLines: 1,
+            ),
+        ],
+      ),
     );
   }
 
@@ -345,12 +443,7 @@ class InspectionPDFGenerator {
     return pw.Container(
       padding: const pw.EdgeInsets.all(14),
       decoration: pw.BoxDecoration(
-        gradient: pw.LinearGradient(
-          colors: [
-            performanceLevel['color'] as PdfColor,
-            (performanceLevel['color'] as PdfColor).shade(0.8),
-          ],
-        ),
+        color: performanceLevel['color'] as PdfColor,
         borderRadius: pw.BorderRadius.circular(6),
       ),
       child: pw.Row(
@@ -363,9 +456,7 @@ class InspectionPDFGenerator {
                 "Gesamtpunktzahl",
                 style: const pw.TextStyle(fontSize: 11, color: PdfColors.white),
               ),
-              pw.SizedBox(height: 4),
               pw.Row(
-                crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
                   pw.Text(
                     totalScore.toStringAsFixed(1),
@@ -387,170 +478,23 @@ class InspectionPDFGenerator {
             ],
           ),
           pw.Container(
-            width: 70,
-            height: 70,
+            width: 60,
+            height: 60,
             decoration: const pw.BoxDecoration(
               shape: pw.BoxShape.circle,
               color: PdfColors.white,
             ),
             child: pw.Center(
-              child: pw.Column(
-                mainAxisAlignment: pw.MainAxisAlignment.center,
-                children: [
-                  pw.Text(
-                    '$percentage%',
-                    style: pw.TextStyle(
-                      fontSize: 20,
-                      fontWeight: pw.FontWeight.bold,
-                      color: performanceLevel['color'] as PdfColor,
-                    ),
-                  ),
-                  pw.Text(
-                    performanceLevel['label'] as String,
-                    style: pw.TextStyle(
-                      fontSize: 8,
-                      color: (performanceLevel['color'] as PdfColor).shade(0.7),
-                    ),
-                  ),
-                ],
+              child: pw.Text(
+                '$percentage%',
+                style: pw.TextStyle(
+                  fontSize: 16,
+                  fontWeight: pw.FontWeight.bold,
+                  color: performanceLevel['color'] as PdfColor,
+                ),
               ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  pw.Widget _buildCategoriesSection() {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text(
-          "Kategorieaufschlüsselung",
-          style: pw.TextStyle(
-            fontSize: 14,
-            fontWeight: pw.FontWeight.bold,
-            color: PdfColors.red700,
-          ),
-        ),
-        pw.SizedBox(height: 10),
-        pw.Table(
-          border: pw.TableBorder.all(color: PdfColors.grey300, width: 0.5),
-          columnWidths: {
-            0: const pw.FlexColumnWidth(3),
-            1: const pw.FlexColumnWidth(1),
-            2: const pw.FlexColumnWidth(2),
-          },
-          children: [
-            pw.TableRow(
-              decoration: const pw.BoxDecoration(color: PdfColors.grey200),
-              children: [
-                _buildTableCell("Kategorie", isHeader: true),
-                _buildTableCell(
-                  "Bewertung",
-                  isHeader: true,
-                  align: pw.Alignment.center,
-                ),
-                _buildTableCell(
-                  "Status",
-                  isHeader: true,
-                  align: pw.Alignment.center,
-                ),
-              ],
-            ),
-            ...categories.map((category) {
-              final scoreString = '${category.score}/${category.maxScore}';
-              final percentage = calculatePerformancePercent(scoreString);
-              final percentValue = int.tryParse(percentage) ?? 0;
-              final performanceLevel = _getPerformanceLevel(percentValue);
-
-              return pw.TableRow(
-                children: [
-                  _buildTableCell(
-                    category.title,
-                    fontSize: 10,
-                    subtitle: category.notes.isNotEmpty ? category.notes : null,
-                    photoCount: category.photoCount,
-                  ),
-                  _buildTableCell(
-                    '${category.score}/${category.maxScore}',
-                    fontSize: 11,
-                    fontWeight: pw.FontWeight.bold,
-                    align: pw.Alignment.center,
-                  ),
-                  pw.Container(
-                    padding: const pw.EdgeInsets.all(6),
-                    alignment: pw.Alignment.center,
-                    child: pw.Container(
-                      padding: const pw.EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: pw.BoxDecoration(
-                        color: performanceLevel['color'] as PdfColor,
-                        borderRadius: pw.BorderRadius.circular(3),
-                      ),
-                      child: pw.Text(
-                        '$percentage%',
-                        style: pw.TextStyle(
-                          fontSize: 10,
-                          fontWeight: pw.FontWeight.bold,
-                          color: PdfColors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }).toList(),
-          ],
-        ),
-      ],
-    );
-  }
-
-  pw.Widget _buildTableCell(
-    String text, {
-    bool isHeader = false,
-    double fontSize = 9,
-    pw.FontWeight? fontWeight,
-    pw.Alignment? align,
-    String? subtitle,
-    int photoCount = 0,
-  }) {
-    return pw.Container(
-      padding: const pw.EdgeInsets.all(6),
-      alignment: align ?? pw.Alignment.centerLeft,
-      child: pw.Column(
-        crossAxisAlignment: align == pw.Alignment.center
-            ? pw.CrossAxisAlignment.center
-            : pw.CrossAxisAlignment.start,
-        children: [
-          pw.Text(
-            text,
-            style: pw.TextStyle(
-              fontSize: isHeader ? 10 : fontSize,
-              fontWeight: isHeader
-                  ? pw.FontWeight.bold
-                  : (fontWeight ?? pw.FontWeight.normal),
-              color: isHeader ? PdfColors.grey800 : PdfColors.black,
-            ),
-          ),
-          if (subtitle != null && subtitle.isNotEmpty) ...[
-            pw.SizedBox(height: 2),
-            pw.Text(
-              subtitle,
-              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey900),
-              maxLines: 20,
-            ),
-          ],
-          if (photoCount > 0) ...[
-            pw.SizedBox(height: 2),
-            pw.Text(
-              '$photoCount Fotos',
-              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600),
-            ),
-          ],
         ],
       ),
     );
@@ -585,51 +529,36 @@ class InspectionPDFGenerator {
 
   pw.Widget _buildSignaturesSection() {
     return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
       children: [
-        _buildSignatureBox("Inspektor-Unterschrift", inspectorSignature),
+        _buildSigBox("Inspektor", inspectorSignature),
         pw.SizedBox(width: 16),
-        _buildSignatureBox("Filialvertreter", branchSignature),
+        _buildSigBox("Filialvertreter", branchSignature),
       ],
     );
   }
 
-  pw.Widget _buildSignatureBox(String title, Uint8List? signature) {
+  pw.Widget _buildSigBox(String label, Uint8List? data) {
     return pw.Expanded(
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.Text(
-            title,
-            style: pw.TextStyle(
-              fontSize: 9,
-              fontWeight: pw.FontWeight.bold,
-              color: PdfColors.grey700,
-            ),
+            label,
+            style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
           ),
-          pw.SizedBox(height: 8),
+          pw.SizedBox(height: 4),
           pw.Container(
             height: 60,
             decoration: pw.BoxDecoration(
               color: PdfColors.grey100,
               borderRadius: pw.BorderRadius.circular(4),
             ),
-            child: signature != null
-                ? pw.ClipRRect(
-                    verticalRadius: 4,
-                    horizontalRadius: 4,
-                    child: pw.Image(
-                      pw.MemoryImage(signature),
-                      fit: pw.BoxFit.contain,
-                    ),
-                  )
+            child: data != null
+                ? pw.Image(pw.MemoryImage(data), fit: pw.BoxFit.contain)
                 : pw.Center(
                     child: pw.Text(
-                      "Nicht unterschrieben",
-                      style: const pw.TextStyle(
-                        fontSize: 9,
-                        color: PdfColors.grey500,
-                      ),
+                      "N/V",
+                      style: const pw.TextStyle(fontSize: 8),
                     ),
                   ),
           ),
@@ -641,115 +570,29 @@ class InspectionPDFGenerator {
   pw.Widget _buildFooter(pw.Context context) {
     return pw.Container(
       alignment: pw.Alignment.centerRight,
-      margin: const pw.EdgeInsets.only(top: 12),
       padding: const pw.EdgeInsets.only(top: 8),
       decoration: const pw.BoxDecoration(
-        border: pw.Border(
-          top: pw.BorderSide(color: PdfColors.grey300, width: 1),
-        ),
+        border: pw.Border(top: pw.BorderSide(color: PdfColors.grey300)),
       ),
       child: pw.Text(
         'Seite ${context.pageNumber} von ${context.pagesCount}',
-        style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600),
+        style: const pw.TextStyle(fontSize: 9),
       ),
     );
   }
 
-  List<pw.Widget> _buildPhotosSection() {
-    final List<pw.Widget> widgets = [];
-
-    for (final category in categories) {
-      final photos = categoryPhotos[category.categoryId];
-      if (photos == null || photos.isEmpty) continue;
-
-      widgets.add(
-        pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Container(
-              padding: const pw.EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 6,
-              ),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.grey200,
-                borderRadius: pw.BorderRadius.circular(4),
-              ),
-              child: pw.Text(
-                '${category.title} (${category.score}/${category.maxScore})',
-                style: pw.TextStyle(
-                  fontSize: 12,
-                  fontWeight: pw.FontWeight.bold,
-                  color: PdfColors.red700,
-                ),
-              ),
-            ),
-            pw.SizedBox(height: 10),
-            pw.GridView(
-              childAspectRatio: 1.0,
-              crossAxisCount: 3,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              children: photos.map((photo) {
-                return pw.Container(
-                  decoration: pw.BoxDecoration(
-                    border: pw.Border.all(color: PdfColors.grey400),
-                    borderRadius: pw.BorderRadius.circular(6),
-                  ),
-                  child: pw.ClipRRect(
-                    horizontalRadius: 6,
-                    verticalRadius: 6,
-                    child: pw.Image(
-                      pw.MemoryImage(photo.readAsBytesSync()),
-                      fit: pw.BoxFit.cover,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-            pw.SizedBox(height: 16),
-          ],
-        ),
-      );
-    }
-
-    return widgets;
-  }
-
-  bool _hasPhotos() {
-    return categoryPhotos.values.any((photos) => photos.isNotEmpty);
-  }
+  bool _hasPhotos() => categoryPhotos.values.any((p) => p.isNotEmpty);
 
   Map<String, dynamic> _getPerformanceLevel(int percentage) {
-    if (percentage >= 90) {
-      return {
-        'label': "Ausgezeichnet",
-        'emoji': '😃',
-        'color': PdfColors.green700,
-      };
-    } else if (percentage >= 75) {
-      return {'label': "Gut", 'emoji': '🙂', 'color': PdfColors.lightGreen700};
-    } else if (percentage >= 60) {
-      return {
-        'label': "Befriedigend",
-        'emoji': '😐',
-        'color': PdfColors.orange700,
-      };
-    } else if (percentage >= 40) {
-      return {
-        'label': "Unterdurchschnittlich",
-        'emoji': '😕',
-        'color': PdfColors.deepOrange700,
-      };
-    } else if (percentage >= 20) {
-      return {'label': "Schlecht", 'emoji': '😞', 'color': PdfColors.red700};
-    } else {
-      return {
-        'label': "Sehr schwach",
-        'emoji': '😢',
-        'color': PdfColors.red900,
-      };
-    }
+    if (percentage >= 90)
+      return {'label': "Ausgezeichnet", 'color': PdfColors.green700};
+    if (percentage >= 75)
+      return {'label': "Gut", 'color': PdfColors.lightGreen700};
+    if (percentage >= 60)
+      return {'label': "Befriedigend", 'color': PdfColors.orange700};
+    if (percentage >= 40)
+      return {'label': "Mittel", 'color': PdfColors.deepOrange700};
+    return {'label': "Schlecht", 'color': PdfColors.red700};
   }
 }
 
@@ -760,7 +603,6 @@ class CategoryScore {
   final int maxScore;
   final String notes;
   final int photoCount;
-
   CategoryScore({
     required this.categoryId,
     required this.title,
@@ -770,7 +612,8 @@ class CategoryScore {
     this.photoCount = 0,
   });
 }
-// /// Complete PDF Generator for Inspection Reports
+
+// /// Complete PDF Generator for Inspection Reports with Turkish/German character support
 // class InspectionPDFGenerator {
 //   final String inspectionId;
 //   final String branchName;
@@ -779,7 +622,7 @@ class CategoryScore {
 //   final String? templateName;
 //   final List<CategoryScore> categories;
 //   final double totalScore;
-//   final double maxPossibleScore; // Add this to calculate percentage
+//   final double maxPossibleScore;
 //   final String overallNotes;
 //   final Uint8List? inspectorSignature;
 //   final Uint8List? branchSignature;
@@ -800,16 +643,33 @@ class CategoryScore {
 //     this.categoryPhotos = const {},
 //   });
 
+//   // Cache the font to avoid loading it multiple times
+//   static pw.Font? _cachedFont;
+
+//   /// Load custom font that supports Turkish/German characters
+//   Future<void> _loadFonts() async {
+//     if (_cachedFont != null) return;
+
+//     try {
+//       // Load Roboto font (supports Turkish/German characters)
+//       final fontData = await rootBundle.load('assets/fonts/Roboto.ttf');
+//       _cachedFont = pw.Font.ttf(fontData);
+//     } catch (e) {
+//       print('Custom font not found: $e');
+//       rethrow;
+//     }
+//   }
+
 //   /// Generate PDF document and return pw.Document
-//   /// Use this for preview or when you want to handle file saving yourself
 //   Future<pw.Document> generateDocument() async {
+//     await _loadFonts(); // Load fonts first
 //     return await _generateInspectionPDF();
 //   }
 
 //   /// Generate PDF and save as file directly
-//   /// Convenience method that handles everything
 //   Future<File> generateFile() async {
 //     try {
+//       await _loadFonts(); // Load fonts first
 //       final pw.Document pdfDocument = await _generateInspectionPDF();
 //       final directory = await getTemporaryDirectory();
 //       final fileName =
@@ -826,20 +686,20 @@ class CategoryScore {
 //     }
 //   }
 
-//   // ============================================
-//   // PRIVATE METHODS - PDF GENERATION
-//   // ============================================
-
 //   Future<pw.Document> _generateInspectionPDF() async {
 //     final pdf = pw.Document();
 //     final logoImage = await _loadLogo();
 //     final dateFormat = DateFormat('dd MMM yyyy, HH:mm');
 //     final now = DateTime.now();
 
+//     // Create theme with custom font
+//     final theme = pw.ThemeData.withFont(base: _cachedFont!, bold: _cachedFont!);
+
 //     pdf.addPage(
 //       pw.MultiPage(
 //         pageFormat: PdfPageFormat.a4,
 //         margin: const pw.EdgeInsets.all(24),
+//         theme: theme, // Apply custom font theme
 //         build: (context) => [
 //           _buildPDFHeader(logoImage, now, dateFormat),
 //           pw.SizedBox(height: 16),
@@ -866,6 +726,7 @@ class CategoryScore {
 //         pw.MultiPage(
 //           pageFormat: PdfPageFormat.a4,
 //           margin: const pw.EdgeInsets.all(24),
+//           theme: theme, // Apply custom font theme
 //           build: (context) => [
 //             pw.Header(
 //               level: 0,
@@ -915,7 +776,6 @@ class CategoryScore {
 //             children: [
 //               pw.Container(
 //                 padding: const pw.EdgeInsets.all(6),
-
 //                 child: pw.Image(logoImage, height: 20),
 //               ),
 //               pw.SizedBox(width: 12),
@@ -1080,11 +940,8 @@ class CategoryScore {
 //   }
 
 //   pw.Widget _buildOverallScoreCompact() {
-//     // Convert to score string format
 //     final scoreString =
 //         '${totalScore.toStringAsFixed(0)}/${maxPossibleScore.toStringAsFixed(0)}';
-
-//     // Use your global helper method
 //     final percentage = calculatePerformancePercent(scoreString);
 //     final percentValue = int.tryParse(percentage) ?? 0;
 //     final performanceLevel = _getPerformanceLevel(percentValue);
@@ -1189,7 +1046,6 @@ class CategoryScore {
 //             2: const pw.FlexColumnWidth(2),
 //           },
 //           children: [
-//             // Header Row
 //             pw.TableRow(
 //               decoration: const pw.BoxDecoration(color: PdfColors.grey200),
 //               children: [
@@ -1206,12 +1062,8 @@ class CategoryScore {
 //                 ),
 //               ],
 //             ),
-//             // Data Rows
 //             ...categories.map((category) {
-//               // Convert to score string format
 //               final scoreString = '${category.score}/${category.maxScore}';
-
-//               // Use your global helper method
 //               final percentage = calculatePerformancePercent(scoreString);
 //               final percentValue = int.tryParse(percentage) ?? 0;
 //               final performanceLevel = _getPerformanceLevel(percentValue);
@@ -1472,7 +1324,6 @@ class CategoryScore {
 //     return categoryPhotos.values.any((photos) => photos.isNotEmpty);
 //   }
 
-//   // Determine performance based on reversed percentage
 //   Map<String, dynamic> _getPerformanceLevel(int percentage) {
 //     if (percentage >= 90) {
 //       return {
@@ -1510,7 +1361,7 @@ class CategoryScore {
 //   final String categoryId;
 //   final String title;
 //   final int score;
-//   final int maxScore; // Add this field
+//   final int maxScore;
 //   final String notes;
 //   final int photoCount;
 
@@ -1518,7 +1369,7 @@ class CategoryScore {
 //     required this.categoryId,
 //     required this.title,
 //     required this.score,
-//     required this.maxScore, // Make it required
+//     required this.maxScore,
 //     this.notes = '',
 //     this.photoCount = 0,
 //   });

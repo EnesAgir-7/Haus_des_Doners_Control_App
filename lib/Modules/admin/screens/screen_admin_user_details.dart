@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
 
@@ -96,6 +97,13 @@ class _ScreenAdminUserDetailsState extends State<ScreenAdminUserDetails> {
         actions: widget.user.role == AppConstants.branch
             ? []
             : [
+                IconButton(
+                  icon: const Icon(Icons.content_copy),
+                  onPressed: () {
+                    Clipboard.setData(ClipboardData(text: widget.user.id));
+                    showSnakBarr(context, LocaleKeys.copiedToClipboard.tr());
+                  },
+                ),
                 if (!_isEditing)
                   IconButton(
                     icon: const Icon(Icons.edit, color: Colors.white),

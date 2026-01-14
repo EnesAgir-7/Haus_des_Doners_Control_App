@@ -1014,7 +1014,10 @@ class CodegenLoader extends AssetLoader{
   "inspectionDeleted": "Inspektion wurde erfolgreich gelöscht.",
   "errorDeletingInspection": "Inspektion konnte nicht gelöscht werden.",
   "confirm": "Bestätigen",
-  "deleteInspectionConfirm": "Möchten Sie diese Inspektion wirklich löschen?"
+  "deleteInspectionConfirm": "Möchten Sie diese Inspektion wirklich löschen?",
+  "copy_id": "ID kopieren",
+  "user_id": "Benutzer-ID",
+  "branch_user_id": "Filialbenutzer-ID"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -2032,7 +2035,10 @@ static const Map<String,dynamic> _en = {
   "inspectionDeleted": "Inspection deleted successfully.",
   "errorDeletingInspection": "Failed to delete inspection.",
   "confirm": "Confirm",
-  "deleteInspectionConfirm": "Are you sure you want to delete this inspection?"
+  "deleteInspectionConfirm": "Are you sure you want to delete this inspection?",
+  "copy_id": "Copy ID",
+  "user_id": "User ID",
+  "branch_user_id": "Branch User ID"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -3020,7 +3026,10 @@ static const Map<String,dynamic> _tr = {
   "inspectionDeleted": "Denetim başarıyla silindi.",
   "errorDeletingInspection": "Denetim silinirken hata oluştu.",
   "confirm": "Onay",
-  "deleteInspectionConfirm": "Bu denetimi silmek istediğinize emin misiniz?"
+  "deleteInspectionConfirm": "Bu denetimi silmek istediğinize emin misiniz?",
+  "copy_id": "ID'yi Kopyala",
+  "user_id": "Kullanıcı ID",
+  "branch_user_id": "Şube Kullanıcı ID"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

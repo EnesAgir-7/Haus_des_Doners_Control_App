@@ -1003,5 +1003,8 @@ abstract class  LocaleKeys {
   static const errorDeletingInspection = 'errorDeletingInspection';
   static const confirm = 'confirm';
   static const deleteInspectionConfirm = 'deleteInspectionConfirm';
+  static const copy_id = 'copy_id';
+  static const user_id = 'user_id';
+  static const branch_user_id = 'branch_user_id';
 
 }

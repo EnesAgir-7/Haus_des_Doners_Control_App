@@ -63,6 +63,7 @@ class ProviderInspection extends ChangeNotifier {
 
       if (_inspection?.id == inspectionId) {
         _inspection = null;
+
         notifyListeners();
       }
 
