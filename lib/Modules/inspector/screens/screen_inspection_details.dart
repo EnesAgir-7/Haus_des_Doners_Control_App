@@ -6,6 +6,7 @@ import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/firebase_constants.dart';
 import '../../../helpers/app_helpers.dart';
 import '../../../models/inspection_model.dart';
 import '../../../translations/locale_keys.g.dart';
@@ -39,20 +40,21 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
     return Scaffold(
       appBar: CustomAppBar(
         actions: [
-          IconButton(
-            onPressed: () {
-              showDeleteInspectionDialog(
-                context: context,
-                onConfirm: () {
-                  context.read<ProviderInspection>().deleteInspection(
-                    context,
-                    widget.inspectionId,
-                  );
-                },
-              );
-            },
-            icon: const Icon(Icons.delete),
-          ),
+          if (loggedInUser != null && loggedInUser!.isAdmin)
+            IconButton(
+              onPressed: () {
+                showDeleteInspectionDialog(
+                  context: context,
+                  onConfirm: () {
+                    context.read<ProviderInspection>().deleteInspection(
+                      context,
+                      widget.inspectionId,
+                    );
+                  },
+                );
+              },
+              icon: const Icon(Icons.delete),
+            ),
         ],
       ),
       body: Container(

@@ -963,6 +963,12 @@
   "error_deleting_request": "İstek silinirken hata: ",
   "error_getting_branch_requests": "Şube istekleri alınırken hata: ",
   "pending_update_request": "Bekleyen Güncelleme İsteği",
+
+  "force_update_title": "Güncelleme Gerekli",
+  "force_update_subtitle": "Uygulamayı kullanmaya devam etmek için güncellemeniz gerekir.",
+  "force_update_message": "Yeni bir uygulama sürümü mevcut. Lütfen güncelleyerek devam edin.",
+  "current_version": "Mevcut Sürüm",
+  "update_now": "Şimdi Güncelle",
   "changes_waiting_approval": "değişiklik onay bekliyor",
   "last_request_rejected": "Son İstek Reddedildi",
   "your_last_request_rejected": "Son isteğiniz yönetici tarafından reddedildi.",
@@ -988,5 +994,7 @@
   "copy_id": "ID'yi Kopyala",
   "user_id": "Kullanıcı ID",
   "branch_user_id": "Şube Kullanıcı ID",
-  "compressing_images": "Görseller Sıkıştırılıyor"
+  "compressing_images": "Görseller Sıkıştırılıyor",
+  "app_version": "Uygulama Sürümü",
+  "version": "Sürüm"
 }

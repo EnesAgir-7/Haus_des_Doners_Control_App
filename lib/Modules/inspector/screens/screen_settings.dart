@@ -8,6 +8,7 @@ import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/app_update_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/language_button.dart';
@@ -59,6 +60,10 @@ class ScreenSettings extends StatelessWidget {
                   _buildSectionTitle(context, LocaleKeys.change_language.tr()),
                   const SizedBox(height: 16),
                   const LanguageButton(),
+                  const SizedBox(height: 24),
+                  _buildSectionTitle(context, LocaleKeys.app_version.tr()),
+                  const SizedBox(height: 8),
+                  _buildVersionTile(),
                 ],
               ),
             ),
@@ -136,6 +141,55 @@ class ScreenSettings extends StatelessWidget {
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
+      ),
+    );
+  }
+
+  Widget _buildVersionTile() {
+    final updateService = AppUpdateService();
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF212121),
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10.0,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.info_outline,
+            color: Colors.lightBlueAccent,
+            size: 28,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${LocaleKeys.version.tr()} ${updateService.currentVersion}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Haus des Döner Control App',
+                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

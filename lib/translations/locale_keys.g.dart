@@ -981,6 +981,11 @@ abstract class  LocaleKeys {
   static const error_deleting_request = 'error_deleting_request';
   static const error_getting_branch_requests = 'error_getting_branch_requests';
   static const pending_update_request = 'pending_update_request';
+  static const force_update_title = 'force_update_title';
+  static const force_update_subtitle = 'force_update_subtitle';
+  static const force_update_message = 'force_update_message';
+  static const current_version = 'current_version';
+  static const update_now = 'update_now';
   static const changes_waiting_approval = 'changes_waiting_approval';
   static const last_request_rejected = 'last_request_rejected';
   static const your_last_request_rejected = 'your_last_request_rejected';
@@ -1007,5 +1012,7 @@ abstract class  LocaleKeys {
   static const user_id = 'user_id';
   static const branch_user_id = 'branch_user_id';
   static const compressing_images = 'compressing_images';
+  static const app_version = 'app_version';
+  static const version = 'version';
 
 }

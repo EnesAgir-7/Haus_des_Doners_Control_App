@@ -8,12 +8,14 @@ import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/app_update_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/providers/provider_auth_new.dart';
 import '../../inspector/widgets/custom_toast.dart';
 import '../../inspector/widgets/language_button.dart';
 import 'screen_admin_templates.dart';
+
 class ScreenAdminSettings extends StatelessWidget {
   const ScreenAdminSettings({super.key});
 
@@ -96,8 +98,8 @@ class ScreenAdminSettings extends StatelessWidget {
                   _buildSettingsTile(
                     context,
                     icon: Icons.supervised_user_circle,
-                    title: LocaleKeys.manage_branch_users.tr(), 
-                    subtitle: LocaleKeys.manage_branch_users_subtitle.tr(), 
+                    title: LocaleKeys.manage_branch_users.tr(),
+                    subtitle: LocaleKeys.manage_branch_users_subtitle.tr(),
                     color: AppColors.primaryRed,
                     onTap: () {
                       Navigator.push(
@@ -105,7 +107,6 @@ class ScreenAdminSettings extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => const ScreenAdminOtherUser(
                             role: AppConstants.branch,
-                            
                           ),
                         ),
                       );
@@ -114,12 +115,65 @@ class ScreenAdminSettings extends StatelessWidget {
                   _buildSectionTitle(context, LocaleKeys.change_language.tr()),
                   const SizedBox(height: 6),
                   const LanguageButton(),
+                  const SizedBox(height: 24),
+                  _buildSectionTitle(context, LocaleKeys.app_version.tr()),
+                  const SizedBox(height: 8),
+                  _buildVersionTile(),
                 ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildVersionTile() {
+    final updateService = AppUpdateService();
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF212121),
+        borderRadius: BorderRadius.circular(16.0),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black26,
+            blurRadius: 10.0,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.info_outline,
+            color: Colors.lightBlueAccent,
+            size: 28,
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${LocaleKeys.version.tr()} ${updateService.currentVersion}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Haus des Döner Control App',
+                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

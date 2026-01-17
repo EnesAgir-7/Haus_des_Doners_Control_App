@@ -998,6 +998,12 @@
   "your_last_request_rejected": "Your last request was rejected by admin.",
   "delete_request": "Delete Request",
   "delete_request_confirmation": "Are you sure you want to delete your pending update request?",
+
+  "force_update_title": "Update Required",
+  "force_update_subtitle": "You must update the app to continue using it.",
+  "force_update_message": "A new version of the app is available. Please update to continue using the app.",
+  "current_version": "Current Version",
+  "update_now": "Update Now",
   "view_details": "View Details",
   "inspection_completed": "Inspection Completed",
   "inspection_completed_body": "The inspection for your branch is now complete.",
@@ -1018,5 +1024,7 @@
   "copy_id": "Copy ID",
   "user_id": "User ID",
   "branch_user_id": "Branch User ID",
-  "compressing_images": "Compressing Images"
+  "compressing_images": "Compressing Images",
+  "app_version": "App Version",
+  "version": "Version"
 }

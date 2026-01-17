@@ -33,6 +33,12 @@ class RemoteConfigService {
       AppConstants.useOldHome: false,
       AppConstants.showInspectorHomeGraph: true,
       AppConstants.showBroadCastNotification: true,
+      AppConstants.forceUpdateEnabled: false,
+      AppConstants.minimumVersionAndroid: '1.0.0',
+      AppConstants.minimumVersionIos: '1.0.0',
+      AppConstants.updateUrlAndroid:
+          'https://play.google.com/store/apps/details?id=com.hausdesdoners.hddcontrol',
+      AppConstants.updateUrlIos: 'https://apps.apple.com/app/id6757006959',
     });
 
     try {
@@ -56,8 +62,18 @@ class RemoteConfigService {
       _remoteConfig.getBool(AppConstants.enableNotifications);
   bool get showInspectorHomeGraph =>
       _remoteConfig.getBool(AppConstants.showInspectorHomeGraph);
-  bool get useOldHome =>
-      _remoteConfig.getBool(AppConstants.useOldHome);
+  bool get useOldHome => _remoteConfig.getBool(AppConstants.useOldHome);
+
+  // Force Update Getters
+  bool get forceUpdateEnabled =>
+      _remoteConfig.getBool(AppConstants.forceUpdateEnabled);
+  String get minimumVersionAndroid =>
+      _remoteConfig.getString(AppConstants.minimumVersionAndroid);
+  String get minimumVersionIos =>
+      _remoteConfig.getString(AppConstants.minimumVersionIos);
+  String get updateUrlAndroid =>
+      _remoteConfig.getString(AppConstants.updateUrlAndroid);
+  String get updateUrlIos => _remoteConfig.getString(AppConstants.updateUrlIos);
 
   Future<void> refresh() async {
     try {

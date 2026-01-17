@@ -39,4 +39,11 @@ class AppConstants {
   static const useOldHome = 'useOldHome';
   static const showInspectorHomeGraph = 'showInspectorHomeGraph';
   static const showBroadCastNotification = 'showBroadCastNotification';
+
+  // Force Update Constants
+  static const forceUpdateEnabled = 'forceUpdateEnabled';
+  static const minimumVersionAndroid = 'minimumVersionAndroid';
+  static const minimumVersionIos = 'minimumVersionIos';
+  static const updateUrlAndroid = 'updateUrlAndroid';
+  static const updateUrlIos = 'updateUrlIos';
 }

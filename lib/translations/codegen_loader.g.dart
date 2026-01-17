@@ -993,6 +993,11 @@ class CodegenLoader extends AssetLoader{
   "error_deleting_request": "Fehler beim Löschen der Anfrage: ",
   "error_getting_branch_requests": "Fehler beim Abrufen der Filialanfragen: ",
   "pending_update_request": "Ausstehende Aktualisierungsanfrage",
+  "force_update_title": "Update Erforderlich",
+  "force_update_subtitle": "Sie müssen die App aktualisieren, um sie weiterhin zu verwenden.",
+  "force_update_message": "Eine neue Version der App ist verfügbar. Bitte aktualisieren Sie die App, um sie weiterhin zu verwenden.",
+  "current_version": "Aktuelle Version",
+  "update_now": "Jetzt Aktualisieren",
   "changes_waiting_approval": "Änderungen warten auf Genehmigung",
   "last_request_rejected": "Letzte Anfrage abgelehnt",
   "your_last_request_rejected": "Ihre letzte Anfrage wurde vom Administrator abgelehnt.",
@@ -1018,7 +1023,9 @@ class CodegenLoader extends AssetLoader{
   "copy_id": "ID kopieren",
   "user_id": "Benutzer-ID",
   "branch_user_id": "Filialbenutzer-ID",
-  "compressing_images": "Bilder werden komprimiert"
+  "compressing_images": "Bilder werden komprimiert",
+  "app_version": "App-Version",
+  "version": "Version"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -2020,6 +2027,11 @@ static const Map<String,dynamic> _en = {
   "your_last_request_rejected": "Your last request was rejected by admin.",
   "delete_request": "Delete Request",
   "delete_request_confirmation": "Are you sure you want to delete your pending update request?",
+  "force_update_title": "Update Required",
+  "force_update_subtitle": "You must update the app to continue using it.",
+  "force_update_message": "A new version of the app is available. Please update to continue using the app.",
+  "current_version": "Current Version",
+  "update_now": "Update Now",
   "view_details": "View Details",
   "inspection_completed": "Inspection Completed",
   "inspection_completed_body": "The inspection for your branch is now complete.",
@@ -2040,7 +2052,9 @@ static const Map<String,dynamic> _en = {
   "copy_id": "Copy ID",
   "user_id": "User ID",
   "branch_user_id": "Branch User ID",
-  "compressing_images": "Compressing Images"
+  "compressing_images": "Compressing Images",
+  "app_version": "App Version",
+  "version": "Version"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -3007,6 +3021,11 @@ static const Map<String,dynamic> _tr = {
   "error_deleting_request": "İstek silinirken hata: ",
   "error_getting_branch_requests": "Şube istekleri alınırken hata: ",
   "pending_update_request": "Bekleyen Güncelleme İsteği",
+  "force_update_title": "Güncelleme Gerekli",
+  "force_update_subtitle": "Uygulamayı kullanmaya devam etmek için güncellemeniz gerekir.",
+  "force_update_message": "Yeni bir uygulama sürümü mevcut. Lütfen güncelleyerek devam edin.",
+  "current_version": "Mevcut Sürüm",
+  "update_now": "Şimdi Güncelle",
   "changes_waiting_approval": "değişiklik onay bekliyor",
   "last_request_rejected": "Son İstek Reddedildi",
   "your_last_request_rejected": "Son isteğiniz yönetici tarafından reddedildi.",
@@ -3032,7 +3051,9 @@ static const Map<String,dynamic> _tr = {
   "copy_id": "ID'yi Kopyala",
   "user_id": "Kullanıcı ID",
   "branch_user_id": "Şube Kullanıcı ID",
-  "compressing_images": "Görseller Sıkıştırılıyor"
+  "compressing_images": "Görseller Sıkıştırılıyor",
+  "app_version": "Uygulama Sürümü",
+  "version": "Sürüm"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

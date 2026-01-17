@@ -977,6 +977,12 @@
   "error_deleting_request": "Fehler beim Löschen der Anfrage: ",
   "error_getting_branch_requests": "Fehler beim Abrufen der Filialanfragen: ",
   "pending_update_request": "Ausstehende Aktualisierungsanfrage",
+
+  "force_update_title": "Update Erforderlich",
+  "force_update_subtitle": "Sie müssen die App aktualisieren, um sie weiterhin zu verwenden.",
+  "force_update_message": "Eine neue Version der App ist verfügbar. Bitte aktualisieren Sie die App, um sie weiterhin zu verwenden.",
+  "current_version": "Aktuelle Version",
+  "update_now": "Jetzt Aktualisieren",
   "changes_waiting_approval": "Änderungen warten auf Genehmigung",
   "last_request_rejected": "Letzte Anfrage abgelehnt",
   "your_last_request_rejected": "Ihre letzte Anfrage wurde vom Administrator abgelehnt.",
@@ -1002,5 +1008,7 @@
   "copy_id": "ID kopieren",
   "user_id": "Benutzer-ID",
   "branch_user_id": "Filialbenutzer-ID",
-  "compressing_images": "Bilder werden komprimiert"
+  "compressing_images": "Bilder werden komprimiert",
+  "app_version": "App-Version",
+  "version": "Version"
 }

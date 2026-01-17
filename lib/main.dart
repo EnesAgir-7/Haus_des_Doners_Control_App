@@ -13,11 +13,13 @@ import 'package:haus_des_control/Modules/admin/screens/admin_bottom_nav_bar.dart
 import 'package:haus_des_control/Modules/inspector/providers/provider_route.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_vehicle.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:haus_des_control/translations/codegen_loader.g.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+
 import 'Modules/admin/admin_providers/provider_admin_announcements.dart';
 import 'Modules/admin/admin_providers/provider_admin_bottombar.dart';
 import 'Modules/admin/admin_providers/provider_admin_documents.dart';
@@ -30,6 +32,7 @@ import 'Modules/branch/branch_providers/provider_branch_dashboard.dart';
 import 'Modules/branch/branch_providers/provider_branch_inspections.dart';
 import 'Modules/branch/branch_providers/provider_branch_update_request.dart';
 import 'Modules/branch/screens/branch_screen_bottom_navbar.dart';
+import 'Modules/common/force_update_dialog.dart';
 import 'Modules/inspector/providers/provider_auth_new.dart';
 import 'Modules/inspector/providers/provider_bottom_nav_bar.dart';
 import 'Modules/inspector/providers/provider_branches.dart';
@@ -42,6 +45,7 @@ import 'Modules/inspector/providers/provider_report_photo.dart';
 import 'Modules/inspector/screens/bottom_nav_bar.dart';
 import 'Modules/inspector/screens/screen_auth.dart';
 import 'app_env.dart';
+import 'common_services/app_update_service.dart';
 import 'common_services/fcm_helper.dart';
 import 'common_services/remote_config_service.dart';
 import 'core/constants/app_colors.dart';
@@ -60,6 +64,7 @@ void main() async {
     await Firebase.initializeApp(options: AppEnvironment.firebaseOptions);
   }
   await RemoteConfigService().initialize();
+  await AppUpdateService().initialize();
   await EasyLocalization.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
@@ -205,6 +210,9 @@ class MyApp extends StatelessWidget {
 class AuthWrapper extends StatelessWidget {
   const AuthWrapper({super.key});
 
+  // Static flag to ensure update check happens only once per app session
+  static bool _hasCheckedForUpdates = false;
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ProviderAuth>(
@@ -212,6 +220,14 @@ class AuthWrapper extends StatelessWidget {
         if (auth.userModel == null) return const ScreenAuth();
 
         loggedInUser = auth.userModel;
+
+        // Check for force updates after user is authenticated (only once per session)
+        if (!_hasCheckedForUpdates) {
+          _hasCheckedForUpdates = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _checkForUpdates(context);
+          });
+        }
 
         switch (auth.userModel!.role) {
           case AppConstants.admin:
@@ -226,5 +242,19 @@ class AuthWrapper extends StatelessWidget {
         }
       },
     );
+  }
+
+  Future<void> _checkForUpdates(BuildContext context) async {
+    console("Checking for updates", type: DebugType.info);
+    try {
+      final updateService = AppUpdateService();
+      final requiresUpdate = await updateService.isForceUpdateRequired();
+
+      if (requiresUpdate && context.mounted) {
+        ForceUpdateDialog.show(context);
+      }
+    } catch (e) {
+      debugPrint('Error checking for updates: $e');
+    }
   }
 }
