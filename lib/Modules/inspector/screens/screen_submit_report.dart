@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -43,6 +44,8 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   final Map<String, TextEditingController> _categoryNotesControllers = {};
   late AnimationController _headerAnimController;
   late Animation<double> _headerAnimation;
+  Timer? _autoSaveTimer;
+  String? _lastSavedHash;
 
   @override
   void initState() {
@@ -69,11 +72,18 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
       // Load draft report after initialization
       await _loadDraftReport(controlProvider);
+
+      // Generate initial hash after loading
+      _lastSavedHash = _generateStateHash(controlProvider);
+
+      // Start auto-save timer
+      _startAutoSaveTimer(controlProvider);
     });
   }
 
   @override
   void dispose() {
+    _autoSaveTimer?.cancel();
     _overallNotesController.dispose();
     for (final controller in _categoryNotesControllers.values) {
       controller.dispose();
@@ -128,7 +138,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         hasSignatures;
   }
 
-  Future<void> _saveDraftReport(ProviderControl provider) async {
+  Future<String?> _saveDraftReport(ProviderControl provider) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final draftKey = _getDraftKey();
@@ -196,13 +206,19 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       final jsonData = jsonEncode(draftData);
       await prefs.setString(draftKey, jsonData);
 
+      // Generate hash of what was saved
+      final savedHash = _generateStateHash(provider);
+
       if (mounted) {
         showSnakBarr(context, 'Draft saved successfully');
       }
+
+      return savedHash;
     } catch (e) {
       if (mounted) {
         showSnakBarr(context, 'Failed to save draft');
       }
+      return null;
     }
   }
 
@@ -295,8 +311,77 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       final prefs = await SharedPreferences.getInstance();
       final draftKey = _getDraftKey();
       await prefs.remove(draftKey);
+      _lastSavedHash = null;
     } catch (e) {
       // Ignore errors when clearing draft
+    }
+  }
+
+  // Generate a hash of current form state for change detection
+  String _generateStateHash(ProviderControl provider) {
+    final buffer = StringBuffer();
+
+    // Add scores
+    if (provider.selectedTemplate != null) {
+      for (final category in provider.selectedTemplate!.categories) {
+        final categoryId = category.categoryId;
+        final score = provider.getCategoryScore(categoryId);
+        buffer.write('score_$categoryId:$score|');
+
+        // Add notes from controllers (latest state)
+        final controller = _categoryNotesControllers[categoryId];
+        final notes = controller?.text ?? provider.getCategoryNotes(categoryId);
+        buffer.write('notes_$categoryId:$notes|');
+
+        // Add photo count
+        final photos = provider.getCategoryPhotos(categoryId);
+        buffer.write('photos_$categoryId:${photos.length}|');
+      }
+    }
+
+    // Add overall notes
+    buffer.write('overall:${_overallNotesController.text}|');
+
+    // Add signatures
+    buffer.write('sig1:${provider.inspectorSignature != null}|');
+    buffer.write('sig2:${provider.branchSignature != null}|');
+
+    return buffer.toString();
+  }
+
+  // Auto-save method called every 10 seconds
+  Future<void> _autoSaveDraft(ProviderControl provider) async {
+    if (!mounted) return;
+
+    // Check if there's any data to save
+    if (!_hasUnsavedData(provider)) {
+      // No data to save, clear any existing draft
+      await _clearDraftReport();
+      return;
+    }
+
+    // Generate current state hash
+    final currentHash = _generateStateHash(provider);
+
+    // Only save if state has changed
+    if (currentHash == _lastSavedHash) {
+      return; // No changes, skip saving
+    }
+
+    try {
+      final savedHash = await _saveDraftReport(provider);
+      if (savedHash != null) {
+        _lastSavedHash = savedHash;
+      }
+
+      // Optional: Show subtle feedback (could be removed for less intrusive UX)
+      if (mounted) {
+        // You could add a small toast or indicator here if desired
+        // showSnakBarr(context, 'Auto-saved');
+      }
+    } catch (e) {
+      // Silently handle auto-save errors to not disturb user
+      debugPrint('Auto-save failed: $e');
     }
   }
 
@@ -309,16 +394,16 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: Text(
+            title: const Text(
               'Unsubmitted Report',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            content: Text(
+            content: const Text(
               'You have an unsubmitted report. Do you want to save it as a draft?',
-              style: const TextStyle(color: Colors.white70),
+              style: TextStyle(color: Colors.white70),
             ),
             actions: [
               TextButton(
@@ -342,11 +427,26 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         false;
   }
 
+  void _startAutoSaveTimer(ProviderControl provider) {
+    _autoSaveTimer?.cancel(); // Cancel any existing timer
+
+    _autoSaveTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (mounted) {
+        _autoSaveDraft(provider);
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
   Future<void> _handleBackPress(ProviderControl provider) async {
     if (_hasUnsavedData(provider)) {
       final shouldSave = await _showSaveDraftDialog();
       if (shouldSave) {
-        await _saveDraftReport(provider);
+        final savedHash = await _saveDraftReport(provider);
+        if (savedHash != null) {
+          _lastSavedHash = savedHash;
+        }
       } else {
         await _clearDraftReport();
       }
@@ -2077,7 +2177,8 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     if (!mounted) return;
 
     if (success) {
-      // Clear draft report after successful submission
+      // Stop auto-save timer and clear draft report after successful submission
+      _autoSaveTimer?.cancel();
       await _clearDraftReport();
 
       showSnakBarr(context, LocaleKeys.inspection_submitted.tr());
