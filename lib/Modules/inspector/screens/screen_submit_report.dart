@@ -40,6 +40,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     with TickerProviderStateMixin {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _overallNotesController = TextEditingController();
+  final Map<String, TextEditingController> _categoryNotesControllers = {};
   late AnimationController _headerAnimController;
   late Animation<double> _headerAnimation;
 
@@ -74,6 +75,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   @override
   void dispose() {
     _overallNotesController.dispose();
+    for (final controller in _categoryNotesControllers.values) {
+      controller.dispose();
+    }
     _headerAnimController.dispose();
     super.dispose();
   }
@@ -99,7 +103,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         }
 
         // Check notes
-        if (provider.getCategoryNotes(categoryId).isNotEmpty) {
+        final controller = _categoryNotesControllers[categoryId];
+        final noteText =
+            controller?.text ?? provider.getCategoryNotes(categoryId);
+        if (noteText.isNotEmpty) {
           hasNotes = true;
         }
 
@@ -141,8 +148,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             scores[categoryId] = score;
           }
 
-          // Get notes
-          final note = provider.getCategoryNotes(categoryId);
+          // Get notes from controller (which has the latest unsaved changes)
+          final controller = _categoryNotesControllers[categoryId];
+          final note =
+              controller?.text ?? provider.getCategoryNotes(categoryId);
           if (note.isNotEmpty) {
             notes[categoryId] = note;
           }
@@ -216,7 +225,13 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       // Load notes
       final notes = draftData['notes'] as Map<String, dynamic>? ?? {};
       for (final entry in notes.entries) {
-        provider.setCategoryNotes(entry.key, entry.value as String);
+        final noteText = entry.value as String;
+        provider.setCategoryNotes(entry.key, noteText);
+        // Also set the controller text
+        if (!_categoryNotesControllers.containsKey(entry.key)) {
+          _categoryNotesControllers[entry.key] = TextEditingController();
+        }
+        _categoryNotesControllers[entry.key]!.text = noteText;
       }
 
       // Load overall notes
@@ -536,11 +551,27 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                                           entry.value.categoryId,
                                           val,
                                         ),
-                                    onNotesChanged: (val) =>
-                                        provider.setCategoryNotes(
-                                          entry.value.categoryId,
-                                          val,
-                                        ),
+                                    onNotesChanged: (val) {
+                                      provider.setCategoryNotes(
+                                        entry.value.categoryId,
+                                        val,
+                                      );
+                                      // Also update the controller
+                                      if (!_categoryNotesControllers
+                                          .containsKey(
+                                            entry.value.categoryId,
+                                          )) {
+                                        _categoryNotesControllers[entry
+                                                .value
+                                                .categoryId] =
+                                            TextEditingController();
+                                      }
+                                      _categoryNotesControllers[entry
+                                                  .value
+                                                  .categoryId]!
+                                              .text =
+                                          val;
+                                    },
                                     onPhotoRemoved: (val) =>
                                         provider.removeCategoryPhoto(
                                           entry.value.categoryId,
@@ -661,6 +692,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     required Function(String) onNotesChanged,
     required Function(File) onPhotoRemoved,
   }) {
+    // Get or create controller for this category
+    if (!_categoryNotesControllers.containsKey(category)) {
+      _categoryNotesControllers[category] = TextEditingController(text: notes);
+    }
+    final notesController = _categoryNotesControllers[category]!;
     final bool isRequired = score >= 3;
     final List<Map<String, dynamic>> allRatings = [
       {
@@ -936,6 +972,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                 ],
               ),
               child: TextField(
+                controller: notesController,
                 onChanged: onNotesChanged,
                 maxLines: 3,
                 style: const TextStyle(color: Colors.white, fontSize: 14),

@@ -146,6 +146,7 @@ class ProviderControl extends ChangeNotifier {
 
   void setCategoryNotes(String categoryId, String value) {
     _notes[categoryId] = value;
+    notifyListeners();
   }
 
   void addCategoryPhoto(String categoryId, File file) {
