@@ -47,7 +47,7 @@ class ProviderRoute extends ChangeNotifier {
     if (_filterDate == null) return stops;
 
     final filterKey =
-        "${_filterDate!.year}-${_filterDate!.month}-${_filterDate!.day}";
+        "${_filterDate!.year}-${_filterDate!.month.toString().padLeft(2, '0')}-${_filterDate!.day.toString().padLeft(2, '0')}";
     return stops.where((stop) => stop.timeSlot == filterKey).toList();
   }
 

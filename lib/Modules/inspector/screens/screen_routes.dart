@@ -12,6 +12,8 @@ import '../widgets/route_picker_dialog.dart';
 import 'common_methods.dart';
 import 'screen_submit_report.dart';
 
+enum RouteFilter { all, today, missed, upcoming }
+
 class ScreenRoutes extends StatefulWidget {
   const ScreenRoutes({super.key});
 
@@ -20,6 +22,8 @@ class ScreenRoutes extends StatefulWidget {
 }
 
 class _ScreenRoutesState extends State<ScreenRoutes> {
+  RouteFilter _selectedFilter = RouteFilter.today;
+
   Future<void> _selectDate(BuildContext context, ProviderRoute provider) async {
     final String? picked = await pickRouteDate(
       context,
@@ -39,9 +43,69 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
     }
   }
 
+  List<RouteStopModel> _getFilteredStops(ProviderRoute provider) {
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final todayKey = DateFormat('yyyy-MM-dd').format(today);
+
+    switch (_selectedFilter) {
+      case RouteFilter.all:
+        return provider.stops;
+
+      case RouteFilter.today:
+        return provider.stops
+            .where((stop) => stop.timeSlot == todayKey)
+            .toList();
+
+      case RouteFilter.missed:
+        return provider.stops.where((stop) {
+          if (stop.status == AppConstants.completed) return false;
+
+          // Parse the stop date
+          final parts = stop.timeSlot.split('-');
+          if (parts.length != 3) return false;
+          final stopDate = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+
+          return stopDate.isBefore(todayDate);
+        }).toList();
+
+      case RouteFilter.upcoming:
+        return provider.stops.where((stop) {
+          // Parse the stop date
+          final parts = stop.timeSlot.split('-');
+          if (parts.length != 3) return false;
+          final stopDate = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+
+          return stopDate.isAfter(todayDate);
+        }).toList();
+    }
+  }
+
+  String _getEmptyStateMessage() {
+    switch (_selectedFilter) {
+      case RouteFilter.all:
+        return LocaleKeys.no_route_today.tr();
+      case RouteFilter.today:
+        return LocaleKeys.no_route_today.tr();
+      case RouteFilter.missed:
+        return '${LocaleKeys.no.tr()} ${LocaleKeys.overdue.tr().toLowerCase()} ${LocaleKeys.stops.tr().toLowerCase()}';
+      case RouteFilter.upcoming:
+        return '${LocaleKeys.no.tr()} upcoming ${LocaleKeys.stops.tr().toLowerCase()}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final routeProvider = Provider.of<ProviderRoute>(context);
+    final displayStops = _getFilteredStops(routeProvider);
 
     return Scaffold(
       body: Container(
@@ -59,15 +123,18 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
         ),
         child: Column(
           children: [
-            _buildHeader(routeProvider),
-            Expanded(child: _buildRouteContent(routeProvider)),
+            _buildHeader(routeProvider, displayStops),
+            Expanded(child: _buildRouteContent(routeProvider, displayStops)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(ProviderRoute provider) {
+  Widget _buildHeader(
+    ProviderRoute provider,
+    List<RouteStopModel> displayStops,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       color: Colors.transparent,
@@ -208,93 +275,145 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
               ],
             ],
           ),
-          if (provider.allRoute != null) ...[
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      spacing: 4,
-                      children: [
-                        _buildStatChip(
-                          icon: Icons.location_on,
-                          label:
-                              '${provider.filteredStops.length} ${LocaleKeys.stops.tr()}',
-                          color: Colors.white,
-                        ),
-                        _buildStatChip(
-                          icon: Icons.check_circle,
-                          label:
-                              '${provider.filteredCompletedCount} ${LocaleKeys.done.tr()}',
-                          color: Colors.green.shade300,
-                        ),
-                        _buildStatChip(
-                          icon: Icons.pending,
-                          label:
-                              '${provider.filteredStops.length - provider.filteredCompletedCount} ${LocaleKeys.left.tr()}',
-                          color: Colors.orange.shade300,
-                        ),
-                        if (provider.filteredOverdueCount > 0)
-                          _buildStatChip(
-                            icon: Icons.alarm,
-                            label:
-                                '${provider.filteredOverdueCount} ${LocaleKeys.overdue.tr()}',
-                            color: Colors.orange.shade300,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: provider.filteredProgressValue,
-                backgroundColor: AppColors.white,
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-                minHeight: 8,
-              ),
-            ),
-          ],
+          const SizedBox(height: 16),
+          _buildFilterChips(),
         ],
       ),
     );
   }
 
-  Widget _buildStatChip({
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(6),
-      ),
+  Widget _buildFilterChips() {
+    final routeProvider = Provider.of<ProviderRoute>(context, listen: false);
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+          _buildFilterChip(
+            label: 'All',
+            filter: RouteFilter.all,
+            icon: Icons.list,
+            count: routeProvider.stops.length,
+          ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: LocaleKeys.today.tr(),
+            filter: RouteFilter.today,
+            icon: Icons.today,
+            count: _getFilterCount(RouteFilter.today, routeProvider),
+          ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: LocaleKeys.overdue.tr(),
+            filter: RouteFilter.missed,
+            icon: Icons.warning,
+            count: _getFilterCount(RouteFilter.missed, routeProvider),
+          ),
+          const SizedBox(width: 8),
+          _buildFilterChip(
+            label: 'Upcoming',
+            filter: RouteFilter.upcoming,
+            icon: Icons.schedule,
+            count: _getFilterCount(RouteFilter.upcoming, routeProvider),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRouteContent(ProviderRoute provider) {
+  Widget _buildFilterChip({
+    required String label,
+    required RouteFilter filter,
+    required IconData icon,
+    required int count,
+  }) {
+    final isSelected = _selectedFilter == filter;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedFilter = filter;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryRed.withValues(alpha: 0.8)
+              : Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.primaryRed
+                : Colors.white.withValues(alpha: 0.3),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: Colors.white),
+            const SizedBox(width: 6),
+            Text(
+              '$label ($count)',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  int _getFilterCount(RouteFilter filter, ProviderRoute provider) {
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    final todayKey = DateFormat('yyyy-MM-dd').format(today);
+
+    switch (filter) {
+      case RouteFilter.all:
+        return provider.stops.length;
+
+      case RouteFilter.today:
+        return provider.stops.where((stop) => stop.timeSlot == todayKey).length;
+
+      case RouteFilter.missed:
+        return provider.stops.where((stop) {
+          if (stop.status == AppConstants.completed) return false;
+
+          final parts = stop.timeSlot.split('-');
+          if (parts.length != 3) return false;
+          final stopDate = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+
+          return stopDate.isBefore(todayDate);
+        }).length;
+
+      case RouteFilter.upcoming:
+        return provider.stops.where((stop) {
+          final parts = stop.timeSlot.split('-');
+          if (parts.length != 3) return false;
+          final stopDate = DateTime(
+            int.parse(parts[0]),
+            int.parse(parts[1]),
+            int.parse(parts[2]),
+          );
+
+          return stopDate.isAfter(todayDate);
+        }).length;
+    }
+  }
+
+  Widget _buildRouteContent(
+    ProviderRoute provider,
+    List<RouteStopModel> displayStops,
+  ) {
     if (provider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -332,9 +451,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
       );
     }
 
-    final displayStops = provider.filteredStops;
-
-    if (displayStops.isEmpty && provider.filterDate != null) {
+    if (displayStops.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -342,14 +459,15 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
             Icon(Icons.event_busy, size: 64, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
-              LocaleKeys.no_stops_for_date.tr(),
+              _getEmptyStateMessage(),
               style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
-              onPressed: () => provider.clearDateFilter(),
-              icon: const Icon(Icons.clear),
-              label: Text(LocaleKeys.show_all_routes.tr()),
+              onPressed: () =>
+                  setState(() => _selectedFilter = RouteFilter.today),
+              icon: const Icon(Icons.today),
+              label: Text(LocaleKeys.today.tr()),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryRed,
                 foregroundColor: Colors.white,
