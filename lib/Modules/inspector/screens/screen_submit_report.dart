@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -55,7 +57,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     );
     _headerAnimController.forward();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final controlProvider = context.read<ProviderControl>();
 
       controlProvider.initialize(
@@ -63,6 +65,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         widget.branchId!,
         widget.branchTemplateId!,
       );
+
+      // Load draft report after initialization
+      await _loadDraftReport(controlProvider);
     });
   }
 
@@ -71,6 +76,269 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     _overallNotesController.dispose();
     _headerAnimController.dispose();
     super.dispose();
+  }
+
+  // Draft saving and loading methods
+  String _getDraftKey() {
+    return 'draft_report_${widget.branchId ?? widget.selectedBranch?.id ?? 'unknown'}';
+  }
+
+  bool _hasUnsavedData(ProviderControl provider) {
+    // Check if any data has been entered
+    bool hasScores = false;
+    bool hasNotes = false;
+    bool hasPhotos = false;
+
+    if (provider.selectedTemplate != null) {
+      for (final category in provider.selectedTemplate!.categories) {
+        final categoryId = category.categoryId;
+
+        // Check scores
+        if (provider.getCategoryScore(categoryId) > 0) {
+          hasScores = true;
+        }
+
+        // Check notes
+        if (provider.getCategoryNotes(categoryId).isNotEmpty) {
+          hasNotes = true;
+        }
+
+        // Check photos
+        if (provider.getCategoryPhotos(categoryId).isNotEmpty) {
+          hasPhotos = true;
+        }
+      }
+    }
+
+    final hasOverallNotes = _overallNotesController.text.isNotEmpty;
+    final hasSignatures =
+        provider.inspectorSignature != null || provider.branchSignature != null;
+
+    return hasScores ||
+        hasNotes ||
+        hasPhotos ||
+        hasOverallNotes ||
+        hasSignatures;
+  }
+
+  Future<void> _saveDraftReport(ProviderControl provider) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final draftKey = _getDraftKey();
+
+      // Collect data from all categories
+      final scores = <String, int>{};
+      final notes = <String, String>{};
+      final photosData = <String, List<String>>{};
+
+      if (provider.selectedTemplate != null) {
+        for (final category in provider.selectedTemplate!.categories) {
+          final categoryId = category.categoryId;
+
+          // Get scores
+          final score = provider.getCategoryScore(categoryId);
+          if (score > 0) {
+            scores[categoryId] = score;
+          }
+
+          // Get notes
+          final note = provider.getCategoryNotes(categoryId);
+          if (note.isNotEmpty) {
+            notes[categoryId] = note;
+          }
+
+          // Get photos and convert to base64
+          final photos = provider.getCategoryPhotos(categoryId);
+          if (photos.isNotEmpty) {
+            final photoList = <String>[];
+            for (final photo in photos) {
+              try {
+                final bytes = await photo.readAsBytes();
+                final base64String = base64Encode(bytes);
+                photoList.add(base64String);
+              } catch (e) {
+                // Skip photos that can't be read
+                continue;
+              }
+            }
+            if (photoList.isNotEmpty) {
+              photosData[categoryId] = photoList;
+            }
+          }
+        }
+      }
+
+      final draftData = {
+        'scores': scores,
+        'notes': notes,
+        'overallNotes': _overallNotesController.text,
+        'photos': photosData,
+        'inspectorSignature': provider.inspectorSignature != null
+            ? base64Encode(provider.inspectorSignature!)
+            : null,
+        'branchSignature': provider.branchSignature != null
+            ? base64Encode(provider.branchSignature!)
+            : null,
+        'savedAt': DateTime.now().toIso8601String(),
+        'branchId': widget.branchId ?? widget.selectedBranch?.id ?? '',
+        'branchTemplateId': widget.branchTemplateId ?? '',
+      };
+
+      final jsonData = jsonEncode(draftData);
+      await prefs.setString(draftKey, jsonData);
+
+      if (mounted) {
+        showSnakBarr(context, 'Draft saved successfully');
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnakBarr(context, 'Failed to save draft');
+      }
+    }
+  }
+
+  Future<void> _loadDraftReport(ProviderControl provider) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final draftKey = _getDraftKey();
+
+      final jsonData = prefs.getString(draftKey);
+      if (jsonData == null) return;
+
+      final draftData = jsonDecode(jsonData) as Map<String, dynamic>;
+
+      // Load scores
+      final scores = draftData['scores'] as Map<String, dynamic>? ?? {};
+      for (final entry in scores.entries) {
+        provider.setCategoryScore(entry.key, entry.value as int);
+      }
+
+      // Load notes
+      final notes = draftData['notes'] as Map<String, dynamic>? ?? {};
+      for (final entry in notes.entries) {
+        provider.setCategoryNotes(entry.key, entry.value as String);
+      }
+
+      // Load overall notes
+      final overallNotes = draftData['overallNotes'] as String? ?? '';
+      _overallNotesController.text = overallNotes;
+
+      // Load photos - Note: We need to add photos one by one since there's no bulk setter
+      final photosData = draftData['photos'] as Map<String, dynamic>? ?? {};
+      for (final entry in photosData.entries) {
+        final categoryId = entry.key;
+        final photoList = entry.value as List<dynamic>;
+
+        for (final photoBase64 in photoList) {
+          try {
+            final bytes = base64Decode(photoBase64 as String);
+            final tempDir = await Directory.systemTemp.createTemp();
+            final tempFile = File(
+              '${tempDir.path}/draft_photo_${DateTime.now().millisecondsSinceEpoch}.jpg',
+            );
+            await tempFile.writeAsBytes(bytes);
+            provider.addCategoryPhoto(categoryId, tempFile);
+          } catch (e) {
+            // Skip corrupted photos
+            continue;
+          }
+        }
+      }
+
+      // Load signatures
+      final inspectorSignatureBase64 =
+          draftData['inspectorSignature'] as String?;
+      if (inspectorSignatureBase64 != null) {
+        try {
+          provider.inspectorSignature = base64Decode(inspectorSignatureBase64);
+        } catch (e) {
+          // Skip corrupted signature
+        }
+      }
+
+      final branchSignatureBase64 = draftData['branchSignature'] as String?;
+      if (branchSignatureBase64 != null) {
+        try {
+          provider.branchSignature = base64Decode(branchSignatureBase64);
+        } catch (e) {
+          // Skip corrupted signature
+        }
+      }
+
+      if (mounted) {
+        showSnakBarr(context, 'Draft report loaded');
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnakBarr(context, 'Failed to load draft report');
+      }
+    }
+  }
+
+  Future<void> _clearDraftReport() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final draftKey = _getDraftKey();
+      await prefs.remove(draftKey);
+    } catch (e) {
+      // Ignore errors when clearing draft
+    }
+  }
+
+  Future<bool> _showSaveDraftDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            backgroundColor: AppColors.lightBlack,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: Text(
+              'Unsubmitted Report',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: Text(
+              'You have an unsubmitted report. Do you want to save it as a draft?',
+              style: const TextStyle(color: Colors.white70),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'No',
+                  style: TextStyle(color: Colors.grey.shade400),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryRed,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Yes, Save Draft'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<void> _handleBackPress(ProviderControl provider) async {
+    if (_hasUnsavedData(provider)) {
+      final shouldSave = await _showSaveDraftDialog();
+      if (shouldSave) {
+        await _saveDraftReport(provider);
+      } else {
+        await _clearDraftReport();
+      }
+    }
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   Future<void> _pickFromGallery(String category) async {
@@ -150,151 +418,163 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primaryDark,
-      extendBodyBehindAppBar: true,
-
-      body: Consumer<ProviderControl>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: AppColors.lightBlack,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const CircularProgressIndicator(
-                      color: AppColors.primaryRed,
-                      strokeWidth: 3,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    LocaleKeys.loadingInspection.tr(),
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                ],
-              ),
-            );
-          }
-          final template = provider.selectedTemplate;
-
-          return Stack(
-            children: [
-              // Gradient Background
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      AppColors.primaryRed.withValues(alpha: 0.1),
-                      AppColors.primaryDark,
-                      AppColors.primaryDark,
-                    ],
-                    stops: const [0.0, 0.3, 1.0],
-                  ),
-                ),
-              ),
-
-              Column(
-                children: [
-                  // Enhanced Header
-                  FadeTransition(
-                    opacity: _headerAnimation,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, -0.5),
-                        end: Offset.zero,
-                      ).animate(_headerAnimation),
-                      child: _buildEnhancedHeader(provider),
-                    ),
-                  ),
-
-                  // Content
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (template != null)
-                            ...template.categories.asMap().entries.map((entry) {
-                              return TweenAnimationBuilder<double>(
-                                duration: Duration(
-                                  milliseconds: 400 + (entry.key * 100),
-                                ),
-                                tween: Tween(begin: 0.0, end: 1.0),
-                                curve: Curves.easeOutCubic,
-                                builder: (context, value, child) {
-                                  return Opacity(
-                                    opacity: value,
-                                    child: Transform.translate(
-                                      offset: Offset(0, 20 * (1 - value)),
-                                      child: child,
-                                    ),
-                                  );
-                                },
-                                child: _buildEnhancedQuestionCard(
-                                  maxScore: entry.value.maxScore,
-                                  title: entry.value.title,
-                                  category: entry.value.categoryId,
-                                  score: provider.getCategoryScore(
-                                    entry.value.categoryId,
-                                  ),
-                                  photos: provider.getCategoryPhotos(
-                                    entry.value.categoryId,
-                                  ),
-                                  notes: provider.getCategoryNotes(
-                                    entry.value.categoryId,
-                                  ),
-                                  onScoreChanged: (val) =>
-                                      provider.setCategoryScore(
-                                        entry.value.categoryId,
-                                        val,
-                                      ),
-                                  onNotesChanged: (val) =>
-                                      provider.setCategoryNotes(
-                                        entry.value.categoryId,
-                                        val,
-                                      ),
-                                  onPhotoRemoved: (val) =>
-                                      provider.removeCategoryPhoto(
-                                        entry.value.categoryId,
-                                        val,
-                                      ),
-                                ),
-                              );
-                            }).toList()
-                          else
-                            _buildEmptyState(),
-
-                          const SizedBox(height: 16),
-                          _buildEnhancedOverallNotes(provider),
-                          const SizedBox(height: 16),
-                          _buildEnhancedSignatureSection(provider),
-                          const SizedBox(height: 24),
-                          _buildEnhancedActions(provider),
-                        ],
+    return WillPopScope(
+      onWillPop: () async {
+        final provider = context.read<ProviderControl>();
+        await _handleBackPress(provider);
+        return false; // Prevent default back behavior since we handle it manually
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.primaryDark,
+        extendBodyBehindAppBar: true,
+        body: Consumer<ProviderControl>(
+          builder: (context, provider, child) {
+            if (provider.isLoading) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppColors.lightBlack,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const CircularProgressIndicator(
+                        color: AppColors.primaryRed,
+                        strokeWidth: 3,
                       ),
                     ),
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 20),
+                    Text(
+                      LocaleKeys.loadingInspection.tr(),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+            final template = provider.selectedTemplate;
 
-              // Upload Progress Overlay
-              if (provider.isSubmitting &&
-                  provider.isUploading &&
-                  provider.currentUploadStage != null)
-                _buildEnhancedUploadOverlay(provider),
-            ],
-          );
-        },
+            return Stack(
+              children: [
+                // Gradient Background
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        AppColors.primaryRed.withValues(alpha: 0.1),
+                        AppColors.primaryDark,
+                        AppColors.primaryDark,
+                      ],
+                      stops: const [0.0, 0.3, 1.0],
+                    ),
+                  ),
+                ),
+
+                Column(
+                  children: [
+                    // Enhanced Header
+                    FadeTransition(
+                      opacity: _headerAnimation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0, -0.5),
+                          end: Offset.zero,
+                        ).animate(_headerAnimation),
+                        child: _buildEnhancedHeader(provider),
+                      ),
+                    ),
+
+                    // Content
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (template != null)
+                              ...template.categories.asMap().entries.map((
+                                entry,
+                              ) {
+                                return TweenAnimationBuilder<double>(
+                                  duration: Duration(
+                                    milliseconds: 400 + (entry.key * 100),
+                                  ),
+                                  tween: Tween(begin: 0.0, end: 1.0),
+                                  curve: Curves.easeOutCubic,
+                                  builder: (context, value, child) {
+                                    return Opacity(
+                                      opacity: value,
+                                      child: Transform.translate(
+                                        offset: Offset(0, 20 * (1 - value)),
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: _buildEnhancedQuestionCard(
+                                    maxScore: entry.value.maxScore,
+                                    title: entry.value.title,
+                                    category: entry.value.categoryId,
+                                    score: provider.getCategoryScore(
+                                      entry.value.categoryId,
+                                    ),
+                                    photos: provider.getCategoryPhotos(
+                                      entry.value.categoryId,
+                                    ),
+                                    notes: provider.getCategoryNotes(
+                                      entry.value.categoryId,
+                                    ),
+                                    onScoreChanged: (val) =>
+                                        provider.setCategoryScore(
+                                          entry.value.categoryId,
+                                          val,
+                                        ),
+                                    onNotesChanged: (val) =>
+                                        provider.setCategoryNotes(
+                                          entry.value.categoryId,
+                                          val,
+                                        ),
+                                    onPhotoRemoved: (val) =>
+                                        provider.removeCategoryPhoto(
+                                          entry.value.categoryId,
+                                          val,
+                                        ),
+                                  ),
+                                );
+                              }).toList()
+                            else
+                              _buildEmptyState(),
+
+                            const SizedBox(height: 16),
+                            _buildEnhancedOverallNotes(provider),
+                            const SizedBox(height: 16),
+                            _buildEnhancedSignatureSection(provider),
+                            const SizedBox(height: 24),
+                            _buildEnhancedActions(provider),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Upload Progress Overlay
+                ...(provider.isSubmitting &&
+                        provider.isUploading &&
+                        provider.currentUploadStage != null
+                    ? [_buildEnhancedUploadOverlay(provider)]
+                    : []),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -311,7 +591,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () async {
+                final provider = context.read<ProviderControl>();
+                await _handleBackPress(provider);
+              },
             ),
           ),
           Expanded(
@@ -1757,6 +2040,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     if (!mounted) return;
 
     if (success) {
+      // Clear draft report after successful submission
+      await _clearDraftReport();
+
       showSnakBarr(context, LocaleKeys.inspection_submitted.tr());
 
       // ✅ Navigate properly based on source
