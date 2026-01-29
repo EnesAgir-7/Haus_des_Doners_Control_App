@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
+import 'package:haus_des_control/core/console.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -42,6 +43,8 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _overallNotesController = TextEditingController();
   final Map<String, TextEditingController> _categoryNotesControllers = {};
+  // Track which questions/categories are enabled (applicable). Default is true.
+  final Map<String, bool> _enabledCategories = {};
   late AnimationController _headerAnimController;
   late Animation<double> _headerAnimation;
   Timer? _autoSaveTimer;
@@ -107,6 +110,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     if (provider.selectedTemplate != null) {
       for (final category in provider.selectedTemplate!.categories) {
         final categoryId = category.categoryId;
+        // Skip disabled categories – they are considered not part of the form
+        final isEnabled = _enabledCategories[categoryId] ?? true;
+        if (!isEnabled) continue;
 
         // Check scores
         if (provider.getCategoryScore(categoryId) > 0) {
@@ -193,6 +199,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         'notes': notes,
         'overallNotes': _overallNotesController.text,
         'photos': photosData,
+        // Persist which questions are enabled/disabled
+        'enabledCategories': _enabledCategories.map(
+          (key, value) => MapEntry(key, value),
+        ),
         'inspectorSignature': provider.inspectorSignature != null
             ? base64Encode(provider.inspectorSignature!)
             : null,
@@ -211,13 +221,15 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       final savedHash = _generateStateHash(provider);
 
       if (mounted) {
-        showSnakBarr(context, 'Draft saved successfully');
+        console("Draft saved successfully");
+        // showSnakBarr(context, 'Draft saved successfully');
       }
 
       return savedHash;
     } catch (e) {
       if (mounted) {
-        showSnakBarr(context, 'Failed to save draft');
+        console("Failed to save draft: $e");
+        // showSnakBarr(context, 'Failed to save draft');
       }
       return null;
     }
@@ -254,6 +266,15 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       // Load overall notes
       final overallNotes = draftData['overallNotes'] as String? ?? '';
       _overallNotesController.text = overallNotes;
+
+      // Load enabled/disabled state for questions (optional)
+      final enabledCategories =
+          draftData['enabledCategories'] as Map<String, dynamic>? ?? {};
+      _enabledCategories
+        ..clear()
+        ..addAll(
+          enabledCategories.map((key, value) => MapEntry(key, value as bool)),
+        );
 
       // Load photos - Note: We need to add photos one by one since there's no bulk setter
       final photosData = draftData['photos'] as Map<String, dynamic>? ?? {};
@@ -313,6 +334,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       final draftKey = _getDraftKey();
       await prefs.remove(draftKey);
       _lastSavedHash = null;
+      _enabledCategories.clear();
     } catch (e) {
       // Ignore errors when clearing draft
     }
@@ -337,6 +359,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         // Add photo count
         final photos = provider.getCategoryPhotos(categoryId);
         buffer.write('photos_$categoryId:${photos.length}|');
+
+        // Add enabled/disabled state
+        final isEnabled = _enabledCategories[categoryId] ?? true;
+        buffer.write('enabled_$categoryId:$isEnabled|');
       }
     }
 
@@ -825,7 +851,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       _categoryNotesControllers[category] = TextEditingController(text: notes);
     }
     final notesController = _categoryNotesControllers[category]!;
-    final bool isRequired = score >= 3;
+
+    // Question enabled/disabled state (defaults to true)
+    final bool isEnabled = _enabledCategories[category] ?? true;
+
+    final bool isRequired = isEnabled && score >= 3;
     final List<Map<String, dynamic>> allRatings = [
       {
         'emoji': '😃',
@@ -856,7 +886,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         .take(maxScore)
         .toList();
 
-    return Container(
+    final card = Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -888,7 +918,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       ),
       child: Column(
         children: [
-          // Title Header
+          // Title Header (with enable/disable switch) - ALWAYS INTERACTIVE
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
@@ -993,297 +1023,367 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                       ),
                     ],
                   ),
+                const SizedBox(width: 8),
+                Transform.scale(
+                  scale: 0.8, // Make switch smaller
+                  child: Switch(
+                    value: isEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _enabledCategories[category] = value;
+                        if (!value) {
+                          final provider = context.read<ProviderControl>();
+                          // Clear score
+                          provider.setCategoryScore(category, 0);
+                          // Clear notes
+                          provider.setCategoryNotes(category, '');
+                          notesController.clear();
+                          // Clear photos
+                          final photosForCat = provider
+                              .getCategoryPhotos(category)
+                              .toList();
+                          for (final photo in photosForCat) {
+                            provider.removeCategoryPhoto(category, photo);
+                          }
+                        }
+                      });
+                    },
+                    activeColor: AppColors.primaryRed,
+                    inactiveThumbColor: Colors.grey,
+                    inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
               ],
             ),
           ),
 
-          // Rating Buttons - Dynamic based on maxScore
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Row(
-              children: List.generate(maxScore, (index) {
-                final rating = index + 1;
-                final isSelected = score == rating;
-                final ratingData = ratings[index];
-                final ratingColor = ratingData['color'] as Color;
+          // Card content (rating buttons, photos, notes) - DISABLED WHEN !isEnabled
+          IgnorePointer(
+            ignoring: !isEnabled,
+            child: Opacity(
+              opacity: isEnabled ? 1.0 : 0.4,
+              child: Column(
+                children: [
+                  // Rating Buttons - Dynamic based on maxScore
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 20,
+                    ),
+                    child: Row(
+                      children: List.generate(maxScore, (index) {
+                        final rating = index + 1;
+                        final isSelected = score == rating;
+                        final ratingData = ratings[index];
+                        final ratingColor = ratingData['color'] as Color;
 
-                return Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: GestureDetector(
-                      onTap: () => onScoreChanged(rating),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeOutCubic,
-                        height: 70,
-                        decoration: BoxDecoration(
-                          gradient: isSelected
-                              ? LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    ratingColor,
-                                    ratingColor.withValues(alpha: 0.8),
-                                  ],
-                                )
-                              : LinearGradient(
-                                  colors: [
-                                    Colors.white.withValues(alpha: 0.05),
-                                    Colors.white.withValues(alpha: 0.02),
-                                  ],
-                                ),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isSelected
-                                ? ratingColor
-                                : Colors.white.withValues(alpha: 0.1),
-                            width: isSelected ? 2 : 1,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: ratingColor.withValues(alpha: 0.4),
-                                    blurRadius: 12,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ]
-                              : null,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              rating.toString(),
-                              style: TextStyle(
-                                fontSize: isSelected ? 23 : 20,
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                color: isSelected
-                                    ? Colors.white
-                                    : Colors.white70,
-                              ),
-                            ),
-                            if (isSelected) ...[
-                              Text(
-                                ratingData['label'],
-                                style: const TextStyle(
-                                  fontSize: 9,
-                                  color: Colors.white70,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-
-          // Notes TextField
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: TextField(
-                controller: notesController,
-                onChanged: onNotesChanged,
-                maxLines: 3,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: isRequired
-                      ? '${LocaleKeys.add_notes_optional.tr()} 🛑 ${LocaleKeys.required.tr()}'
-                      : '${LocaleKeys.add_notes_optional.tr()}',
-                  hintStyle: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.3),
-                  ),
-                  filled: true,
-                  fillColor: Colors.black.withValues(alpha: 0.3),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: Colors.white.withValues(alpha: 0.1),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(
-                      color: score > 0
-                          ? ratings[score - 1]['color'] as Color
-                          : AppColors.primaryRed,
-                      width: 2,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.all(16),
-                ),
-              ),
-            ),
-          ),
-
-          // Photos Section (unchanged)
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  spacing: 13,
-                  children: [
-                    Expanded(
-                      child: AppButton(
-                        text:
-                            '${LocaleKeys.take_photo.tr()} (${photos.length}/4)',
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        icon: photos.length < 4
-                            ? Icons.camera_alt
-                            : Icons.check_circle,
-                        onPressed: photos.length < 4
-                            ? () => _takePhoto(category)
-                            : null,
-                        backgroundColor: photos.length < 4
-                            ? AppColors.primaryRed
-                            : Colors.green,
-                        height: 48,
-                      ),
-                    ),
-                    Expanded(
-                      child: AppButton(
-                        text: '${LocaleKeys.browse.tr()} (${photos.length}/4)',
-                        textStyle: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        icon: photos.length < 4
-                            ? Icons.camera_alt
-                            : Icons.check_circle,
-                        onPressed: photos.length < 4
-                            ? () => _pickFromGallery(category)
-                            : null,
-                        backgroundColor: photos.length < 4
-                            ? AppColors.primaryRed
-                            : Colors.green,
-                        height: 48,
-                      ),
-                    ),
-                  ],
-                ),
-                if (photos.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 110,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: photos.length,
-                      itemBuilder: (context, index) {
-                        return TweenAnimationBuilder<double>(
-                          duration: Duration(milliseconds: 300 + (index * 50)),
-                          tween: Tween(begin: 0.0, end: 1.0),
-                          curve: Curves.easeOutBack,
-                          builder: (context, value, child) {
-                            return Transform.scale(scale: value, child: child);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            child: Stack(
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.3,
-                                        ),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
-                                    child: Image.file(
-                                      photos[index],
-                                      width: 110,
-                                      height: 110,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 6,
-                                  right: 6,
-                                  child: GestureDetector(
-                                    onTap: () => onPhotoRemoved(photos[index]),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(6),
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
+                        return Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: GestureDetector(
+                              onTap: () => onScoreChanged(rating),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                curve: Curves.easeOutCubic,
+                                height: 70,
+                                decoration: BoxDecoration(
+                                  gradient: isSelected
+                                      ? LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
                                           colors: [
-                                            Colors.red,
-                                            Colors.red.shade700,
+                                            ratingColor,
+                                            ratingColor.withValues(alpha: 0.8),
+                                          ],
+                                        )
+                                      : LinearGradient(
+                                          colors: [
+                                            Colors.white.withValues(
+                                              alpha: 0.05,
+                                            ),
+                                            Colors.white.withValues(
+                                              alpha: 0.02,
+                                            ),
                                           ],
                                         ),
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? ratingColor
+                                        : Colors.white.withValues(alpha: 0.1),
+                                    width: isSelected ? 2 : 1,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? [
                                           BoxShadow(
-                                            color: Colors.red.withValues(
-                                              alpha: 0.5,
+                                            color: ratingColor.withValues(
+                                              alpha: 0.4,
                                             ),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 3),
                                           ),
-                                        ],
-                                      ),
-                                      child: const Icon(
-                                        Icons.close,
-                                        size: 16,
-                                        color: Colors.white,
+                                        ]
+                                      : null,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      rating.toString(),
+                                      style: TextStyle(
+                                        fontSize: isSelected ? 23 : 20,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.white70,
                                       ),
                                     ),
-                                  ),
+                                    if (isSelected) ...[
+                                      Text(
+                                        ratingData['label'],
+                                        style: const TextStyle(
+                                          fontSize: 9,
+                                          color: Colors.white70,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         );
-                      },
+                      }),
                     ),
                   ),
-                ] else ...[
-                  const SizedBox(height: 10),
-                  if (isRequired && photos.isEmpty)
-                    Text(
-                      '${LocaleKeys.atLeast1PhotoRequired.tr()}',
-                      style: const TextStyle(color: Colors.red, fontSize: 12),
+
+                  // Notes TextField
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: notesController,
+                        onChanged: onNotesChanged,
+                        maxLines: 3,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: isRequired
+                              ? '${LocaleKeys.add_notes_optional.tr()} 🛑 ${LocaleKeys.required.tr()}'
+                              : '${LocaleKeys.add_notes_optional.tr()}',
+                          hintStyle: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.3),
+                          ),
+                          filled: true,
+                          fillColor: Colors.black.withValues(alpha: 0.3),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: Colors.white.withValues(alpha: 0.1),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: score > 0
+                                  ? ratings[score - 1]['color'] as Color
+                                  : AppColors.primaryRed,
+                              width: 2,
+                            ),
+                          ),
+                          contentPadding: const EdgeInsets.all(16),
+                        ),
+                      ),
                     ),
+                  ),
+
+                  // Photos Section (unchanged)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Row(
+                          spacing: 13,
+                          children: [
+                            Expanded(
+                              child: AppButton(
+                                text:
+                                    '${LocaleKeys.take_photo.tr()} (${photos.length}/4)',
+                                textStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                icon: photos.length < 4
+                                    ? Icons.camera_alt
+                                    : Icons.check_circle,
+                                onPressed: photos.length < 4
+                                    ? () => _takePhoto(category)
+                                    : null,
+                                backgroundColor: photos.length < 4
+                                    ? AppColors.primaryRed
+                                    : Colors.green,
+                                height: 48,
+                              ),
+                            ),
+                            Expanded(
+                              child: AppButton(
+                                text:
+                                    '${LocaleKeys.browse.tr()} (${photos.length}/4)',
+                                textStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                icon: photos.length < 4
+                                    ? Icons.camera_alt
+                                    : Icons.check_circle,
+                                onPressed: photos.length < 4
+                                    ? () => _pickFromGallery(category)
+                                    : null,
+                                backgroundColor: photos.length < 4
+                                    ? AppColors.primaryRed
+                                    : Colors.green,
+                                height: 48,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (photos.isNotEmpty) ...[
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: 110,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: photos.length,
+                              itemBuilder: (context, index) {
+                                return TweenAnimationBuilder<double>(
+                                  duration: Duration(
+                                    milliseconds: 300 + (index * 50),
+                                  ),
+                                  tween: Tween(begin: 0.0, end: 1.0),
+                                  curve: Curves.easeOutBack,
+                                  builder: (context, value, child) {
+                                    return Transform.scale(
+                                      scale: value,
+                                      child: child,
+                                    );
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.only(right: 12),
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withValues(
+                                                  alpha: 0.3,
+                                                ),
+                                                blurRadius: 12,
+                                                offset: const Offset(0, 4),
+                                              ),
+                                            ],
+                                          ),
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            child: Image.file(
+                                              photos[index],
+                                              width: 110,
+                                              height: 110,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 6,
+                                          right: 6,
+                                          child: GestureDetector(
+                                            onTap: () =>
+                                                onPhotoRemoved(photos[index]),
+                                            child: Container(
+                                              padding: const EdgeInsets.all(6),
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    Colors.red,
+                                                    Colors.red.shade700,
+                                                  ],
+                                                ),
+                                                shape: BoxShape.circle,
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.red
+                                                        .withValues(alpha: 0.5),
+                                                    blurRadius: 8,
+                                                    offset: const Offset(0, 2),
+                                                  ),
+                                                ],
+                                              ),
+                                              child: const Icon(
+                                                Icons.close,
+                                                size: 16,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ] else ...[
+                          const SizedBox(height: 10),
+                          if (isRequired && photos.isEmpty)
+                            Text(
+                              '${LocaleKeys.atLeast1PhotoRequired.tr()}',
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
+                            ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ],
-              ],
+              ),
             ),
           ),
         ],
       ),
     );
+
+    // Return the card with selective interaction blocking
+    return card;
   }
 
   Widget _buildEnhancedOverallNotes(ProviderControl provider) {
@@ -2082,6 +2182,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
   Future<void> _submitInspection(ProviderControl provider) async {
     for (var category in provider.selectedTemplate!.categories) {
+      // Skip disabled questions – they are treated as not applicable
+      final isEnabled = _enabledCategories[category.categoryId] ?? true;
+      if (!isEnabled) continue;
+
       final score = provider.getCategoryScore(category.categoryId);
       final photos = provider.getCategoryPhotos(category.categoryId);
       final notes = provider.getCategoryNotes(category.categoryId);
