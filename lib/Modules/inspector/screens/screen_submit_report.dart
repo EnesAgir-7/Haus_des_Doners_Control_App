@@ -582,16 +582,22 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop:
+          false, // Prevent default back behavior since we handle it manually
+      onPopInvokedWithResult: (bool didPop, dynamic result) async {
+        // If already popped by system, do nothing
+        if (didPop) {
+          return;
+        }
+
         // Prevent back navigation if save dialog is already open
         if (_isSaveDialogOpen) {
-          return false;
+          return;
         }
 
         final provider = context.read<ProviderControl>();
         await _handleBackPress(provider);
-        return false; // Prevent default back behavior since we handle it manually
       },
       child: Scaffold(
         backgroundColor: AppColors.primaryDark,

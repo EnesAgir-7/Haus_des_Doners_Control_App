@@ -319,6 +319,26 @@ class InspectionPDFGenerator {
         ),
       );
 
+      // Add category notes if available
+      if (category.notes.isNotEmpty) {
+        widgets.add(
+          pw.Container(
+            width: double.infinity,
+            padding: const pw.EdgeInsets.all(8),
+            margin: const pw.EdgeInsets.only(bottom: 10),
+            decoration: pw.BoxDecoration(
+              color: PdfColors.grey100,
+              borderRadius: pw.BorderRadius.circular(4),
+              border: pw.Border.all(color: PdfColors.grey300),
+            ),
+            child: pw.Text(
+              category.notes,
+              style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey800),
+            ),
+          ),
+        );
+      }
+
       widgets.add(
         pw.Wrap(
           spacing: 10,
