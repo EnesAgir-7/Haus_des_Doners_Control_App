@@ -1031,8 +1031,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                     onChanged: (value) {
                       setState(() {
                         _enabledCategories[category] = value;
+                        // Sync enabled categories with provider for validation
+                        final provider = context.read<ProviderControl>();
+                        provider.setEnabledCategories(_enabledCategories);
+
                         if (!value) {
-                          final provider = context.read<ProviderControl>();
                           // Clear score
                           provider.setCategoryScore(category, 0);
                           // Clear notes
@@ -1048,7 +1051,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                         }
                       });
                     },
-                    activeColor: AppColors.primaryRed,
+                    activeThumbColor: AppColors.primaryRed,
                     inactiveThumbColor: Colors.grey,
                     inactiveTrackColor: Colors.grey.withValues(alpha: 0.3),
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

@@ -22,6 +22,8 @@ class InspectionPDFGenerator {
   final Uint8List? inspectorSignature;
   final Uint8List? branchSignature;
   final Map<String, List<File>> categoryPhotos;
+  final Map<String, bool>?
+  enabledCategories; // Track which questions are enabled
 
   InspectionPDFGenerator({
     required this.inspectionId,
@@ -36,6 +38,7 @@ class InspectionPDFGenerator {
     this.inspectorSignature,
     this.branchSignature,
     this.categoryPhotos = const {},
+    this.enabledCategories, // Optional, defaults to all enabled
   });
 
   static pw.Font? _cachedFont;
@@ -186,14 +189,17 @@ class InspectionPDFGenerator {
         ),
         // Data Rows
         ...categories.map((category) {
+          // Check if category is skipped
+          final isSkipped = category.isSkipped ?? false;
           final scoreString = '${category.score}/${category.maxScore}';
           final percentage = calculatePerformancePercent(scoreString);
           final percentValue = int.tryParse(percentage) ?? 0;
           final performanceLevel = _getPerformanceLevel(percentValue);
 
           return pw.Container(
-            decoration: const pw.BoxDecoration(
-              border: pw.Border(
+            decoration: pw.BoxDecoration(
+              color: isSkipped ? PdfColors.grey50 : null,
+              border: const pw.Border(
                 bottom: pw.BorderSide(color: PdfColors.grey300, width: 0.5),
               ),
             ),
@@ -206,11 +212,30 @@ class InspectionPDFGenerator {
                   child: pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
+                      // Title with strikethrough if skipped
                       pw.Text(
                         category.title,
-                        style: const pw.TextStyle(fontSize: 10),
+                        style: pw.TextStyle(
+                          fontSize: 10,
+                          decoration: isSkipped
+                              ? pw.TextDecoration.lineThrough
+                              : null,
+                          color: isSkipped
+                              ? PdfColors.grey600
+                              : PdfColors.black,
+                        ),
                       ),
-                      if (category.notes.isNotEmpty)
+                      // Show "Not Applicable" note if skipped
+                      if (isSkipped)
+                        pw.Text(
+                          "Not Applicable",
+                          style: pw.TextStyle(
+                            fontSize: 8,
+                            color: PdfColors.grey600,
+                            fontStyle: pw.FontStyle.italic,
+                          ),
+                        )
+                      else if (category.notes.isNotEmpty)
                         pw.Text(
                           category.notes,
                           style: const pw.TextStyle(
@@ -224,11 +249,14 @@ class InspectionPDFGenerator {
                 pw.Expanded(
                   flex: 1,
                   child: pw.Text(
-                    '${category.score}/${category.maxScore}',
+                    isSkipped
+                        ? 'N/A'
+                        : '${category.score}/${category.maxScore}',
                     textAlign: pw.TextAlign.center,
                     style: pw.TextStyle(
                       fontSize: 11,
                       fontWeight: pw.FontWeight.bold,
+                      color: isSkipped ? PdfColors.grey600 : PdfColors.black,
                     ),
                   ),
                 ),
@@ -241,11 +269,13 @@ class InspectionPDFGenerator {
                         vertical: 4,
                       ),
                       decoration: pw.BoxDecoration(
-                        color: performanceLevel['color'] as PdfColor,
+                        color: isSkipped
+                            ? PdfColors.grey400
+                            : (performanceLevel['color'] as PdfColor),
                         borderRadius: pw.BorderRadius.circular(3),
                       ),
                       child: pw.Text(
-                        '$percentage%',
+                        isSkipped ? 'Skipped' : '$percentage%',
                         style: pw.TextStyle(
                           fontSize: 10,
                           fontWeight: pw.FontWeight.bold,
@@ -268,6 +298,10 @@ class InspectionPDFGenerator {
     final List<pw.Widget> widgets = [];
 
     for (final category in categories) {
+      // Skip disabled/skipped categories in photos section
+      final isSkipped = category.isSkipped ?? false;
+      if (isSkipped) continue;
+
       final photos = categoryPhotos[category.categoryId];
       if (photos == null || photos.isEmpty) continue;
 
@@ -603,6 +637,8 @@ class CategoryScore {
   final int maxScore;
   final String notes;
   final int photoCount;
+  final bool? isSkipped; // Indicates if question was disabled/not applicable
+
   CategoryScore({
     required this.categoryId,
     required this.title,
@@ -610,6 +646,7 @@ class CategoryScore {
     required this.maxScore,
     this.notes = '',
     this.photoCount = 0,
+    this.isSkipped, // Optional, defaults to false
   });
 }
 

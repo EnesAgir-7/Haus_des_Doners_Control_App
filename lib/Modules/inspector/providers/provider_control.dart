@@ -53,6 +53,8 @@ class ProviderControl extends ChangeNotifier {
   Map<String, int> _scores = {};
   Map<String, String> _notes = {};
   Map<String, List<File>> _photos = {};
+  Map<String, bool> _enabledCategories =
+      {}; // Track which questions are enabled
 
   // Overall notes
   String _overallNotes = '';
@@ -177,9 +179,23 @@ class ProviderControl extends ChangeNotifier {
   // Validation
   bool get isFormValid {
     if (selectedTemplate == null) return false;
-    return selectedTemplate!.categories.every(
-      (cat) => _scores[cat.categoryId] != null,
-    );
+    // Only validate enabled categories
+    return selectedTemplate!.categories.every((cat) {
+      final categoryId = cat.categoryId;
+      final isEnabled = _enabledCategories[categoryId] ?? true;
+
+      // If disabled, skip validation for this category
+      if (!isEnabled) return true;
+
+      // If enabled, must have a score selected
+      return _scores[categoryId] != null && _scores[categoryId]! > 0;
+    });
+  }
+
+  // Method to set enabled/disabled categories from UI
+  void setEnabledCategories(Map<String, bool> enabledCategories) {
+    _enabledCategories = Map.from(enabledCategories);
+    notifyListeners();
   }
 
   bool get isSubmittingOrUploading => _isSubmitting || _isUploading;
@@ -409,9 +425,28 @@ class ProviderControl extends ChangeNotifier {
           : (hasPhotos ? 0.8 : 0.5);
       notifyListeners();
 
-      // ✅ Calculate total possible score from template
-      final currentScore = totalScore;
-      final scoreString = '$currentScore/$maxPossibleScore'; // e.g., "3/12"
+      // ✅ Calculate total score excluding skipped questions
+      final enabledScore = selectedTemplate!.categories.fold<double>(0.0, (
+        sum,
+        cat,
+      ) {
+        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
+        if (!isEnabled) return sum;
+        return sum + (_scores[cat.categoryId] ?? 0).toDouble();
+      });
+
+      // Calculate max possible score excluding skipped questions
+      final enabledMaxScore = selectedTemplate!.categories.fold<double>(0.0, (
+        sum,
+        cat,
+      ) {
+        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
+        if (!isEnabled) return sum;
+        return sum + cat.maxScore.toDouble();
+      });
+
+      final scoreString =
+          '${enabledScore.toStringAsFixed(0)}/${enabledMaxScore.toStringAsFixed(0)}';
 
       // 🔹 Only after all uploads succeeded, create inspection object
       final inspection = InspectionModel(
@@ -426,12 +461,26 @@ class ProviderControl extends ChangeNotifier {
         score: scoreString,
         categories: Map.fromEntries(
           selectedTemplate!.categories.map((cat) {
-            final score = _scores[cat.categoryId] ?? "";
-            final notes = _notes[cat.categoryId] ?? '';
+            final categoryId = cat.categoryId;
+            final isEnabled = _enabledCategories[categoryId] ?? true;
+            final score = _scores[categoryId] ?? 0;
+            final notes = _notes[categoryId] ?? '';
+
+            // Mark category as skipped if disabled
+            if (!isEnabled) {
+              return MapEntry(
+                cat.title,
+                InspectionCategoryModel(
+                  score: "N/A",
+                  notes: "Not Applicable - Question Skipped",
+                ),
+              );
+            }
+
             return MapEntry(
               cat.title,
               InspectionCategoryModel(
-                score: "${score}/${cat.maxScore}",
+                score: "$score/${cat.maxScore}",
                 notes: notes,
               ),
             );
@@ -579,6 +628,7 @@ class ProviderControl extends ChangeNotifier {
     _photos = {};
     _scores = {};
     _notes = {};
+    _enabledCategories = {}; // Reset enabled categories
     _selectedBranch = null;
     _uploadProgress = 0.0;
     _errorMessage = null;
@@ -602,32 +652,58 @@ class ProviderControl extends ChangeNotifier {
     try {
       // Prepare category data
       final List<CategoryScore> categoryScores = selectedTemplate!.categories
-          .map(
-            (category) => CategoryScore(
+          .map((category) {
+            final categoryId = category.categoryId;
+            final isEnabled = _enabledCategories[categoryId] ?? true;
+            final isSkipped = !isEnabled; // Question is skipped if disabled
+
+            return CategoryScore(
               maxScore: category.maxScore,
               categoryId: category.categoryId,
               title: category.title,
-              score: _scores[category.categoryId] ?? 0,
-              notes: _notes[category.categoryId] ?? '',
-              photoCount: (_photos[category.categoryId] ?? []).length,
-            ),
-          )
+              score: _scores[categoryId] ?? 0,
+              notes: _notes[categoryId] ?? '',
+              photoCount: (_photos[categoryId] ?? []).length,
+              isSkipped: isSkipped, // Mark as skipped if disabled
+            );
+          })
           .toList();
+
+      // Calculate total score excluding skipped questions
+      final enabledScore = selectedTemplate!.categories.fold<double>(0.0, (
+        sum,
+        cat,
+      ) {
+        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
+        if (!isEnabled) return sum;
+        return sum + (_scores[cat.categoryId] ?? 0).toDouble();
+      });
+
+      // Calculate max possible score excluding skipped questions
+      final enabledMaxScore = selectedTemplate!.categories.fold<double>(0.0, (
+        sum,
+        cat,
+      ) {
+        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
+        if (!isEnabled) return sum;
+        return sum + cat.maxScore.toDouble();
+      });
 
       // Create PDF generator
       final pdfGenerator = InspectionPDFGenerator(
-        maxPossibleScore: double.parse(maxPossibleScore.toString()),
+        maxPossibleScore: enabledMaxScore,
         inspectionId: 'preview_${DateTime.now().millisecondsSinceEpoch}',
         branchName: _selectedBranch!.name,
         branchAddress: _selectedBranch!.address,
         inspectorName: loggedInUser!.name,
         templateName: selectedTemplate?.name,
         categories: categoryScores,
-        totalScore: totalScore,
+        totalScore: enabledScore,
         overallNotes: _overallNotes,
         inspectorSignature: inspectorSignature,
         branchSignature: branchSignature,
         categoryPhotos: _photos,
+        enabledCategories: _enabledCategories,
       );
 
       // Generate pw.Document for preview
@@ -654,32 +730,58 @@ class ProviderControl extends ChangeNotifier {
     try {
       // Prepare category data
       final List<CategoryScore> categoryScores = selectedTemplate!.categories
-          .map(
-            (category) => CategoryScore(
+          .map((category) {
+            final categoryId = category.categoryId;
+            final isEnabled = _enabledCategories[categoryId] ?? true;
+            final isSkipped = !isEnabled; // Question is skipped if disabled
+
+            return CategoryScore(
               maxScore: category.maxScore,
               categoryId: category.categoryId,
               title: category.title,
-              score: _scores[category.categoryId] ?? 0,
-              notes: _notes[category.categoryId] ?? '',
-              photoCount: (_photos[category.categoryId] ?? []).length,
-            ),
-          )
+              score: _scores[categoryId] ?? 0,
+              notes: _notes[categoryId] ?? '',
+              photoCount: (_photos[categoryId] ?? []).length,
+              isSkipped: isSkipped, // Mark as skipped if disabled
+            );
+          })
           .toList();
+
+      // Calculate total score excluding skipped questions
+      final enabledScore = selectedTemplate!.categories.fold<double>(0.0, (
+        sum,
+        cat,
+      ) {
+        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
+        if (!isEnabled) return sum;
+        return sum + (_scores[cat.categoryId] ?? 0).toDouble();
+      });
+
+      // Calculate max possible score excluding skipped questions
+      final enabledMaxScore = selectedTemplate!.categories.fold<double>(0.0, (
+        sum,
+        cat,
+      ) {
+        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
+        if (!isEnabled) return sum;
+        return sum + cat.maxScore.toDouble();
+      });
 
       // Create PDF generator
       final pdfGenerator = InspectionPDFGenerator(
-        maxPossibleScore: double.parse(maxPossibleScore.toString()),
+        maxPossibleScore: enabledMaxScore,
         inspectionId: inspectionId,
         branchName: _selectedBranch!.name,
         branchAddress: _selectedBranch!.address,
         inspectorName: loggedInUser!.name,
         templateName: selectedTemplate?.name,
         categories: categoryScores,
-        totalScore: totalScore,
+        totalScore: enabledScore,
         overallNotes: _overallNotes,
         inspectorSignature: inspectorSignature,
         branchSignature: branchSignature,
         categoryPhotos: _photos,
+        enabledCategories: _enabledCategories,
       );
 
       // Generate pw.Document
