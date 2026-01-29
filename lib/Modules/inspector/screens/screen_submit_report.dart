@@ -46,6 +46,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   late Animation<double> _headerAnimation;
   Timer? _autoSaveTimer;
   String? _lastSavedHash;
+  bool _isSaveDialogOpen = false;
 
   @override
   void initState() {
@@ -385,46 +386,54 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     }
   }
 
-  Future<bool> _showSaveDraftDialog() async {
+  Future<bool?> _showSaveDraftDialog() async {
     return await showDialog<bool>(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            backgroundColor: AppColors.lightBlack,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: const Text(
-              'Unsubmitted Report',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            content: const Text(
-              'You have an unsubmitted report. Do you want to save it as a draft?',
-              style: TextStyle(color: Colors.white70),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(
-                  'No',
-                  style: TextStyle(color: Colors.grey.shade400),
+      context: context,
+      barrierDismissible: true, // Allow dismissal to continue working
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.lightBlack,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Expanded(
+              child: const Text(
+                'Unsubmitted Report',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryRed,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Yes, Save Draft'),
-              ),
-            ],
+            ),
+            IconButton(
+              icon: Icon(Icons.close, color: Colors.grey.shade400),
+              onPressed: () => Navigator.pop(context, null), // Dismiss dialog
+              tooltip: 'Continue Working',
+            ),
+          ],
+        ),
+        content: const Text(
+          'You have an unsubmitted report. Do you want to save it as a draft?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              'No, Discard',
+              style: TextStyle(color: Colors.grey.shade400),
+            ),
           ),
-        ) ??
-        false;
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryRed,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Yes, Save Draft'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _startAutoSaveTimer(ProviderControl provider) {
@@ -441,18 +450,32 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
   Future<void> _handleBackPress(ProviderControl provider) async {
     if (_hasUnsavedData(provider)) {
-      final shouldSave = await _showSaveDraftDialog();
-      if (shouldSave) {
-        final savedHash = await _saveDraftReport(provider);
-        if (savedHash != null) {
-          _lastSavedHash = savedHash;
+      _isSaveDialogOpen = true;
+      bool? shouldSave;
+      try {
+        shouldSave = await _showSaveDraftDialog();
+        if (shouldSave == true) {
+          final savedHash = await _saveDraftReport(provider);
+          if (savedHash != null) {
+            _lastSavedHash = savedHash;
+          }
+        } else if (shouldSave == false) {
+          await _clearDraftReport();
         }
-      } else {
-        await _clearDraftReport();
+        // If shouldSave is null (dialog dismissed), do nothing and stay on screen
+      } finally {
+        _isSaveDialogOpen = false;
       }
-    }
-    if (mounted) {
-      Navigator.pop(context);
+
+      // Only navigate back if user chose an option (not dismissed)
+      if (mounted && shouldSave != null) {
+        Navigator.pop(context);
+      }
+    } else {
+      // No unsaved data, safe to go back
+      if (mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
@@ -535,6 +558,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        // Prevent back navigation if save dialog is already open
+        if (_isSaveDialogOpen) {
+          return false;
+        }
+
         final provider = context.read<ProviderControl>();
         await _handleBackPress(provider);
         return false; // Prevent default back behavior since we handle it manually
