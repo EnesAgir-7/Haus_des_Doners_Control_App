@@ -276,6 +276,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
           enabledCategories.map((key, value) => MapEntry(key, value as bool)),
         );
 
+      // ✅ CRITICAL: Also update the provider's enabled categories for validation
+      provider.setEnabledCategories(_enabledCategories);
+
       // Load photos - Note: We need to add photos one by one since there's no bulk setter
       final photosData = draftData['photos'] as Map<String, dynamic>? ?? {};
       for (final entry in photosData.entries) {
@@ -303,7 +306,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
           draftData['inspectorSignature'] as String?;
       if (inspectorSignatureBase64 != null) {
         try {
-          provider.inspectorSignature = base64Decode(inspectorSignatureBase64);
+          provider.setInspectorSignature(
+            base64Decode(inspectorSignatureBase64),
+          );
         } catch (e) {
           // Skip corrupted signature
         }
@@ -312,7 +317,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       final branchSignatureBase64 = draftData['branchSignature'] as String?;
       if (branchSignatureBase64 != null) {
         try {
-          provider.branchSignature = base64Decode(branchSignatureBase64);
+          provider.setBranchSignature(base64Decode(branchSignatureBase64));
         } catch (e) {
           // Skip corrupted signature
         }
@@ -421,8 +426,8 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            Expanded(
-              child: const Text(
+            const Expanded(
+              child: Text(
                 'Unsubmitted Report',
                 style: TextStyle(
                   color: Colors.white,

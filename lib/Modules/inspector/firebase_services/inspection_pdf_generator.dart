@@ -228,7 +228,7 @@ class InspectionPDFGenerator {
                       // Show "Not Applicable" note if skipped
                       if (isSkipped)
                         pw.Text(
-                          "Not Applicable",
+                          "N/A",
                           style: pw.TextStyle(
                             fontSize: 8,
                             color: PdfColors.grey600,
@@ -275,7 +275,7 @@ class InspectionPDFGenerator {
                         borderRadius: pw.BorderRadius.circular(3),
                       ),
                       child: pw.Text(
-                        isSkipped ? 'Skipped' : '$percentage%',
+                        isSkipped ? 'Übersprungen' : '$percentage%',
                         style: pw.TextStyle(
                           fontSize: 10,
                           fontWeight: pw.FontWeight.bold,
