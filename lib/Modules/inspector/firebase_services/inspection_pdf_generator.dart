@@ -24,6 +24,7 @@ class InspectionPDFGenerator {
   final Map<String, List<File>> categoryPhotos;
   final Map<String, bool>?
   enabledCategories; // Track which questions are enabled
+  final String? branchRepresentativeName;
 
   InspectionPDFGenerator({
     required this.inspectionId,
@@ -39,6 +40,7 @@ class InspectionPDFGenerator {
     this.branchSignature,
     this.categoryPhotos = const {},
     this.enabledCategories, // Optional, defaults to all enabled
+    this.branchRepresentativeName,
   });
 
   static pw.Font? _cachedFont;
@@ -586,12 +588,16 @@ class InspectionPDFGenerator {
       children: [
         _buildSigBox("Inspektor", inspectorSignature),
         pw.SizedBox(width: 16),
-        _buildSigBox("Filialvertreter", branchSignature),
+        _buildSigBox(
+          "Filialvertreter",
+          branchSignature,
+          name: branchRepresentativeName,
+        ),
       ],
     );
   }
 
-  pw.Widget _buildSigBox(String label, Uint8List? data) {
+  pw.Widget _buildSigBox(String label, Uint8List? data, {String? name}) {
     return pw.Expanded(
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -600,6 +606,15 @@ class InspectionPDFGenerator {
             label,
             style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
           ),
+          if (name != null && name.isNotEmpty)
+            pw.Text(
+              name,
+              style: pw.TextStyle(
+                fontSize: 10,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.red700,
+              ),
+            ),
           pw.SizedBox(height: 4),
           pw.Container(
             height: 60,

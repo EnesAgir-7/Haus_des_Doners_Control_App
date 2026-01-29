@@ -58,6 +58,7 @@ class ProviderControl extends ChangeNotifier {
 
   // Overall notes
   String _overallNotes = '';
+  String? _branchRepresentativeName;
 
   // UI State
   bool _isSubmitting = false;
@@ -71,6 +72,7 @@ class ProviderControl extends ChangeNotifier {
   BranchModel? get selectedBranch => _selectedBranch;
 
   String get overallNotes => _overallNotes;
+  String? get branchRepresentativeName => _branchRepresentativeName;
 
   bool get isSubmitting => _isSubmitting;
   bool get isUploading => _isUploading;
@@ -227,6 +229,11 @@ class ProviderControl extends ChangeNotifier {
 
   void setOverallNotes(String notes) {
     _overallNotes = notes;
+    notifyListeners();
+  }
+
+  void setBranchRepresentativeName(String? name) {
+    _branchRepresentativeName = name;
     notifyListeners();
   }
 
@@ -486,6 +493,7 @@ class ProviderControl extends ChangeNotifier {
             );
           }),
         ),
+        branchRepresentativeName: _branchRepresentativeName,
         overallNotes: _overallNotes,
         pdfReportUrl: firebasePdfUrl,
         createdAt: now,
@@ -628,6 +636,7 @@ class ProviderControl extends ChangeNotifier {
     _photos = {};
     _scores = {};
     _notes = {};
+    _branchRepresentativeName = null;
     _enabledCategories = {}; // Reset enabled categories
     _selectedBranch = null;
     _uploadProgress = 0.0;
@@ -704,6 +713,7 @@ class ProviderControl extends ChangeNotifier {
         branchSignature: branchSignature,
         categoryPhotos: _photos,
         enabledCategories: _enabledCategories,
+        branchRepresentativeName: _branchRepresentativeName,
       );
 
       // Generate pw.Document for preview
@@ -782,6 +792,7 @@ class ProviderControl extends ChangeNotifier {
         branchSignature: branchSignature,
         categoryPhotos: _photos,
         enabledCategories: _enabledCategories,
+        branchRepresentativeName: _branchRepresentativeName,
       );
 
       // Generate pw.Document

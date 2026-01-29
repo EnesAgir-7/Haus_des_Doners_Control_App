@@ -16,6 +16,7 @@ class InspectionModel {
   final String score;
   final Map<String, InspectionCategoryModel> categories;
   final String overallNotes;
+  final String? branchRepresentativeName;
   final String? pdfReportUrl;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -32,6 +33,7 @@ class InspectionModel {
     required this.score,
     required this.categories,
     required this.overallNotes,
+    this.branchRepresentativeName,
     this.pdfReportUrl,
     required this.createdAt,
     required this.updatedAt,
@@ -63,6 +65,7 @@ class InspectionModel {
       score: (data[InspectionFields.score] ?? "0/0").toString(),
       categories: parsedCategories,
       overallNotes: data[InspectionFields.overallNotes] ?? '',
+      branchRepresentativeName: data[InspectionFields.branchRepresentativeName],
       pdfReportUrl: data[InspectionFields.pdfReportUrl],
       createdAt: FirestoreHelpers.parseTimestamp(
         data[InspectionFields.createdAt],
@@ -88,6 +91,7 @@ class InspectionModel {
       InspectionFields.categories: categories.map(
         (key, value) => MapEntry(key, value.toMap()),
       ),
+      InspectionFields.branchRepresentativeName: branchRepresentativeName,
       InspectionFields.pdfReportUrl: pdfReportUrl,
       InspectionFields.overallNotes: overallNotes,
       InspectionFields.createdAt: Timestamp.fromDate(createdAt),

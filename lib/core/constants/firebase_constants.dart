@@ -87,6 +87,7 @@ class InspectionFields {
   static const String overallNotes = 'overallNotes';
   static const String photos = 'photos';
   static const String notes = 'notes';
+  static const String branchRepresentativeName = 'branchRepresentativeName';
   static const String createdAt = 'createdAt';
   static const String updatedAt = 'updatedAt';
 }
@@ -202,7 +203,6 @@ class InspectorFields {
   static const String name = 'name';
 }
 
-
 class BUF {
   static const String branchId = 'branchId';
   static const String branchName = 'branchName';
@@ -222,7 +222,6 @@ class FCFields {
   static const String oldValue = 'oldValue';
   static const String newValue = 'newValue';
   static const String fieldType = 'fieldType';
-
 }
 
 UserModel? loggedInUser;

@@ -42,6 +42,8 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     with TickerProviderStateMixin {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _overallNotesController = TextEditingController();
+  final TextEditingController _branchRepNameController =
+      TextEditingController();
   final Map<String, TextEditingController> _categoryNotesControllers = {};
   // Track which questions/categories are enabled (applicable). Default is true.
   final Map<String, bool> _enabledCategories = {};
@@ -89,6 +91,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   void dispose() {
     _autoSaveTimer?.cancel();
     _overallNotesController.dispose();
+    _branchRepNameController.dispose();
     for (final controller in _categoryNotesControllers.values) {
       controller.dispose();
     }
@@ -209,6 +212,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         'branchSignature': provider.branchSignature != null
             ? base64Encode(provider.branchSignature!)
             : null,
+        'branchRepName': _branchRepNameController.text,
         'savedAt': DateTime.now().toIso8601String(),
         'branchId': widget.branchId ?? widget.selectedBranch?.id ?? '',
         'branchTemplateId': widget.branchTemplateId ?? '',
@@ -266,6 +270,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       // Load overall notes
       final overallNotes = draftData['overallNotes'] as String? ?? '';
       _overallNotesController.text = overallNotes;
+
+      // Load branch representative name
+      final branchRepName = draftData['branchRepName'] as String? ?? '';
+      _branchRepNameController.text = branchRepName;
+      provider.setBranchRepresentativeName(branchRepName);
 
       // Load enabled/disabled state for questions (optional)
       final enabledCategories =
@@ -1632,7 +1641,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             onTap: () => _showEnhancedSignatureDialog(
               context,
               title: LocaleKeys.inspector_signature.tr(),
-              onSave: (signature) {
+              onSave: (signature, _) {
                 provider.setInspectorSignature(signature);
               },
             ),
@@ -1646,15 +1655,26 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             title: LocaleKeys.branch_representative.tr(),
             subtitle: LocaleKeys.branch_manager_signature.tr(),
             signature: provider.branchSignature,
+            name: provider.branchRepresentativeName,
             icon: Icons.business_outlined,
             onTap: () => _showEnhancedSignatureDialog(
               context,
               title: LocaleKeys.branch_representative.tr(),
-              onSave: (signature) {
+              showNameField: true,
+              initialName: provider.branchRepresentativeName,
+              onSave: (signature, name) {
                 provider.setBranchSignature(signature);
+                if (name != null) {
+                  provider.setBranchRepresentativeName(name);
+                  _branchRepNameController.text = name;
+                }
               },
             ),
-            onClear: () => provider.setBranchSignature(null),
+            onClear: () {
+              provider.setBranchSignature(null);
+              provider.setBranchRepresentativeName(null);
+              _branchRepNameController.clear();
+            },
           ),
         ],
       ),
@@ -1668,6 +1688,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     required IconData icon,
     required VoidCallback onTap,
     required VoidCallback onClear,
+    String? name,
     VoidCallback? onDeleteSignature,
     bool isSignatureFromStorage = false,
   }) {
@@ -1767,7 +1788,29 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      if (!hasSigned) ...[
+                      if (hasSigned && name != null && name.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.person,
+                              color: AppColors.primaryRed,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                name,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ] else if (!hasSigned) ...[
                         const SizedBox(height: 4),
                         Row(
                           children: [
@@ -1831,11 +1874,36 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
                 const SizedBox(width: 8),
 
-                // Action Button
+                // Action Buttons
                 if (hasSigned)
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Edit Name Button
+                      if (name != null)
+                        Container(
+                          width: 32,
+                          height: 32,
+                          margin: const EdgeInsets.only(right: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.2),
+                            ),
+                          ),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: onTap,
+                            icon: const Icon(
+                              Icons.edit_outlined,
+                              color: Colors.white70,
+                              size: 16,
+                            ),
+                            tooltip: 'Name bearbeiten',
+                          ),
+                        ),
+
                       if (isSignatureFromStorage && onDeleteSignature != null)
                         Container(
                           width: 32,
@@ -2342,13 +2410,17 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   void _showEnhancedSignatureDialog(
     BuildContext context, {
     required String title,
-    required Function(Uint8List) onSave,
+    required Function(Uint8List, String?) onSave,
+    String? initialName,
+    bool showNameField = false,
   }) {
     final SignatureController controller = SignatureController(
       penStrokeWidth: 3,
       penColor: Colors.black,
       exportBackgroundColor: Colors.white,
     );
+
+    final nameController = TextEditingController(text: initialName);
 
     showDialog(
       context: context,
@@ -2453,57 +2525,105 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                 ),
               ),
 
-              // Signature Pad
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 220,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: AppColors.primaryRed.withValues(alpha: 0.3),
-                          width: 3,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 15,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Signature(
-                          controller: controller,
-                          backgroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+              // Content Area
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.gesture,
-                          color: Colors.white38,
-                          size: 16,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          LocaleKeys.sign_here.tr(),
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
-                            fontSize: 13,
-                            fontStyle: FontStyle.italic,
+                        if (showNameField) ...[
+                          TextFormField(
+                            controller: nameController,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              labelText: LocaleKeys.name.tr(),
+                              hintText: 'Name eingeben',
+                              labelStyle: const TextStyle(
+                                color: Colors.white70,
+                              ),
+                              hintStyle: const TextStyle(color: Colors.white30),
+                              prefixIcon: const Icon(
+                                Icons.person_outline,
+                                color: AppColors.primaryRed,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withValues(alpha: 0.05),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(
+                                  color: AppColors.primaryRed,
+                                ),
+                              ),
+                            ),
                           ),
+                          const SizedBox(height: 20),
+                        ],
+
+                        // Signature Pad
+                        Container(
+                          height: 220,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppColors.primaryRed.withValues(
+                                alpha: 0.3,
+                              ),
+                              width: 3,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.2),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Signature(
+                              controller: controller,
+                              backgroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.gesture,
+                              color: Colors.white38,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              LocaleKeys.sign_here.tr(),
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.5),
+                                fontSize: 13,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
 
@@ -2553,6 +2673,12 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                         ),
                         child: ElevatedButton.icon(
                           onPressed: () async {
+                            if (showNameField &&
+                                nameController.text.trim().isEmpty) {
+                              showSnakBarr(context, 'Bitte Namen eingeben');
+                              return;
+                            }
+
                             if (controller.isEmpty) {
                               showSnakBarr(
                                 context,
@@ -2563,7 +2689,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
                             final signature = await controller.toPngBytes();
                             if (signature != null) {
-                              onSave(signature);
+                              onSave(signature, nameController.text.trim());
                               if (context.mounted) {
                                 Navigator.pop(context);
                               }
