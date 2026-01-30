@@ -16,6 +16,8 @@ import '../../../models/inspector_history_model.dart';
 import '../../../models/route_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../admin/widgets/performance_chart.dart';
+import '../../common/widgets/compact_stat_card.dart';
+import '../../common/widgets/inspector_details_bottomsheets.dart';
 import '../providers/provider_panel.dart';
 import '../providers/provider_route.dart';
 import '../providers/provider_tasks.dart';
@@ -433,13 +435,16 @@ class PerformanceSection extends StatelessWidget {
               ),
             )
           else
-            _buildPerformanceContent(provider.currentMonthStats!),
+            _buildPerformanceContent(context, provider.currentMonthStats!),
         ],
       ),
     );
   }
 
-  Widget _buildPerformanceContent(InspectorHistoryModel stats) {
+  Widget _buildPerformanceContent(
+    BuildContext context,
+    InspectorHistoryModel stats,
+  ) {
     final completionRate = stats.tasksTotal > 0
         ? (stats.tasksCompleted / stats.tasksTotal * 100).round()
         : 0;
@@ -451,25 +456,48 @@ class PerformanceSection extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: _buildCompactStatCard(
+                child: CompactStatCard(
+                  onTap: () {
+                    if (loggedInUser == null) return;
+                    InspectorDetailsBottomSheets.showInspectionsSheet(
+                      context,
+                      inspectorId: loggedInUser?.id ?? '',
+                      inspectorName: loggedInUser?.name ?? '',
+                      year: getYearFromKey(provider.selectedMonthKey ?? ''),
+                      month: getMonthFromKey(provider.selectedMonthKey ?? ''),
+                      totalInspections: stats.totalInspections,
+                    );
+                  },
                   label: LocaleKeys.branchesVisitedReported.tr(),
                   value: stats.totalInspections.toString(),
                   icon: Icons.assignment_turned_in_outlined,
-                  gradientColors: [
-                    const Color(0xFF4CAF50),
-                    const Color(0xFF388E3C),
+                  gradientColors: const [
+                    Color(0xFF4CAF50),
+                    Color(0xFF388E3C),
                   ],
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildCompactStatCard(
+                child: CompactStatCard(
+                  onTap: () {
+                    if (loggedInUser == null) return;
+                    InspectorDetailsBottomSheets.showTasksSheet(
+                      context,
+                      inspectorId: loggedInUser?.id ?? '',
+                      inspectorName: loggedInUser?.name ?? '',
+                      year: getYearFromKey(provider.selectedMonthKey ?? ''),
+                      month: getMonthFromKey(provider.selectedMonthKey ?? ''),
+                      totalTasks: stats.tasksTotal,
+                      completedTasks: stats.tasksCompleted,
+                    );
+                  },
                   label: LocaleKeys.tasksCompleted.tr(),
                   value: "${stats.tasksCompleted}/${stats.tasksTotal}",
                   icon: Icons.check_circle_outline,
-                  gradientColors: [
-                    const Color(0xFF0F766E),
-                    const Color(0xFF115E59),
+                  gradientColors: const [
+                    Color(0xFF0F766E),
+                    Color(0xFF115E59),
                   ],
                   subtitle: "$completionRate%",
                 ),
@@ -510,104 +538,6 @@ class PerformanceSection extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildCompactStatCard({
-    required String label,
-    required String value,
-    required IconData icon,
-    required List<Color> gradientColors,
-    String? subtitle,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          // gradient: LinearGradient(
-          //   begin: Alignment.topLeft,
-          //   end: Alignment.bottomRight,
-          //   colors: [
-          //     gradientColors[0].withValues(alpha: 0.15),
-          //     gradientColors[0].withValues(alpha: 0.08),
-          //   ],
-          // ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: gradientColors[0].withValues(alpha: 0.3)),
-          boxShadow: const [
-            // BoxShadow(
-            //   color: gradientColors[0].withValues(alpha: 0.1),
-            //   blurRadius: 12,
-            //   offset: const Offset(0, 4),
-            // ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: gradientColors),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: gradientColors[0].withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Icon(icon, size: 20, color: Colors.white),
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: -0.5,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
     );
   }
 

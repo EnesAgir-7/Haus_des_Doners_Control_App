@@ -1,5 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/common/providers/provider_inspector_records.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../models/inspection_model.dart';
@@ -7,7 +9,6 @@ import '../../../models/task_model.dart';
 import '../../../models/vehicle_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../inspector/screens/screen_pdf_viewer.dart';
-import '../admin_firebase_services/admin_user_service.dart';
 
 class InspectorDetailsBottomSheets {
   // Tasks Bottom Sheet
@@ -117,7 +118,6 @@ class InspectorDetailsBottomSheets {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 10),
                     InfoMessage(message: LocaleKeys.info_missing_records.tr()),
                   ],
@@ -125,12 +125,10 @@ class InspectorDetailsBottomSheets {
               ),
               // Content
               Expanded(
-                child: FutureBuilder<List<TaskModel>>(
-                  future: InspectorDataService.fetchTasks(
-                    inspectorId,
-                    year,
-                    month,
-                  ),
+                child: StreamBuilder<List<TaskModel>>(
+                  stream: context
+                      .read<ProviderInspectorRecords>()
+                      .getTasksStream(inspectorId, year, month),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
@@ -278,7 +276,6 @@ class InspectorDetailsBottomSheets {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 10),
                     InfoMessage(message: LocaleKeys.info_missing_records.tr()),
                   ],
@@ -286,12 +283,10 @@ class InspectorDetailsBottomSheets {
               ),
               // Content
               Expanded(
-                child: FutureBuilder<List<InspectionModel>>(
-                  future: InspectorDataService.fetchInspections(
-                    inspectorId,
-                    year,
-                    month,
-                  ),
+                child: StreamBuilder<List<InspectionModel>>(
+                  stream: context
+                      .read<ProviderInspectorRecords>()
+                      .getInspectionsStream(inspectorId, year, month),
                   builder: (_, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
@@ -338,7 +333,6 @@ class InspectorDetailsBottomSheets {
     required String inspectorName,
     required int year,
     required int month,
-
     required List<String> vehicleIds,
     required int totalVehicles,
   }) {
@@ -446,13 +440,10 @@ class InspectorDetailsBottomSheets {
               ),
               // Content
               Expanded(
-                child: FutureBuilder<List<VehicleModel>>(
-                  future: InspectorDataService.fetchVehicles(
-                    inspectorId,
-                    year,
-                    month,
-                    vehicleIds,
-                  ),
+                child: StreamBuilder<List<VehicleModel>>(
+                  stream: context
+                      .read<ProviderInspectorRecords>()
+                      .getVehiclesStream(inspectorId, year, month, vehicleIds),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
@@ -543,15 +534,13 @@ class InspectorDetailsBottomSheets {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...[
-              const SizedBox(height: 4),
-              Text(
-                task.description,
-                style: const TextStyle(color: Colors.white60, fontSize: 12),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+            const SizedBox(height: 4),
+            Text(
+              task.description,
+              style: const TextStyle(color: Colors.white60, fontSize: 12),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -717,30 +706,26 @@ class InspectorDetailsBottomSheets {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  const Icon(Icons.pin, size: 12, color: Colors.white60),
-                  const SizedBox(width: 4),
-                  Text(
-                    vehicle.plate,
-                    style: const TextStyle(
-                      color: Colors.white60,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(Icons.pin, size: 12, color: Colors.white60),
+                const SizedBox(width: 4),
+                Text(
+                  vehicle.plate,
+                  style: const TextStyle(
+                    color: Colors.white60,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
                   ),
-                ],
-              ),
-            ],
-            ...[
-              const SizedBox(height: 4),
-              Text(
-                vehicle.model,
-                style: const TextStyle(color: Colors.white60, fontSize: 12),
-              ),
-            ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              vehicle.model,
+              style: const TextStyle(color: Colors.white60, fontSize: 12),
+            ),
             const SizedBox(height: 8),
           ],
         ),
@@ -805,49 +790,32 @@ class InspectorDetailsBottomSheets {
     );
   }
 
-  // ========================
-  // HELPER METHODS
-  // ========================
-
   static String _getMonthName(int month) {
-    final monthNames = {
-      1: LocaleKeys.january.tr(),
-      2: LocaleKeys.february.tr(),
-      3: LocaleKeys.march.tr(),
-      4: LocaleKeys.april.tr(),
-      5: LocaleKeys.may.tr(),
-      6: LocaleKeys.june.tr(),
-      7: LocaleKeys.july.tr(),
-      8: LocaleKeys.august.tr(),
-      9: LocaleKeys.september.tr(),
-      10: LocaleKeys.october.tr(),
-      11: LocaleKeys.november.tr(),
-      12: LocaleKeys.december.tr(),
-    };
-    return monthNames[month] ?? '';
+    return DateFormat('MMMM').format(DateTime(2022, month));
   }
 }
 
 class InfoMessage extends StatelessWidget {
   final String message;
-  const InfoMessage({Key? key, required this.message}) : super(key: key);
+  const InfoMessage({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Icon(Icons.info_outline, size: 20, color: AppColors.amber),
+          const Icon(Icons.info_outline, color: Colors.white54, size: 16),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                color: AppColors.whiteWithOpacity(0.3),
-                fontSize: 13,
-                height: 1.4,
-              ),
+              style: const TextStyle(color: Colors.white54, fontSize: 11),
             ),
           ),
         ],

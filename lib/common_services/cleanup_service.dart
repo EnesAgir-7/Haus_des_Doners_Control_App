@@ -11,6 +11,7 @@ import '../Modules/admin/admin_providers/provider_admin_vehicle.dart';
 import '../Modules/inspector/providers/provider_route.dart';
 import '../Modules/inspector/providers/provider_tasks.dart';
 import '../Modules/inspector/providers/provider_vehicle.dart';
+import '../Modules/common/providers/provider_inspector_records.dart';
 import '../core/constants/app_constants.dart';
 import '../core/constants/firebase_constants.dart';
 import '../core/console.dart';
@@ -26,7 +27,10 @@ class ProviderCleanupService {
         return;
       }
 
-      console('🧹 Starting cleanup streams for role: $userRole');
+      console('跑 Starting cleanup streams for role: $userRole');
+
+      // Shared providers cleanup
+      context.read<ProviderInspectorRecords>().cancelAllStreams();
 
       switch (userRole) {
         case AppConstants.admin:

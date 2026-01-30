@@ -5,12 +5,8 @@ import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../helpers/local_storage_helper.dart';
-import '../../../models/inspection_model.dart';
 import '../../../models/inspector_history_model.dart';
-import '../../../models/task_model.dart';
 import '../../../models/user_model.dart';
-import '../../../models/vehicle_model.dart';
-import '../data/inspector_data_cache.dart';
 
 class AdminUserService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -360,106 +356,5 @@ class AdminUserService {
     } catch (e) {
       console('⚠️ Error pruning old months: $e');
     }
-  }
-}
-
-class InspectorDataService {
-  static Future<List<TaskModel>> fetchTasks(
-    String inspectorId,
-    int year,
-    int month,
-  ) async {
-    // Check cache first
-    final cached = InspectorDataCache.getTasks(inspectorId, year, month);
-    if (cached != null) return cached;
-
-    // Fetch from Firestore
-    final startDate = DateTime(year, month, 1);
-    final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
-
-    final snapshot = await FirebaseFirestore.instance
-        .collection(Collections.tasks)
-        .where(TaskFields.assignedInspectorId, isEqualTo: inspectorId)
-        .where(
-          TaskFields.createdAt,
-          isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
-        )
-        .where(
-          TaskFields.createdAt,
-          isLessThanOrEqualTo: Timestamp.fromDate(endDate),
-        )
-        .orderBy(TaskFields.createdAt, descending: true)
-        .get();
-
-    final tasks = snapshot.docs
-        .map((doc) => TaskModel.fromFirestore(doc))
-        .toList();
-
-    InspectorDataCache.setTasks(inspectorId, year, month, tasks);
-    return tasks;
-  }
-
-  static Future<List<InspectionModel>> fetchInspections(
-    String inspectorId,
-    int year,
-    int month,
-  ) async {
-    // Check cache first
-    final cached = InspectorDataCache.getInspections(inspectorId, year, month);
-    if (cached != null) return cached;
-
-    // Fetch from Firestore
-    final startDate = DateTime(year, month, 1);
-    final endDate = DateTime(year, month + 1, 0, 23, 59, 59);
-
-    final snapshot = await FirebaseFirestore.instance
-        .collection(Collections.inspections)
-        .where(InspectionFields.inspectorId, isEqualTo: inspectorId)
-        .where(
-          InspectionFields.completedTime,
-          isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
-        )
-        .where(
-          InspectionFields.completedTime,
-          isLessThanOrEqualTo: Timestamp.fromDate(endDate),
-        )
-        .orderBy(InspectionFields.completedTime, descending: true)
-        .get();
-
-    final inspections = snapshot.docs
-        .map((doc) => InspectionModel.fromFirestore(doc))
-        .toList();
-
-    // Cache the result
-    InspectorDataCache.setInspections(inspectorId, year, month, inspections);
-    return inspections;
-  }
-
-  static Future<List<VehicleModel>> fetchVehicles(
-    String inspectorId,
-    int year,
-    int month,
-    List<String> vehicleIds,
-  ) async {
-    if (vehicleIds.isEmpty) return [];
-
-    // ✅ Check cache first
-    final cached = InspectorDataCache.getVehicles(inspectorId, year, month);
-    if (cached != null) return cached;
-
-    // ✅ Fetch only by vehicle IDs
-    final snapshot = await FirebaseFirestore.instance
-        .collection(Collections.vehicles)
-        .where(FieldPath.documentId, whereIn: vehicleIds)
-        .get();
-
-    final vehicles = snapshot.docs
-        .map((doc) => VehicleModel.fromFirestore(doc))
-        .toList();
-
-    // ✅ Cache the result by inspector + month/year
-    InspectorDataCache.setVehicles(inspectorId, year, month, vehicles);
-
-    return vehicles;
   }
 }

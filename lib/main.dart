@@ -41,6 +41,7 @@ import 'Modules/inspector/providers/provider_inspections.dart';
 import 'Modules/inspector/providers/provider_map.dart';
 import 'Modules/inspector/providers/provider_panel.dart';
 import 'Modules/inspector/providers/provider_panel_old.dart';
+import 'Modules/common/providers/provider_inspector_records.dart';
 import 'Modules/inspector/providers/provider_report_photo.dart';
 import 'Modules/inspector/screens/bottom_nav_bar.dart';
 import 'Modules/inspector/screens/screen_auth.dart';
@@ -138,6 +139,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => BranchUpdateRequestProvider()),
         ChangeNotifierProvider(create: (_) => AdminUpdateRequestProvider()),
         ChangeNotifierProvider(create: (_) => AdminAnnouncementsProvider()),
+        ChangeNotifierProvider(create: (_) => ProviderInspectorRecords()),
       ],
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,

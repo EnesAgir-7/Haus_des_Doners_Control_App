@@ -10,10 +10,10 @@ import '../../../helpers/app_helpers.dart';
 import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../../common/widgets/compact_stat_card.dart';
+import '../../common/widgets/inspector_details_bottomsheets.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
-import '../data/inspector_data_cache.dart';
 import '../widgets/performance_chart.dart';
-import 'admin_data_bottomsheets.dart';
 import 'screen_admin_user_details.dart';
 
 class ScreenInspectorDetails extends StatefulWidget {
@@ -52,7 +52,6 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
 
   @override
   void dispose() {
-    InspectorDataCache.clearAll();
     super.dispose();
   }
 
@@ -192,7 +191,6 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
           // Success State - Show month selector always
           return RefreshIndicator(
             onRefresh: () async {
-              InspectorDataCache.clearAll();
               await provider.getInspectorStatistics(widget.inspector.id);
             },
             color: AppColors.primaryRed,
@@ -431,8 +429,8 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
           Row(
             children: [
               Expanded(
-                child: _buildCompactStatCard(
-                  ontap: () {
+                child: CompactStatCard(
+                  onTap: () {
                     // Show Inspections Bottom Sheet
                     InspectorDetailsBottomSheets.showInspectionsSheet(
                       context,
@@ -454,8 +452,8 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildCompactStatCard(
-                  ontap: () {
+                child: CompactStatCard(
+                  onTap: () {
                     // Show Tasks Bottom Sheet
                     InspectorDetailsBottomSheets.showTasksSheet(
                       context,
@@ -553,79 +551,6 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
             ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCompactStatCard({
-    required String label,
-    required String value,
-    required IconData icon,
-    required List<Color> gradientColors,
-    String? subtitle,
-    VoidCallback? ontap,
-  }) {
-    return GestureDetector(
-      onTap: ontap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: gradientColors,
-          ),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: gradientColors[0].withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: Colors.white, size: 24),
-            const SizedBox(height: 12),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 12,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(width: 5),
-                  Text(
-                    "(${subtitle})",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
       ),
     );
   }
