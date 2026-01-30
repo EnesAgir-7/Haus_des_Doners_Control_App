@@ -8,11 +8,22 @@ import '../../../models/route_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../bottom_sheets/stop_info_sheet.dart';
 import '../providers/provider_route.dart';
-import '../widgets/route_picker_dialog.dart';
+
 import 'common_methods.dart';
 import 'screen_submit_report.dart';
 
-enum RouteFilter { all, today, missed, upcoming }
+enum RouteFilter {
+  all,
+  completed,
+  overdue,
+  day1,
+  day2,
+  day3,
+  day4,
+  day5,
+  day6,
+  day7,
+}
 
 class ScreenRoutes extends StatefulWidget {
   const ScreenRoutes({super.key});
@@ -22,46 +33,25 @@ class ScreenRoutes extends StatefulWidget {
 }
 
 class _ScreenRoutesState extends State<ScreenRoutes> {
-  RouteFilter _selectedFilter = RouteFilter.today;
-
-  Future<void> _selectDate(BuildContext context, ProviderRoute provider) async {
-    final String? picked = await pickRouteDate(
-      context,
-      initialDate: provider.filterDate ?? DateTime.now(),
-      maxDaysAhead: 7,
-    );
-
-    if (picked != null) {
-      // Convert the string "yyyy-MM-dd" back to DateTime for the provider
-      try {
-        final DateTime selectedDate = DateTime.parse(picked);
-        provider.setDateFilter(selectedDate);
-      } catch (e) {
-        // Handle parsing error if needed
-        debugPrint('Error parsing selected date: $e');
-      }
-    }
-  }
+  RouteFilter _selectedFilter = RouteFilter.day1;
 
   List<RouteStopModel> _getFilteredStops(ProviderRoute provider) {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    final todayKey = DateFormat('yyyy-MM-dd').format(today);
 
     switch (_selectedFilter) {
       case RouteFilter.all:
         return provider.stops;
 
-      case RouteFilter.today:
+      case RouteFilter.completed:
         return provider.stops
-            .where((stop) => stop.timeSlot == todayKey)
+            .where((stop) => stop.status == AppConstants.completed)
             .toList();
 
-      case RouteFilter.missed:
+      case RouteFilter.overdue:
         return provider.stops.where((stop) {
           if (stop.status == AppConstants.completed) return false;
 
-          // Parse the stop date
           final parts = stop.timeSlot.split('-');
           if (parts.length != 3) return false;
           final stopDate = DateTime(
@@ -73,19 +63,17 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
           return stopDate.isBefore(todayDate);
         }).toList();
 
-      case RouteFilter.upcoming:
-        return provider.stops.where((stop) {
-          // Parse the stop date
-          final parts = stop.timeSlot.split('-');
-          if (parts.length != 3) return false;
-          final stopDate = DateTime(
-            int.parse(parts[0]),
-            int.parse(parts[1]),
-            int.parse(parts[2]),
-          );
-
-          return stopDate.isAfter(todayDate);
-        }).toList();
+      default:
+        // Handle day1 to day7
+        final dayOffset = _selectedFilter.index - RouteFilter.day1.index;
+        if (dayOffset >= 0 && dayOffset < 7) {
+          final targetDate = todayDate.add(Duration(days: dayOffset));
+          final targetKey = DateFormat('yyyy-MM-dd').format(targetDate);
+          return provider.stops
+              .where((stop) => stop.timeSlot == targetKey)
+              .toList();
+        }
+        return [];
     }
   }
 
@@ -93,12 +81,16 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
     switch (_selectedFilter) {
       case RouteFilter.all:
         return LocaleKeys.no_route_today.tr();
-      case RouteFilter.today:
-        return LocaleKeys.no_route_today.tr();
-      case RouteFilter.missed:
+      case RouteFilter.completed:
+        return '${LocaleKeys.no.tr()} ${LocaleKeys.completed.tr().toLowerCase()} ${LocaleKeys.stops.tr().toLowerCase()}';
+      case RouteFilter.overdue:
         return '${LocaleKeys.no.tr()} ${LocaleKeys.overdue.tr().toLowerCase()} ${LocaleKeys.stops.tr().toLowerCase()}';
-      case RouteFilter.upcoming:
-        return '${LocaleKeys.no.tr()} upcoming ${LocaleKeys.stops.tr().toLowerCase()}';
+      default:
+        final dayOffset = _selectedFilter.index - RouteFilter.day1.index;
+        if (dayOffset == 0) return LocaleKeys.no_route_today.tr();
+        final targetDate = DateTime.now().add(Duration(days: dayOffset));
+        final dayName = DateFormat('EEEE').format(targetDate);
+        return '${LocaleKeys.no.tr()} ${LocaleKeys.stops.tr().toLowerCase()} $dayName';
     }
   }
 
@@ -143,21 +135,19 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
         children: [
           Row(
             children: [
-              if (provider.filterDate == null) ...[
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.route_outlined,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                const SizedBox(width: 12),
-              ],
+                child: const Icon(
+                  Icons.route_outlined,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,108 +161,16 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
                       ),
                     ),
                     if (provider.allRoute != null)
-                      Row(
-                        children: [
-                          if (provider.filterDate != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.withValues(alpha: 0.3),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.filter_alt,
-                                    size: 12,
-                                    color: Colors.white,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    LocaleKeys.filtered.tr(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          if (provider.filterDate != null)
-                            const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              DateFormat('EEEE').format(
-                                provider.filterDate ?? provider.selectedDate,
-                              ),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            DateFormat('MMMM d, yyyy').format(
-                              provider.filterDate ?? provider.selectedDate,
-                            ),
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        DateFormat('MMMM d, yyyy').format(DateTime.now()),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 14,
+                        ),
                       ),
                   ],
                 ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.calendar_today,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  onPressed: () => _selectDate(context, provider),
-                  tooltip: LocaleKeys.select_date.tr(),
-                ),
-              ),
-              if (provider.filterDate != null) ...[
-                const SizedBox(width: 8),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.clear,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    onPressed: () => provider.clearDateFilter(),
-                    tooltip: LocaleKeys.show_all_routes.tr(),
-                  ),
-                ),
-              ],
             ],
           ),
           const SizedBox(height: 16),
@@ -284,6 +182,8 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
 
   Widget _buildFilterChips() {
     final routeProvider = Provider.of<ProviderRoute>(context, listen: false);
+
+    final today = DateTime.now();
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -297,25 +197,37 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
           ),
           const SizedBox(width: 8),
           _buildFilterChip(
-            label: LocaleKeys.today.tr(),
-            filter: RouteFilter.today,
-            icon: Icons.today,
-            count: _getFilterCount(RouteFilter.today, routeProvider),
+            label: LocaleKeys.completed.tr(),
+            filter: RouteFilter.completed,
+            icon: Icons.check_circle,
+            count: _getFilterCount(RouteFilter.completed, routeProvider),
           ),
           const SizedBox(width: 8),
           _buildFilterChip(
             label: LocaleKeys.overdue.tr(),
-            filter: RouteFilter.missed,
+            filter: RouteFilter.overdue,
             icon: Icons.warning,
-            count: _getFilterCount(RouteFilter.missed, routeProvider),
+            count: _getFilterCount(RouteFilter.overdue, routeProvider),
           ),
           const SizedBox(width: 8),
-          _buildFilterChip(
-            label: 'Upcoming',
-            filter: RouteFilter.upcoming,
-            icon: Icons.schedule,
-            count: _getFilterCount(RouteFilter.upcoming, routeProvider),
-          ),
+          // Today and next 6 days
+          ...List.generate(7, (index) {
+            final targetDate = today.add(Duration(days: index));
+            final label = index == 0
+                ? LocaleKeys.today.tr()
+                : DateFormat('EEEE').format(targetDate);
+            final filter = RouteFilter.values[RouteFilter.day1.index + index];
+
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: _buildFilterChip(
+                label: label,
+                filter: filter,
+                icon: Icons.calendar_today,
+                count: _getFilterCount(filter, routeProvider),
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -371,16 +283,17 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
   int _getFilterCount(RouteFilter filter, ProviderRoute provider) {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    final todayKey = DateFormat('yyyy-MM-dd').format(today);
 
     switch (filter) {
       case RouteFilter.all:
         return provider.stops.length;
 
-      case RouteFilter.today:
-        return provider.stops.where((stop) => stop.timeSlot == todayKey).length;
+      case RouteFilter.completed:
+        return provider.stops
+            .where((stop) => stop.status == AppConstants.completed)
+            .length;
 
-      case RouteFilter.missed:
+      case RouteFilter.overdue:
         return provider.stops.where((stop) {
           if (stop.status == AppConstants.completed) return false;
 
@@ -395,18 +308,17 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
           return stopDate.isBefore(todayDate);
         }).length;
 
-      case RouteFilter.upcoming:
-        return provider.stops.where((stop) {
-          final parts = stop.timeSlot.split('-');
-          if (parts.length != 3) return false;
-          final stopDate = DateTime(
-            int.parse(parts[0]),
-            int.parse(parts[1]),
-            int.parse(parts[2]),
-          );
-
-          return stopDate.isAfter(todayDate);
-        }).length;
+      default:
+        // Handle day1 to day7
+        final dayOffset = filter.index - RouteFilter.day1.index;
+        if (dayOffset >= 0 && dayOffset < 7) {
+          final targetDate = todayDate.add(Duration(days: dayOffset));
+          final targetKey = DateFormat('yyyy-MM-dd').format(targetDate);
+          return provider.stops
+              .where((stop) => stop.timeSlot == targetKey)
+              .length;
+        }
+        return 0;
     }
   }
 
@@ -465,7 +377,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () =>
-                  setState(() => _selectedFilter = RouteFilter.today),
+                  setState(() => _selectedFilter = RouteFilter.day1),
               icon: const Icon(Icons.today),
               label: Text(LocaleKeys.today.tr()),
               style: ElevatedButton.styleFrom(
