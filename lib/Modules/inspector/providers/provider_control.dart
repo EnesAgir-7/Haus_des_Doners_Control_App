@@ -316,45 +316,7 @@ class ProviderControl extends ChangeNotifier {
 
       if (hasPhotos) {
         // ✅ Compress images first if flag is true
-        if (shouldCompressImages) {
-          _currentUploadStage = UploadStage.compressingImages;
-          notifyListeners();
-
-          int totalImages = 0;
-          int processedImages = 0;
-
-          // Count total images
-          for (var category in selectedTemplate!.categories) {
-            final files = _photos[category.categoryId] ?? [];
-            totalImages += files.length;
-          }
-
-          // Compress all images
-          for (var category in selectedTemplate!.categories) {
-            final files = _photos[category.categoryId] ?? [];
-
-            if (files.isEmpty) continue;
-
-            List<File> compressedFiles = [];
-
-            for (var file in files) {
-              // Compress the image
-              final compressedFile = await _compressImage(file);
-              compressedFiles.add(compressedFile);
-
-              processedImages++;
-              // Update progress for compression (0% - 25%)
-              _uploadProgress = 0.25 * (processedImages / totalImages);
-              notifyListeners();
-            }
-
-            // Replace original files with compressed files
-            _photos[category.categoryId] = compressedFiles;
-          }
-
-          _uploadProgress = 0.25;
-          notifyListeners();
-        }
+        await _compressAllImagesIfNeeded();
 
         // ✅ Set stage to uploading photos
         _currentUploadStage = UploadStage.uploadingPhotos;
@@ -533,6 +495,62 @@ class ProviderControl extends ChangeNotifier {
     }
   }
 
+  // ✅ Helper method to compress all photos in the form
+  Future<void> _compressAllImagesIfNeeded() async {
+    if (!shouldCompressImages || selectedTemplate == null) return;
+
+    _currentUploadStage = UploadStage.compressingImages;
+    notifyListeners();
+
+    int totalImages = 0;
+    int processedImages = 0;
+
+    // Count total images
+    for (var category in selectedTemplate!.categories) {
+      final files = _photos[category.categoryId] ?? [];
+      totalImages += files.length;
+    }
+
+    if (totalImages == 0) {
+      _uploadProgress = 0.25;
+      _currentUploadStage = null;
+      notifyListeners();
+      return;
+    }
+
+    // Compress all images
+    for (var category in selectedTemplate!.categories) {
+      final files = _photos[category.categoryId] ?? [];
+
+      if (files.isEmpty) continue;
+
+      List<File> compressedFiles = [];
+
+      for (var file in files) {
+        // Skip if already compressed (basic check)
+        if (file.path.contains('_compressed.jpg')) {
+          compressedFiles.add(file);
+        } else {
+          // Compress the image
+          final compressedFile = await _compressImage(file);
+          compressedFiles.add(compressedFile);
+        }
+
+        processedImages++;
+        // Update progress for compression (0% - 25%)
+        _uploadProgress = 0.25 * (processedImages / totalImages);
+        notifyListeners();
+      }
+
+      // Replace original files with compressed files
+      _photos[category.categoryId] = compressedFiles;
+    }
+
+    _uploadProgress = 0.25;
+    _currentUploadStage = null;
+    notifyListeners();
+  }
+
   // ✅ Helper method to compress a single image
   Future<File> _compressImage(File imageFile) async {
     try {
@@ -659,6 +677,22 @@ class ProviderControl extends ChangeNotifier {
 
   Future<void> previewPDF(BuildContext context) async {
     try {
+      // ✅ Compress images before preview if enabled
+      if (shouldCompressImages) {
+        final hasPhotos = selectedTemplate!.categories.any((category) {
+          final files = _photos[category.categoryId] ?? [];
+          return files.isNotEmpty;
+        });
+
+        if (hasPhotos) {
+          _isUploading = true; // Show loading while compressing
+          notifyListeners();
+          await _compressAllImagesIfNeeded();
+          _isUploading = false;
+          notifyListeners();
+        }
+      }
+
       // Prepare category data
       final List<CategoryScore> categoryScores = selectedTemplate!.categories
           .map((category) {
