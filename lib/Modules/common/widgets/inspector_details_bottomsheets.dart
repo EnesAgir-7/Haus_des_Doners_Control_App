@@ -580,8 +580,11 @@ class InspectorDetailsBottomSheets {
         if (inspection.pdfReportUrl == null) return;
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) =>
-                ScreenPdfViewer(pdfUrl: inspection.pdfReportUrl ?? ""),
+            builder: (context) => ScreenPdfViewer(
+              pdfUrl: inspection.pdfReportUrl ?? "",
+              inspectionId: inspection.id,
+              branchName: inspection.branchName,
+            ),
           ),
         );
       },

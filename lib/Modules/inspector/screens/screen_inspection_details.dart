@@ -286,8 +286,8 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
                     MaterialPageRoute(
                       builder: (context) => ScreenPdfViewer(
                         pdfUrl: inspection.pdfReportUrl!,
-                        // inspectionId: inspection.id,
-                        // branchName: inspection.branchName,
+                        inspectionId: inspection.id,
+                        branchName: inspection.branchName,
                       ),
                     ),
                   );

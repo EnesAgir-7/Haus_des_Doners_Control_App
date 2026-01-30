@@ -40,9 +40,9 @@ class _ScreenBranchesState extends State<ScreenBranches> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         heroTag: "branchesFab",
-        onPressed: () => Navigator.of(
-          context,
-        ).push(MaterialPageRoute(builder: (context) => const BranchMapScreen())),
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => const BranchMapScreen()),
+        ),
         child: const Icon(Icons.location_on, size: 36),
       ),
       body: Container(
@@ -270,7 +270,11 @@ class _ScreenBranchesState extends State<ScreenBranches> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          const Icon(
+            Icons.error_outline,
+            size: 60,
+            color: AppColors.primaryRed,
+          ),
           const SizedBox(height: 16),
           Text(
             LocaleKeys.error_occurred.tr(),
@@ -452,12 +456,19 @@ class BranchDetailsSheet extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.location_on, size: 16, color: Colors.white54),
+                  const Icon(
+                    Icons.location_on,
+                    size: 16,
+                    color: Colors.white54,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       branch.address,
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
@@ -647,8 +658,11 @@ class BranchDetailsSheet extends StatelessWidget {
             if (inspection.pdfReportUrl == null) return;
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) =>
-                    ScreenPdfViewer(pdfUrl: inspection.pdfReportUrl ?? ""),
+                builder: (context) => ScreenPdfViewer(
+                  pdfUrl: inspection.pdfReportUrl ?? "",
+                  inspectionId: inspection.id,
+                  branchName: branch.name,
+                ),
               ),
             );
           },
@@ -985,7 +999,10 @@ class RouteManagementSheet extends StatelessWidget {
                     onPressed: () => Navigator.pop(context),
                     child: Text(
                       LocaleKeys.cancel.tr(),
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
