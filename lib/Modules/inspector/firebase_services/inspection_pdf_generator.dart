@@ -173,7 +173,7 @@ class InspectionPDFGenerator {
               pw.Expanded(
                 flex: 1,
                 child: pw.Text(
-                  "Note", // User wants "marks", "Note" is common for 1-5 scale
+                  "Bewertung", // Renamed from "Note" to "Bewertung"
                   textAlign: pw.TextAlign.center,
                   style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 ),
@@ -548,7 +548,8 @@ class InspectionPDFGenerator {
                       vertical: 2,
                     ),
                     decoration: pw.BoxDecoration(
-                      color: const PdfColor(1, 1, 1, 0.2),
+                      // Removed white background color per user request
+                      border: pw.Border.all(color: PdfColors.white, width: 1),
                       borderRadius: pw.BorderRadius.circular(4),
                     ),
                     child: pw.Text(
