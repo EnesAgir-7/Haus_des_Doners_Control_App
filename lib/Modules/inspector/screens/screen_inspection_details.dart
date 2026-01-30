@@ -410,7 +410,25 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
     InspectionCategoryModel data,
     String path,
   ) {
-    final scoreColor = getScoreColor(data.score);
+    // Parse mark from "1/5" string
+    int mark = 0;
+    try {
+      if (data.score.contains('/')) {
+        mark = int.parse(data.score.split('/')[0]);
+      } else {
+        mark = int.tryParse(data.score) ?? 0;
+      }
+    } catch (e) {
+      mark = 0;
+    }
+
+    // Determine color based on inverted mark logic (1=Best, 5=Worst)
+    // We Map mark to points (1->100) to get the correct severity color
+    Color scoreColor = Colors.grey;
+    if (mark > 0) {
+      final points = mapScoreToPoints(mark);
+      scoreColor = getPercentageColor(points.toDouble());
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -438,43 +456,27 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                    horizontal: 10, // Increased padding
+                    vertical: 6,
                   ),
                   decoration: BoxDecoration(
                     color: scoreColor.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(
+                      8,
+                    ), // Slightly larger radius
                     border: Border.all(color: scoreColor),
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min, // Keep compact
                     children: [
-                      Icon(Icons.stars_rounded, size: 14, color: scoreColor),
-                      const SizedBox(width: 6),
+                      Icon(Icons.stars_rounded, size: 16, color: scoreColor),
+                      const SizedBox(width: 8),
                       Text(
-                        '${calculatePerformancePercent(data.score)} Pkt',
+                        '${data.score}', // Display "1/5"
                         style: TextStyle(
                           color: scoreColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: scoreColor.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '${calculatePerformancePercent(data.score)}%',
-                          style: TextStyle(
-                            color: scoreColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11,
-                          ),
                         ),
                       ),
                     ],
