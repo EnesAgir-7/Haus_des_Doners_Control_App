@@ -28,13 +28,13 @@ Color getScoreColor(String scoreString) {
 }
 
 Color getPercentageColor(double percentage) {
-  if (percentage == 100) {
+  if (percentage >= 90) {
     return Colors.green;
-  } else if (percentage == 75) {
+  } else if (percentage >= 70) {
     return AppColors.amber;
-  } else if (percentage == 50) {
+  } else if (percentage >= 50) {
     return Colors.orange;
-  } else if (percentage == 25) {
+  } else if (percentage >= 20) {
     return Colors.deepOrange;
   } else {
     return AppColors.primaryRed;
@@ -42,45 +42,49 @@ Color getPercentageColor(double percentage) {
 }
 
 IconData getPercentageIcon(double percentage) {
-  if (percentage == 100) {
+  if (percentage >= 90) {
     return Icons.emoji_events; // Excellent
-  } else if (percentage == 75) {
+  } else if (percentage >= 70) {
     return Icons.thumb_up; // Good
-  } else if (percentage == 50) {
+  } else if (percentage >= 50) {
     return Icons.thumbs_up_down; // Fair/Okay
-  } else if (percentage == 25) {
+  } else if (percentage >= 20) {
     return Icons.warning; // Fair
   } else {
     return Icons.error; // Poor / 0%
   }
 }
 
+int mapScoreToPoints(int score) {
+  switch (score) {
+    case 1:
+      return 100;
+    case 2:
+      return 75;
+    case 3:
+      return 50;
+    case 4:
+      return 25;
+    case 5:
+      return 0;
+    default:
+      return 0;
+  }
+}
+
 String calculatePerformancePercent(String totalScoreStr) {
+  if (totalScoreStr == 'N/A') return '0';
   final parts = totalScoreStr.split('/');
-  if (parts.length != 2) return '100';
+  if (parts.length != 2) return '0';
 
   final points = double.tryParse(parts[0]) ?? 0.0;
   final maxPoints = double.tryParse(parts[1]) ?? 1.0;
 
-  if (maxPoints <= 0) return '100';
+  if (maxPoints <= 0) return '0';
 
-  final avgScorePerQuestion = points / maxPoints * 5; // scale to 1–5
+  final percentage = (points / maxPoints) * 100;
 
-  // Map average score to your custom percentage
-  double percentage;
-  if (avgScorePerQuestion <= 1) {
-    percentage = 100;
-  } else if (avgScorePerQuestion <= 2) {
-    percentage = 75;
-  } else if (avgScorePerQuestion <= 3) {
-    percentage = 50;
-  } else if (avgScorePerQuestion <= 4) {
-    percentage = 25;
-  } else {
-    percentage = 0;
-  }
-
-  return '${percentage.toStringAsFixed(0)}';
+  return percentage.toStringAsFixed(0);
 }
 
 List<String> getInspectorTokens(String inspectorId, BuildContext context) {

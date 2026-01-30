@@ -1,17 +1,11 @@
-import 'dart:io';
-
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:permission_handler/permission_handler.dart';
 import 'package:printing/printing.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../widgets/custom_app_bar.dart';
-import '../widgets/custom_toast.dart';
 
 class PDFPreviewScreen extends StatelessWidget {
   final pw.Document pdf;
@@ -34,10 +28,7 @@ class PDFPreviewScreen extends StatelessWidget {
           //   icon: const Icon(Icons.share, color: Colors.white),
           //   onPressed: () => _sharePDF(),
           // ),
-          IconButton(
-            icon: const Icon(Icons.download, color: Colors.white),
-            onPressed: () => _downloadPDF(context),
-          ),
+          // Removed download button per user request for preview
         ],
       ),
       body: PdfPreview(
@@ -62,65 +53,5 @@ class PDFPreviewScreen extends StatelessWidget {
   //   );
   // }
 
-  Future<void> _downloadPDF(BuildContext context) async {
-    try {
-      // Request appropriate permissions based on Android version
-      bool hasPermission = false;
-
-      if (Platform.isAndroid) {
-        final androidInfo = await DeviceInfoPlugin().androidInfo;
-
-        if (androidInfo.version.sdkInt >= 33) {
-          // Android 13+ doesn't need storage permission for Downloads
-          hasPermission = true;
-        } else if (androidInfo.version.sdkInt >= 30) {
-          // Android 11 & 12
-          var status = await Permission.manageExternalStorage.status;
-          if (!status.isGranted) {
-            status = await Permission.manageExternalStorage.request();
-          }
-          hasPermission = status.isGranted;
-        } else {
-          // Android 10 and below
-          var status = await Permission.storage.status;
-          if (!status.isGranted) {
-            status = await Permission.storage.request();
-          }
-          hasPermission = status.isGranted;
-        }
-
-        if (!hasPermission) {
-          if (context.mounted) {
-            showSnakBarr(context, LocaleKeys.storagePermissionDenied.tr());
-          }
-          return;
-        }
-      }
-
-      final bytes = await pdf.save();
-      String filePath;
-
-      if (Platform.isAndroid) {
-        final downloadsDir = Directory('/storage/emulated/0/Download');
-        filePath =
-            '${downloadsDir.path}/Inspection_Report_${DateTime.now().millisecondsSinceEpoch}.pdf';
-      } else {
-        final dir = await getApplicationDocumentsDirectory();
-        filePath =
-            '${dir.path}/Inspection_Report_${DateTime.now().millisecondsSinceEpoch}.pdf';
-      }
-
-      final file = File(filePath);
-      await file.writeAsBytes(bytes);
-
-      if (context.mounted) {
-        showSnakBarr(context, LocaleKeys.pdfSavedToDownloads.tr());
-      }
-    } catch (e) {
-      debugPrint('Download error: $e');
-      if (context.mounted) {
-        showSnakBarr(context, '${LocaleKeys.error.tr()}: $e');
-      }
-    }
-  }
+  // Removed unused _downloadPDF method per user request to disable downloading in preview
 }

@@ -148,7 +148,7 @@ class InspectorBranchCard extends StatelessWidget {
             child: Text(
               textAlign: TextAlign.end,
               branch.lastInspectionDate != null
-                  ? "${formatDate(branch.lastInspectionDate!)} (${branch.lastInspectionScore})"
+                  ? "${formatDate(branch.lastInspectionDate!)} (${calculatePerformancePercent(branch.lastInspectionScore ?? '')} Pkt)"
                   : LocaleKeys.pending_first.tr(),
               style: const TextStyle(
                 color: Colors.white70,

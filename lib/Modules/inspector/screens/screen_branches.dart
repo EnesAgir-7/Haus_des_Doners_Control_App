@@ -722,7 +722,7 @@ class BranchDetailsSheet extends StatelessWidget {
                           Icon(Icons.star, size: 14, color: scoreColor),
                           const SizedBox(width: 4),
                           Text(
-                            inspection.score,
+                            '${calculatePerformancePercent(inspection.score)} Pkt',
                             style: TextStyle(
                               color: scoreColor,
                               fontWeight: FontWeight.bold,

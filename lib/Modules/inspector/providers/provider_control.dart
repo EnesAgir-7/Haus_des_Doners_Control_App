@@ -17,6 +17,7 @@ import '../../../models/branch_model.dart';
 import '../../../models/inspection_model.dart';
 import '../../../models/inspection_template_model.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../../../helpers/app_helpers.dart';
 import '../firebase_services/inspection_pdf_generator.dart';
 import '../firebase_services/inspector_inspection_service.dart';
 import '../firebase_services/inspector_onedrive_service.dart';
@@ -216,15 +217,25 @@ class ProviderControl extends ChangeNotifier {
     notifyListeners();
   }
 
-  double get totalScore => _scores.values.fold(0, (a, b) => a + b);
-  String get scoreDisplay => '$totalScore/$maxPossibleScore';
+  double get totalScore {
+    if (selectedTemplate == null) return 0;
+    return selectedTemplate!.categories.fold<double>(0.0, (sum, cat) {
+      final isEnabled = _enabledCategories[cat.categoryId] ?? true;
+      if (!isEnabled) return sum;
+      final score = _scores[cat.categoryId] ?? 0;
+      return sum + mapScoreToPoints(score);
+    });
+  }
+
+  String get scoreDisplay => '${totalScore.toInt()}/$maxPossibleScore';
 
   int get maxPossibleScore {
     if (selectedTemplate == null) return 0;
-    return selectedTemplate!.categories.fold(
-      0,
-      (sum, category) => sum + category.maxScore,
-    );
+    return selectedTemplate!.categories.fold(0, (sum, category) {
+      final isEnabled = _enabledCategories[category.categoryId] ?? true;
+      if (!isEnabled) return sum;
+      return sum + 100;
+    });
   }
 
   void setOverallNotes(String notes) {
@@ -398,28 +409,7 @@ class ProviderControl extends ChangeNotifier {
           : (hasPhotos ? 0.8 : 0.5);
       notifyListeners();
 
-      // ✅ Calculate total score excluding skipped questions
-      final enabledScore = selectedTemplate!.categories.fold<double>(0.0, (
-        sum,
-        cat,
-      ) {
-        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
-        if (!isEnabled) return sum;
-        return sum + (_scores[cat.categoryId] ?? 0).toDouble();
-      });
-
-      // Calculate max possible score excluding skipped questions
-      final enabledMaxScore = selectedTemplate!.categories.fold<double>(0.0, (
-        sum,
-        cat,
-      ) {
-        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
-        if (!isEnabled) return sum;
-        return sum + cat.maxScore.toDouble();
-      });
-
-      final scoreString =
-          '${enabledScore.toStringAsFixed(0)}/${enabledMaxScore.toStringAsFixed(0)}';
+      final scoreString = '${totalScore.toInt()}/$maxPossibleScore';
 
       // 🔹 Only after all uploads succeeded, create inspection object
       final inspection = InspectionModel(
@@ -453,7 +443,7 @@ class ProviderControl extends ChangeNotifier {
             return MapEntry(
               cat.title,
               InspectionCategoryModel(
-                score: "$score/${cat.maxScore}",
+                score: "$score/5", // Store raw mark (1-5)
                 notes: notes,
               ),
             );
@@ -703,12 +693,13 @@ class ProviderControl extends ChangeNotifier {
             final categoryId = category.categoryId;
             final isEnabled = _enabledCategories[categoryId] ?? true;
             final isSkipped = !isEnabled; // Question is skipped if disabled
+            final score = _scores[categoryId] ?? 0;
 
             return CategoryScore(
-              maxScore: category.maxScore,
-              categoryId: category.categoryId,
+              maxScore: 5, // Show raw mark scale (1-5)
+              categoryId: categoryId,
               title: category.title,
-              score: _scores[categoryId] ?? 0,
+              score: score, // Pass raw mark (1, 2, 3, 4, 5)
               notes: _notes[categoryId] ?? '',
               photoCount: (_photos[categoryId] ?? []).length,
               isSkipped: isSkipped, // Mark as skipped if disabled
@@ -716,25 +707,8 @@ class ProviderControl extends ChangeNotifier {
           })
           .toList();
 
-      // Calculate total score excluding skipped questions
-      final enabledScore = selectedTemplate!.categories.fold<double>(0.0, (
-        sum,
-        cat,
-      ) {
-        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
-        if (!isEnabled) return sum;
-        return sum + (_scores[cat.categoryId] ?? 0).toDouble();
-      });
-
-      // Calculate max possible score excluding skipped questions
-      final enabledMaxScore = selectedTemplate!.categories.fold<double>(0.0, (
-        sum,
-        cat,
-      ) {
-        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
-        if (!isEnabled) return sum;
-        return sum + cat.maxScore.toDouble();
-      });
+      final enabledScore = totalScore;
+      final enabledMaxScore = maxPossibleScore.toDouble();
 
       // Create PDF generator
       final pdfGenerator = InspectionPDFGenerator(
@@ -784,10 +758,10 @@ class ProviderControl extends ChangeNotifier {
             final isSkipped = !isEnabled; // Question is skipped if disabled
 
             return CategoryScore(
-              maxScore: category.maxScore,
+              maxScore: 100,
               categoryId: category.categoryId,
               title: category.title,
-              score: _scores[categoryId] ?? 0,
+              score: mapScoreToPoints(_scores[categoryId] ?? 0),
               notes: _notes[categoryId] ?? '',
               photoCount: (_photos[categoryId] ?? []).length,
               isSkipped: isSkipped, // Mark as skipped if disabled

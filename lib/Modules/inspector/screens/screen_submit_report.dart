@@ -19,6 +19,7 @@ import '../../../models/branch_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../providers/provider_control.dart';
 import '../widgets/app_button.dart';
+import '../../../helpers/app_helpers.dart';
 
 class ScreenSubmitReport extends StatefulWidget {
   final BranchModel? selectedBranch;
@@ -803,13 +804,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             ),
           ),
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
@@ -846,8 +844,49 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+                // Added Average Score Badge
+                Container(
+                  margin: const EdgeInsets.only(right: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: getScoreColor(
+                      provider.scoreDisplay,
+                    ).withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: getScoreColor(
+                        provider.scoreDisplay,
+                      ).withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '${calculatePerformancePercent(provider.scoreDisplay)}%',
+                        style: TextStyle(
+                          color: getScoreColor(provider.scoreDisplay),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        '${provider.totalScore.toInt()} Pkt',
+                        style: TextStyle(
+                          color: getScoreColor(
+                            provider.scoreDisplay,
+                          ).withValues(alpha: 0.8),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ],

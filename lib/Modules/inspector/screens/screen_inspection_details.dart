@@ -196,32 +196,47 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.star, size: 18, color: scoreColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      inspection.score,
-                      style: TextStyle(
-                        color: scoreColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+                    Icon(Icons.stars_rounded, size: 20, color: scoreColor),
                     const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${calculatePerformancePercent(inspection.score)} Pkt',
+                          style: TextStyle(
+                            color: scoreColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Text(
+                          'Gesamt: ${inspection.score}',
+                          style: TextStyle(
+                            color: scoreColor.withValues(alpha: 0.7),
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 16),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
+                        horizontal: 10,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: scoreColor.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(4),
+                        color: scoreColor.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: scoreColor.withValues(alpha: 0.4),
+                        ),
                       ),
                       child: Text(
                         '${calculatePerformancePercent(inspection.score)}%',
                         style: TextStyle(
                           color: scoreColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -433,20 +448,20 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.star, size: 12, color: scoreColor),
-                      const SizedBox(width: 4),
+                      Icon(Icons.stars_rounded, size: 14, color: scoreColor),
+                      const SizedBox(width: 6),
                       Text(
-                        '${data.score}',
+                        '${calculatePerformancePercent(data.score)} Pkt',
                         style: TextStyle(
                           color: scoreColor,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
+                          horizontal: 6,
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
@@ -458,7 +473,7 @@ class _ScreenInspectionDetailsState extends State<ScreenInspectionDetails> {
                           style: TextStyle(
                             color: scoreColor,
                             fontWeight: FontWeight.bold,
-                            fontSize: 10,
+                            fontSize: 11,
                           ),
                         ),
                       ),

@@ -173,7 +173,7 @@ class InspectionPDFGenerator {
               pw.Expanded(
                 flex: 1,
                 child: pw.Text(
-                  "Bewertung",
+                  "Note", // User wants "marks", "Note" is common for 1-5 scale
                   textAlign: pw.TextAlign.center,
                   style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 ),
@@ -181,7 +181,7 @@ class InspectionPDFGenerator {
               pw.Expanded(
                 flex: 2,
                 child: pw.Text(
-                  "Status",
+                  "Prozent",
                   textAlign: pw.TextAlign.center,
                   style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 ),
@@ -193,8 +193,20 @@ class InspectionPDFGenerator {
         ...categories.map((category) {
           // Check if category is skipped
           final isSkipped = category.isSkipped ?? false;
-          final scoreString = '${category.score}/${category.maxScore}';
-          final percentage = calculatePerformancePercent(scoreString);
+
+          // Fix individual percentage calculation for 1-5 marks
+          // If category.maxScore is 5, we map to points for correct percentage display
+          final int mark = category.score;
+          final int points = category.maxScore == 5
+              ? mapScoreToPoints(mark)
+              : category.score;
+          final int maxPossiblePoints = category.maxScore == 5
+              ? 100
+              : category.maxScore;
+
+          final percentage = calculatePerformancePercent(
+            '$points/$maxPossiblePoints',
+          );
           final percentValue = int.tryParse(percentage) ?? 0;
           final performanceLevel = _getPerformanceLevel(percentValue);
 
@@ -253,7 +265,7 @@ class InspectionPDFGenerator {
                   child: pw.Text(
                     isSkipped
                         ? 'N/A'
-                        : '${category.score}/${category.maxScore}',
+                        : '${category.score}', // Just show the mark (1-5)
                     textAlign: pw.TextAlign.center,
                     style: pw.TextStyle(
                       fontSize: 11,
@@ -509,13 +521,13 @@ class InspectionPDFGenerator {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                "Gesamtpunktzahl",
+                "Gesamtpunktzahl & Durchschnitt",
                 style: const pw.TextStyle(fontSize: 11, color: PdfColors.white),
               ),
               pw.Row(
                 children: [
                   pw.Text(
-                    totalScore.toStringAsFixed(1),
+                    totalScore.toStringAsFixed(0),
                     style: pw.TextStyle(
                       fontSize: 32,
                       fontWeight: pw.FontWeight.bold,
@@ -523,10 +535,29 @@ class InspectionPDFGenerator {
                     ),
                   ),
                   pw.Text(
-                    ' / ${maxPossibleScore.toStringAsFixed(0)}',
+                    ' / ${maxPossibleScore.toInt()}',
                     style: const pw.TextStyle(
                       fontSize: 16,
                       color: PdfColors.white,
+                    ),
+                  ),
+                  pw.SizedBox(width: 12),
+                  pw.Container(
+                    padding: const pw.EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: pw.BoxDecoration(
+                      color: const PdfColor(1, 1, 1, 0.2),
+                      borderRadius: pw.BorderRadius.circular(4),
+                    ),
+                    child: pw.Text(
+                      'Ø ${(totalScore / (maxPossibleScore / 100)).toStringAsFixed(1)} Pkt',
+                      style: pw.TextStyle(
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                        color: PdfColors.white,
+                      ),
                     ),
                   ),
                 ],
@@ -536,9 +567,12 @@ class InspectionPDFGenerator {
           pw.Container(
             width: 60,
             height: 60,
-            decoration: const pw.BoxDecoration(
+            decoration: pw.BoxDecoration(
               shape: pw.BoxShape.circle,
-              color: PdfColors.white,
+              color:
+                  performanceLevel['color']
+                      as PdfColor, // Use solid performance color
+              border: pw.Border.all(color: PdfColors.white, width: 2),
             ),
             child: pw.Center(
               child: pw.Text(
@@ -546,7 +580,7 @@ class InspectionPDFGenerator {
                 style: pw.TextStyle(
                   fontSize: 16,
                   fontWeight: pw.FontWeight.bold,
-                  color: performanceLevel['color'] as PdfColor,
+                  color: PdfColors.white,
                 ),
               ),
             ),
