@@ -322,6 +322,10 @@ class ProviderControl extends ChangeNotifier {
         _currentUploadStage = UploadStage.uploadingPhotos;
         notifyListeners();
 
+        // ✅ Pre-create the directory structure once to avoid race conditions
+        // in the concurrent category uploads below.
+        await _oneDriveService.createImagesFolder(_selectedBranch!.name, now);
+
         // 🔹 Upload all category images to OneDrive only
         await Future.wait(
           selectedTemplate!.categories.map((category) async {

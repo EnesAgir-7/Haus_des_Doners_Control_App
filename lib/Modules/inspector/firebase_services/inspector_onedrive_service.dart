@@ -20,6 +20,9 @@ class InspectorOneDriveService {
   String? _accessToken;
   DateTime? _tokenExpiry;
 
+  // Cache for folder creation requests to avoid race conditions
+  final Map<String, Future<void>> _folderCreationFutures = {};
+
   // Get app-only access token with expiry tracking
 
   // ✅ ADD THIS: Get root folder based on environment
@@ -122,7 +125,7 @@ class InspectorOneDriveService {
     await _ensureToken();
 
     try {
-      final monthFolder = _getMonthFolder(timestamp); 
+      final monthFolder = _getMonthFolder(timestamp);
 
       final dateFolder =
           '${timestamp.day.toString().padLeft(2, '0')}-'
@@ -194,6 +197,24 @@ class InspectorOneDriveService {
   }
 
   Future<void> _createFolderIfNotExists(String folderPath) async {
+    // If there's already a request in flight for this exact path, wait for it
+    if (_folderCreationFutures.containsKey(folderPath)) {
+      print('⏳ Waiting for concurrent folder creation: $folderPath');
+      return _folderCreationFutures[folderPath];
+    }
+
+    final future = _performFolderCreation(folderPath);
+    _folderCreationFutures[folderPath] = future;
+
+    try {
+      await future;
+    } finally {
+      // Remove from cache after completion
+      _folderCreationFutures.remove(folderPath);
+    }
+  }
+
+  Future<void> _performFolderCreation(String folderPath) async {
     await _ensureToken();
 
     final checkUrl = Uri.parse(
@@ -231,7 +252,8 @@ class InspectorOneDriveService {
         body: jsonEncode({
           'name': folderName,
           'folder': {},
-          '@microsoft.graph.conflictBehavior': 'replace',
+          '@microsoft.graph.conflictBehavior':
+              'fail', // Fail if exists to catch it in error handler
         }),
       );
 
@@ -239,14 +261,22 @@ class InspectorOneDriveService {
           createResponse.statusCode == 200) {
         print('✅ Folder created: $folderPath');
       } else {
-        final error = jsonDecode(createResponse.body);
-        final errorMessage = error['error']?['message'] ?? createResponse.body;
+        final body = createResponse.body;
+        final error = jsonDecode(body);
+        final errorMessage = error['error']?['message'] ?? body;
+        final errorCode = error['error']?['code']?.toString() ?? '';
 
-        // If error is "name already exists", it means folder was created by another request, ignore it
+        // If error is "name already exists" or "eTag mismatch", it means
+        // folder was likely created by another request, so we treat it as success.
         if (errorMessage.toString().toLowerCase().contains(
-          'name already exists',
-        )) {
-          print('ℹ️ Folder already exists (created concurrently): $folderPath');
+              'name already exists',
+            ) ||
+            errorMessage.toString().toLowerCase().contains('etag mismatch') ||
+            errorMessage.toString().toLowerCase().contains(
+              'resource has changed',
+            ) ||
+            errorCode.toLowerCase().contains('namealreadyexists')) {
+          print('ℹ️ Folder already exists (handled conflict): $folderPath');
           return;
         }
 
@@ -255,9 +285,10 @@ class InspectorOneDriveService {
         );
       }
     } else {
-      final error = jsonDecode(checkResponse.body);
+      final body = checkResponse.body;
+      final error = jsonDecode(body);
       throw Exception(
-        '${LocaleKeys.errorCheckingFolder.tr()} "$folderPath": ${error['error']?['message'] ?? checkResponse.body}',
+        '${LocaleKeys.errorCheckingFolder.tr()} "$folderPath": ${error['error']?['message'] ?? body}',
       );
     }
   }
