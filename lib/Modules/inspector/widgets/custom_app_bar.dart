@@ -66,7 +66,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         const Icon(Icons.circle, color: AppColors.green),
                         const SizedBox(width: 7),
                       ],
-                      Image.asset(kAppLogo, height: 32, fit: BoxFit.contain),
+                      Flexible(
+                        child: Image.asset(
+                          kAppLogo,
+                          height: 32,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ],
                   ),
                 ),

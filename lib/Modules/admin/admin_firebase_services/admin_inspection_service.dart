@@ -11,7 +11,7 @@ class AdminInspectionService {
     return _db
         .collection(Collections.inspections)
         .orderBy(InspectionFields.updatedAt, descending: true)
-        .limit(5)
+        .limit(10)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
