@@ -1081,324 +1081,346 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             ),
           ),
 
-          // Card content (rating buttons, photos, notes) - DISABLED WHEN !isEnabled
-          IgnorePointer(
-            ignoring: !isEnabled,
-            child: Opacity(
-              opacity: isEnabled ? 1.0 : 0.4,
-              child: Column(
-                children: [
-                  // Rating Buttons - Dynamic based on maxScore
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 20,
-                    ),
-                    child: Row(
-                      children: List.generate(maxScore, (index) {
-                        final rating = index + 1;
-                        final isSelected = score == rating;
-                        final ratingData = ratings[index];
-                        final ratingColor = ratingData['color'] as Color;
-
-                        return Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4),
-                            child: GestureDetector(
-                              onTap: () => onScoreChanged(rating),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeOutCubic,
-                                height: 70,
-                                decoration: BoxDecoration(
-                                  gradient: isSelected
-                                      ? LinearGradient(
-                                          begin: Alignment.topLeft,
-                                          end: Alignment.bottomRight,
-                                          colors: [
-                                            ratingColor,
-                                            ratingColor.withValues(alpha: 0.8),
-                                          ],
-                                        )
-                                      : LinearGradient(
-                                          colors: [
-                                            Colors.white.withValues(
-                                              alpha: 0.05,
-                                            ),
-                                            Colors.white.withValues(
-                                              alpha: 0.02,
-                                            ),
-                                          ],
-                                        ),
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? ratingColor
-                                        : Colors.white.withValues(alpha: 0.1),
-                                    width: isSelected ? 2 : 1,
-                                  ),
-                                  boxShadow: isSelected
-                                      ? [
-                                          BoxShadow(
-                                            color: ratingColor.withValues(
-                                              alpha: 0.4,
-                                            ),
-                                            blurRadius: 12,
-                                            offset: const Offset(0, 3),
-                                          ),
-                                        ]
-                                      : null,
-                                ),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      rating.toString(),
-                                      style: TextStyle(
-                                        fontSize: isSelected ? 23 : 20,
-                                        fontWeight: isSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : Colors.white70,
-                                      ),
-                                    ),
-                                    if (isSelected) ...[
-                                      Text(
-                                        ratingData['label'],
-                                        style: const TextStyle(
-                                          fontSize: 9,
-                                          color: Colors.white70,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-
-                  // Notes TextField
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TextField(
-                        controller: notesController,
-                        onChanged: onNotesChanged,
-                        maxLines: 3,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: isRequired
-                              ? '${LocaleKeys.add_notes_optional.tr()} 🛑 ${LocaleKeys.required.tr()}'
-                              : '${LocaleKeys.add_notes_optional.tr()}',
-                          hintStyle: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.3),
-                          ),
-                          filled: true,
-                          fillColor: Colors.black.withValues(alpha: 0.3),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: score > 0
-                                  ? ratings[score - 1]['color'] as Color
-                                  : AppColors.primaryRed,
-                              width: 2,
-                            ),
-                          ),
-                          contentPadding: const EdgeInsets.all(16),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Photos Section (unchanged)
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
+          // Card content (rating buttons, photos, notes) - HIDDEN WHEN !isEnabled
+          ClipRect(
+            child: AnimatedSize(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: !isEnabled
+                  ? const SizedBox(width: double.infinity, height: 0)
+                  : Column(
                       children: [
-                        Row(
-                          spacing: 13,
-                          children: [
-                            Expanded(
-                              child: AppButton(
-                                text:
-                                    '${LocaleKeys.take_photo.tr()} (${photos.length}/4)',
-                                textStyle: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                icon: photos.length < 4
-                                    ? Icons.camera_alt
-                                    : Icons.check_circle,
-                                onPressed: photos.length < 4
-                                    ? () => _takePhoto(category)
-                                    : null,
-                                backgroundColor: photos.length < 4
-                                    ? AppColors.primaryRed
-                                    : Colors.green,
-                                height: 48,
-                              ),
-                            ),
-                            Expanded(
-                              child: AppButton(
-                                text:
-                                    '${LocaleKeys.browse.tr()} (${photos.length}/4)',
-                                textStyle: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                icon: photos.length < 4
-                                    ? Icons.camera_alt
-                                    : Icons.check_circle,
-                                onPressed: photos.length < 4
-                                    ? () => _pickFromGallery(category)
-                                    : null,
-                                backgroundColor: photos.length < 4
-                                    ? AppColors.primaryRed
-                                    : Colors.green,
-                                height: 48,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (photos.isNotEmpty) ...[
-                          const SizedBox(height: 16),
-                          SizedBox(
-                            height: 110,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: photos.length,
-                              itemBuilder: (context, index) {
-                                return TweenAnimationBuilder<double>(
-                                  duration: Duration(
-                                    milliseconds: 300 + (index * 50),
+                        // Rating Buttons - Dynamic based on maxScore
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 20,
+                          ),
+                          child: Row(
+                            children: List.generate(maxScore, (index) {
+                              final rating = index + 1;
+                              final isSelected = score == rating;
+                              final ratingData = ratings[index];
+                              final ratingColor = ratingData['color'] as Color;
+
+                              return Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
                                   ),
-                                  tween: Tween(begin: 0.0, end: 1.0),
-                                  curve: Curves.easeOutBack,
-                                  builder: (context, value, child) {
-                                    return Transform.scale(
-                                      scale: value,
-                                      child: child,
-                                    );
-                                  },
-                                  child: Container(
-                                    margin: const EdgeInsets.only(right: 12),
-                                    child: Stack(
-                                      children: [
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.black.withValues(
-                                                  alpha: 0.3,
-                                                ),
-                                                blurRadius: 12,
-                                                offset: const Offset(0, 4),
-                                              ),
-                                            ],
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
-                                            child: Image.file(
-                                              photos[index],
-                                              width: 110,
-                                              height: 110,
-                                              fit: BoxFit.cover,
-                                            ),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 6,
-                                          right: 6,
-                                          child: GestureDetector(
-                                            onTap: () =>
-                                                onPhotoRemoved(photos[index]),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(6),
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    Colors.red,
-                                                    Colors.red.shade700,
-                                                  ],
-                                                ),
-                                                shape: BoxShape.circle,
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: Colors.red
-                                                        .withValues(alpha: 0.5),
-                                                    blurRadius: 8,
-                                                    offset: const Offset(0, 2),
+                                  child: GestureDetector(
+                                    onTap: () => onScoreChanged(rating),
+                                    child: AnimatedContainer(
+                                      duration: const Duration(
+                                        milliseconds: 300,
+                                      ),
+                                      curve: Curves.easeOutCubic,
+                                      height: 70,
+                                      decoration: BoxDecoration(
+                                        gradient: isSelected
+                                            ? LinearGradient(
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                                colors: [
+                                                  ratingColor,
+                                                  ratingColor.withValues(
+                                                    alpha: 0.8,
+                                                  ),
+                                                ],
+                                              )
+                                            : LinearGradient(
+                                                colors: [
+                                                  Colors.white.withValues(
+                                                    alpha: 0.05,
+                                                  ),
+                                                  Colors.white.withValues(
+                                                    alpha: 0.02,
                                                   ),
                                                 ],
                                               ),
-                                              child: const Icon(
-                                                Icons.close,
-                                                size: 16,
-                                                color: Colors.white,
-                                              ),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? ratingColor
+                                              : Colors.white.withValues(
+                                                  alpha: 0.1,
+                                                ),
+                                          width: isSelected ? 2 : 1,
+                                        ),
+                                        boxShadow: isSelected
+                                            ? [
+                                                BoxShadow(
+                                                  color: ratingColor.withValues(
+                                                    alpha: 0.4,
+                                                  ),
+                                                  blurRadius: 12,
+                                                  offset: const Offset(0, 3),
+                                                ),
+                                              ]
+                                            : null,
+                                      ),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            rating.toString(),
+                                            style: TextStyle(
+                                              fontSize: isSelected ? 23 : 20,
+                                              fontWeight: isSelected
+                                                  ? FontWeight.bold
+                                                  : FontWeight.normal,
+                                              color: isSelected
+                                                  ? Colors.white
+                                                  : Colors.white70,
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                          if (isSelected) ...[
+                                            Text(
+                                              ratingData['label'],
+                                              style: const TextStyle(
+                                                fontSize: 9,
+                                                color: Colors.white70,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ],
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                );
-                              },
-                            ),
+                                ),
+                              );
+                            }),
                           ),
-                        ] else ...[
-                          const SizedBox(height: 10),
-                          if (isRequired && photos.isEmpty)
-                            Text(
-                              '${LocaleKeys.atLeast1PhotoRequired.tr()}',
+                        ),
+
+                        // Notes TextField
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: notesController,
+                              onChanged: onNotesChanged,
+                              maxLines: 3,
                               style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 12,
+                                color: Colors.white,
+                                fontSize: 14,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: isRequired
+                                    ? '${LocaleKeys.add_notes_optional.tr()} 🛑 ${LocaleKeys.required.tr()}'
+                                    : '${LocaleKeys.add_notes_optional.tr()}',
+                                hintStyle: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.3),
+                                ),
+                                filled: true,
+                                fillColor: Colors.black.withValues(alpha: 0.3),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: Colors.white.withValues(alpha: 0.1),
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide(
+                                    color: score > 0
+                                        ? ratings[score - 1]['color'] as Color
+                                        : AppColors.primaryRed,
+                                    width: 2,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.all(16),
                               ),
                             ),
-                        ],
+                          ),
+                        ),
+
+                        // Photos Section (unchanged)
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            children: [
+                              Row(
+                                spacing: 13,
+                                children: [
+                                  Expanded(
+                                    child: AppButton(
+                                      text:
+                                          '${LocaleKeys.take_photo.tr()} (${photos.length}/4)',
+                                      textStyle: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      icon: photos.length < 4
+                                          ? Icons.camera_alt
+                                          : Icons.check_circle,
+                                      onPressed: photos.length < 4
+                                          ? () => _takePhoto(category)
+                                          : null,
+                                      backgroundColor: photos.length < 4
+                                          ? AppColors.primaryRed
+                                          : Colors.green,
+                                      height: 48,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: AppButton(
+                                      text:
+                                          '${LocaleKeys.browse.tr()} (${photos.length}/4)',
+                                      textStyle: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      icon: photos.length < 4
+                                          ? Icons.camera_alt
+                                          : Icons.check_circle,
+                                      onPressed: photos.length < 4
+                                          ? () => _pickFromGallery(category)
+                                          : null,
+                                      backgroundColor: photos.length < 4
+                                          ? AppColors.primaryRed
+                                          : Colors.green,
+                                      height: 48,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (photos.isNotEmpty) ...[
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  height: 110,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: photos.length,
+                                    itemBuilder: (context, index) {
+                                      return TweenAnimationBuilder<double>(
+                                        duration: Duration(
+                                          milliseconds: 300 + (index * 50),
+                                        ),
+                                        tween: Tween(begin: 0.0, end: 1.0),
+                                        curve: Curves.easeOutBack,
+                                        builder: (context, value, child) {
+                                          return Transform.scale(
+                                            scale: value,
+                                            child: child,
+                                          );
+                                        },
+                                        child: Container(
+                                          margin: const EdgeInsets.only(
+                                            right: 12,
+                                          ),
+                                          child: Stack(
+                                            children: [
+                                              Container(
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                  boxShadow: [
+                                                    BoxShadow(
+                                                      color: Colors.black
+                                                          .withValues(
+                                                            alpha: 0.3,
+                                                          ),
+                                                      blurRadius: 12,
+                                                      offset: const Offset(
+                                                        0,
+                                                        4,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
+                                                  child: Image.file(
+                                                    photos[index],
+                                                    width: 110,
+                                                    height: 110,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                              ),
+                                              Positioned(
+                                                top: 6,
+                                                right: 6,
+                                                child: GestureDetector(
+                                                  onTap: () => onPhotoRemoved(
+                                                    photos[index],
+                                                  ),
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(6),
+                                                    decoration: BoxDecoration(
+                                                      gradient: LinearGradient(
+                                                        colors: [
+                                                          Colors.red,
+                                                          Colors.red.shade700,
+                                                        ],
+                                                      ),
+                                                      shape: BoxShape.circle,
+                                                      boxShadow: [
+                                                        BoxShadow(
+                                                          color: Colors.red
+                                                              .withValues(
+                                                                alpha: 0.5,
+                                                              ),
+                                                          blurRadius: 8,
+                                                          offset: const Offset(
+                                                            0,
+                                                            2,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.close,
+                                                      size: 16,
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ] else ...[
+                                const SizedBox(height: 10),
+                                if (isRequired && photos.isEmpty)
+                                  Text(
+                                    '${LocaleKeys.atLeast1PhotoRequired.tr()}',
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                              ],
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ),
         ],
