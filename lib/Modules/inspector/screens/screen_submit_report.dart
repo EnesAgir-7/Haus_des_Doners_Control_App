@@ -875,7 +875,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     // Question enabled/disabled state (defaults to true)
     final bool isEnabled = _enabledCategories[category] ?? true;
 
-    final bool isRequired = isEnabled && score >= 3;
+    final bool isRequired = isEnabled && score >= 4;
     final List<Map<String, dynamic>> allRatings = [
       {
         'emoji': '😃',
@@ -2294,7 +2294,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       final photos = provider.getCategoryPhotos(category.categoryId);
       final notes = provider.getCategoryNotes(category.categoryId);
 
-      if (score >= 3) {
+      if (score >= 4) {
         // Check what's missing
         final missingNotes = notes.trim().isEmpty;
         final missingPhotos = photos.isEmpty;

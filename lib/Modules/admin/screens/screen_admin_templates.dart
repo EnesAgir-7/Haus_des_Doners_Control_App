@@ -31,7 +31,10 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text(
           LocaleKeys.createQuestionnaire.tr(),
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       body: Container(
@@ -138,7 +141,10 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.lightRed,
                     borderRadius: BorderRadius.circular(12),
@@ -160,7 +166,10 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
               runSpacing: 8,
               children: template.categories.map((category) {
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.primaryRed.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(6),
@@ -184,7 +193,11 @@ class _ScreenAdminQuestionnairesState extends State<ScreenAdminQuestionnaires> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 60, color: AppColors.primaryRed),
+          const Icon(
+            Icons.error_outline,
+            size: 60,
+            color: AppColors.primaryRed,
+          ),
           const SizedBox(height: 16),
           Text(
             LocaleKeys.errorLoadingQuestionnaires.tr(),
@@ -307,7 +320,7 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
       _categories.add(
         CategoryInput(
           titleController: TextEditingController(),
-          maxScore: 4,
+          maxScore: 5,
           categoryId: DateTime.now().millisecondsSinceEpoch.toString(),
         ),
       );
@@ -543,7 +556,11 @@ class _TemplateFormDialogState extends State<TemplateFormDialog>
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.category, color: AppColors.primaryRed, size: 18),
+                const Icon(
+                  Icons.category,
+                  color: AppColors.primaryRed,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   LocaleKeys.categories.tr(),
@@ -960,7 +977,11 @@ class TemplateDetailsSheet extends StatelessWidget {
                             ),
                             child: Row(
                               children: [
-                                const Icon(Icons.star, size: 12, color: Colors.amber),
+                                const Icon(
+                                  Icons.star,
+                                  size: 12,
+                                  color: Colors.amber,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   '${LocaleKeys.max.tr()}: ${category.maxScore}',

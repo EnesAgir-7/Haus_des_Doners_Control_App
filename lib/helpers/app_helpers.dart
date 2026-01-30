@@ -32,6 +32,8 @@ Color getPercentageColor(double percentage) {
     return Colors.green;
   } else if (percentage == 75) {
     return AppColors.amber;
+  } else if (percentage == 50) {
+    return Colors.orange;
   } else if (percentage == 25) {
     return Colors.deepOrange;
   } else {
@@ -44,6 +46,8 @@ IconData getPercentageIcon(double percentage) {
     return Icons.emoji_events; // Excellent
   } else if (percentage == 75) {
     return Icons.thumb_up; // Good
+  } else if (percentage == 50) {
+    return Icons.thumbs_up_down; // Fair/Okay
   } else if (percentage == 25) {
     return Icons.warning; // Fair
   } else {
@@ -60,7 +64,7 @@ String calculatePerformancePercent(String totalScoreStr) {
 
   if (maxPoints <= 0) return '100';
 
-  final avgScorePerQuestion = points / maxPoints * 4; // scale to 1–4
+  final avgScorePerQuestion = points / maxPoints * 5; // scale to 1–5
 
   // Map average score to your custom percentage
   double percentage;
@@ -69,6 +73,8 @@ String calculatePerformancePercent(String totalScoreStr) {
   } else if (avgScorePerQuestion <= 2) {
     percentage = 75;
   } else if (avgScorePerQuestion <= 3) {
+    percentage = 50;
+  } else if (avgScorePerQuestion <= 4) {
     percentage = 25;
   } else {
     percentage = 0;
@@ -152,7 +158,6 @@ List<String> generateLast12Months() {
 
   return months;
 }
-
 
 Widget buildNextInspectionInfo({
   required int? daysUntilNextInspection,

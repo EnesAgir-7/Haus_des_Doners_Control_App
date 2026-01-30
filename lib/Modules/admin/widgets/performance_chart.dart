@@ -1,9 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../helpers/app_helpers.dart';
-import '../../../translations/locale_keys.g.dart';
 
 /// Reusable performance chart widget
 /// Can be used for both Inspector History and Branch Performance
@@ -81,29 +79,22 @@ Widget buildPerformanceChart({
         child: Column(
           children: [
             // Legend
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildLegendItem(
-                  Colors.green,
-                  '${LocaleKeys.excellent.tr()} (100%)',
-                ),
-                const SizedBox(width: 12),
-                _buildLegendItem(
-                  AppColors.amber,
-                  '${LocaleKeys.good.tr()} (75%)',
-                ),
-                const SizedBox(width: 12),
-                _buildLegendItem(
-                  Colors.orange,
-                  '${LocaleKeys.fair.tr()} (25%)',
-                ),
-                const SizedBox(width: 12),
-                _buildLegendItem(
-                  AppColors.primaryRed,
-                  '${LocaleKeys.poor.tr()} (0%)',
-                ),
-              ],
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _buildLegendItem(Colors.green, '100%'),
+                  const SizedBox(width: 12),
+                  _buildLegendItem(AppColors.amber, '75%'),
+                  const SizedBox(width: 12),
+                  _buildLegendItem(Colors.orange, '50%'),
+                  const SizedBox(width: 12),
+                  _buildLegendItem(Colors.deepOrange, '25%'),
+                  const SizedBox(width: 12),
+                  _buildLegendItem(AppColors.primaryRed, '0%'),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
             // Chart with dynamic width control

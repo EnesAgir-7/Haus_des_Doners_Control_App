@@ -17,7 +17,7 @@ class InspectionCategory {
     return InspectionCategory(
       categoryId: map[InspectionCategoryFields.categoryId] ?? '',
       title: map[InspectionCategoryFields.title] ?? '',
-      maxScore: map[InspectionCategoryFields.maxScore] ?? 4,
+      maxScore: map[InspectionCategoryFields.maxScore] ?? 5,
     );
   }
 

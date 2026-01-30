@@ -655,11 +655,10 @@ class InspectionPDFGenerator {
   Map<String, dynamic> _getPerformanceLevel(int percentage) {
     if (percentage >= 90)
       return {'label': "Ausgezeichnet", 'color': PdfColors.green700};
-    if (percentage >= 75)
-      return {'label': "Gut", 'color': PdfColors.lightGreen700};
-    if (percentage >= 60)
+    if (percentage >= 70) return {'label': "Gut", 'color': PdfColors.amber700};
+    if (percentage >= 50)
       return {'label': "Befriedigend", 'color': PdfColors.orange700};
-    if (percentage >= 40)
+    if (percentage >= 20)
       return {'label': "Mittel", 'color': PdfColors.deepOrange700};
     return {'label': "Schlecht", 'color': PdfColors.red700};
   }
