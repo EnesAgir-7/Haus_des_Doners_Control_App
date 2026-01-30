@@ -39,17 +39,20 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
 
+    List<RouteStopModel> filtered;
     switch (_selectedFilter) {
       case RouteFilter.all:
-        return provider.stops;
+        filtered = provider.stops;
+        break;
 
       case RouteFilter.completed:
-        return provider.stops
+        filtered = provider.stops
             .where((stop) => stop.status == AppConstants.completed)
             .toList();
+        break;
 
       case RouteFilter.overdue:
-        return provider.stops.where((stop) {
+        filtered = provider.stops.where((stop) {
           if (stop.status == AppConstants.completed) return false;
 
           final parts = stop.timeSlot.split('-');
@@ -62,6 +65,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
 
           return stopDate.isBefore(todayDate);
         }).toList();
+        break;
 
       default:
         // Handle day1 to day7
@@ -69,12 +73,30 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
         if (dayOffset >= 0 && dayOffset < 7) {
           final targetDate = todayDate.add(Duration(days: dayOffset));
           final targetKey = DateFormat('yyyy-MM-dd').format(targetDate);
-          return provider.stops
+          filtered = provider.stops
               .where((stop) => stop.timeSlot == targetKey)
               .toList();
+        } else {
+          filtered = [];
         }
-        return [];
+        break;
     }
+
+    // Sort: Non-completed/non-expired first, then by date
+    final sorted = List<RouteStopModel>.from(filtered);
+    sorted.sort((a, b) {
+      final aBottom = a.isCompleted || a.isExpired;
+      final bBottom = b.isCompleted || b.isExpired;
+
+      if (aBottom != bBottom) {
+        return aBottom ? 1 : -1;
+      }
+
+      // If both are in the same category (bottom or top), sort by date/timeSlot
+      return a.timeSlot.compareTo(b.timeSlot);
+    });
+
+    return sorted;
   }
 
   String _getEmptyStateMessage() {
@@ -215,7 +237,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
             final targetDate = today.add(Duration(days: index));
             final label = index == 0
                 ? LocaleKeys.today.tr()
-                : DateFormat('EEEE').format(targetDate);
+                : _getLocalizedDayName(targetDate);
             final filter = RouteFilter.values[RouteFilter.day1.index + index];
 
             return Padding(
@@ -231,6 +253,27 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
         ],
       ),
     );
+  }
+
+  String _getLocalizedDayName(DateTime date) {
+    switch (date.weekday) {
+      case DateTime.monday:
+        return LocaleKeys.monday.tr();
+      case DateTime.tuesday:
+        return LocaleKeys.tuesday.tr();
+      case DateTime.wednesday:
+        return LocaleKeys.wednesday.tr();
+      case DateTime.thursday:
+        return LocaleKeys.thursday.tr();
+      case DateTime.friday:
+        return LocaleKeys.friday.tr();
+      case DateTime.saturday:
+        return LocaleKeys.saturday.tr();
+      case DateTime.sunday:
+        return LocaleKeys.sunday.tr();
+      default:
+        return '';
+    }
   }
 
   Widget _buildFilterChip({
