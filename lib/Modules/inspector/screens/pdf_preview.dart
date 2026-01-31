@@ -23,7 +23,7 @@ class PDFPreviewScreen extends StatelessWidget {
       appBar: CustomAppBar(
         title: '${LocaleKeys.pdfPreview.tr()} - $branchName',
 
-        actions: [
+        actions: const [
           // IconButton(
           //   icon: const Icon(Icons.share, color: Colors.white),
           //   onPressed: () => _sharePDF(),
