@@ -11,6 +11,8 @@ class CustomField extends StatelessWidget {
   final TextInputType keyboardType;
   final String? Function(String?)? validator;
   final Widget? suffixIcon;
+  final TextInputAction? textInputAction;
+  final Function(String)? onFieldSubmitted;
 
   const CustomField({
     required this.controller,
@@ -21,6 +23,8 @@ class CustomField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.validator,
     this.suffixIcon,
+    this.textInputAction,
+    this.onFieldSubmitted,
   });
 
   @override
@@ -29,6 +33,8 @@ class CustomField extends StatelessWidget {
       controller: controller,
       keyboardType: keyboardType,
       obscureText: obscureText,
+      textInputAction: textInputAction,
+      onFieldSubmitted: onFieldSubmitted,
       style: const TextStyle(color: AppColors.white),
       validator: validator,
       decoration: InputDecoration(

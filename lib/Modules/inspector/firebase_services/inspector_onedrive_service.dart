@@ -382,7 +382,6 @@ class InspectorOneDriveService {
     final uploadUrl = sessionData['uploadUrl'];
 
     final chunkSize = 320 * 1024 * 10; // 3.2 MB chunks
-    final fileBytes = await file.readAsBytes();
     int uploadedBytes = 0;
 
     while (uploadedBytes < fileSize) {
@@ -391,16 +390,55 @@ class InspectorOneDriveService {
           ? uploadedBytes + chunkSize
           : fileSize;
 
-      final chunk = fileBytes.sublist(start, end);
+      // Read chunk directly from disk to keep memory usage low
+      final List<int> chunk = await file
+          .openRead(start, end)
+          .expand((bytes) => bytes)
+          .toList();
 
-      final uploadResponse = await http.put(
-        Uri.parse(uploadUrl),
-        headers: {
-          'Content-Length': chunk.length.toString(),
-          'Content-Range': 'bytes $start-${end - 1}/$fileSize',
-        },
-        body: chunk,
-      );
+      int attempts = 0;
+      bool success = false;
+      http.Response? uploadResponse;
+
+      while (attempts < 3 && !success) {
+        try {
+          uploadResponse = await http.put(
+            Uri.parse(uploadUrl),
+            headers: {
+              'Content-Length': chunk.length.toString(),
+              'Content-Range': 'bytes $start-${end - 1}/$fileSize',
+            },
+            body: chunk,
+          );
+
+          if (uploadResponse.statusCode == 200 ||
+              uploadResponse.statusCode == 201 ||
+              uploadResponse.statusCode == 202) {
+            success = true;
+          } else {
+            final errorBody = uploadResponse.body;
+            print(
+              '⚠️ Chunk upload failed (attempt ${attempts + 1}): $errorBody',
+            );
+            attempts++;
+            if (attempts < 3) {
+              await Future.delayed(Duration(seconds: attempts * 2));
+            }
+          }
+        } catch (e) {
+          print('⚠️ Error sending chunk (attempt ${attempts + 1}): $e');
+          attempts++;
+          if (attempts < 3) {
+            await Future.delayed(Duration(seconds: attempts * 2));
+          }
+        }
+      }
+
+      if (!success) {
+        throw Exception(
+          '${LocaleKeys.uploadChunkFailed.tr()} after 3 attempts',
+        );
+      }
 
       uploadedBytes = end;
 
@@ -412,15 +450,11 @@ class InspectorOneDriveService {
         '📊 Upload progress: ${(uploadedBytes / fileSize * 100).toStringAsFixed(1)}%',
       );
 
-      if (uploadResponse.statusCode == 200 ||
+      // 200 or 201 means the entire file is finished
+      if (uploadResponse!.statusCode == 200 ||
           uploadResponse.statusCode == 201) {
         print('✅ Resumable upload complete: $fileName');
         return;
-      } else if (uploadResponse.statusCode != 202) {
-        final error = jsonDecode(uploadResponse.body);
-        throw Exception(
-          '${LocaleKeys.uploadChunkFailed.tr()}: ${error['error']?['message'] ?? uploadResponse.body}',
-        );
       }
     }
 

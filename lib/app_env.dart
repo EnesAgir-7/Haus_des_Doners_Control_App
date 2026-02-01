@@ -5,7 +5,7 @@ import 'firebase_options_dev.dart' as dev_firebase;
 import 'firebase_options_prod.dart' as prod_firebase;
 
 class AppEnvironment {
-  static const Environment _environment = Environment.prod;
+  static const Environment _environment = Environment.dev;
 
   AppEnvironment._();
   static String get current => _environment.value;

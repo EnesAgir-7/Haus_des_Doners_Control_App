@@ -37,6 +37,21 @@ class _ScreenAuthState extends State<ScreenAuth> {
     super.dispose();
   }
 
+  Future<void> _handleLogin(ProviderAuth provider) async {
+    if (_formKey.currentState!.validate()) {
+      bool success = await provider.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      if (!success && provider.error != null) {
+        if (mounted) {
+          showSnakBarr(context, provider.error!);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ProviderAuth>(
@@ -80,6 +95,7 @@ class _ScreenAuthState extends State<ScreenAuth> {
                           hint: LocaleKeys.email_hint.tr(),
                           icon: Icons.email_outlined,
                           keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return LocaleKeys.email_required.tr();
@@ -98,6 +114,8 @@ class _ScreenAuthState extends State<ScreenAuth> {
                           hint: LocaleKeys.password_hint.tr(),
                           icon: Icons.lock_outline,
                           obscureText: provider.obscurePassword,
+                          textInputAction: TextInputAction.done,
+                          onFieldSubmitted: (_) => _handleLogin(provider),
                           suffixIcon: IconButton(
                             icon: Icon(
                               provider.obscurePassword
@@ -124,18 +142,7 @@ class _ScreenAuthState extends State<ScreenAuth> {
                         AppButton(
                           isLoading: provider.isLoading,
                           text: LocaleKeys.login.tr(),
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              bool success = await provider.login(
-                                email: _emailController.text.trim(),
-                                password: _passwordController.text.trim(),
-                              );
-
-                              if (!success && provider.error != null) {
-                                showSnakBarr(context, provider.error!);
-                              }
-                            }
-                          },
+                          onPressed: () => _handleLogin(provider),
                         ),
 
                         const SizedBox(height: 80),
