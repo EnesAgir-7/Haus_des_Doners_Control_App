@@ -1101,5 +1101,8 @@
   "request_delete_no_pending": "No pending request to delete",
   "request_deleted_success": "Request deleted successfully",
   "request_delete_error": "Error deleting request: {error}",
-  "inspections_report_branch_title": "Inspections Report - {branch}"
+  "inspections_report_branch_title": "Inspections Report - {branch}",
+  "export_excel": "Export Excel",
+  "update_request_approved_title": "Update Request Approved",
+  "update_request_approved_body": "Your update request for branch has been approved."
 }

@@ -52,7 +52,7 @@ class BranchMenuButton extends StatelessWidget {
         buildMenuItem(
           value: 'export',
           icon: Icons.file_download_outlined,
-          title: 'Export Excel',
+          title: LocaleKeys.export_excel.tr(),
           color: Colors.amber,
         ),
         buildDivider(),

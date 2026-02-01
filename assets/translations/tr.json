@@ -1071,5 +1071,8 @@
   "request_delete_no_pending": "No pending request to delete",
   "request_deleted_success": "Request deleted successfully",
   "request_delete_error": "Error deleting request: {error}",
-  "inspections_report_branch_title": "Denetim Raporu - {branch}"
+  "inspections_report_branch_title": "Denetim Raporu - {branch}",
+  "export_excel": "Excel Dışa Aktar",
+  "update_request_approved_title": "Güncelleme İsteği Onaylandı",
+  "update_request_approved_body": "Şube için güncelleme isteğiniz onaylandı."
 }

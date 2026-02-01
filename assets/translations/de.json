@@ -1085,5 +1085,8 @@
   "request_delete_no_pending": "No pending request to delete",
   "request_deleted_success": "Request deleted successfully",
   "request_delete_error": "Error deleting request: {error}",
-  "inspections_report_branch_title": "Inspektionsbericht - {branch}"
+  "inspections_report_branch_title": "Inspektionsbericht - {branch}",
+  "export_excel": "Export Excel",
+  "update_request_approved_title": "Änderungsantrag genehmigt",
+  "update_request_approved_body": "Ihr Änderungsantrag für die Filiale wurde genehmigt."
 }

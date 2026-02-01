@@ -908,7 +908,6 @@ abstract class  LocaleKeys {
   static const recent = 'recent';
   static const view = 'view';
   static const copy = 'copy';
-  static const copied_to_clipboard = 'copied_to_clipboard';
   static const delete_announcement = 'delete_announcement';
   static const delete_confirmation = 'delete_confirmation';
   static const add_announcement = 'add_announcement';
@@ -1066,6 +1065,7 @@ abstract class  LocaleKeys {
   static const filter_unread = 'filter_unread';
   static const filter_read = 'filter_read';
   static const new_badge = 'new_badge';
+  static const copied_to_clipboard = 'copied_to_clipboard';
   static const delete_notification_title = 'delete_notification_title';
   static const delete_notification_confirmation = 'delete_notification_confirmation';
   static const enter_notification_title = 'enter_notification_title';
@@ -1090,5 +1090,8 @@ abstract class  LocaleKeys {
   static const request_deleted_success = 'request_deleted_success';
   static const request_delete_error = 'request_delete_error';
   static const inspections_report_branch_title = 'inspections_report_branch_title';
+  static const export_excel = 'export_excel';
+  static const update_request_approved_title = 'update_request_approved_title';
+  static const update_request_approved_body = 'update_request_approved_body';
 
 }

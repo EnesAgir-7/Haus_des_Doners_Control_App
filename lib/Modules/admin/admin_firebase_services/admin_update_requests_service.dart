@@ -213,8 +213,8 @@ class AdminUpdateRequestService {
       // Step 3: Send notification
       // ---------------------------------------------------------
       NotificationHelper.instance.sendNotificationToMultipleTokens(
-        title: "Update Request Approved",
-        body: "Your update request for branch has been approved.",
+        title: LocaleKeys.update_request_approved_title.tr(),
+        body: LocaleKeys.update_request_approved_body.tr(),
         fcmTokens: fcmTokens,
         data: {
           'type': 'branch_notification',
