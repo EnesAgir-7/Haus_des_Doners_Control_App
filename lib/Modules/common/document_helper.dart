@@ -187,7 +187,7 @@ Future<void> copyLink(BuildContext context, String url) async {
 Future<void> shareDocument(BuildContext context, DocumentModel doc) async {
   try {
     await SharePlus.instance.share(
-      ShareParams(uri: Uri.tryParse(doc.fileUrl), title: doc.name),
+      ShareParams(text: doc.fileUrl, subject: doc.name),
     );
   } catch (e) {
     if (context.mounted) {

@@ -221,10 +221,12 @@ class ExcelExportService {
     final tempFile = File('${tempDir.path}/$fileName');
     await tempFile.writeAsBytes(bytes);
 
-    await Share.shareXFiles(
-      [XFile(tempFile.path)],
-      text: shareTitle,
-      subject: shareTitle,
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(tempFile.path)],
+        text: shareTitle,
+        subject: shareTitle,
+      ),
     );
   }
 
@@ -237,10 +239,12 @@ class ExcelExportService {
     final tempFile = File('${tempDir.path}/$fileName');
     await tempFile.writeAsBytes(bytes);
 
-    await Share.shareXFiles(
-      [XFile(tempFile.path)],
-      text: shareTitle,
-      subject: shareTitle,
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(tempFile.path)],
+        text: shareTitle,
+        subject: shareTitle,
+      ),
     );
   }
 }

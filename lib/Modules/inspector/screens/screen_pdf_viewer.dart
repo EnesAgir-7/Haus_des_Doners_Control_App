@@ -135,9 +135,9 @@ class _ScreenPdfViewerState extends State<ScreenPdfViewer> {
 
       await SharePlus.instance.share(
         ShareParams(
-          uri: Uri.file(file.path),
+          files: [XFile(file.path)],
           text: 'Inspection Report: ${widget.branchName}',
-          title: 'Inspection Report - ${widget.branchName}',
+          subject: 'Inspection Report - ${widget.branchName}',
         ),
       );
     } catch (e) {
