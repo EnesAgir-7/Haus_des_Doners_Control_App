@@ -1093,5 +1093,7 @@ abstract class  LocaleKeys {
   static const export_excel = 'export_excel';
   static const update_request_approved_title = 'update_request_approved_title';
   static const update_request_approved_body = 'update_request_approved_body';
+  static const all_routes = 'all_routes';
+  static const pleaseSelectDueDate = 'pleaseSelectDueDate';
 
 }

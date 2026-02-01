@@ -1074,5 +1074,7 @@
   "inspections_report_branch_title": "Denetim Raporu - {branch}",
   "export_excel": "Excel Dışa Aktar",
   "update_request_approved_title": "Güncelleme İsteği Onaylandı",
-  "update_request_approved_body": "Şube için güncelleme isteğiniz onaylandı."
+  "update_request_approved_body": "Şube için güncelleme isteğiniz onaylandı.",
+  "all_routes": "Tümü",
+  "pleaseSelectDueDate": "Lütfen son tarihi seçin"
 }

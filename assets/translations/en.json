@@ -1104,5 +1104,7 @@
   "inspections_report_branch_title": "Inspections Report - {branch}",
   "export_excel": "Export Excel",
   "update_request_approved_title": "Update Request Approved",
-  "update_request_approved_body": "Your update request for branch has been approved."
+  "update_request_approved_body": "Your update request for branch has been approved.",
+  "all_routes": "All",
+  "pleaseSelectDueDate": "Please select due date"
 }

@@ -212,7 +212,7 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
       child: Row(
         children: [
           _buildFilterChip(
-            label: 'All',
+            label: LocaleKeys.all_routes.tr(),
             filter: RouteFilter.all,
             icon: Icons.list,
             count: routeProvider.stops.length,

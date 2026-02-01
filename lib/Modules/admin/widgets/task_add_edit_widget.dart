@@ -113,7 +113,7 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
       return;
     }
     if (_dueDate == null) {
-      showCustomSnackBar(context, "Please select due date");
+      showCustomSnackBar(context, LocaleKeys.pleaseSelectDueDate.tr());
       return;
     }
     setState(() => _isLoading = true);
@@ -136,7 +136,11 @@ class _TaskAddEditSheetState extends State<TaskAddEditSheet> {
               : null,
         };
 
-        success = await tasksProvider.updateTask(widget.task!.id, data, context);
+        success = await tasksProvider.updateTask(
+          widget.task!.id,
+          data,
+          context,
+        );
       } else {
         // Create new task
         success = await tasksProvider.createTask(

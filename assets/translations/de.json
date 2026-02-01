@@ -1088,5 +1088,7 @@
   "inspections_report_branch_title": "Inspektionsbericht - {branch}",
   "export_excel": "Export Excel",
   "update_request_approved_title": "Änderungsantrag genehmigt",
-  "update_request_approved_body": "Ihr Änderungsantrag für die Filiale wurde genehmigt."
+  "update_request_approved_body": "Ihr Änderungsantrag für die Filiale wurde genehmigt.",
+  "all_routes": "Alle",
+  "pleaseSelectDueDate": "Bitte wählen Sie ein Fälligkeitsdatum aus"
 }
