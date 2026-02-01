@@ -162,6 +162,155 @@ class ExcelExportService {
     }
   }
 
+  /// Converts a list of inspections for a specific branch to a beautified Excel format and shares it.
+  static Future<void> exportBranchInspections({
+    required List<InspectionModel> inspections,
+    required String fileNamePrefix,
+    required String shareTitle,
+    required String branchName,
+    required String period,
+  }) async {
+    try {
+      // 1. Create Excel workbook
+      var excel = Excel.createExcel();
+      Sheet sheet = excel['Sheet1'];
+
+      // 2. Define Styles
+      CellStyle headerStyle = CellStyle(
+        bold: true,
+        backgroundColorHex: ExcelColor.fromHexString('#BFC9D2'),
+        fontFamily: getFontFamily(FontFamily.Arial),
+      );
+
+      CellStyle titleStyle = CellStyle(
+        bold: true,
+        fontSize: 14,
+        fontFamily: getFontFamily(FontFamily.Arial),
+      );
+
+      CellStyle infoLabelStyle = CellStyle(
+        bold: true,
+        fontFamily: getFontFamily(FontFamily.Arial),
+      );
+
+      // 3. Add Header Section
+      _addCell(sheet, 0, 0, 'BRANCH INSPECTIONS REPORT', style: titleStyle);
+
+      _addCell(sheet, 0, 1, 'Branch Name:', style: infoLabelStyle);
+      _addCell(sheet, 1, 1, branchName);
+
+      _addCell(sheet, 0, 2, 'Total Inspections:', style: infoLabelStyle);
+      _addCell(sheet, 1, 2, inspections.length);
+
+      _addCell(sheet, 0, 3, 'Period:', style: infoLabelStyle);
+      _addCell(sheet, 1, 3, period);
+
+      _addCell(sheet, 0, 4, 'Generated At:', style: infoLabelStyle);
+      _addCell(
+        sheet,
+        1,
+        4,
+        DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now()),
+      );
+
+      // Spacer row
+      int currentRow = 6;
+
+      // 4. Collect Category Columns
+      Set<String> categoryNames = {};
+      for (var inspection in inspections) {
+        categoryNames.addAll(inspection.categories.keys);
+      }
+      List<String> sortedCategories = categoryNames.toList()..sort();
+
+      // 5. Build Table Headers
+      List<String> tableHeaders = [
+        'Inspector Name',
+        'Status',
+        'Scheduled Time',
+        'Completed Time',
+        'Overall Score',
+        'Representative Name',
+        'Overall Notes',
+        'Created At',
+      ];
+
+      for (var catName in sortedCategories) {
+        tableHeaders.add('$catName Score');
+        tableHeaders.add('$catName Notes');
+      }
+      tableHeaders.add('PDF Report URL');
+
+      for (int i = 0; i < tableHeaders.length; i++) {
+        _addCell(sheet, i, currentRow, tableHeaders[i], style: headerStyle);
+      }
+      currentRow++;
+
+      // 6. Add Data Rows
+      for (var inspection in inspections) {
+        // Fix Score formatting to prevent Excel date conversion
+        String formattedOverallScore = inspection.score.contains('/')
+            ? ' ${inspection.score}'
+            : inspection.score;
+
+        List<dynamic> rowValues = [
+          inspection.inspectorName,
+          inspection.status,
+          inspection.scheduledTime,
+          inspection.completedTime != null
+              ? DateFormat('yyyy-MM-dd HH:mm').format(inspection.completedTime!)
+              : '',
+          formattedOverallScore,
+          inspection.branchRepresentativeName ?? '',
+          inspection.overallNotes,
+          DateFormat('yyyy-MM-dd HH:mm').format(inspection.createdAt),
+        ];
+
+        for (var catName in sortedCategories) {
+          final categoryData = inspection.categories[catName];
+          if (categoryData != null) {
+            String formattedCatScore = categoryData.score.contains('/')
+                ? ' ${categoryData.score}'
+                : categoryData.score;
+            rowValues.add(formattedCatScore);
+            rowValues.add(categoryData.notes);
+          } else {
+            rowValues.add('N/A');
+            rowValues.add('');
+          }
+        }
+        rowValues.add(inspection.pdfReportUrl ?? '');
+
+        for (int i = 0; i < rowValues.length; i++) {
+          _addCell(sheet, i, currentRow, rowValues[i]);
+        }
+        currentRow++;
+      }
+
+      // 7. Save and Share
+      final List<int>? fileBytes = excel.save();
+      if (fileBytes == null)
+        throw Exception('Failed to generate Excel file bytes');
+
+      final String timestamp = DateFormat(
+        'yyyyMMdd_HHmmss',
+      ).format(DateTime.now());
+      final String fileName = '${fileNamePrefix}_$timestamp.xlsx'.replaceAll(
+        ' ',
+        '_',
+      );
+
+      await _saveAndShareFile(
+        bytes: fileBytes,
+        fileName: fileName,
+        shareTitle: shareTitle,
+      );
+    } catch (e) {
+      debugPrint('Excel Export Error: $e');
+      rethrow;
+    }
+  }
+
   static void _addCell(
     Sheet sheet,
     int col,

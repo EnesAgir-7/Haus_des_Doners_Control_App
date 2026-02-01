@@ -56,6 +56,46 @@ class InspectorInspectionService {
     }
   }
 
+  Future<List<InspectionModel>> getInspectionsByBranchFiltered({
+    required String branchId,
+    int? limit,
+    DateTime? since,
+  }) async {
+    try {
+      Query query = _db
+          .collection(_collection)
+          .where(InspectionFields.branchId, isEqualTo: branchId);
+
+      if (since != null) {
+        query = query.where(
+          InspectionFields.completedTime,
+          isGreaterThanOrEqualTo: Timestamp.fromDate(since),
+        );
+      } else {
+        // Use scheduledTime if completedTime range not requested, but sort by scheduledTime descending
+        query = query.orderBy(InspectionFields.scheduledTime, descending: true);
+      }
+
+      // If 'since' is provided, we need to order by 'completedTime' to match the 'where' clause requirement
+      if (since != null) {
+        query = query.orderBy(InspectionFields.completedTime, descending: true);
+      }
+
+      if (limit != null) {
+        query = query.limit(limit);
+      }
+
+      final snapshot = await query.get();
+
+      return snapshot.docs
+          .map((doc) => InspectionModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error getting filtered inspections by branch: $e');
+      return [];
+    }
+  }
+
   // Stream inspections by branch (real-time)
   Stream<List<InspectionModel>> streamLast10Inspections(
     String branchId,

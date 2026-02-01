@@ -25,6 +25,8 @@ import 'screen_admin_branch_docs.dart';
 import 'screen_admin_branch_edit.dart';
 import 'screen_admin_branch_notifications.dart';
 import 'screen_admin_inspections.dart';
+import '../../../common_services/excel_export_service.dart';
+import '../../inspector/firebase_services/inspector_inspection_service.dart';
 
 // ignore: must_be_immutable
 class ScreenAdminBranchDetails extends StatefulWidget {
@@ -40,6 +42,9 @@ class ScreenAdminBranchDetails extends StatefulWidget {
 class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   bool _isLoadingDetails = true;
   String? _detailsError;
+  bool _isExporting = false;
+  final InspectorInspectionService _inspectionService =
+      InspectorInspectionService();
 
   @override
   void initState() {
@@ -265,6 +270,188 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     }
   }
 
+  Future<void> _exportBranchInspections({int? limit, int? months}) async {
+    setState(() => _isExporting = true);
+
+    try {
+      DateTime? since;
+      String period = "";
+
+      if (months != null) {
+        since = DateTime.now().subtract(Duration(days: months * 30));
+        period = months == 1 ? "Last Month" : "Last $months Months";
+      } else if (limit != null) {
+        period = "Last $limit Inspections";
+      } else {
+        period = "All Inspections";
+      }
+
+      final inspections = await _inspectionService
+          .getInspectionsByBranchFiltered(
+            branchId: widget.branch.id,
+            limit: limit,
+            since: since,
+          );
+
+      if (inspections.isEmpty) {
+        if (mounted) {
+          showSnakBarr(context, LocaleKeys.noData.tr());
+        }
+        return;
+      }
+
+      await ExcelExportService.exportBranchInspections(
+        inspections: inspections,
+        fileNamePrefix: '${widget.branch.name}_Report',
+        shareTitle: 'Inspections Report - ${widget.branch.name}',
+        branchName: widget.branch.name,
+        period: period,
+      );
+
+      if (mounted) {
+        showSnakBarr(context, 'Excel Report Exported Successfully');
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnakBarr(context, 'Export Failed: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
+    }
+  }
+
+  void _showExportOptionsSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: AppColors.lightBlack,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Export Options',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const Divider(color: Colors.white10, height: 1),
+
+              // Last N inspections
+              _buildOptionCategory('By Count'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildOptionButton(
+                    'Last 10',
+                    () => _exportBranchInspections(limit: 10),
+                  ),
+                  _buildOptionButton(
+                    'Last 20',
+                    () => _exportBranchInspections(limit: 20),
+                  ),
+                  _buildOptionButton(
+                    'Last 30',
+                    () => _exportBranchInspections(limit: 30),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Last X months
+              _buildOptionCategory('By Time Period'),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: [
+                  _buildOptionButton(
+                    'Last Month',
+                    () => _exportBranchInspections(months: 1),
+                  ),
+                  _buildOptionButton(
+                    'Last 3 Months',
+                    () => _exportBranchInspections(months: 3),
+                  ),
+                  _buildOptionButton(
+                    'Last 6 Months',
+                    () => _exportBranchInspections(months: 6),
+                  ),
+                  _buildOptionButton(
+                    'Last Year',
+                    () => _exportBranchInspections(months: 12),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionCategory(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.5),
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionButton(String label, VoidCallback onSelected) {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.pop(context);
+        onSelected();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white.withValues(alpha: 0.05),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      child: Text(label),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isTablet = ResponsiveBreakpoints.of(context).isTablet;
@@ -272,6 +459,29 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     return Scaffold(
       appBar: CustomAppBar(
         actions: [
+          if (_isExporting)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.primaryRed,
+                  ),
+                ),
+              ),
+            )
+          else
+            IconButton(
+              icon: const Icon(
+                Icons.file_download_outlined,
+                color: Colors.white,
+              ),
+              onPressed: _showExportOptionsSheet,
+              tooltip: 'Export CSV',
+            ),
           BranchMenuButton(
             onEdit: () {
               _navigateToEditScreen();
