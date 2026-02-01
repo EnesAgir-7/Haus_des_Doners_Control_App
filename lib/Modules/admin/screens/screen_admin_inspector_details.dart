@@ -13,6 +13,7 @@ import '../../../translations/locale_keys.g.dart';
 import '../../common/widgets/compact_stat_card.dart';
 import '../../common/widgets/inspector_details_bottomsheets.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
+import '../widgets/admin_inspector_routes_widget.dart';
 import '../widgets/performance_chart.dart';
 import 'screen_admin_user_details.dart';
 
@@ -581,6 +582,13 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
 
           const Divider(height: 24, color: Colors.white12),
           _buildLastUpdatedRow(stats),
+
+          // Inspector Routes Section
+          const Divider(height: 32, color: Colors.white12),
+          AdminInspectorRoutesWidget(
+            inspectorId: widget.inspector.id,
+            inspectorName: widget.inspector.name,
+          ),
         ],
       ),
     );
