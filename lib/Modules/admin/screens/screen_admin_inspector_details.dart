@@ -16,7 +16,7 @@ import '../../inspector/widgets/custom_app_bar.dart';
 import '../widgets/admin_inspector_routes_widget.dart';
 import '../widgets/performance_chart.dart';
 import 'screen_admin_user_details.dart';
-import '../../../common_services/csv_export_service.dart';
+import '../../../common_services/excel_export_service.dart';
 import '../../inspector/firebase_services/inspector_inspection_service.dart';
 import '../../inspector/widgets/custom_toast.dart';
 
@@ -89,8 +89,8 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
         return;
       }
 
-      // Export to CSV
-      await CsvExportService.exportInspections(
+      // Export to Excel
+      await ExcelExportService.exportInspections(
         inspections: inspections,
         fileNamePrefix:
             '${widget.inspector.name}_Inspections_${_selectedMonthKey}',
@@ -102,7 +102,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
       );
 
       if (mounted) {
-        showSnakBarr(context, 'CSV Exported Successfully');
+        showSnakBarr(context, 'Excel Report Exported Successfully');
       }
     } catch (e) {
       if (mounted) {
@@ -166,47 +166,50 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               child: Column(
                 children: [
                   const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(child: _buildMonthSelector(provider)),
-                      const SizedBox(width: 8),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: _isExporting
-                            ? const SizedBox(
-                                width: 44,
-                                height: 44,
-                                child: Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.primaryRed,
-                                  ),
-                                ),
-                              )
-                            : Container(
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryRed.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: AppColors.primaryRed.withValues(
-                                      alpha: 0.3,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Row(
+                      children: [
+                        Expanded(child: _buildMonthSelector(provider)),
+                        const SizedBox(width: 8),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: _isExporting
+                              ? const SizedBox(
+                                  width: 44,
+                                  height: 44,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(12),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primaryRed,
                                     ),
                                   ),
-                                ),
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.file_download_outlined,
-                                    color: AppColors.primaryRed,
+                                )
+                              : Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryRed.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: AppColors.primaryRed.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                    ),
                                   ),
-                                  onPressed: _exportMonthToCsv,
-                                  tooltip: 'Export CSV',
+                                  child: IconButton(
+                                    icon: const Icon(
+                                      Icons.file_download_outlined,
+                                      color: AppColors.primaryRed,
+                                    ),
+                                    onPressed: _exportMonthToCsv,
+                                    tooltip: 'Export CSV',
+                                  ),
                                 ),
-                              ),
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 10),
 

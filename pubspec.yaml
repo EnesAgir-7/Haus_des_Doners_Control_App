@@ -72,6 +72,7 @@ dependencies:
   flutter_image_compress: ^2.4.0
   package_info_plus: ^8.2.1
   csv: ^6.0.0
+  excel: ^4.0.0
   
 
 dev_dependencies:
