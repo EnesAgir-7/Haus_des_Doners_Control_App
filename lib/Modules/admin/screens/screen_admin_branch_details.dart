@@ -8,7 +8,6 @@ import 'package:haus_des_control/core/extensions.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-import '../../../common_services/show_branch_notify_dialog.dart';
 import '../../../common_services/user_selection_sheet.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/constants/app_colors.dart';
@@ -24,6 +23,7 @@ import '../widgets/performance_chart.dart';
 import '../widgets/widgets_admin_branch_details.dart';
 import 'screen_admin_branch_docs.dart';
 import 'screen_admin_branch_edit.dart';
+import 'screen_admin_branch_notifications.dart';
 import 'screen_admin_inspections.dart';
 
 // ignore: must_be_immutable
@@ -280,10 +280,15 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               _deleteBranch();
             },
             onSendNotification: () {
-              showBranchNotifyDialog(
-                context: context,
-                branchName: widget.branch.name,
-                fcmTokens: widget.branch.fcmTokens,
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ScreenAdminBranchNotifications(
+                    branchId: widget.branch.id,
+                    branchName: widget.branch.name,
+                    fcmTokens: widget.branch.fcmTokens,
+                  ),
+                ),
               );
             },
             onUploadDocument: () {

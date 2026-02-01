@@ -22,6 +22,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import 'Modules/admin/admin_providers/provider_admin_announcements.dart';
 import 'Modules/admin/admin_providers/provider_admin_bottombar.dart';
+import 'Modules/admin/admin_providers/provider_admin_branch_notifications.dart';
 import 'Modules/admin/admin_providers/provider_admin_documents.dart';
 import 'Modules/admin/admin_providers/provider_admin_inspections.dart';
 import 'Modules/admin/admin_providers/provider_admin_tasks.dart';
@@ -30,6 +31,7 @@ import 'Modules/admin/admin_providers/provider_admin_update_requests.dart';
 import 'Modules/branch/branch_providers/provider_branch_bottom_navbar.dart';
 import 'Modules/branch/branch_providers/provider_branch_dashboard.dart';
 import 'Modules/branch/branch_providers/provider_branch_inspections.dart';
+import 'Modules/branch/branch_providers/provider_branch_notifications.dart';
 import 'Modules/branch/branch_providers/provider_branch_update_request.dart';
 import 'Modules/branch/screens/branch_screen_bottom_navbar.dart';
 import 'Modules/common/force_update_dialog.dart';
@@ -140,6 +142,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AdminUpdateRequestProvider()),
         ChangeNotifierProvider(create: (_) => AdminAnnouncementsProvider()),
         ChangeNotifierProvider(create: (_) => ProviderInspectorRecords()),
+        ChangeNotifierProvider(
+          create: (_) => AdminBranchNotificationsProvider(),
+        ),
+        ChangeNotifierProvider(create: (_) => BranchNotificationsProvider()),
       ],
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,

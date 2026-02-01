@@ -8,10 +8,12 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../branch_providers/provider_branch_dashboard.dart';
+import '../branch_providers/provider_branch_notifications.dart';
 import '../branch_providers/provider_branch_update_request.dart';
 import 'screen_branch_request_edit.dart';
 import 'screen_branch_trainings.dart';
 import 'screen_branch_documents.dart';
+import 'screen_notifications.dart';
 
 class BranchScreenMore extends StatefulWidget {
   const BranchScreenMore({super.key});
@@ -139,6 +141,10 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
     final reqProv = context.watch<BranchUpdateRequestProvider>();
     final int updateBadge =
         (reqProv.hasPendingRequest || reqProv.rejectedCount > 0) ? 1 : 0;
+
+    // watch notifications provider for unseen count
+    final notifProv = context.watch<BranchNotificationsProvider>();
+    final int notificationsBadge = notifProv.unseenCount;
     final actions = [
       {
         'icon': Icons.campaign_outlined,
@@ -149,25 +155,26 @@ class Screen_BranchDashboardTabState extends State<BranchScreenMore> {
         'onTap': () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const ScreenAdminAnnouncements(
-              role: AppConstants.branch,
-            )),
+            MaterialPageRoute(
+              builder: (_) =>
+                  const ScreenAdminAnnouncements(role: AppConstants.branch),
+            ),
           );
         },
       },
-      // {
-      //   'icon': Icons.notifications_outlined,
-      //   'label': LocaleKeys.notifications.tr(),
-      //   'description': LocaleKeys.check_latest_notifications.tr(),
-      //   'color': Colors.orange,
-      //   'badge': provider.unreadNotifications,
-      //   'onTap': () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(builder: (_) => const ScreenNotifications()),
-      //     );
-      //   },
-      // },
+      {
+        'icon': Icons.notifications_outlined,
+        'label': LocaleKeys.notifications.tr(),
+        'description': 'Check your branch notifications',
+        'color': Colors.orange,
+        'badge': notificationsBadge,
+        'onTap': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ScreenNotifications()),
+          );
+        },
+      },
       {
         'icon': Icons.video_library_outlined,
         'label': LocaleKeys.training_videos.tr(),

@@ -17,6 +17,7 @@ class Collections {
   static const String notifications = 'notifications';
   static const String updateRequests = 'update_requests';
   static const String announcements = 'announcements';
+  static const String branchNotifications = 'branch_notifications';
 }
 
 class VehicleFields {

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:haus_des_control/Modules/branch/branch_providers/provider_branch_dashboard.dart';
+import 'package:haus_des_control/Modules/branch/branch_providers/provider_branch_notifications.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_branches.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_panel.dart';
 import 'package:provider/provider.dart';
 
+import '../Modules/admin/admin_providers/provider_admin_branch_notifications.dart';
 import '../Modules/admin/admin_providers/provider_admin_branches.dart';
 import '../Modules/admin/admin_providers/provider_admin_tasks.dart';
 import '../Modules/admin/admin_providers/provider_admin_users.dart';
@@ -75,6 +77,9 @@ class ProviderCleanupService {
       futures.add(
         Future(() => context.read<ProviderAdminTasks>().cancelAllStreams()),
       );
+      futures.add(
+        Future(() => context.read<AdminBranchNotificationsProvider>().clear()),
+      );
       // futures.add(Future(() => context.read<ProviderAdminInspections>().cancelAllStreams()));
       // futures.add(Future(() => context.read<ProviderAdminAnnouncements>().cancelAllStreams()));
 
@@ -130,6 +135,9 @@ class ProviderCleanupService {
       // Cancel all streams in parallel
       futures.add(
         Future(() => context.read<ProviderBranchDashboard>().closeAllStreams()),
+      );
+      futures.add(
+        Future(() => context.read<BranchNotificationsProvider>().clear()),
       );
       // futures.add(Future(() => context.read<ProviderBranchInspections>().cancelAllStreams()));
       // futures.add(Future(() => context.read<ProviderBranchTasks>().cancelAllStreams()));
