@@ -93,6 +93,9 @@ class FCMHelper {
       // Handle notification tap when app is in background
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
         console('Notification opened app: ${message.messageId}');
+        // ✅ RESET BADGE WHEN NOTIFICATION TRAPS THE APP
+        resetBadgeCount();
+
         if (onMessageOpenedApp != null) {
           onMessageOpenedApp(message);
         }
@@ -100,12 +103,20 @@ class FCMHelper {
 
       // Check for initial message (app opened from terminated state)
       RemoteMessage? initialMessage = await _messaging.getInitialMessage();
-      if (initialMessage != null && onMessageOpenedApp != null) {
-        onMessageOpenedApp(initialMessage);
+      if (initialMessage != null) {
+        // ✅ RESET BADGE WHEN OPENED FROM INITIAL MESSAGE
+        await resetBadgeCount();
+
+        if (onMessageOpenedApp != null) {
+          onMessageOpenedApp(initialMessage);
+        }
       }
 
       _isInitialized = true;
       console('FCM initialized successfully');
+
+      // ✅ RESET BADGE ON INITIALIZATION
+      await resetBadgeCount();
     } catch (e) {
       console('FCM initialization error: $e');
       rethrow;
@@ -242,6 +253,32 @@ class FCMHelper {
       console('FCM token deleted');
     } catch (e) {
       console('Failed to delete FCM token: $e');
+    }
+  }
+
+  /// ✅ Reset app icon badge count (specifically for iOS)
+  Future<void> resetBadgeCount() async {
+    if (!Platform.isIOS) return;
+
+    try {
+      console('Resetting app icon badge count');
+      final dynamic platformPlugin = _localNotifications
+          .resolvePlatformSpecificImplementation();
+
+      if (platformPlugin != null) {
+        try {
+          await platformPlugin.clearBadge();
+          console('Badge cleared using clearBadge()');
+          return;
+        } catch (_) {}
+        try {
+          await platformPlugin.setApplicationIconBadgeNumber(0);
+          console('Badge cleared using setApplicationIconBadgeNumber(0)');
+          return;
+        } catch (_) {}
+      }
+    } catch (e) {
+      console('Failed to reset badge count: $e');
     }
   }
 }
