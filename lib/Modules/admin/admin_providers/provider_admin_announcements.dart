@@ -112,6 +112,22 @@ class AdminAnnouncementsProvider extends ChangeNotifier {
     }
   }
 
+  /// Mark an announcement as seen by a branch
+  Future<void> markAnnouncementAsSeen({
+    required String announcementId,
+    required String branchId,
+    required String branchName,
+  }) async {
+    await _service.markAnnouncementAsSeen(
+      announcementId: announcementId,
+      branchId: branchId,
+      branchName: branchName,
+    );
+    // Note: We don't necessarily need to call notifyListeners() here
+    // because the stream listener in loadAllAnnouncements() will
+    // automatically pick up the change and update the UI.
+  }
+
   /// Get the count of currently loaded announcements
   int getLoadedAnnouncementCount() => _announcements.length;
 

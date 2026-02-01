@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
 
 import '../../../translations/locale_keys.g.dart';
@@ -61,5 +62,48 @@ class AdminAnnouncementService {
         .collection(_announcementsCollection)
         .orderBy('createdAt', descending: true)
         .snapshots();
+  }
+
+  /// Mark an announcement as seen by a branch
+  ///
+  Future<void> markAnnouncementAsSeen({
+    required String announcementId,
+    required String branchId,
+    required String branchName,
+  }) async {
+    try {
+      final docRef = _firestore
+          .collection(_announcementsCollection)
+          .doc(announcementId);
+
+      // We use a Map to represent AnnouncementSeenInfo in Firestore
+      final seenInfo = {
+        'branchId': branchId,
+        'branchName': branchName,
+        'seenAt':
+            Timestamp.now(), // Fixed: serverTimestamp() doesn't work in arrayUnion
+      };
+
+      // To avoid duplicates if the branch opens it multiple times,
+      // we could check first, but arrayUnion is simpler.
+      // However, arrayUnion with serverTimestamp will always be unique.
+      // Better approach: Get current seenBy and check if branch already exists.
+
+      final doc = await docRef.get();
+      if (!doc.exists) return;
+
+      final data = doc.data() as Map<String, dynamic>;
+      final List seenBy = data['seenBy'] as List? ?? [];
+
+      bool alreadySeen = seenBy.any((item) => item['branchId'] == branchId);
+
+      if (!alreadySeen) {
+        await docRef.update({
+          'seenBy': FieldValue.arrayUnion([seenInfo]),
+        });
+      }
+    } catch (e) {
+      debugPrint('Error marking announcement as seen: $e');
+    }
   }
 }

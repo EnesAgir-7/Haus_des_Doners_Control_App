@@ -7,6 +7,7 @@ class AnnouncementModel {
   final String createdBy;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final List<AnnouncementSeenInfo> seenBy;
 
   AnnouncementModel({
     required this.id,
@@ -15,6 +16,7 @@ class AnnouncementModel {
     required this.createdBy,
     this.createdAt,
     this.updatedAt,
+    this.seenBy = const [],
   });
 
   /// Create AnnouncementModel from Firestore DocumentSnapshot
@@ -27,6 +29,11 @@ class AnnouncementModel {
       createdBy: data['createdBy'] ?? '',
       createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       updatedAt: (data['updatedAt'] as Timestamp?)?.toDate(),
+      seenBy:
+          (data['seenBy'] as List?)
+              ?.map((item) => AnnouncementSeenInfo.fromMap(item))
+              .toList() ??
+          [],
     );
   }
 
@@ -38,6 +45,35 @@ class AnnouncementModel {
       'createdBy': createdBy,
       'createdAt': createdAt != null ? Timestamp.fromDate(createdAt!) : null,
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
+      'seenBy': seenBy.map((item) => item.toMap()).toList(),
+    };
+  }
+}
+
+class AnnouncementSeenInfo {
+  final String branchId;
+  final String branchName;
+  final DateTime seenAt;
+
+  AnnouncementSeenInfo({
+    required this.branchId,
+    required this.branchName,
+    required this.seenAt,
+  });
+
+  factory AnnouncementSeenInfo.fromMap(Map<String, dynamic> map) {
+    return AnnouncementSeenInfo(
+      branchId: map['branchId'] ?? '',
+      branchName: map['branchName'] ?? '',
+      seenAt: (map['seenAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'branchId': branchId,
+      'branchName': branchName,
+      'seenAt': Timestamp.fromDate(seenAt),
     };
   }
 }

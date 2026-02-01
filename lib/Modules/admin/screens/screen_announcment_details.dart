@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:haus_des_control/Modules/branch/branch_providers/provider_branch_dashboard.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
+import 'package:haus_des_control/core/constants/firebase_constants.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -10,7 +12,7 @@ import '../../../translations/locale_keys.g.dart';
 import '../../inspector/widgets/custom_app_bar.dart';
 import '../admin_providers/provider_admin_announcements.dart';
 
-class ScreenAnnouncementDetails extends StatelessWidget {
+class ScreenAnnouncementDetails extends StatefulWidget {
   final AnnouncementModel announcement;
   final String role; // 'admin' or 'branch'
 
@@ -21,13 +23,55 @@ class ScreenAnnouncementDetails extends StatelessWidget {
   });
 
   @override
+  State<ScreenAnnouncementDetails> createState() =>
+      _ScreenAnnouncementDetailsState();
+}
+
+class _ScreenAnnouncementDetailsState extends State<ScreenAnnouncementDetails> {
+  @override
+  void initState() {
+    super.initState();
+    _markAsSeenIfNeeded();
+  }
+
+  void _markAsSeenIfNeeded() {
+    if (widget.role.toLowerCase() == AppConstants.branch) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        String? bId;
+        String? bName;
+
+        // Use loggedInUser directly (most reliable)
+        if (loggedInUser != null && loggedInUser!.id.isNotEmpty) {
+          bId = loggedInUser!.id;
+          bName = loggedInUser!.name;
+        } else {
+          // Fallback to provider if loggedInUser is not synced yet
+          final branchProvider = context.read<ProviderBranchDashboard>();
+          bId = branchProvider.branchInfo?.id;
+          bName = branchProvider.branchInfo?.name;
+        }
+
+        if (bId != null &&
+            bId.isNotEmpty &&
+            bName != null &&
+            bName.isNotEmpty) {
+          context.read<AdminAnnouncementsProvider>().markAnnouncementAsSeen(
+            announcementId: widget.announcement.id,
+            branchId: bId,
+            branchName: bName,
+          );
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isTablet = ResponsiveBreakpoints.of(context).isTablet;
-    final isAdmin = role.toLowerCase() == AppConstants.admin;
+    final isAdmin = widget.role.toLowerCase() == AppConstants.admin;
 
     return Scaffold(
       appBar: CustomAppBar(title: LocaleKeys.announcement_details.tr()),
-
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -36,8 +80,6 @@ class ScreenAnnouncementDetails extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Image Section
-
                 // Title Section
                 Container(
                   padding: const EdgeInsets.all(20),
@@ -77,7 +119,7 @@ class ScreenAnnouncementDetails extends StatelessWidget {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              announcement.title,
+                              widget.announcement.title,
                               style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
@@ -104,10 +146,10 @@ class ScreenAnnouncementDetails extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            announcement.createdAt != null
+                            widget.announcement.createdAt != null
                                 ? DateFormat(
                                     'MMMM dd, yyyy - hh:mm a',
-                                  ).format(announcement.createdAt!)
+                                  ).format(widget.announcement.createdAt!)
                                 : LocaleKeys.na.tr(),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.7),
@@ -126,7 +168,7 @@ class ScreenAnnouncementDetails extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '${LocaleKeys.created_by.tr()} ${announcement.createdBy}',
+                            '${LocaleKeys.created_by.tr()} ${widget.announcement.createdBy}',
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.7),
                               fontSize: 13,
@@ -139,6 +181,12 @@ class ScreenAnnouncementDetails extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 20),
+
+                // Seen By Section (ADMIN ONLY)
+                if (isAdmin) ...[
+                  _buildSeenBySection(isTablet),
+                  const SizedBox(height: 20),
+                ],
 
                 // Description Section
                 Container(
@@ -174,8 +222,8 @@ class ScreenAnnouncementDetails extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        announcement.description.isNotEmpty
-                            ? announcement.description
+                        widget.announcement.description.isNotEmpty
+                            ? widget.announcement.description
                             : LocaleKeys.no_description_provided.tr(),
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.8),
@@ -187,7 +235,7 @@ class ScreenAnnouncementDetails extends StatelessWidget {
                   ),
                 ),
 
-                // Admin Delete Button at bottom (alternative placement)
+                // Admin Delete Button at bottom
                 if (isAdmin) ...[
                   const SizedBox(height: 24),
                   SizedBox(
@@ -215,6 +263,247 @@ class ScreenAnnouncementDetails extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildSeenBySection(bool isTablet) {
+    return Consumer<AdminAnnouncementsProvider>(
+      builder: (context, provider, child) {
+        final latestAnnouncement = provider.announcements.firstWhere(
+          (a) => a.id == widget.announcement.id,
+          orElse: () => widget.announcement,
+        );
+
+        final seenCount = latestAnnouncement.seenBy.length;
+
+        return InkWell(
+          onTap: seenCount > 0
+              ? () => _showSeenByBottomSheet(latestAnnouncement.seenBy)
+              : null,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.visibility_outlined,
+                    color: Colors.green,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Seen by $seenCount branches',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
+                      if (seenCount > 0)
+                        Text(
+                          'Tap to see who viewed this',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontSize: 12,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                if (seenCount > 0)
+                  const Icon(
+                    Icons.keyboard_arrow_right_rounded,
+                    color: Colors.white70,
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showSeenByBottomSheet(List<AnnouncementSeenInfo> seenBy) {
+    final searchNotifier = ValueNotifier<String>("");
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: AppColors.lightBlack,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              // Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Viewed By',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      onChanged: (val) => searchNotifier.value = val,
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      decoration: InputDecoration(
+                        hintText: 'Search branch...',
+                        hintStyle: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.4),
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Colors.white.withValues(alpha: 0.5),
+                          size: 20,
+                        ),
+                        filled: true,
+                        fillColor: Colors.white.withValues(alpha: 0.05),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ValueListenableBuilder<String>(
+                  valueListenable: searchNotifier,
+                  builder: (context, query, _) {
+                    final filteredList = seenBy
+                        .where(
+                          (e) => e.branchName.toLowerCase().contains(
+                            query.toLowerCase(),
+                          ),
+                        )
+                        .toList();
+
+                    if (filteredList.isEmpty) {
+                      return ListView(
+                        controller: scrollController,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 60),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.search_off_rounded,
+                                  size: 64,
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No branches found',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.5),
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return ListView.separated(
+                      controller: scrollController,
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+                      itemCount: filteredList.length,
+                      separatorBuilder: (context, index) => Divider(
+                        color: Colors.white.withValues(alpha: 0.05),
+                        height: 1,
+                      ),
+                      itemBuilder: (context, index) {
+                        final info = filteredList[index];
+                        return ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: CircleAvatar(
+                            backgroundColor: AppColors.primaryRed.withValues(
+                              alpha: 0.2,
+                            ),
+                            child: Text(
+                              info.branchName.isNotEmpty
+                                  ? info.branchName[0].toUpperCase()
+                                  : 'B',
+                              style: const TextStyle(
+                                color: AppColors.primaryRed,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          title: Text(
+                            info.branchName,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          subtitle: Text(
+                            DateFormat('MMM dd, hh:mm a').format(info.seenAt),
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.6),
+                              fontSize: 12,
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).then((_) => searchNotifier.dispose());
   }
 
   void _showDeleteConfirmation(BuildContext context) {
@@ -279,7 +568,7 @@ class ScreenAnnouncementDetails extends StatelessWidget {
     );
 
     final success = await provider.deleteAnnouncement(
-      announcement.id,
+      widget.announcement.id,
       context: context,
     );
 
