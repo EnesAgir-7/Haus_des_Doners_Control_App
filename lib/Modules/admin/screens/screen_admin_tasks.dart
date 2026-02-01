@@ -206,6 +206,13 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
 
   List<TaskModel> _filterTasks(List<TaskModel> tasks) {
     if (_selectedFilter == 'all') return tasks;
+
+    // Handle 'overdue' separately since it's a computed property, not a status
+    if (_selectedFilter == 'overdue') {
+      return tasks.where((task) => task.isOverdue).toList();
+    }
+
+    // For other filters, match against status
     return tasks.where((task) => task.status == _selectedFilter).toList();
   }
 
@@ -276,7 +283,10 @@ class _ScreenAdminTasksState extends State<ScreenAdminTasks> {
       icon: const Icon(Icons.add, color: Colors.white),
       label: Text(
         LocaleKeys.addTask.tr(),
-        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
