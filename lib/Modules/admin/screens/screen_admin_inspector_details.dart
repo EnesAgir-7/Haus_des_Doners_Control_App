@@ -16,6 +16,9 @@ import '../../inspector/widgets/custom_app_bar.dart';
 import '../widgets/admin_inspector_routes_widget.dart';
 import '../widgets/performance_chart.dart';
 import 'screen_admin_user_details.dart';
+import '../../../common_services/csv_export_service.dart';
+import '../../inspector/firebase_services/inspector_inspection_service.dart';
+import '../../inspector/widgets/custom_toast.dart';
 
 class ScreenInspectorDetails extends StatefulWidget {
   final UserModel inspector;
@@ -28,6 +31,9 @@ class ScreenInspectorDetails extends StatefulWidget {
 
 class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
   String? _selectedMonthKey;
+  bool _isExporting = false;
+  final InspectorInspectionService _inspectionService =
+      InspectorInspectionService();
 
   final remoteConfig = RemoteConfigService();
 
@@ -60,6 +66,53 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     final year = getYearFromKey(monthKey);
     final month = getMonthFromKey(monthKey);
     context.read<ProviderAdminUsers>().switchMonth(year, month);
+  }
+
+  Future<void> _exportMonthToCsv() async {
+    if (_selectedMonthKey == null) return;
+
+    setState(() => _isExporting = true);
+
+    try {
+      final year = getYearFromKey(_selectedMonthKey!);
+      final month = getMonthFromKey(_selectedMonthKey!);
+
+      // Fetch all inspections for this month
+      final inspections = await _inspectionService
+          .getInspectionsByInspectorByMonth(widget.inspector.id, year, month);
+
+      if (inspections.isEmpty) {
+        if (mounted) {
+          showSnakBarr(context, LocaleKeys.noDataForSelectedMonth.tr());
+        }
+        setState(() => _isExporting = false);
+        return;
+      }
+
+      // Export to CSV
+      await CsvExportService.exportInspections(
+        inspections: inspections,
+        fileNamePrefix:
+            '${widget.inspector.name}_Inspections_${_selectedMonthKey}',
+        shareTitle:
+            'Inspections Report - ${widget.inspector.name} ($month/$year)',
+        inspectorName: widget.inspector.name,
+        month: month,
+        year: year,
+      );
+
+      if (mounted) {
+        showSnakBarr(context, 'CSV Exported Successfully');
+      }
+    } catch (e) {
+      if (mounted) {
+        showSnakBarr(context, 'Export Failed: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
+    }
   }
 
   @override
@@ -102,94 +155,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
       ),
       body: Consumer<ProviderAdminUsers>(
         builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const CircularProgressIndicator(color: AppColors.primaryRed),
-                  const SizedBox(height: 16),
-                  Text(
-                    LocaleKeys.loadingStatistics.tr(),
-                    style: const TextStyle(color: Colors.white70, fontSize: 14),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          // Error State
-          if (provider.error != null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: AppColors.primaryRed,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      LocaleKeys.errorLoadingStatistics.tr(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      provider.error!,
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        provider.getInspectorStatistics(widget.inspector.id);
-                      },
-                      icon: const Icon(Icons.refresh),
-                      label: Text(LocaleKeys.retry.tr()),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryRed,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          // No Data State
-          if (provider.inspectorAllData == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.inbox_outlined,
-                    size: 64,
-                    color: Colors.white38,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    LocaleKeys.noStatisticsAvailable.tr(),
-                    style: const TextStyle(color: Colors.white70, fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            );
-          }
-
-          // Success State - Show month selector always
+          // Success State - Show month selector and routes always
           return RefreshIndicator(
             onRefresh: () async {
               await provider.getInspectorStatistics(widget.inspector.id);
@@ -200,37 +166,54 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
               child: Column(
                 children: [
                   const SizedBox(height: 16),
-                  _buildMonthSelector(provider),
+                  Row(
+                    children: [
+                      Expanded(child: _buildMonthSelector(provider)),
+                      const SizedBox(width: 8),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: _isExporting
+                            ? const SizedBox(
+                                width: 44,
+                                height: 44,
+                                child: Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.primaryRed,
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryRed.withValues(
+                                    alpha: 0.1,
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: AppColors.primaryRed.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                  ),
+                                ),
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.file_download_outlined,
+                                    color: AppColors.primaryRed,
+                                  ),
+                                  onPressed: _exportMonthToCsv,
+                                  tooltip: 'Export CSV',
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 10),
 
-                  // Show stats if available, otherwise show no data message
-                  if (provider.currentMonthStats != null) ...[
-                    _buildStatsGrid(provider.currentMonthStats!),
-                    _buildDetailedSection(provider.currentMonthStats!),
-                  ] else ...[
-                    const SizedBox(height: 100),
-                    Center(
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.inbox_outlined,
-                            size: 64,
-                            color: Colors.white38,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            LocaleKeys.noDataForSelectedMonth.tr(),
-                            style: const TextStyle(
-                              color: Colors.white70,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  // --- Statistics Section (Independent Loading/Error) ---
+                  _buildStatisticsContent(provider),
 
-                  // Inspector Routes Section - Separate from monthly stats
+                  // --- Inspector Routes Section (Independent) ---
                   const SizedBox(height: 16),
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -257,6 +240,108 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     );
   }
 
+  Widget _buildStatisticsContent(ProviderAdminUsers provider) {
+    if (provider.isLoading) {
+      return Container(
+        height: 200,
+        alignment: Alignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(color: AppColors.primaryRed),
+            const SizedBox(height: 16),
+            Text(
+              LocaleKeys.loadingStatistics.tr(),
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (provider.error != null) {
+      return Container(
+        margin: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppColors.primaryRed.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppColors.primaryRed.withValues(alpha: 0.1),
+          ),
+        ),
+        child: Column(
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 48,
+              color: AppColors.primaryRed,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              LocaleKeys.errorLoadingStatistics.tr(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              provider.error!,
+              style: const TextStyle(color: Colors.white70, fontSize: 13),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                provider.getInspectorStatistics(widget.inspector.id);
+              },
+              icon: const Icon(Icons.refresh, size: 18),
+              label: Text(LocaleKeys.retry.tr()),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryRed,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (provider.currentMonthStats != null) {
+      return Column(
+        children: [
+          _buildStatsGrid(provider.currentMonthStats!),
+          _buildDetailedSection(provider.currentMonthStats!),
+        ],
+      );
+    }
+
+    return Container(
+      height: 150,
+      alignment: Alignment.center,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.inbox_outlined, size: 48, color: Colors.white38),
+          const SizedBox(height: 12),
+          Text(
+            LocaleKeys.noDataForSelectedMonth.tr(),
+            style: const TextStyle(color: Colors.white70, fontSize: 15),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildMonthSelector(ProviderAdminUsers provider) {
     final last12Months = generateLast12Months();
 
@@ -267,7 +352,6 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     }
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -464,10 +548,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   label: LocaleKeys.branchesVisitedReported.tr(),
                   value: stats.totalInspections.toString(),
                   icon: Icons.assignment_turned_in_outlined,
-                  gradientColors: [
-                    const Color(0xFF4A5568),
-                    const Color(0xFF2D3748),
-                  ],
+                  gradientColors: const [Color(0xFF4A5568), Color(0xFF2D3748)],
                 ),
               ),
               const SizedBox(width: 12),
@@ -488,10 +569,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                   label: LocaleKeys.tasksCompleted.tr(),
                   value: "${stats.tasksCompleted}/${stats.tasksTotal}",
                   icon: Icons.check_circle_outline,
-                  gradientColors: [
-                    const Color(0xFF0F766E),
-                    const Color(0xFF115E59),
-                  ],
+                  gradientColors: const [Color(0xFF0F766E), Color(0xFF115E59)],
                   subtitle: "$completionRate%",
                 ),
               ),
