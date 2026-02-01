@@ -270,16 +270,28 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
     }
   }
 
-  Future<void> _exportBranchInspections({int? limit, int? months}) async {
+  Future<void> _exportBranchInspections({
+    int? limit,
+    int? months,
+    bool isAll = false,
+  }) async {
     setState(() => _isExporting = true);
 
     try {
       DateTime? since;
       String period = "";
 
-      if (months != null) {
+      if (isAll) {
+        period = "All Time History";
+      } else if (months != null) {
         since = DateTime.now().subtract(Duration(days: months * 30));
-        period = months == 1 ? "Last Month" : "Last $months Months";
+        if (months == 1) {
+          period = "Last Month";
+        } else if (months < 12) {
+          period = "Last $months Months";
+        } else {
+          period = "Last ${months ~/ 12} Year(s)";
+        }
       } else if (limit != null) {
         period = "Last $limit Inspections";
       } else {
@@ -289,8 +301,8 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
       final inspections = await _inspectionService
           .getInspectionsByBranchFiltered(
             branchId: widget.branch.id,
-            limit: limit,
-            since: since,
+            limit: isAll ? null : limit,
+            since: isAll ? null : since,
           );
 
       if (inspections.isEmpty) {
@@ -325,130 +337,296 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
   void _showExportOptionsSheet() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: BoxDecoration(
+        height: MediaQuery.of(context).size.height * 0.58,
+        decoration: const BoxDecoration(
           color: AppColors.lightBlack,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                margin: const EdgeInsets.only(top: 12, bottom: 8),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.white24,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Export Options',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+        child: Column(
+          children: [
+            // Premium Header matching Selection Sheets
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 16, 12),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    width: 1,
                   ),
                 ),
               ),
-              const Divider(color: Colors.white10, height: 1),
-
-              // Last N inspections
-              _buildOptionCategory('By Count'),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              child: Row(
                 children: [
-                  _buildOptionButton(
-                    'Last 10',
-                    () => _exportBranchInspections(limit: 10),
+                  const Icon(
+                    Icons.file_download_outlined,
+                    color: AppColors.primaryRed,
+                    size: 22,
                   ),
-                  _buildOptionButton(
-                    'Last 20',
-                    () => _exportBranchInspections(limit: 20),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Export Branch Report',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                      letterSpacing: -0.5,
+                    ),
                   ),
-                  _buildOptionButton(
-                    'Last 30',
-                    () => _exportBranchInspections(limit: 30),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: Colors.white.withValues(alpha: 0.7),
+                      size: 20,
+                    ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
                 ],
               ),
+            ),
 
-              const SizedBox(height: 16),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildOptionCategory(
+                      'By Recent Count',
+                      Icons.numbers_rounded,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 4,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: 1.1,
+                        children: [
+                          _buildOptionTile(
+                            'Last 10',
+                            Icons.filter_1_rounded,
+                            () => _exportBranchInspections(limit: 10),
+                          ),
+                          _buildOptionTile(
+                            'Last 20',
+                            Icons.filter_2_rounded,
+                            () => _exportBranchInspections(limit: 20),
+                          ),
+                          _buildOptionTile(
+                            'Last 30',
+                            Icons.filter_3_rounded,
+                            () => _exportBranchInspections(limit: 30),
+                          ),
+                          _buildOptionTile(
+                            'Last 50',
+                            Icons.filter_9_plus_rounded,
+                            () => _exportBranchInspections(limit: 50),
+                          ),
+                        ],
+                      ),
+                    ),
 
-              // Last X months
-              _buildOptionCategory('By Time Period'),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                children: [
-                  _buildOptionButton(
-                    'Last Month',
-                    () => _exportBranchInspections(months: 1),
-                  ),
-                  _buildOptionButton(
-                    'Last 3 Months',
-                    () => _exportBranchInspections(months: 3),
-                  ),
-                  _buildOptionButton(
-                    'Last 6 Months',
-                    () => _exportBranchInspections(months: 6),
-                  ),
-                  _buildOptionButton(
-                    'Last Year',
-                    () => _exportBranchInspections(months: 12),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+
+                    _buildOptionCategory(
+                      'By Time Period',
+                      Icons.calendar_month_rounded,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: GridView.count(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: 1.3,
+                        children: [
+                          _buildOptionTile(
+                            'Last Month',
+                            Icons.today_rounded,
+                            () => _exportBranchInspections(months: 1),
+                          ),
+                          _buildOptionTile(
+                            'Last 3 Months',
+                            Icons.date_range_rounded,
+                            () => _exportBranchInspections(months: 3),
+                          ),
+                          _buildOptionTile(
+                            'Last 6 Months',
+                            Icons.event_note_rounded,
+                            () => _exportBranchInspections(months: 6),
+                          ),
+                          _buildOptionTile(
+                            'Last Year',
+                            Icons.event_available_rounded,
+                            () => _exportBranchInspections(months: 12),
+                          ),
+                          _buildOptionTile(
+                            'Last 2 Years',
+                            Icons.history_toggle_off_rounded,
+                            () => _exportBranchInspections(months: 24),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    _buildOptionCategory(
+                      'Full History',
+                      Icons.data_exploration_rounded,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildFullWidthTile(
+                        'All Time History',
+                        'Export every inspection recorded',
+                        Icons.all_inclusive_rounded,
+                        () => _exportBranchInspections(isAll: true),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
-
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildOptionCategory(String title) {
+  Widget _buildOptionCategory(String title, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.5),
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: Colors.white.withValues(alpha: 0.4)),
+          const SizedBox(width: 8),
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.4),
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOptionTile(String label, IconData icon, VoidCallback onTap) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.03),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: AppColors.primaryRed, size: 20),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildOptionButton(String label, VoidCallback onSelected) {
-    return ElevatedButton(
-      onPressed: () {
+  Widget _buildFullWidthTile(
+    String title,
+    String subtitle,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: () {
         Navigator.pop(context);
-        onSelected();
+        onTap();
       },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white.withValues(alpha: 0.05),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-        ),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: AppColors.primaryRed.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: AppColors.primaryRed.withValues(alpha: 0.15),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.primaryRed.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.auto_awesome_rounded,
+                color: AppColors.primaryRed,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.4),
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.white.withValues(alpha: 0.3),
+              size: 20,
+            ),
+          ],
+        ),
       ),
-      child: Text(label),
     );
   }
 
@@ -472,15 +650,6 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
                   ),
                 ),
               ),
-            )
-          else
-            IconButton(
-              icon: const Icon(
-                Icons.file_download_outlined,
-                color: Colors.white,
-              ),
-              onPressed: _showExportOptionsSheet,
-              tooltip: 'Export CSV',
             ),
           BranchMenuButton(
             onEdit: () {
@@ -522,6 +691,7 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               //   ),
               // );
             },
+            onExport: _showExportOptionsSheet,
           ),
         ],
       ),
