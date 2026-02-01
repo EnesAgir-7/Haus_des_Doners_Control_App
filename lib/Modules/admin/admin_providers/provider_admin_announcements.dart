@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import '../../../translations/locale_keys.g.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import '../../../models/announcement_model.dart';
@@ -65,7 +67,7 @@ class AdminAnnouncementsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, "Announcement created successfully");
+        showSnakBarr(context, LocaleKeys.announcement_created_success.tr());
       }
 
       return true;
@@ -75,7 +77,12 @@ class AdminAnnouncementsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, 'Error creating announcement: $e');
+        showSnakBarr(
+          context,
+          LocaleKeys.announcement_create_error.tr(
+            namedArgs: {'error': e.toString()},
+          ),
+        );
       }
       return false;
     }
@@ -96,7 +103,7 @@ class AdminAnnouncementsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, "Announcement deleted successfully");
+        showSnakBarr(context, LocaleKeys.announcement_deleted_success.tr());
       }
 
       return true;
@@ -106,7 +113,12 @@ class AdminAnnouncementsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, 'Error deleting announcement: $e');
+        showSnakBarr(
+          context,
+          LocaleKeys.announcement_delete_error.tr(
+            namedArgs: {'error': e.toString()},
+          ),
+        );
       }
       return false;
     }

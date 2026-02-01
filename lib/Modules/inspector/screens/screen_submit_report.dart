@@ -334,11 +334,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       }
 
       if (mounted) {
-        showSnakBarr(context, 'Draft report loaded');
+        showSnakBarr(context, LocaleKeys.draft_report_loaded.tr());
       }
     } catch (e) {
       if (mounted) {
-        showSnakBarr(context, 'Failed to load draft report');
+        showSnakBarr(context, LocaleKeys.generic_error.tr());
       }
     }
   }
@@ -436,10 +436,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
           children: [
-            const Expanded(
+            Expanded(
               child: Text(
-                'Unsubmitted Report',
-                style: TextStyle(
+                LocaleKeys.unsubmitted_report.tr(),
+                style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
@@ -448,19 +448,19 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             IconButton(
               icon: Icon(Icons.close, color: Colors.grey.shade400),
               onPressed: () => Navigator.pop(context, null), // Dismiss dialog
-              tooltip: 'Continue Working',
+              tooltip: LocaleKeys.continue_working.tr(),
             ),
           ],
         ),
-        content: const Text(
-          'You have an unsubmitted report. Do you want to save it as a draft?',
-          style: TextStyle(color: Colors.white70),
+        content: Text(
+          LocaleKeys.unsubmitted_report.tr(),
+          style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              'No, Discard',
+              LocaleKeys.no.tr(),
               style: TextStyle(color: Colors.grey.shade400),
             ),
           ),
@@ -470,7 +470,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
               backgroundColor: AppColors.primaryRed,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Yes, Save Draft'),
+            child: Text(LocaleKeys.yes.tr()),
           ),
         ],
       ),
@@ -874,7 +874,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                         ),
                       ),
                       Text(
-                        '${provider.totalScore.toInt()} Pkt',
+                        '${provider.totalScore.toInt()} ${LocaleKeys.points_short.tr()}',
                         style: TextStyle(
                           color: getScoreColor(
                             provider.scoreDisplay,
@@ -1961,7 +1961,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                               color: Colors.white70,
                               size: 16,
                             ),
-                            tooltip: 'Name bearbeiten',
+                            tooltip: LocaleKeys.edit_name_tooltip.tr(),
                           ),
                         ),
 
@@ -2600,7 +2600,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                             style: const TextStyle(color: Colors.white),
                             decoration: InputDecoration(
                               labelText: LocaleKeys.name.tr(),
-                              hintText: 'Name eingeben',
+                              hintText: LocaleKeys.enter_name.tr(),
                               labelStyle: const TextStyle(
                                 color: Colors.white70,
                               ),
@@ -2736,7 +2736,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                           onPressed: () async {
                             if (showNameField &&
                                 nameController.text.trim().isEmpty) {
-                              showSnakBarr(context, 'Bitte Namen eingeben');
+                              showSnakBarr(
+                                context,
+                                LocaleKeys.please_enter_name.tr(),
+                              );
                               return;
                             }
 

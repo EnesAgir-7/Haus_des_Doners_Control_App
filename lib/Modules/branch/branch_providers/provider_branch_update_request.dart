@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import '../../../translations/locale_keys.g.dart';
 import '../../../models/branch_update_request_model.dart';
 import '../../../models/branch_model.dart';
 import '../../inspector/widgets/custom_toast.dart';
@@ -125,7 +127,7 @@ class BranchUpdateRequestProvider extends ChangeNotifier {
   Future<bool> deletePendingRequest(BuildContext context) async {
     if (_pendingRequest == null) {
       if (context.mounted) {
-        showSnakBarr(context, 'No pending request to delete');
+        showSnakBarr(context, LocaleKeys.request_delete_no_pending.tr());
       }
       return false;
     }
@@ -144,7 +146,7 @@ class BranchUpdateRequestProvider extends ChangeNotifier {
       debugPrint('Request deleted: $deletedId');
 
       if (context.mounted) {
-        showSnakBarr(context, "Request deleted successfully");
+        showSnakBarr(context, LocaleKeys.request_deleted_success.tr());
       }
 
       return true;
@@ -153,7 +155,12 @@ class BranchUpdateRequestProvider extends ChangeNotifier {
       debugPrint('Error deleting request: $e');
 
       if (context.mounted) {
-        showSnakBarr(context, 'Error deleting request: ${e.toString()}');
+        showSnakBarr(
+          context,
+          LocaleKeys.request_delete_error.tr(
+            namedArgs: {'error': e.toString()},
+          ),
+        );
       }
       return false;
     } finally {

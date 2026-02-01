@@ -1,4 +1,6 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import '../../../translations/locale_keys.g.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import '../../../models/branch_notification_model.dart';
@@ -122,7 +124,7 @@ class AdminBranchNotificationsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, "Notification created successfully");
+        showSnakBarr(context, LocaleKeys.notification_created_success.tr());
       }
 
       return true;
@@ -132,7 +134,12 @@ class AdminBranchNotificationsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, 'Error creating notification: $e');
+        showSnakBarr(
+          context,
+          LocaleKeys.notification_create_error.tr(
+            namedArgs: {'error': e.toString()},
+          ),
+        );
       }
       return false;
     }
@@ -159,7 +166,7 @@ class AdminBranchNotificationsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, "Notification updated successfully");
+        showSnakBarr(context, LocaleKeys.notification_updated_success.tr());
       }
 
       return true;
@@ -169,7 +176,12 @@ class AdminBranchNotificationsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, 'Error updating notification: $e');
+        showSnakBarr(
+          context,
+          LocaleKeys.notification_update_error.tr(
+            namedArgs: {'error': e.toString()},
+          ),
+        );
       }
       return false;
     }
@@ -190,7 +202,7 @@ class AdminBranchNotificationsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, "Notification deleted successfully");
+        showSnakBarr(context, LocaleKeys.notification_deleted_success.tr());
       }
 
       return true;
@@ -200,7 +212,12 @@ class AdminBranchNotificationsProvider extends ChangeNotifier {
       notifyListeners();
 
       if (context.mounted) {
-        showSnakBarr(context, 'Error deleting notification: $e');
+        showSnakBarr(
+          context,
+          LocaleKeys.notification_delete_error.tr(
+            namedArgs: {'error': e.toString()},
+          ),
+        );
       }
       return false;
     }

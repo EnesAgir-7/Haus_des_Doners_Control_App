@@ -67,7 +67,7 @@ class _ScreenPdfViewerState extends State<ScreenPdfViewer> {
         if (!hasPermission && mounted) {
           showSnakBarr(
             context,
-            'Storage permission denied. Opening share options...',
+            LocaleKeys.storage_permission_denied_opening_share.tr(),
           );
           // Fallback to sharing which allows saving
           await _sharePDF(bytes: bytes);
@@ -94,7 +94,10 @@ class _ScreenPdfViewerState extends State<ScreenPdfViewer> {
           setState(() => _isDownloading = false);
 
           if (mounted) {
-            showSnakBarr(context, 'PDF saved to: ${directory.path}');
+            showSnakBarr(
+              context,
+              LocaleKeys.pdf_saved_to.tr(args: [directory.path]),
+            );
           }
           return;
         } catch (e) {
@@ -111,7 +114,10 @@ class _ScreenPdfViewerState extends State<ScreenPdfViewer> {
     } catch (e) {
       setState(() => _isDownloading = false);
       if (mounted) {
-        showSnakBarr(context, 'Download failed: ${e.toString()}');
+        showSnakBarr(
+          context,
+          LocaleKeys.download_failed.tr(args: [e.toString()]),
+        );
       }
     }
   }
@@ -136,14 +142,19 @@ class _ScreenPdfViewerState extends State<ScreenPdfViewer> {
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
-          text: 'Inspection Report: ${widget.branchName}',
-          subject: 'Inspection Report - ${widget.branchName}',
+          text: LocaleKeys.inspection_report_text.tr(args: [widget.branchName]),
+          subject: LocaleKeys.inspection_report_subject.tr(
+            args: [widget.branchName],
+          ),
         ),
       );
     } catch (e) {
       setState(() => _isDownloading = false);
       if (mounted) {
-        showSnakBarr(context, 'Sharing failed: ${e.toString()}');
+        showSnakBarr(
+          context,
+          LocaleKeys.sharing_failed.tr(args: [e.toString()]),
+        );
       }
     }
   }
@@ -173,12 +184,12 @@ class _ScreenPdfViewerState extends State<ScreenPdfViewer> {
             IconButton(
               icon: const Icon(Icons.download, color: Colors.white),
               onPressed: _downloadPDF,
-              tooltip: 'Download',
+              tooltip: LocaleKeys.download.tr(),
             ),
             IconButton(
               icon: const Icon(Icons.share, color: Colors.white),
               onPressed: _sharePDF,
-              tooltip: 'Share',
+              tooltip: LocaleKeys.share.tr(),
             ),
           ],
         ],
@@ -188,7 +199,7 @@ class _ScreenPdfViewerState extends State<ScreenPdfViewer> {
         onDocumentLoadFailed: (details) {
           showSnakBarr(
             context,
-            '${LocaleKeys.error.tr()}: ${details.description}',
+            '${LocaleKeys.error_occurred.tr()}: ${details.description}',
           );
         },
       ),

@@ -307,7 +307,9 @@ class _ScreenAnnouncementDetailsState extends State<ScreenAnnouncementDetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Seen by $seenCount branches',
+                        LocaleKeys.seen_by_branches.tr(
+                          namedArgs: {'count': seenCount.toString()},
+                        ),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -316,7 +318,7 @@ class _ScreenAnnouncementDetailsState extends State<ScreenAnnouncementDetails> {
                       ),
                       if (seenCount > 0)
                         Text(
-                          'Tap to see who viewed this',
+                          LocaleKeys.tap_to_see_viewed.tr(),
                           style: TextStyle(
                             color: Colors.white.withValues(alpha: 0.5),
                             fontSize: 12,
@@ -374,9 +376,9 @@ class _ScreenAnnouncementDetailsState extends State<ScreenAnnouncementDetails> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Viewed By',
-                      style: TextStyle(
+                    Text(
+                      LocaleKeys.viewed_by.tr(),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -387,7 +389,7 @@ class _ScreenAnnouncementDetailsState extends State<ScreenAnnouncementDetails> {
                       onChanged: (val) => searchNotifier.value = val,
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                       decoration: InputDecoration(
-                        hintText: 'Search branch...',
+                        hintText: LocaleKeys.search_branch_placeholder.tr(),
                         hintStyle: TextStyle(
                           color: Colors.white.withValues(alpha: 0.4),
                         ),
@@ -438,7 +440,7 @@ class _ScreenAnnouncementDetailsState extends State<ScreenAnnouncementDetails> {
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  'No branches found',
+                                  LocaleKeys.no_branches_found_search.tr(),
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.5),
                                     fontSize: 16,

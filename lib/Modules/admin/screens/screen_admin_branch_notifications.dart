@@ -64,7 +64,7 @@ class _ScreenAdminBranchNotificationsState
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddNotificationBottomSheet(context),
-        label: const Text('Create Notification'),
+        label: Text(LocaleKeys.create_notification.tr()),
         icon: const Icon(Icons.add),
         backgroundColor: AppColors.primaryRed,
       ),
@@ -146,7 +146,7 @@ class _ScreenAdminBranchNotificationsState
           ),
           const SizedBox(height: 16),
           Text(
-            'Error Loading Notifications',
+            LocaleKeys.error_loading_notifications.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 16,
@@ -185,7 +185,7 @@ class _ScreenAdminBranchNotificationsState
           ),
           const SizedBox(height: 24),
           Text(
-            'No Notifications Yet',
+            LocaleKeys.no_notifications_yet.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.7),
               fontSize: 18,
@@ -194,7 +194,7 @@ class _ScreenAdminBranchNotificationsState
           ),
           const SizedBox(height: 8),
           Text(
-            'Create your first notification for this branch',
+            LocaleKeys.create_first_notification.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.5),
               fontSize: 14,
@@ -242,9 +242,9 @@ class _ScreenAdminBranchNotificationsState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Branch Notifications',
-                      style: TextStyle(
+                    Text(
+                      LocaleKeys.branch_notifications_title.tr(),
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -252,7 +252,7 @@ class _ScreenAdminBranchNotificationsState
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$displayedCount ${displayedCount == 1 ? 'Notification' : 'Notifications'}${unseenCount > 0 ? ' • $unseenCount Unread' : ''}',
+                      '$displayedCount ${displayedCount == 1 ? LocaleKeys.notification_single.tr() : LocaleKeys.notification_plural.tr()}${unseenCount > 0 ? ' • $unseenCount ${LocaleKeys.unread_suffix.tr()}' : ''}',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.7),
                         fontSize: 13,
@@ -265,7 +265,7 @@ class _ScreenAdminBranchNotificationsState
           ),
           const SizedBox(height: 12),
           Text(
-            'All notifications sent to this branch',
+            LocaleKeys.all_notifications_sent.tr(),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.6),
               fontSize: 13,
@@ -275,8 +275,8 @@ class _ScreenAdminBranchNotificationsState
           // Search field using CustomField
           CustomField(
             controller: _searchController,
-            label: 'Search',
-            hint: 'Search notifications...',
+            label: LocaleKeys.search_branch_hint.tr(),
+            hint: LocaleKeys.search_notifications_hint.tr(),
             icon: Icons.search,
           ),
         ],
@@ -302,7 +302,13 @@ class _ScreenAdminBranchNotificationsState
   ) {
     final isSelected = provider.selectedFilter == filter;
     return ChoiceChip(
-      label: Text(filter),
+      label: Text(
+        filter == 'All'
+            ? LocaleKeys.filter_all.tr()
+            : filter == 'Unread'
+            ? LocaleKeys.filter_unread.tr()
+            : LocaleKeys.filter_read.tr(),
+      ),
       selected: isSelected,
       onSelected: (_) => provider.updateFilter(filter),
       selectedColor: AppColors.primaryRed,
@@ -393,9 +399,9 @@ class _ScreenAdminBranchNotificationsState
                     color: AppColors.primaryRed.withValues(alpha: 0.25),
                   ),
                 ),
-                child: const Text(
-                  'NEW',
-                  style: TextStyle(
+                child: Text(
+                  LocaleKeys.new_badge.tr(),
+                  style: const TextStyle(
                     color: AppColors.primaryRed,
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -455,7 +461,7 @@ class _ScreenAdminBranchNotificationsState
           ),
         );
         if (context.mounted) {
-          showCustomSnackBar(context, 'Copied to clipboard');
+          showCustomSnackBar(context, LocaleKeys.copied_to_clipboard.tr());
         }
         break;
       case 'delete':
@@ -476,13 +482,13 @@ class _ScreenAdminBranchNotificationsState
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
         ),
-        title: const Text(
-          'Delete Notification',
-          style: TextStyle(color: Colors.white),
+        title: Text(
+          LocaleKeys.delete_notification_title.tr(),
+          style: const TextStyle(color: Colors.white),
         ),
-        content: const Text(
-          'Are you sure you want to delete this notification?',
-          style: TextStyle(color: Colors.white),
+        content: Text(
+          LocaleKeys.delete_notification_confirmation.tr(),
+          style: const TextStyle(color: Colors.white),
         ),
         actions: [
           TextButton(
@@ -548,7 +554,7 @@ class _ScreenAdminBranchNotificationsState
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: _NotificationFormBottomSheet(
-          title: 'Create Notification',
+          title: LocaleKeys.create_notification.tr(),
           branchName: widget.branchName,
           titleController: titleController,
           descriptionController: descriptionController,
@@ -611,7 +617,7 @@ class _ScreenAdminBranchNotificationsState
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
         child: _NotificationFormBottomSheet(
-          title: 'Edit Notification',
+          title: LocaleKeys.edit_notification.tr(),
           branchName: widget.branchName,
           titleController: titleController,
           descriptionController: descriptionController,
@@ -705,14 +711,14 @@ class _NotificationFormBottomSheet extends StatelessWidget {
                   CustomField(
                     controller: titleController,
                     label: LocaleKeys.title.tr(),
-                    hint: 'Enter notification title',
+                    hint: LocaleKeys.enter_notification_title.tr(),
                     icon: Icons.title,
                   ),
                   const SizedBox(height: 16),
                   CustomField(
                     controller: descriptionController,
                     label: LocaleKeys.description.tr(),
-                    hint: 'Enter notification description',
+                    hint: LocaleKeys.enter_notification_description.tr(),
                     icon: Icons.message,
                     keyboardType: TextInputType.multiline,
                   ),

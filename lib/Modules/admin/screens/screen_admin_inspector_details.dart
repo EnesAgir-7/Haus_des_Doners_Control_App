@@ -94,19 +94,26 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
         inspections: inspections,
         fileNamePrefix:
             '${widget.inspector.name}_Inspections_${_selectedMonthKey}',
-        shareTitle:
-            'Inspections Report - ${widget.inspector.name} ($month/$year)',
+        shareTitle: LocaleKeys.inspections_report_title.tr(
+          namedArgs: {
+            'inspector': widget.inspector.name,
+            'date': '$month/$year',
+          },
+        ),
         inspectorName: widget.inspector.name,
         month: month,
         year: year,
       );
 
       if (mounted) {
-        showSnakBarr(context, 'Excel Report Exported Successfully');
+        showSnakBarr(context, LocaleKeys.export_success.tr());
       }
     } catch (e) {
       if (mounted) {
-        showSnakBarr(context, 'Export Failed: $e');
+        showSnakBarr(
+          context,
+          LocaleKeys.export_failed.tr(namedArgs: {'error': e.toString()}),
+        );
       }
     } finally {
       if (mounted) {
@@ -204,7 +211,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                                       color: AppColors.primaryRed,
                                     ),
                                     onPressed: _exportMonthToCsv,
-                                    tooltip: 'Export CSV',
+                                    tooltip: LocaleKeys.export_csv.tr(),
                                   ),
                                 ),
                         ),

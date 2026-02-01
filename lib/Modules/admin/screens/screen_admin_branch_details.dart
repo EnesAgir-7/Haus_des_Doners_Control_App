@@ -315,17 +315,22 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
       await ExcelExportService.exportBranchInspections(
         inspections: inspections,
         fileNamePrefix: '${widget.branch.name}_Report',
-        shareTitle: 'Inspections Report - ${widget.branch.name}',
+        shareTitle: LocaleKeys.inspections_report_branch_title.tr(
+          namedArgs: {'branch': widget.branch.name},
+        ),
         branchName: widget.branch.name,
         period: period,
       );
 
       if (mounted) {
-        showSnakBarr(context, 'Excel Report Exported Successfully');
+        showSnakBarr(context, LocaleKeys.export_success.tr());
       }
     } catch (e) {
       if (mounted) {
-        showSnakBarr(context, 'Export Failed: $e');
+        showSnakBarr(
+          context,
+          LocaleKeys.export_failed.tr(namedArgs: {'error': e.toString()}),
+        );
       }
     } finally {
       if (mounted) {
