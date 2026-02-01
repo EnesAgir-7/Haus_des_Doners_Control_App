@@ -229,6 +229,25 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                       ),
                     ),
                   ],
+
+                  // Inspector Routes Section - Separate from monthly stats
+                  const SizedBox(height: 16),
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
+                    ),
+                    child: AdminInspectorRoutesWidget(
+                      inspectorId: widget.inspector.id,
+                      inspectorName: widget.inspector.name,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -582,13 +601,6 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
 
           const Divider(height: 24, color: Colors.white12),
           _buildLastUpdatedRow(stats),
-
-          // Inspector Routes Section
-          const Divider(height: 32, color: Colors.white12),
-          AdminInspectorRoutesWidget(
-            inspectorId: widget.inspector.id,
-            inspectorName: widget.inspector.name,
-          ),
         ],
       ),
     );

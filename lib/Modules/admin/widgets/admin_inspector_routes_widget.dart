@@ -88,30 +88,24 @@ class _AdminInspectorRoutesWidgetState
       'completed': [],
     };
 
-    // Get stops for today and next 6 days
-    for (int i = 0; i < 7; i++) {
-      final targetDate = todayDate.add(Duration(days: i));
-      final targetKey = DateFormat('yyyy-MM-dd').format(targetDate);
+    // Get ALL stops from route data (not just next 7 days)
+    for (var stop in _routeData!.stops) {
+      final stopDate = _parseDate(stop.timeSlot);
+      if (stopDate == null) continue;
 
-      final dayStops = _routeData!.stops
-          .where((stop) => stop.timeSlot == targetKey)
-          .toList();
-
-      for (var stop in dayStops) {
-        final stopDate = _parseDate(stop.timeSlot);
-        if (stopDate == null) continue;
-
-        if (stop.isCompleted) {
-          grouped['completed']!.add(stop);
-        } else if (stopDate.isBefore(todayDate)) {
-          grouped['missed']!.add(stop);
-        } else if (stopDate.isAtSameMomentAs(todayDate)) {
-          grouped['today']!.add(stop);
-        } else if (stopDate.isAtSameMomentAs(tomorrow)) {
-          grouped['tomorrow']!.add(stop);
-        } else {
-          grouped['upcoming']!.add(stop);
-        }
+      if (stop.isCompleted) {
+        grouped['completed']!.add(stop);
+      } else if (stopDate.isBefore(todayDate)) {
+        // Missed/overdue routes
+        grouped['missed']!.add(stop);
+      } else if (stopDate.isAtSameMomentAs(todayDate)) {
+        grouped['today']!.add(stop);
+      } else if (stopDate.isAtSameMomentAs(tomorrow)) {
+        grouped['tomorrow']!.add(stop);
+      } else if (stopDate.isAfter(tomorrow) &&
+          stopDate.isBefore(todayDate.add(const Duration(days: 7)))) {
+        // Only upcoming routes within next 7 days
+        grouped['upcoming']!.add(stop);
       }
     }
 
@@ -375,15 +369,11 @@ class _AdminInspectorRoutesWidgetState
 
   Widget _buildRouteCard(RouteStopModel stop, int index) {
     final statusInfo = _getStatusInfo(stop);
-    final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
-    final stopDate = _parseDate(stop.timeSlot);
-    final isToday = stopDate != null && stopDate.isAtSameMomentAs(todayDate);
 
     return GestureDetector(
       onTap: () => _showStopDetails(stop),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -391,99 +381,73 @@ class _AdminInspectorRoutesWidgetState
               Colors.white.withValues(alpha: 0.04),
             ],
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: statusInfo.color.withValues(alpha: 0.3),
-            width: 1.5,
+            width: 1,
           ),
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             onTap: () => _showStopDetails(stop),
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(10),
               child: Row(
                 children: [
                   // Status Icon
                   Container(
-                    width: 50,
-                    height: 50,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: statusInfo.gradientColors,
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8),
                       boxShadow: [
                         BoxShadow(
                           color: statusInfo.color.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
                         ),
                       ],
                     ),
-                    child: Icon(statusInfo.icon, color: Colors.white, size: 26),
+                    child: Icon(statusInfo.icon, color: Colors.white, size: 20),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 10),
 
                   // Branch Info
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                stop.branchName,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (isToday)
-                              Container(
-                                margin: const EdgeInsets.only(left: 8),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryRed,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Text(
-                                  LocaleKeys.today.tr(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                          ],
+                        Text(
+                          stop.branchName,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 3),
                         Row(
                           children: [
                             Icon(
                               Icons.calendar_today,
-                              size: 13,
+                              size: 11,
                               color: Colors.white.withValues(alpha: 0.6),
                             ),
-                            const SizedBox(width: 5),
+                            const SizedBox(width: 4),
                             Text(
                               _formatTimeSlot(stop.timeSlot),
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.7),
-                                fontSize: 13,
+                                fontSize: 11,
                               ),
                             ),
                           ],
@@ -492,40 +456,36 @@ class _AdminInspectorRoutesWidgetState
                     ),
                   ),
 
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
 
-                  // Status Badge and Arrow
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: statusInfo.color.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: statusInfo.color.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Text(
-                          statusInfo.label,
-                          style: TextStyle(
-                            color: statusInfo.color,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                  // Status Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusInfo.color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: statusInfo.color.withValues(alpha: 0.3),
                       ),
-                      const SizedBox(height: 6),
-                      Icon(
-                        Icons.chevron_right,
-                        color: Colors.white.withValues(alpha: 0.4),
-                        size: 20,
+                    ),
+                    child: Text(
+                      statusInfo.label,
+                      style: TextStyle(
+                        color: statusInfo.color,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
+                    ),
+                  ),
+
+                  const SizedBox(width: 4),
+                  Icon(
+                    Icons.chevron_right,
+                    color: Colors.white.withValues(alpha: 0.3),
+                    size: 18,
                   ),
                 ],
               ),
