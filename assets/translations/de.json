@@ -1100,5 +1100,6 @@
   "pleaseSelectDueDate": "Bitte wählen Sie ein Fälligkeitsdatum aus",
   "upcoming_days": "Kommende Tage",
   "no_stops_scheduled": "Für diesen Tag sind keine Stopps geplant",
-  "request_history": "Anfrageverlauf"
+  "request_history": "Anfrageverlauf",
+  "delete_to_edit_hint": "Bitte löschen Sie die bestehende Anfrage, um neue Änderungen vorzunehmen."
 }

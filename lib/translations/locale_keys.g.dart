@@ -1105,5 +1105,6 @@ abstract class  LocaleKeys {
   static const upcoming_days = 'upcoming_days';
   static const no_stops_scheduled = 'no_stops_scheduled';
   static const request_history = 'request_history';
+  static const delete_to_edit_hint = 'delete_to_edit_hint';
 
 }

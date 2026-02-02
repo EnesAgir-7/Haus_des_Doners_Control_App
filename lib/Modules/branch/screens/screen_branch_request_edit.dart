@@ -377,6 +377,15 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                           color: Colors.white.withValues(alpha: 0.8),
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      Text(
+                        LocaleKeys.delete_to_edit_hint.tr(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -534,6 +543,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     TextInputType? keyboardType,
     String? hint,
     IconData? icon,
+    bool enabled = true,
     String? Function(String?)? validator,
   }) {
     return TextFormField(
@@ -541,12 +551,17 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
       maxLines: maxLines,
       keyboardType: keyboardType,
       validator: validator,
+      enabled: enabled,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
         prefixIcon: icon != null ? Icon(icon, color: Colors.white70) : null,
-        labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+        labelStyle: TextStyle(
+          color: enabled
+              ? Colors.white.withValues(alpha: 0.7)
+              : Colors.white.withValues(alpha: 0.3),
+        ),
         filled: true,
         fillColor: AppColors.primaryDark.withValues(alpha: 0.35),
         border: OutlineInputBorder(
@@ -562,24 +577,28 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     required String label,
     String? hint,
     required IconData icon,
+    bool enabled = true,
   }) {
     return InkWell(
-      onTap: () async {
-        final time = await showTimePicker(
-          context: context,
-          initialTime: TimeOfDay.now(),
-        );
-        if (time != null) {
-          controller.text = time.format(context);
-          setState(() {});
-        }
-      },
+      onTap: !enabled
+          ? null
+          : () async {
+              final time = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+              if (time != null) {
+                controller.text = time.format(context);
+                setState(() {});
+              }
+            },
       child: IgnorePointer(
         child: _buildTextField(
           controller: controller,
           label: label,
           hint: hint,
           icon: icon,
+          enabled: enabled,
         ),
       ),
     );
@@ -600,7 +619,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     return timeStr;
   }
 
-  Widget _buildOpeningDaysSelector() {
+  Widget _buildOpeningDaysSelector({bool enabled = true}) {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -610,15 +629,17 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
           label: Text(d),
           selected: selected,
           selectedColor: AppColors.white,
-          onSelected: (v) {
-            setState(() {
-              if (v) {
-                _selectedOpeningDays.add(d);
-              } else {
-                _selectedOpeningDays.remove(d);
-              }
-            });
-          },
+          onSelected: !enabled
+              ? null
+              : (v) {
+                  setState(() {
+                    if (v) {
+                      _selectedOpeningDays.add(d);
+                    } else {
+                      _selectedOpeningDays.remove(d);
+                    }
+                  });
+                },
         );
       }).toList(),
     );
@@ -630,6 +651,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     required VoidCallback onAdd,
     required Function(int, ContactPerson) onEdit,
     required Function(int) onRemove,
+    bool enabled = true,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -645,11 +667,16 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
               ),
             ),
             TextButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add, color: AppColors.primaryRed),
+              onPressed: !enabled ? null : onAdd,
+              icon: Icon(
+                Icons.add,
+                color: enabled ? AppColors.primaryRed : Colors.grey,
+              ),
               label: Text(
                 LocaleKeys.add.tr(),
-                style: const TextStyle(color: AppColors.primaryRed),
+                style: TextStyle(
+                  color: enabled ? AppColors.primaryRed : Colors.grey,
+                ),
               ),
             ),
           ],
@@ -718,324 +745,364 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.primaryDark,
-      appBar: CustomAppBar(
-        title: LocaleKeys.update_request.tr(),
-        actions: [
-          IconButton(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    ScreenBranchRequestHistory(branchId: widget.branch.id),
+    return Consumer<BranchUpdateRequestProvider>(
+      builder: (context, provider, child) {
+        final isFormEnabled = !provider.hasPendingRequest;
+
+        return Scaffold(
+          backgroundColor: AppColors.primaryDark,
+          appBar: CustomAppBar(
+            title: LocaleKeys.update_request.tr(),
+            actions: [
+              IconButton(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ScreenBranchRequestHistory(branchId: widget.branch.id),
+                  ),
+                ),
+                icon: const Icon(Icons.history, color: Colors.white),
+                tooltip: LocaleKeys.request_history.tr(),
               ),
-            ),
-            icon: const Icon(Icons.history, color: Colors.white),
-            tooltip: LocaleKeys.request_history.tr(),
+            ],
           ),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            // Pending request banner
-            _buildPendingRequestBanner(),
+          body: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                // Pending request banner
+                _buildPendingRequestBanner(),
 
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Branch Information
-                    _buildSectionHeader(
-                      LocaleKeys.branchInformation.tr(),
-                      Icons.store,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _nameController,
-                      label: LocaleKeys.branchName.tr(),
-                      hint: LocaleKeys.enterBranchName.tr(),
-                      icon: Icons.business,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return LocaleKeys.branchNameRequired.tr();
-                        }
-                        return null;
-                      },
-                    ),
-                    /*  Email removed as it is admin-controlled */
-                    const SizedBox(height: 24),
-                    // Location
-                    _buildSectionHeader(
-                      LocaleKeys.location.tr(),
-                      Icons.location_on,
-                    ),
-                    const SizedBox(height: 16),
-                    InkWell(
-                      onTap: _pickLocation,
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryDark.withValues(alpha: 0.6),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.map, color: AppColors.primaryRed),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                '${_latitudeController.text}, ${_longitudeController.text}',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _addressController,
-                      label: LocaleKeys.address.tr(),
-                      hint: LocaleKeys.enterBranchAddress.tr(),
-                      icon: Icons.location_on,
-                      maxLines: 3,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return LocaleKeys.addressRequired.tr();
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 24),
-                    // Contact Information
-                    _buildSectionHeader(
-                      LocaleKeys.contactInformation.tr(),
-                      Icons.contact_phone,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _contactNameController,
-                      label: LocaleKeys.contactName.tr(),
-                      hint: LocaleKeys.enterContactPersonName.tr(),
-                      icon: Icons.person,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return LocaleKeys.contactNameRequired.tr();
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _contactPhoneController,
-                      label: LocaleKeys.contactPhone.tr(),
-                      hint: LocaleKeys.enterContactPhoneNumber.tr(),
-                      icon: Icons.phone,
-                      keyboardType: TextInputType.phone,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return LocaleKeys.contactPhoneRequired.tr();
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 24),
-                    // Opening Hours
-                    _buildSectionHeader(
-                      LocaleKeys.openingHoursDays.tr(),
-                      Icons.schedule,
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: _buildTimeField(
-                            controller: _openingTimeController,
-                            label: LocaleKeys.openingTime.tr(),
-                            hint: 'HH:MM',
-                            icon: Icons.access_time,
-                          ),
+                        // Branch Information
+                        _buildSectionHeader(
+                          LocaleKeys.branchInformation.tr(),
+                          Icons.store,
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _buildTimeField(
-                            controller: _closingTimeController,
-                            label: LocaleKeys.closingTime.tr(),
-                            hint: 'HH:MM',
-                            icon: Icons.access_time_filled,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    _buildOpeningDaysSelector(),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            LocaleKeys.openingDay.tr(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () async {
-                            final date = await showDatePicker(
-                              context: context,
-                              initialDate:
-                                  _selectedOpeningDay ?? DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (date != null) {
-                              setState(() => _selectedOpeningDay = date);
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _nameController,
+                          label: LocaleKeys.branchName.tr(),
+                          hint: LocaleKeys.enterBranchName.tr(),
+                          icon: Icons.business,
+                          enabled: isFormEnabled,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return LocaleKeys.branchNameRequired.tr();
                             }
+                            return null;
                           },
+                        ),
+                        /*  Email removed as it is admin-controlled */
+                        const SizedBox(height: 24),
+                        // Location
+                        _buildSectionHeader(
+                          LocaleKeys.location.tr(),
+                          Icons.location_on,
+                        ),
+                        const SizedBox(height: 16),
+                        InkWell(
+                          onTap: !isFormEnabled ? null : _pickLocation,
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: AppColors.primaryDark.withValues(
-                                alpha: 0.35,
+                                alpha: 0.6,
                               ),
-                              borderRadius: BorderRadius.circular(8),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.white.withValues(
+                                  alpha: isFormEnabled ? 0.2 : 0.05,
+                                ),
+                              ),
                             ),
                             child: Row(
                               children: [
-                                const Icon(
-                                  Icons.calendar_today,
-                                  color: Colors.white70,
+                                Icon(
+                                  Icons.map,
+                                  color: isFormEnabled
+                                      ? AppColors.primaryRed
+                                      : Colors.grey,
                                 ),
                                 const SizedBox(width: 12),
-                                Text(
-                                  _selectedOpeningDay != null
-                                      ? DateFormat.yMMMd().format(
-                                          _selectedOpeningDay!,
-                                        )
-                                      : LocaleKeys.selectOpeningDay.tr(),
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.8),
+                                Expanded(
+                                  child: Text(
+                                    '${_latitudeController.text}, ${_longitudeController.text}',
+                                    style: TextStyle(
+                                      color: isFormEnabled
+                                          ? Colors.white
+                                          : Colors.white38,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _addressController,
+                          label: LocaleKeys.address.tr(),
+                          hint: LocaleKeys.enterBranchAddress.tr(),
+                          icon: Icons.location_on,
+                          maxLines: 3,
+                          enabled: isFormEnabled,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return LocaleKeys.addressRequired.tr();
+                            }
+                            return null;
+                          },
+                        ),
 
-                    const SizedBox(height: 24),
-                    // Branch Owners
-                    _buildSectionHeader(
-                      LocaleKeys.branchOwners.tr(),
-                      Icons.business_center,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildContactPersonList(
-                      title: '',
-                      persons: _branchOwners,
-                      onAdd: () => _showAddContactPersonDialog(
-                        title: LocaleKeys.addBranchOwner.tr(),
-                        onSave: (person) =>
-                            setState(() => _branchOwners.add(person)),
-                      ),
-                      onEdit: (index, person) =>
-                          setState(() => _branchOwners[index] = person),
-                      onRemove: (index) =>
-                          setState(() => _branchOwners.removeAt(index)),
-                    ),
+                        const SizedBox(height: 24),
+                        // Contact Information
+                        _buildSectionHeader(
+                          LocaleKeys.contactInformation.tr(),
+                          Icons.contact_phone,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _contactNameController,
+                          label: LocaleKeys.contactName.tr(),
+                          hint: LocaleKeys.enterContactPersonName.tr(),
+                          icon: Icons.person,
+                          enabled: isFormEnabled,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return LocaleKeys.contactNameRequired.tr();
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _contactPhoneController,
+                          label: LocaleKeys.contactPhone.tr(),
+                          hint: LocaleKeys.enterContactPhoneNumber.tr(),
+                          icon: Icons.phone,
+                          keyboardType: TextInputType.phone,
+                          enabled: isFormEnabled,
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return LocaleKeys.contactPhoneRequired.tr();
+                            }
+                            return null;
+                          },
+                        ),
 
-                    const SizedBox(height: 24),
-                    // Branch Managers
-                    _buildSectionHeader(
-                      LocaleKeys.branchManagers.tr(),
-                      Icons.manage_accounts,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildContactPersonList(
-                      title: '',
-                      persons: _branchManagers,
-                      onAdd: () => _showAddContactPersonDialog(
-                        title: LocaleKeys.addBranchManager.tr(),
-                        onSave: (person) =>
-                            setState(() => _branchManagers.add(person)),
-                      ),
-                      onEdit: (index, person) =>
-                          setState(() => _branchManagers[index] = person),
-                      onRemove: (index) =>
-                          setState(() => _branchManagers.removeAt(index)),
-                    ),
+                        const SizedBox(height: 24),
+                        // Opening Hours
+                        _buildSectionHeader(
+                          LocaleKeys.openingHoursDays.tr(),
+                          Icons.schedule,
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildTimeField(
+                                controller: _openingTimeController,
+                                label: LocaleKeys.openingTime.tr(),
+                                hint: 'HH:MM',
+                                icon: Icons.access_time,
+                                enabled: isFormEnabled,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildTimeField(
+                                controller: _closingTimeController,
+                                label: LocaleKeys.closingTime.tr(),
+                                hint: 'HH:MM',
+                                icon: Icons.access_time_filled,
+                                enabled: isFormEnabled,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        _buildOpeningDaysSelector(enabled: isFormEnabled),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                LocaleKeys.openingDay.tr(),
+                                style: TextStyle(
+                                  color: isFormEnabled
+                                      ? Colors.white
+                                      : Colors.white38,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: !isFormEnabled
+                                  ? null
+                                  : () async {
+                                      final date = await showDatePicker(
+                                        context: context,
+                                        initialDate:
+                                            _selectedOpeningDay ??
+                                            DateTime.now(),
+                                        firstDate: DateTime(2000),
+                                        lastDate: DateTime(2100),
+                                      );
+                                      if (date != null) {
+                                        setState(
+                                          () => _selectedOpeningDay = date,
+                                        );
+                                      }
+                                    },
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryDark.withValues(
+                                    alpha: 0.35,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.calendar_today,
+                                      color: isFormEnabled
+                                          ? Colors.white70
+                                          : Colors.white24,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      _selectedOpeningDay != null
+                                          ? DateFormat.yMMMd().format(
+                                              _selectedOpeningDay!,
+                                            )
+                                          : LocaleKeys.selectOpeningDay.tr(),
+                                      style: TextStyle(
+                                        color: isFormEnabled
+                                            ? Colors.white.withValues(
+                                                alpha: 0.8,
+                                              )
+                                            : Colors.white24,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
 
-                    const SizedBox(height: 24),
-                    // Suppliers
-                    _buildSectionHeader(
-                      LocaleKeys.suppliers.tr(),
-                      Icons.local_shipping,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildContactPersonList(
-                      title: '',
-                      persons: _suppliers,
-                      onAdd: () => _showAddContactPersonDialog(
-                        title: LocaleKeys.addSupplier.tr(),
-                        onSave: (person) =>
-                            setState(() => _suppliers.add(person)),
-                      ),
-                      onEdit: (index, person) =>
-                          setState(() => _suppliers[index] = person),
-                      onRemove: (index) =>
-                          setState(() => _suppliers.removeAt(index)),
-                    ),
+                        const SizedBox(height: 24),
+                        // Branch Owners
+                        _buildSectionHeader(
+                          LocaleKeys.branchOwners.tr(),
+                          Icons.business_center,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildContactPersonList(
+                          title: '',
+                          persons: _branchOwners,
+                          enabled: isFormEnabled,
+                          onAdd: () => _showAddContactPersonDialog(
+                            title: LocaleKeys.addBranchOwner.tr(),
+                            onSave: (person) =>
+                                setState(() => _branchOwners.add(person)),
+                          ),
+                          onEdit: (index, person) =>
+                              setState(() => _branchOwners[index] = person),
+                          onRemove: (index) =>
+                              setState(() => _branchOwners.removeAt(index)),
+                        ),
 
-                    const SizedBox(height: 24),
-                    // Additional Information
-                    _buildSectionHeader(
-                      LocaleKeys.additionalInformation.tr(),
-                      Icons.info_outline,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _donerPricesController,
-                      label: LocaleKeys.donerPrices.tr(),
-                      hint: LocaleKeys.enterDonerPrices.tr(),
-                      icon: Icons.price_change,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _softwareController,
-                      label: LocaleKeys.software.tr(),
-                      hint: LocaleKeys.enterSoftwareUsed.tr(),
-                      icon: Icons.computer,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _shopInformationController,
-                      label: LocaleKeys.shopInformation.tr(),
-                      hint: LocaleKeys.enterShopInformation.tr(),
-                      icon: Icons.info,
-                      maxLines: 3,
-                    ),
+                        const SizedBox(height: 24),
+                        // Branch Managers
+                        _buildSectionHeader(
+                          LocaleKeys.branchManagers.tr(),
+                          Icons.manage_accounts,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildContactPersonList(
+                          title: '',
+                          persons: _branchManagers,
+                          enabled: isFormEnabled,
+                          onAdd: () => _showAddContactPersonDialog(
+                            title: LocaleKeys.addBranchManager.tr(),
+                            onSave: (person) =>
+                                setState(() => _branchManagers.add(person)),
+                          ),
+                          onEdit: (index, person) =>
+                              setState(() => _branchManagers[index] = person),
+                          onRemove: (index) =>
+                              setState(() => _branchManagers.removeAt(index)),
+                        ),
 
-                    const SizedBox(height: 32),
-                    // Submit Button
-                    Consumer<BranchUpdateRequestProvider>(
-                      builder: (context, provider, child) {
-                        return SizedBox(
+                        const SizedBox(height: 24),
+                        // Suppliers
+                        _buildSectionHeader(
+                          LocaleKeys.suppliers.tr(),
+                          Icons.local_shipping,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildContactPersonList(
+                          title: '',
+                          persons: _suppliers,
+                          enabled: isFormEnabled,
+                          onAdd: () => _showAddContactPersonDialog(
+                            title: LocaleKeys.addSupplier.tr(),
+                            onSave: (person) =>
+                                setState(() => _suppliers.add(person)),
+                          ),
+                          onEdit: (index, person) =>
+                              setState(() => _suppliers[index] = person),
+                          onRemove: (index) =>
+                              setState(() => _suppliers.removeAt(index)),
+                        ),
+
+                        const SizedBox(height: 24),
+                        // Additional Information
+                        _buildSectionHeader(
+                          LocaleKeys.additionalInformation.tr(),
+                          Icons.info_outline,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _donerPricesController,
+                          label: LocaleKeys.donerPrices.tr(),
+                          hint: LocaleKeys.enterDonerPrices.tr(),
+                          icon: Icons.price_change,
+                          enabled: isFormEnabled,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _softwareController,
+                          label: LocaleKeys.software.tr(),
+                          hint: LocaleKeys.enterSoftwareUsed.tr(),
+                          icon: Icons.computer,
+                          enabled: isFormEnabled,
+                        ),
+                        const SizedBox(height: 16),
+                        _buildTextField(
+                          controller: _shopInformationController,
+                          label: LocaleKeys.shopInformation.tr(),
+                          hint: LocaleKeys.enterShopInformation.tr(),
+                          icon: Icons.info,
+                          maxLines: 3,
+                          enabled: isFormEnabled,
+                        ),
+
+                        const SizedBox(height: 32),
+                        // Submit Button
+                        SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: provider.isSubmitting
+                            onPressed: (provider.isSubmitting || !isFormEnabled)
                                 ? null
                                 : _submitRequest,
                             style: ElevatedButton.styleFrom(
@@ -1062,17 +1129,17 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                                     ),
                                   ),
                           ),
-                        );
-                      },
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                     ),
-                    const SizedBox(height: 24),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

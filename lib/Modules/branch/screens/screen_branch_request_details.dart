@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:haus_des_control/Modules/branch/firebase_services/branch_update_request_service.dart';
+import 'package:haus_des_control/Modules/branch/branch_providers/provider_branch_update_request.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/core/constants/app_colors.dart';
 
@@ -25,7 +27,17 @@ class ScreenBranchRequestDetails extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
-      appBar: CustomAppBar(title: LocaleKeys.request_details.tr()),
+      appBar: CustomAppBar(
+        title: LocaleKeys.request_details.tr(),
+        actions: [
+          if (request.isPending)
+            IconButton(
+              onPressed: () => _showDeleteConfirmation(context),
+              icon: const Icon(Icons.delete, color: Colors.red),
+              tooltip: LocaleKeys.delete_request.tr(),
+            ),
+        ],
+      ),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -431,5 +443,39 @@ class ScreenBranchRequestDetails extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return DateFormat('MMM dd, yyyy HH:mm').format(date);
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.primaryDark,
+        title: Text(
+          LocaleKeys.delete_request.tr(),
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          LocaleKeys.delete_request_confirmation.tr(),
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(LocaleKeys.cancel.tr()),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext); // Close dialog
+              context.read<BranchUpdateRequestProvider>().deletePendingRequest(
+                context,
+              );
+              Navigator.pop(context); // Close details screen after deletion
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(LocaleKeys.delete.tr()),
+          ),
+        ],
+      ),
+    );
   }
 }

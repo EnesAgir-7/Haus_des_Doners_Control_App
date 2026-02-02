@@ -1086,5 +1086,6 @@
   "pleaseSelectDueDate": "Lütfen son tarihi seçin",
   "upcoming_days": "Gelecek Günler",
   "no_stops_scheduled": "Bu gün için planlanmış durak yok",
-  "request_history": "İstek Geçmişi"
+  "request_history": "İstek Geçmişi",
+  "delete_to_edit_hint": "Yeni değişiklikler yapmak için lütfen mevcut isteği silin."
 }

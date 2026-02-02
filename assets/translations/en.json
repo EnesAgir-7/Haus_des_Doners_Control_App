@@ -1116,5 +1116,6 @@
   "pleaseSelectDueDate": "Please select due date",
   "upcoming_days": "Upcoming Days",
   "no_stops_scheduled": "No stops scheduled for this day",
-  "request_history": "Request History"
+  "request_history": "Request History",
+  "delete_to_edit_hint": "Please delete the existing request to make new changes."
 }
