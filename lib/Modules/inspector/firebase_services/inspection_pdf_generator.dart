@@ -181,7 +181,7 @@ class InspectionPDFGenerator {
               pw.Expanded(
                 flex: 2,
                 child: pw.Text(
-                  "Prozent",
+                  "Punkte", // Renamed from "Prozent" to "Punkte"
                   textAlign: pw.TextAlign.center,
                   style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 ),
@@ -289,7 +289,9 @@ class InspectionPDFGenerator {
                         borderRadius: pw.BorderRadius.circular(3),
                       ),
                       child: pw.Text(
-                        isSkipped ? 'Übersprungen' : '$percentage%',
+                        isSkipped
+                            ? 'Übersprungen'
+                            : '$points/$maxPossiblePoints',
                         style: pw.TextStyle(
                           fontSize: 10,
                           fontWeight: pw.FontWeight.bold,
