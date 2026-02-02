@@ -15,8 +15,7 @@ class ExcelExportService {
     required String fileNamePrefix,
     required String shareTitle,
     required String inspectorName,
-    required int month,
-    required int year,
+    String? period, // Changed from int month, int year
   }) async {
     try {
       // 1. Create Excel workbook
@@ -50,11 +49,8 @@ class ExcelExportService {
       _addCell(sheet, 0, 2, 'Total Inspections:', style: infoLabelStyle);
       _addCell(sheet, 1, 2, inspections.length);
 
-      _addCell(sheet, 0, 3, 'Month:', style: infoLabelStyle);
-      _addCell(sheet, 1, 3, month);
-
-      _addCell(sheet, 0, 4, 'Year:', style: infoLabelStyle);
-      _addCell(sheet, 1, 4, year);
+      _addCell(sheet, 0, 3, 'Period:', style: infoLabelStyle);
+      _addCell(sheet, 1, 3, period ?? 'All Time');
 
       _addCell(sheet, 0, 5, 'Generated At:', style: infoLabelStyle);
       _addCell(

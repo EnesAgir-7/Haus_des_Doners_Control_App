@@ -23,6 +23,7 @@ enum RouteFilter {
   day5,
   day6,
   day7,
+  day8,
 }
 
 class ScreenRoutes extends StatefulWidget {
@@ -68,9 +69,9 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
         break;
 
       default:
-        // Handle day1 to day7
+        // Handle day1 to day8
         final dayOffset = _selectedFilter.index - RouteFilter.day1.index;
-        if (dayOffset >= 0 && dayOffset < 7) {
+        if (dayOffset >= 0 && dayOffset < 8) {
           final targetDate = todayDate.add(Duration(days: dayOffset));
           final targetKey = DateFormat('yyyy-MM-dd').format(targetDate);
           filtered = provider.stops
@@ -93,7 +94,11 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
       }
 
       // If both are in the same category (bottom or top), sort by date/timeSlot
-      return a.timeSlot.compareTo(b.timeSlot);
+      final dateCompare = a.timeSlot.compareTo(b.timeSlot);
+      if (dateCompare != 0) return dateCompare;
+
+      // If same date, sort by order
+      return a.order.compareTo(b.order);
     });
 
     return sorted;
@@ -195,7 +200,25 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(
+                Icons.info_outline,
+                size: 10,
+                color: Colors.greenAccent,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                LocaleKeys.free_day_info.tr(),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           _buildFilterChips(),
         ],
       ),
@@ -232,8 +255,8 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
             count: _getFilterCount(RouteFilter.overdue, routeProvider),
           ),
           const SizedBox(width: 8),
-          // Today and next 6 days
-          ...List.generate(7, (index) {
+          // Today and next 7 days (Total 8)
+          ...List.generate(8, (index) {
             final targetDate = today.add(Duration(days: index));
             final label = index == 0
                 ? LocaleKeys.today.tr()
@@ -283,6 +306,8 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
     required int count,
   }) {
     final isSelected = _selectedFilter == filter;
+    final isDayFilter = filter.index >= RouteFilter.day1.index;
+    final isFree = count == 0 && isDayFilter;
 
     return GestureDetector(
       onTap: () {
@@ -295,11 +320,15 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primaryRed.withValues(alpha: 0.8)
+              : isFree
+              ? Colors.green.withValues(alpha: 0.15)
               : Colors.white.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
                 ? AppColors.primaryRed
+                : isFree
+                ? Colors.green.withValues(alpha: 0.5)
                 : Colors.white.withValues(alpha: 0.3),
             width: 1,
           ),
@@ -307,12 +336,16 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: Colors.white),
+            Icon(
+              isFree ? Icons.event_available : icon,
+              size: 16,
+              color: isFree ? Colors.greenAccent : Colors.white,
+            ),
             const SizedBox(width: 6),
             Text(
               '$label ($count)',
               style: TextStyle(
-                color: Colors.white,
+                color: isFree ? Colors.greenAccent : Colors.white,
                 fontSize: 14,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
               ),

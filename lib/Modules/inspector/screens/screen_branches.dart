@@ -949,6 +949,7 @@ class RouteManagementSheet extends StatelessWidget {
                               .updateStopTimeSlotForMe(
                                 branchId: branch.stop!.branchId,
                                 context: context,
+                                oldTimeSlot: branch.stop!.timeSlot,
                                 newTimeSlot: pickedDate,
                                 order: branch.stop!.order,
                               );

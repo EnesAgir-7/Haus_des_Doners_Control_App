@@ -35,6 +35,8 @@ abstract class  LocaleKeys {
   static const password_required = 'password_required';
   static const password_min_length = 'password_min_length';
   static const forgot_password = 'forgot_password';
+  static const free = 'free';
+  static const free_day_info = 'free_day_info';
   static const login = 'login';
   static const controller_name = 'controller_name';
   static const total_branch = 'total_branch';
@@ -1073,6 +1075,9 @@ abstract class  LocaleKeys {
   static const edit_notification = 'edit_notification';
   static const continue_working = 'continue_working';
   static const export_csv = 'export_csv';
+  static const export_options = 'export_options';
+  static const selected_month_inspections = 'selected_month_inspections';
+  static const export_range_desc = 'export_range_desc';
   static const export_success = 'export_success';
   static const export_failed = 'export_failed';
   static const inspections_report_title = 'inspections_report_title';

@@ -523,6 +523,7 @@ class StopRouteManagementSheet extends StatelessWidget {
                               .updateStopTimeSlotForMe(
                                 branchId: stop.branchId,
                                 context: context,
+                                oldTimeSlot: stop.timeSlot,
                                 newTimeSlot: pickedDate,
                                 order: stop.order,
                               );
@@ -577,7 +578,9 @@ class StopRouteManagementSheet extends StatelessWidget {
                               onPressed: () => Navigator.pop(context, true),
                               child: Text(
                                 LocaleKeys.remove.tr(),
-                                style: const TextStyle(color: AppColors.primaryRed),
+                                style: const TextStyle(
+                                  color: AppColors.primaryRed,
+                                ),
                               ),
                             ),
                           ],
@@ -613,7 +616,10 @@ class StopRouteManagementSheet extends StatelessWidget {
                     onPressed: () => Navigator.pop(context),
                     child: Text(
                       LocaleKeys.cancel.tr(),
-                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],

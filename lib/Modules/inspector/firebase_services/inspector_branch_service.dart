@@ -114,6 +114,7 @@ class InspectorBranchService {
     required String inspectorId,
     required String branchId,
     required int order,
+    required String oldTimeSlot,
     required String newTimeSlot,
   }) async {
     try {
@@ -128,15 +129,42 @@ class InspectorBranchService {
 
       final route = RouteModel.fromFirestore(docSnap);
 
-      final stopIndex = route.stops.indexWhere((s) => s.order == order);
+      // Unique identification using branchId, timeSlot, and order
+      final stopIndex = route.stops.indexWhere(
+        (s) =>
+            s.branchId == branchId &&
+            s.timeSlot == oldTimeSlot &&
+            s.order == order,
+      );
+
       if (stopIndex == -1) {
         throw Exception(
           LocaleKeys.noStopFound.tr().replaceFirst('{order}', order.toString()),
         );
       }
 
+      // Recalculate order if moved to a different day
+      int newOrder = order;
+      final isDifferentDay = newTimeSlot != oldTimeSlot;
+
+      if (isDifferentDay) {
+        // Find max order for the new day in the current stops list
+        final stopsOnNewDay = route.stops
+            .where((s) => s.timeSlot == newTimeSlot)
+            .toList();
+        if (stopsOnNewDay.isEmpty) {
+          newOrder = 1;
+        } else {
+          final maxOrder = stopsOnNewDay
+              .map((s) => s.order)
+              .reduce((a, b) => a > b ? a : b);
+          newOrder = maxOrder + 1;
+        }
+      }
+
       final updatedStop = route.stops[stopIndex].copyWith(
         timeSlot: newTimeSlot,
+        order: newOrder,
       );
 
       final updatedStops = [...route.stops];
@@ -159,7 +187,9 @@ class InspectorBranchService {
       // Commit the batch
       await batch.commit();
 
-      console('✅ Stop timeSlot updated successfully for order: $order');
+      console(
+        '✅ Stop timeSlot updated from $oldTimeSlot to $newTimeSlot. New order: $newOrder',
+      );
     } catch (e, st) {
       print("❌ Error updating stop timeSlot: $e\n$st");
       rethrow;

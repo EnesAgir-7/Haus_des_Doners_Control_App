@@ -180,6 +180,7 @@ class ProviderBranches extends ChangeNotifier {
 
   Future<bool> updateStopTimeSlotForMe({
     required String branchId,
+    required String oldTimeSlot,
     required String newTimeSlot,
     required int order,
     required BuildContext context,
@@ -191,6 +192,7 @@ class ProviderBranches extends ChangeNotifier {
       await _branchService.updateStopTimeSlot(
         inspectorId: loggedInUser!.id,
         branchId: branchId,
+        oldTimeSlot: oldTimeSlot,
         newTimeSlot: newTimeSlot,
         order: order,
       );

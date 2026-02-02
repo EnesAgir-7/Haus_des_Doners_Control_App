@@ -9,6 +9,7 @@ import '../../../core/constants/app_colors.dart';
 import '../../../helpers/app_helpers.dart';
 import '../../../models/inspector_history_model.dart';
 import '../../../models/user_model.dart';
+import '../../../models/inspection_model.dart';
 import '../../../translations/locale_keys.g.dart';
 import '../../common/widgets/compact_stat_card.dart';
 import '../../common/widgets/inspector_details_bottomsheets.dart';
@@ -68,18 +69,39 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
     context.read<ProviderAdminUsers>().switchMonth(year, month);
   }
 
-  Future<void> _exportMonthToCsv() async {
-    if (_selectedMonthKey == null) return;
-
+  Future<void> _exportInspections(String range) async {
     setState(() => _isExporting = true);
 
     try {
-      final year = getYearFromKey(_selectedMonthKey!);
-      final month = getMonthFromKey(_selectedMonthKey!);
+      List<InspectionModel> inspections = [];
+      String periodLabel = "";
 
-      // Fetch all inspections for this month
-      final inspections = await _inspectionService
-          .getInspectionsByInspectorByMonth(widget.inspector.id, year, month);
+      if (range == 'selected_month') {
+        if (_selectedMonthKey == null) return;
+        final year = getYearFromKey(_selectedMonthKey!);
+        final month = getMonthFromKey(_selectedMonthKey!);
+        inspections = await _inspectionService.getInspectionsByInspectorByMonth(
+          widget.inspector.id,
+          year,
+          month,
+        );
+        periodLabel = "${getMonthNameFromKey(_selectedMonthKey!)} $year";
+      } else if (range == 'last_3_months') {
+        final now = DateTime.now();
+        final startDate = DateTime(now.year, now.month - 3, now.day);
+        inspections = await _inspectionService
+            .getInspectionsByInspectorByDateRange(
+              widget.inspector.id,
+              startDate,
+              now,
+            );
+        periodLabel = "Last 3 Months";
+      } else if (range == 'all_time') {
+        inspections = await _inspectionService.getInspectionsByInspectorAll(
+          widget.inspector.id,
+        );
+        periodLabel = "All Time";
+      }
 
       if (inspections.isEmpty) {
         if (mounted) {
@@ -92,17 +114,12 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
       // Export to Excel
       await ExcelExportService.exportInspections(
         inspections: inspections,
-        fileNamePrefix:
-            '${widget.inspector.name}_Inspections_${_selectedMonthKey}',
+        fileNamePrefix: '${widget.inspector.name}_Inspections_${range}',
         shareTitle: LocaleKeys.inspections_report_title.tr(
-          namedArgs: {
-            'inspector': widget.inspector.name,
-            'date': '$month/$year',
-          },
+          namedArgs: {'inspector': widget.inspector.name, 'date': periodLabel},
         ),
         inspectorName: widget.inspector.name,
-        month: month,
-        year: year,
+        period: periodLabel,
       );
 
       if (mounted) {
@@ -120,6 +137,96 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
         setState(() => _isExporting = false);
       }
     }
+  }
+
+  void _showExportOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1a1a1a),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              LocaleKeys.export_options.tr(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              LocaleKeys.export_range_desc.tr(),
+              style: const TextStyle(color: Colors.white54, fontSize: 13),
+            ),
+            const SizedBox(height: 24),
+            _buildExportOption(
+              icon: Icons.calendar_month,
+              title: LocaleKeys.selected_month_inspections.tr(),
+              onTap: () {
+                Navigator.pop(context);
+                _exportInspections('selected_month');
+              },
+            ),
+            _buildExportOption(
+              icon: Icons.history_rounded,
+              title: LocaleKeys.last_3_months.tr(),
+              onTap: () {
+                Navigator.pop(context);
+                _exportInspections('last_3_months');
+              },
+            ),
+            _buildExportOption(
+              icon: Icons.all_inclusive_rounded,
+              title: LocaleKeys.all_time_history.tr(),
+              onTap: () {
+                Navigator.pop(context);
+                _exportInspections('all_time');
+              },
+            ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExportOption({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.primaryRed.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: AppColors.primaryRed, size: 20),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(color: Colors.white, fontSize: 15),
+      ),
+      trailing: const Icon(Icons.chevron_right, color: Colors.white24),
+    );
   }
 
   @override
@@ -210,7 +317,7 @@ class _ScreenInspectorDetailsState extends State<ScreenInspectorDetails> {
                                       Icons.file_download_outlined,
                                       color: AppColors.primaryRed,
                                     ),
-                                    onPressed: _exportMonthToCsv,
+                                    onPressed: _showExportOptions,
                                     tooltip: LocaleKeys.export_csv.tr(),
                                   ),
                                 ),

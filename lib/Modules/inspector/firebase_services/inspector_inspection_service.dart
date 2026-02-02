@@ -168,6 +168,56 @@ class InspectorInspectionService {
     }
   }
 
+  // Get inspections by inspector and date range
+  Future<List<InspectionModel>> getInspectionsByInspectorByDateRange(
+    String inspectorId,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      final snapshot = await _db
+          .collection(_collection)
+          .where(InspectionFields.inspectorId, isEqualTo: inspectorId)
+          .where(
+            InspectionFields.completedTime,
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
+          .where(
+            InspectionFields.completedTime,
+            isLessThanOrEqualTo: Timestamp.fromDate(endDate),
+          )
+          .orderBy(InspectionFields.completedTime, descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => InspectionModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error getting inspections by inspector and range: $e');
+      return [];
+    }
+  }
+
+  // Get all inspections by inspector
+  Future<List<InspectionModel>> getInspectionsByInspectorAll(
+    String inspectorId,
+  ) async {
+    try {
+      final snapshot = await _db
+          .collection(_collection)
+          .where(InspectionFields.inspectorId, isEqualTo: inspectorId)
+          .orderBy(InspectionFields.completedTime, descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => InspectionModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error getting all inspections by inspector: $e');
+      return [];
+    }
+  }
+
   // Get today's inspections for inspector
   Future<List<InspectionModel>> getTodaysInspections(String inspectorId) async {
     try {
@@ -274,6 +324,7 @@ class InspectorInspectionService {
         batch: batch,
         inspectorId: inspection.inspectorId,
         branchId: inspection.branchId,
+        timeSlot: inspection.scheduledTime,
         inspectionId: docRef.id,
         score: inspection.score,
       );
@@ -384,6 +435,7 @@ class InspectorInspectionService {
     required WriteBatch batch,
     required String inspectorId,
     required String branchId,
+    required String timeSlot,
     required String inspectionId,
     required String score,
     String status = AppConstants.completed,
@@ -394,7 +446,7 @@ class InspectorInspectionService {
 
     final route = RouteModel.fromFirestore(docSnap);
     final updatedStops = route.stops.map((stop) {
-      if (stop.branchId == branchId) {
+      if (stop.branchId == branchId && stop.timeSlot == timeSlot) {
         return stop.copyWith(
           status: status,
           inspectionId: inspectionId,
