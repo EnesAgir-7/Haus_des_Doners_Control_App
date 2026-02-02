@@ -11,6 +11,7 @@ class BranchMenuButton extends StatelessWidget {
   final VoidCallback onUploadDocument;
   final VoidCallback onTrainingVideos;
   final VoidCallback onExport;
+  final VoidCallback onRequestsHistory;
 
   const BranchMenuButton({
     Key? key,
@@ -20,6 +21,7 @@ class BranchMenuButton extends StatelessWidget {
     required this.onUploadDocument,
     required this.onTrainingVideos,
     required this.onExport,
+    required this.onRequestsHistory,
   }) : super(key: key);
 
   @override
@@ -54,6 +56,13 @@ class BranchMenuButton extends StatelessWidget {
           icon: Icons.file_download_outlined,
           title: LocaleKeys.export_excel.tr(),
           color: Colors.amber,
+        ),
+        buildDivider(),
+        buildMenuItem(
+          value: 'requests',
+          icon: Icons.history_edu_outlined,
+          title: LocaleKeys.request_history.tr(),
+          color: Colors.orange,
         ),
         buildDivider(),
         buildMenuItem(
@@ -96,6 +105,9 @@ class BranchMenuButton extends StatelessWidget {
             break;
           case 'delete':
             onDelete();
+            break;
+          case 'requests':
+            onRequestsHistory();
             break;
           case 'notification':
             onSendNotification();

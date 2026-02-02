@@ -95,6 +95,8 @@ class CodegenLoader extends AssetLoader{
   "status_completed": "Abgeschlossen",
   "status_in_progress": "In Bearbeitung",
   "status_pending": "Ausstehend",
+  "status_approved": "Genehmigt",
+  "status_rejected": "Abgelehnt",
   "overdue_days": "Vor {count} Tagen überfällig",
   "today": "Heute",
   "tomorrow": "Morgen",
@@ -1113,7 +1115,14 @@ class CodegenLoader extends AssetLoader{
   "all_routes": "Alle",
   "pleaseSelectDueDate": "Bitte wählen Sie ein Fälligkeitsdatum aus",
   "upcoming_days": "Kommende Tage",
-  "no_stops_scheduled": "Für diesen Tag sind keine Stopps geplant"
+  "no_stops_scheduled": "Für diesen Tag sind keine Stopps geplant",
+  "request_history": "Anfrageverlauf",
+  "delete_to_edit_hint": "Bitte löschen Sie die bestehende Anfrage, um neue Änderungen vorzunehmen.",
+  "wait_for_admin_approval": "Warten Sie darauf, dass der Administrator diese Anfrage genehmigt oder ablehnt",
+  "check_your_request": "Überprüfen Sie Ihre Anfrage",
+  "view_and_edit_request": "Anfrage anzeigen und bearbeiten",
+  "confirm_request_submission": "Anfrageeinreichung bestätigen",
+  "request_submission_warning": "Nach der Übermittlung können Sie diese Anfrage nicht mehr bearbeiten. Sie können sie nur löschen und bei Bedarf eine neue erstellen. Sind Sie sicher, dass Sie fortfahren möchten?"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -1196,6 +1205,8 @@ static const Map<String,dynamic> _en = {
   "status_completed": "Completed",
   "status_in_progress": "In Progress",
   "status_pending": "Pending",
+  "status_approved": "Approved",
+  "status_rejected": "Rejected",
   "overdue_days": "{count} days overdue",
   "today": "Today",
   "tomorrow": "Tomorrow",
@@ -2230,7 +2241,14 @@ static const Map<String,dynamic> _en = {
   "all_routes": "All",
   "pleaseSelectDueDate": "Please select due date",
   "upcoming_days": "Upcoming Days",
-  "no_stops_scheduled": "No stops scheduled for this day"
+  "no_stops_scheduled": "No stops scheduled for this day",
+  "request_history": "Request History",
+  "delete_to_edit_hint": "Please delete the existing request to make new changes.",
+  "wait_for_admin_approval": "Wait for the admin to approve or reject this request",
+  "check_your_request": "Check Your Request",
+  "view_and_edit_request": "View and Edit Request",
+  "confirm_request_submission": "Confirm Request Submission",
+  "request_submission_warning": "Once submitted, you cannot edit this request. You can only delete it and create a new one if needed. Are you sure you want to continue?"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -2313,6 +2331,8 @@ static const Map<String,dynamic> _tr = {
   "status_completed": "Tamamlandı",
   "status_in_progress": "Devam Ediyor",
   "status_pending": "Bekliyor",
+  "status_approved": "Onaylandı",
+  "status_rejected": "Reddedildi",
   "overdue_days": "{count} gün gecikmiş",
   "today": "Bugün",
   "tomorrow": "Yarın",
@@ -3317,7 +3337,14 @@ static const Map<String,dynamic> _tr = {
   "all_routes": "Tümü",
   "pleaseSelectDueDate": "Lütfen son tarihi seçin",
   "upcoming_days": "Gelecek Günler",
-  "no_stops_scheduled": "Bu gün için planlanmış durak yok"
+  "no_stops_scheduled": "Bu gün için planlanmış durak yok",
+  "request_history": "İstek Geçmişi",
+  "delete_to_edit_hint": "Yeni değişiklikler yapmak için lütfen mevcut isteği silin.",
+  "wait_for_admin_approval": "Yöneticinin bu isteği onaylamasını veya reddetmesini bekleyin",
+  "check_your_request": "İsteğinizi Kontrol Edin",
+  "view_and_edit_request": "İsteği Görüntüle ve Düzenle",
+  "confirm_request_submission": "İstek Gönderimini Onayla",
+  "request_submission_warning": "Gönderildikten sonra bu isteği düzenleyemezsiniz. Gerekirse sadece silebilir ve yeni bir tane oluşturabilirsiniz. Devam etmek istediğinizden emin misiniz?"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

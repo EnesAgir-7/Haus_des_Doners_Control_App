@@ -1106,5 +1106,10 @@ abstract class  LocaleKeys {
   static const no_stops_scheduled = 'no_stops_scheduled';
   static const request_history = 'request_history';
   static const delete_to_edit_hint = 'delete_to_edit_hint';
+  static const wait_for_admin_approval = 'wait_for_admin_approval';
+  static const check_your_request = 'check_your_request';
+  static const view_and_edit_request = 'view_and_edit_request';
+  static const confirm_request_submission = 'confirm_request_submission';
+  static const request_submission_warning = 'request_submission_warning';
 
 }

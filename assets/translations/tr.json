@@ -1087,5 +1087,10 @@
   "upcoming_days": "Gelecek Günler",
   "no_stops_scheduled": "Bu gün için planlanmış durak yok",
   "request_history": "İstek Geçmişi",
-  "delete_to_edit_hint": "Yeni değişiklikler yapmak için lütfen mevcut isteği silin."
+  "delete_to_edit_hint": "Yeni değişiklikler yapmak için lütfen mevcut isteği silin.",
+  "wait_for_admin_approval": "Yöneticinin bu isteği onaylamasını veya reddetmesini bekleyin",
+  "check_your_request": "İsteğinizi Kontrol Edin",
+  "view_and_edit_request": "İsteği Görüntüle ve Düzenle",
+  "confirm_request_submission": "İstek Gönderimini Onayla",
+  "request_submission_warning": "Gönderildikten sonra bu isteği düzenleyemezsiniz. Gerekirse sadece silebilir ve yeni bir tane oluşturabilirsiniz. Devam etmek istediğinizden emin misiniz?"
 }

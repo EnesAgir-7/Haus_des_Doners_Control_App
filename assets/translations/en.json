@@ -1117,5 +1117,10 @@
   "upcoming_days": "Upcoming Days",
   "no_stops_scheduled": "No stops scheduled for this day",
   "request_history": "Request History",
-  "delete_to_edit_hint": "Please delete the existing request to make new changes."
+  "delete_to_edit_hint": "Please delete the existing request to make new changes.",
+  "wait_for_admin_approval": "Wait for the admin to approve or reject this request",
+  "check_your_request": "Check Your Request",
+  "view_and_edit_request": "View and Edit Request",
+  "confirm_request_submission": "Confirm Request Submission",
+  "request_submission_warning": "Once submitted, you cannot edit this request. You can only delete it and create a new one if needed. Are you sure you want to continue?"
 }

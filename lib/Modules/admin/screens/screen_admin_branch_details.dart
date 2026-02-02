@@ -25,6 +25,7 @@ import 'screen_admin_branch_docs.dart';
 import 'screen_admin_branch_edit.dart';
 import 'screen_admin_branch_notifications.dart';
 import 'screen_admin_inspections.dart';
+import '../../branch/screens/screen_branch_request_history.dart';
 import '../../../common_services/excel_export_service.dart';
 import '../../inspector/firebase_services/inspector_inspection_service.dart';
 
@@ -688,13 +689,18 @@ class _ScreenAdminBranchDetailsState extends State<ScreenAdminBranchDetails> {
               );
             },
             onTrainingVideos: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (_) =>
-              //         ScreenAdminBranchTrainings(branchId: widget.branch.id),
-              //   ),
-              // );
+              // ...
+            },
+            onRequestsHistory: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ScreenBranchRequestHistory(
+                    branchId: widget.branch.id,
+                    isAdmin: true,
+                  ),
+                ),
+              );
             },
             onExport: _showExportOptionsSheet,
           ),

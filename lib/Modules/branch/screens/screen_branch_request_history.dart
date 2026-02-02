@@ -7,11 +7,16 @@ import 'package:haus_des_control/translations/locale_keys.g.dart';
 import '../../../models/branch_update_request_model.dart';
 import '../branch_providers/provider_branch_update_request.dart';
 import 'screen_branch_request_details.dart';
+import '../../admin/screens/screen_admin_request_details.dart';
 
 class ScreenBranchRequestHistory extends StatefulWidget {
   final String branchId;
-  const ScreenBranchRequestHistory({Key? key, required this.branchId})
-    : super(key: key);
+  final bool isAdmin;
+  const ScreenBranchRequestHistory({
+    Key? key,
+    required this.branchId,
+    this.isAdmin = false,
+  }) : super(key: key);
 
   @override
   State<ScreenBranchRequestHistory> createState() =>
@@ -109,7 +114,9 @@ class _ScreenBranchRequestHistoryState
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => ScreenBranchRequestDetails(request: request),
+            builder: (_) => widget.isAdmin
+                ? ScreenRequestDetails(request: request, isAdmin: true)
+                : ScreenBranchRequestDetails(request: request),
           ),
         ),
         leading: Container(

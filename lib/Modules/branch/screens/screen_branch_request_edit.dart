@@ -117,6 +117,40 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
   Future<void> _submitRequest() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Show confirmation dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.primaryDark,
+        title: Text(
+          LocaleKeys.confirm_request_submission.tr(),
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          LocaleKeys.request_submission_warning.tr(),
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              LocaleKeys.cancel.tr(),
+              style: const TextStyle(color: Colors.white54),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryRed,
+            ),
+            child: Text(LocaleKeys.continue_key.tr()),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
     final userId = loggedInUser?.id ?? '';
     final userName = loggedInUser?.name ?? '';
 
@@ -743,6 +777,68 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     );
   }
 
+  Widget _buildWaitingView(BranchUpdateRequestProvider provider) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.pending_actions,
+              size: 80,
+              color: Colors.orange.withValues(alpha: 0.8),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              LocaleKeys.wait_for_admin_approval.tr(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 48),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  if (provider.pendingRequest != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ScreenRequestDetails(
+                          request: provider.pendingRequest!,
+                          isAdmin: false,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryRed,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.visibility),
+                label: Text(
+                  LocaleKeys.check_your_request.tr(),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<BranchUpdateRequestProvider>(
@@ -775,365 +871,381 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                 _buildPendingRequestBanner(),
 
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Branch Information
-                        _buildSectionHeader(
-                          LocaleKeys.branchInformation.tr(),
-                          Icons.store,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _nameController,
-                          label: LocaleKeys.branchName.tr(),
-                          hint: LocaleKeys.enterBranchName.tr(),
-                          icon: Icons.business,
-                          enabled: isFormEnabled,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return LocaleKeys.branchNameRequired.tr();
-                            }
-                            return null;
-                          },
-                        ),
-                        /*  Email removed as it is admin-controlled */
-                        const SizedBox(height: 24),
-                        // Location
-                        _buildSectionHeader(
-                          LocaleKeys.location.tr(),
-                          Icons.location_on,
-                        ),
-                        const SizedBox(height: 16),
-                        InkWell(
-                          onTap: !isFormEnabled ? null : _pickLocation,
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryDark.withValues(
-                                alpha: 0.6,
+                  child: provider.isLoading
+                      ? const Center(
+                          child: CircularProgressIndicator(color: Colors.white),
+                        )
+                      : provider.hasPendingRequest
+                      ? _buildWaitingView(provider)
+                      : SingleChildScrollView(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Branch Information
+                              _buildSectionHeader(
+                                LocaleKeys.branchInformation.tr(),
+                                Icons.store,
                               ),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: Colors.white.withValues(
-                                  alpha: isFormEnabled ? 0.2 : 0.05,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.map,
-                                  color: isFormEnabled
-                                      ? AppColors.primaryRed
-                                      : Colors.grey,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    '${_latitudeController.text}, ${_longitudeController.text}',
-                                    style: TextStyle(
-                                      color: isFormEnabled
-                                          ? Colors.white
-                                          : Colors.white38,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _addressController,
-                          label: LocaleKeys.address.tr(),
-                          hint: LocaleKeys.enterBranchAddress.tr(),
-                          icon: Icons.location_on,
-                          maxLines: 3,
-                          enabled: isFormEnabled,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return LocaleKeys.addressRequired.tr();
-                            }
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 24),
-                        // Contact Information
-                        _buildSectionHeader(
-                          LocaleKeys.contactInformation.tr(),
-                          Icons.contact_phone,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _contactNameController,
-                          label: LocaleKeys.contactName.tr(),
-                          hint: LocaleKeys.enterContactPersonName.tr(),
-                          icon: Icons.person,
-                          enabled: isFormEnabled,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return LocaleKeys.contactNameRequired.tr();
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _contactPhoneController,
-                          label: LocaleKeys.contactPhone.tr(),
-                          hint: LocaleKeys.enterContactPhoneNumber.tr(),
-                          icon: Icons.phone,
-                          keyboardType: TextInputType.phone,
-                          enabled: isFormEnabled,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return LocaleKeys.contactPhoneRequired.tr();
-                            }
-                            return null;
-                          },
-                        ),
-
-                        const SizedBox(height: 24),
-                        // Opening Hours
-                        _buildSectionHeader(
-                          LocaleKeys.openingHoursDays.tr(),
-                          Icons.schedule,
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildTimeField(
-                                controller: _openingTimeController,
-                                label: LocaleKeys.openingTime.tr(),
-                                hint: 'HH:MM',
-                                icon: Icons.access_time,
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _nameController,
+                                label: LocaleKeys.branchName.tr(),
+                                hint: LocaleKeys.enterBranchName.tr(),
+                                icon: Icons.business,
                                 enabled: isFormEnabled,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return LocaleKeys.branchNameRequired.tr();
+                                  }
+                                  return null;
+                                },
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _buildTimeField(
-                                controller: _closingTimeController,
-                                label: LocaleKeys.closingTime.tr(),
-                                hint: 'HH:MM',
-                                icon: Icons.access_time_filled,
-                                enabled: isFormEnabled,
+                              /*  Email removed as it is admin-controlled */
+                              const SizedBox(height: 24),
+                              // Location
+                              _buildSectionHeader(
+                                LocaleKeys.location.tr(),
+                                Icons.location_on,
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        _buildOpeningDaysSelector(enabled: isFormEnabled),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                LocaleKeys.openingDay.tr(),
-                                style: TextStyle(
-                                  color: isFormEnabled
-                                      ? Colors.white
-                                      : Colors.white38,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: !isFormEnabled
-                                  ? null
-                                  : () async {
-                                      final date = await showDatePicker(
-                                        context: context,
-                                        initialDate:
-                                            _selectedOpeningDay ??
-                                            DateTime.now(),
-                                        firstDate: DateTime(2000),
-                                        lastDate: DateTime(2100),
-                                      );
-                                      if (date != null) {
-                                        setState(
-                                          () => _selectedOpeningDay = date,
-                                        );
-                                      }
-                                    },
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: AppColors.primaryDark.withValues(
-                                    alpha: 0.35,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.calendar_today,
-                                      color: isFormEnabled
-                                          ? Colors.white70
-                                          : Colors.white24,
+                              const SizedBox(height: 16),
+                              InkWell(
+                                onTap: !isFormEnabled ? null : _pickLocation,
+                                child: Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryDark.withValues(
+                                      alpha: 0.6,
                                     ),
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      _selectedOpeningDay != null
-                                          ? DateFormat.yMMMd().format(
-                                              _selectedOpeningDay!,
-                                            )
-                                          : LocaleKeys.selectOpeningDay.tr(),
-                                      style: TextStyle(
-                                        color: isFormEnabled
-                                            ? Colors.white.withValues(
-                                                alpha: 0.8,
-                                              )
-                                            : Colors.white24,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.white.withValues(
+                                        alpha: isFormEnabled ? 0.2 : 0.05,
                                       ),
                                     ),
-                                  ],
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.map,
+                                        color: isFormEnabled
+                                            ? AppColors.primaryRed
+                                            : Colors.grey,
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          '${_latitudeController.text}, ${_longitudeController.text}',
+                                          style: TextStyle(
+                                            color: isFormEnabled
+                                                ? Colors.white
+                                                : Colors.white38,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 24),
-                        // Branch Owners
-                        _buildSectionHeader(
-                          LocaleKeys.branchOwners.tr(),
-                          Icons.business_center,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildContactPersonList(
-                          title: '',
-                          persons: _branchOwners,
-                          enabled: isFormEnabled,
-                          onAdd: () => _showAddContactPersonDialog(
-                            title: LocaleKeys.addBranchOwner.tr(),
-                            onSave: (person) =>
-                                setState(() => _branchOwners.add(person)),
-                          ),
-                          onEdit: (index, person) =>
-                              setState(() => _branchOwners[index] = person),
-                          onRemove: (index) =>
-                              setState(() => _branchOwners.removeAt(index)),
-                        ),
-
-                        const SizedBox(height: 24),
-                        // Branch Managers
-                        _buildSectionHeader(
-                          LocaleKeys.branchManagers.tr(),
-                          Icons.manage_accounts,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildContactPersonList(
-                          title: '',
-                          persons: _branchManagers,
-                          enabled: isFormEnabled,
-                          onAdd: () => _showAddContactPersonDialog(
-                            title: LocaleKeys.addBranchManager.tr(),
-                            onSave: (person) =>
-                                setState(() => _branchManagers.add(person)),
-                          ),
-                          onEdit: (index, person) =>
-                              setState(() => _branchManagers[index] = person),
-                          onRemove: (index) =>
-                              setState(() => _branchManagers.removeAt(index)),
-                        ),
-
-                        const SizedBox(height: 24),
-                        // Suppliers
-                        _buildSectionHeader(
-                          LocaleKeys.suppliers.tr(),
-                          Icons.local_shipping,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildContactPersonList(
-                          title: '',
-                          persons: _suppliers,
-                          enabled: isFormEnabled,
-                          onAdd: () => _showAddContactPersonDialog(
-                            title: LocaleKeys.addSupplier.tr(),
-                            onSave: (person) =>
-                                setState(() => _suppliers.add(person)),
-                          ),
-                          onEdit: (index, person) =>
-                              setState(() => _suppliers[index] = person),
-                          onRemove: (index) =>
-                              setState(() => _suppliers.removeAt(index)),
-                        ),
-
-                        const SizedBox(height: 24),
-                        // Additional Information
-                        _buildSectionHeader(
-                          LocaleKeys.additionalInformation.tr(),
-                          Icons.info_outline,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _donerPricesController,
-                          label: LocaleKeys.donerPrices.tr(),
-                          hint: LocaleKeys.enterDonerPrices.tr(),
-                          icon: Icons.price_change,
-                          enabled: isFormEnabled,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _softwareController,
-                          label: LocaleKeys.software.tr(),
-                          hint: LocaleKeys.enterSoftwareUsed.tr(),
-                          icon: Icons.computer,
-                          enabled: isFormEnabled,
-                        ),
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _shopInformationController,
-                          label: LocaleKeys.shopInformation.tr(),
-                          hint: LocaleKeys.enterShopInformation.tr(),
-                          icon: Icons.info,
-                          maxLines: 3,
-                          enabled: isFormEnabled,
-                        ),
-
-                        const SizedBox(height: 32),
-                        // Submit Button
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: (provider.isSubmitting || !isFormEnabled)
-                                ? null
-                                : _submitRequest,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryRed,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _addressController,
+                                label: LocaleKeys.address.tr(),
+                                hint: LocaleKeys.enterBranchAddress.tr(),
+                                icon: Icons.location_on,
+                                maxLines: 3,
+                                enabled: isFormEnabled,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return LocaleKeys.addressRequired.tr();
+                                  }
+                                  return null;
+                                },
                               ),
-                            ),
-                            child: provider.isSubmitting
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(
-                                    LocaleKeys.update_request.tr(),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+
+                              const SizedBox(height: 24),
+                              // Contact Information
+                              _buildSectionHeader(
+                                LocaleKeys.contactInformation.tr(),
+                                Icons.contact_phone,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _contactNameController,
+                                label: LocaleKeys.contactName.tr(),
+                                hint: LocaleKeys.enterContactPersonName.tr(),
+                                icon: Icons.person,
+                                enabled: isFormEnabled,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return LocaleKeys.contactNameRequired.tr();
+                                  }
+                                  return null;
+                                },
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _contactPhoneController,
+                                label: LocaleKeys.contactPhone.tr(),
+                                hint: LocaleKeys.enterContactPhoneNumber.tr(),
+                                icon: Icons.phone,
+                                keyboardType: TextInputType.phone,
+                                enabled: isFormEnabled,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return LocaleKeys.contactPhoneRequired.tr();
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                              const SizedBox(height: 24),
+                              // Opening Hours
+                              _buildSectionHeader(
+                                LocaleKeys.openingHoursDays.tr(),
+                                Icons.schedule,
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildTimeField(
+                                      controller: _openingTimeController,
+                                      label: LocaleKeys.openingTime.tr(),
+                                      hint: 'HH:MM',
+                                      icon: Icons.access_time,
+                                      enabled: isFormEnabled,
                                     ),
                                   ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildTimeField(
+                                      controller: _closingTimeController,
+                                      label: LocaleKeys.closingTime.tr(),
+                                      hint: 'HH:MM',
+                                      icon: Icons.access_time_filled,
+                                      enabled: isFormEnabled,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              _buildOpeningDaysSelector(enabled: isFormEnabled),
+                              const SizedBox(height: 16),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      LocaleKeys.openingDay.tr(),
+                                      style: TextStyle(
+                                        color: isFormEnabled
+                                            ? Colors.white
+                                            : Colors.white38,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: !isFormEnabled
+                                        ? null
+                                        : () async {
+                                            final date = await showDatePicker(
+                                              context: context,
+                                              initialDate:
+                                                  _selectedOpeningDay ??
+                                                  DateTime.now(),
+                                              firstDate: DateTime(2000),
+                                              lastDate: DateTime(2100),
+                                            );
+                                            if (date != null) {
+                                              setState(
+                                                () =>
+                                                    _selectedOpeningDay = date,
+                                              );
+                                            }
+                                          },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primaryDark.withValues(
+                                          alpha: 0.35,
+                                        ),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.calendar_today,
+                                            color: isFormEnabled
+                                                ? Colors.white70
+                                                : Colors.white24,
+                                          ),
+                                          const SizedBox(width: 12),
+                                          Text(
+                                            _selectedOpeningDay != null
+                                                ? DateFormat.yMMMd().format(
+                                                    _selectedOpeningDay!,
+                                                  )
+                                                : LocaleKeys.selectOpeningDay
+                                                      .tr(),
+                                            style: TextStyle(
+                                              color: isFormEnabled
+                                                  ? Colors.white.withValues(
+                                                      alpha: 0.8,
+                                                    )
+                                                  : Colors.white24,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 24),
+                              // Branch Owners
+                              _buildSectionHeader(
+                                LocaleKeys.branchOwners.tr(),
+                                Icons.business_center,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildContactPersonList(
+                                title: '',
+                                persons: _branchOwners,
+                                enabled: isFormEnabled,
+                                onAdd: () => _showAddContactPersonDialog(
+                                  title: LocaleKeys.addBranchOwner.tr(),
+                                  onSave: (person) =>
+                                      setState(() => _branchOwners.add(person)),
+                                ),
+                                onEdit: (index, person) => setState(
+                                  () => _branchOwners[index] = person,
+                                ),
+                                onRemove: (index) => setState(
+                                  () => _branchOwners.removeAt(index),
+                                ),
+                              ),
+
+                              const SizedBox(height: 24),
+                              // Branch Managers
+                              _buildSectionHeader(
+                                LocaleKeys.branchManagers.tr(),
+                                Icons.manage_accounts,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildContactPersonList(
+                                title: '',
+                                persons: _branchManagers,
+                                enabled: isFormEnabled,
+                                onAdd: () => _showAddContactPersonDialog(
+                                  title: LocaleKeys.addBranchManager.tr(),
+                                  onSave: (person) => setState(
+                                    () => _branchManagers.add(person),
+                                  ),
+                                ),
+                                onEdit: (index, person) => setState(
+                                  () => _branchManagers[index] = person,
+                                ),
+                                onRemove: (index) => setState(
+                                  () => _branchManagers.removeAt(index),
+                                ),
+                              ),
+
+                              const SizedBox(height: 24),
+                              // Suppliers
+                              _buildSectionHeader(
+                                LocaleKeys.suppliers.tr(),
+                                Icons.local_shipping,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildContactPersonList(
+                                title: '',
+                                persons: _suppliers,
+                                enabled: isFormEnabled,
+                                onAdd: () => _showAddContactPersonDialog(
+                                  title: LocaleKeys.addSupplier.tr(),
+                                  onSave: (person) =>
+                                      setState(() => _suppliers.add(person)),
+                                ),
+                                onEdit: (index, person) =>
+                                    setState(() => _suppliers[index] = person),
+                                onRemove: (index) =>
+                                    setState(() => _suppliers.removeAt(index)),
+                              ),
+
+                              const SizedBox(height: 24),
+                              // Additional Information
+                              _buildSectionHeader(
+                                LocaleKeys.additionalInformation.tr(),
+                                Icons.info_outline,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _donerPricesController,
+                                label: LocaleKeys.donerPrices.tr(),
+                                hint: LocaleKeys.enterDonerPrices.tr(),
+                                icon: Icons.price_change,
+                                enabled: isFormEnabled,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _softwareController,
+                                label: LocaleKeys.software.tr(),
+                                hint: LocaleKeys.enterSoftwareUsed.tr(),
+                                icon: Icons.computer,
+                                enabled: isFormEnabled,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _shopInformationController,
+                                label: LocaleKeys.shopInformation.tr(),
+                                hint: LocaleKeys.enterShopInformation.tr(),
+                                icon: Icons.info,
+                                maxLines: 3,
+                                enabled: isFormEnabled,
+                              ),
+
+                              const SizedBox(height: 32),
+                              // Submit Button
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed:
+                                      (provider.isSubmitting || !isFormEnabled)
+                                      ? null
+                                      : _submitRequest,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primaryRed,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: provider.isSubmitting
+                                      ? const SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                      : Text(
+                                          LocaleKeys.update_request.tr(),
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 24),
-                      ],
-                    ),
-                  ),
                 ),
               ],
             ),
