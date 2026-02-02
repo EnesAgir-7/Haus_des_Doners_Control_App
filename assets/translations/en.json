@@ -1122,5 +1122,9 @@
   "check_your_request": "Check Your Request",
   "view_and_edit_request": "View and Edit Request",
   "confirm_request_submission": "Confirm Request Submission",
-  "request_submission_warning": "Once submitted, you cannot edit this request. You can only delete it and create a new one if needed. Are you sure you want to continue?"
+  "request_submission_warning": "Once submitted, you cannot edit this request. You can only delete it and create a new one if needed. Are you sure you want to continue?",
+  "unsaved_changes_title": "Unsaved Changes",
+  "unsaved_changes_message": "You have unsaved changes in your report. Would you like to save them as a draft or discard them?",
+  "save_draft": "Save Draft",
+  "discard_changes": "Discard"
 }

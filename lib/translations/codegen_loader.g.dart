@@ -1122,7 +1122,11 @@ class CodegenLoader extends AssetLoader{
   "check_your_request": "Überprüfen Sie Ihre Anfrage",
   "view_and_edit_request": "Anfrage anzeigen und bearbeiten",
   "confirm_request_submission": "Anfrageeinreichung bestätigen",
-  "request_submission_warning": "Nach der Übermittlung können Sie diese Anfrage nicht mehr bearbeiten. Sie können sie nur löschen und bei Bedarf eine neue erstellen. Sind Sie sicher, dass Sie fortfahren möchten?"
+  "request_submission_warning": "Nach der Übermittlung können Sie diese Anfrage nicht mehr bearbeiten. Sie können sie nur löschen und bei Bedarf eine neue erstellen. Sind Sie sicher, dass Sie fortfahren möchten?",
+  "unsaved_changes_title": "Ungespeicherte Änderungen",
+  "unsaved_changes_message": "Sie haben ungespeicherte Änderungen in Ihrem Bericht. Möchten Sie diese als Entwurf speichern oder verwerfen?",
+  "save_draft": "Entwurf speichern",
+  "discard_changes": "Verwerfen"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -2248,7 +2252,11 @@ static const Map<String,dynamic> _en = {
   "check_your_request": "Check Your Request",
   "view_and_edit_request": "View and Edit Request",
   "confirm_request_submission": "Confirm Request Submission",
-  "request_submission_warning": "Once submitted, you cannot edit this request. You can only delete it and create a new one if needed. Are you sure you want to continue?"
+  "request_submission_warning": "Once submitted, you cannot edit this request. You can only delete it and create a new one if needed. Are you sure you want to continue?",
+  "unsaved_changes_title": "Unsaved Changes",
+  "unsaved_changes_message": "You have unsaved changes in your report. Would you like to save them as a draft or discard them?",
+  "save_draft": "Save Draft",
+  "discard_changes": "Discard"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -3344,7 +3352,11 @@ static const Map<String,dynamic> _tr = {
   "check_your_request": "İsteğinizi Kontrol Edin",
   "view_and_edit_request": "İsteği Görüntüle ve Düzenle",
   "confirm_request_submission": "İstek Gönderimini Onayla",
-  "request_submission_warning": "Gönderildikten sonra bu isteği düzenleyemezsiniz. Gerekirse sadece silebilir ve yeni bir tane oluşturabilirsiniz. Devam etmek istediğinizden emin misiniz?"
+  "request_submission_warning": "Gönderildikten sonra bu isteği düzenleyemezsiniz. Gerekirse sadece silebilir ve yeni bir tane oluşturabilirsiniz. Devam etmek istediğinizden emin misiniz?",
+  "unsaved_changes_title": "Kaydedilmemiş Değişiklikler",
+  "unsaved_changes_message": "Raporunuzda kaydedilmemiş değişiklikler var. Bunları taslak olarak kaydetmek mi yoksa silmek mi istersiniz?",
+  "save_draft": "Taslağı Kaydet",
+  "discard_changes": "Sil"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

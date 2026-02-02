@@ -1111,5 +1111,9 @@ abstract class  LocaleKeys {
   static const view_and_edit_request = 'view_and_edit_request';
   static const confirm_request_submission = 'confirm_request_submission';
   static const request_submission_warning = 'request_submission_warning';
+  static const unsaved_changes_title = 'unsaved_changes_title';
+  static const unsaved_changes_message = 'unsaved_changes_message';
+  static const save_draft = 'save_draft';
+  static const discard_changes = 'discard_changes';
 
 }

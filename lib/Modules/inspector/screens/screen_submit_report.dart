@@ -433,14 +433,29 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       barrierDismissible: true, // Allow dismissal to continue working
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.lightBlack,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 8, 8),
         title: Row(
           children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.amber,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 16),
             Expanded(
               child: Text(
-                LocaleKeys.unsubmitted_report.tr(),
+                "unsaved_changes_title".tr(),
                 style: const TextStyle(
                   color: Colors.white,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -448,29 +463,68 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             IconButton(
               icon: Icon(Icons.close, color: Colors.grey.shade400),
               onPressed: () => Navigator.pop(context, null), // Dismiss dialog
-              tooltip: LocaleKeys.continue_working.tr(),
+              tooltip: "continue_working".tr(),
             ),
           ],
         ),
-        content: Text(
-          LocaleKeys.unsubmitted_report.tr(),
-          style: const TextStyle(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(
-              LocaleKeys.no.tr(),
-              style: TextStyle(color: Colors.grey.shade400),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Text(
+            "unsaved_changes_message".tr(),
+            style: TextStyle(
+              color: Colors.grey.shade300,
+              fontSize: 16,
+              height: 1.5,
             ),
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryRed,
-              foregroundColor: Colors.white,
-            ),
-            child: Text(LocaleKeys.yes.tr()),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.grey.shade700),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "discard_changes".tr(),
+                    style: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryRed,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "save_draft".tr(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -480,7 +534,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   void _startAutoSaveTimer(ProviderControl provider) {
     _autoSaveTimer?.cancel(); // Cancel any existing timer
 
-    _autoSaveTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+    _autoSaveTimer = Timer.periodic(const Duration(seconds: 7), (timer) {
       if (mounted) {
         _autoSaveDraft(provider);
       } else {

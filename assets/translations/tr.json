@@ -1092,5 +1092,9 @@
   "check_your_request": "İsteğinizi Kontrol Edin",
   "view_and_edit_request": "İsteği Görüntüle ve Düzenle",
   "confirm_request_submission": "İstek Gönderimini Onayla",
-  "request_submission_warning": "Gönderildikten sonra bu isteği düzenleyemezsiniz. Gerekirse sadece silebilir ve yeni bir tane oluşturabilirsiniz. Devam etmek istediğinizden emin misiniz?"
+  "request_submission_warning": "Gönderildikten sonra bu isteği düzenleyemezsiniz. Gerekirse sadece silebilir ve yeni bir tane oluşturabilirsiniz. Devam etmek istediğinizden emin misiniz?",
+  "unsaved_changes_title": "Kaydedilmemiş Değişiklikler",
+  "unsaved_changes_message": "Raporunuzda kaydedilmemiş değişiklikler var. Bunları taslak olarak kaydetmek mi yoksa silmek mi istersiniz?",
+  "save_draft": "Taslağı Kaydet",
+  "discard_changes": "Sil"
 }

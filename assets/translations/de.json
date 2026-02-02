@@ -1106,5 +1106,9 @@
   "check_your_request": "Überprüfen Sie Ihre Anfrage",
   "view_and_edit_request": "Anfrage anzeigen und bearbeiten",
   "confirm_request_submission": "Anfrageeinreichung bestätigen",
-  "request_submission_warning": "Nach der Übermittlung können Sie diese Anfrage nicht mehr bearbeiten. Sie können sie nur löschen und bei Bedarf eine neue erstellen. Sind Sie sicher, dass Sie fortfahren möchten?"
+  "request_submission_warning": "Nach der Übermittlung können Sie diese Anfrage nicht mehr bearbeiten. Sie können sie nur löschen und bei Bedarf eine neue erstellen. Sind Sie sicher, dass Sie fortfahren möchten?",
+  "unsaved_changes_title": "Ungespeicherte Änderungen",
+  "unsaved_changes_message": "Sie haben ungespeicherte Änderungen in Ihrem Bericht. Möchten Sie diese als Entwurf speichern oder verwerfen?",
+  "save_draft": "Entwurf speichern",
+  "discard_changes": "Verwerfen"
 }
