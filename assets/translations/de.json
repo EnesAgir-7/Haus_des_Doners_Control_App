@@ -1095,5 +1095,7 @@
   "update_request_approved_title": "Änderungsantrag genehmigt",
   "update_request_approved_body": "Ihr Änderungsantrag für die Filiale wurde genehmigt.",
   "all_routes": "Alle",
-  "pleaseSelectDueDate": "Bitte wählen Sie ein Fälligkeitsdatum aus"
+  "pleaseSelectDueDate": "Bitte wählen Sie ein Fälligkeitsdatum aus",
+  "upcoming_days": "Kommende Tage",
+  "no_stops_scheduled": "Für diesen Tag sind keine Stopps geplant"
 }

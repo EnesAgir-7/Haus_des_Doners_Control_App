@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:intl/intl.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -31,6 +31,7 @@ class _AdminInspectorRoutesWidgetState
   RouteModel? _routeData;
   bool _isLoading = true;
   String? _errorMessage;
+  String? _selectedDateKey;
 
   @override
   void initState() {
@@ -53,6 +54,10 @@ class _AdminInspectorRoutesWidgetState
               setState(() {
                 _routeData = route;
                 _isLoading = false;
+                if (_selectedDateKey == null) {
+                  final tomorrow = DateTime.now().add(const Duration(days: 1));
+                  _selectedDateKey = DateFormat('yyyy-MM-dd').format(tomorrow);
+                }
               });
             }
           },
@@ -78,12 +83,9 @@ class _AdminInspectorRoutesWidgetState
 
     final today = DateTime.now();
     final todayDate = DateTime(today.year, today.month, today.day);
-    final tomorrow = todayDate.add(const Duration(days: 1));
 
     final Map<String, List<RouteStopModel>> grouped = {
       'today': [],
-      'tomorrow': [],
-      'upcoming': [],
       'missed': [],
       'completed': [],
     };
@@ -100,12 +102,6 @@ class _AdminInspectorRoutesWidgetState
         grouped['missed']!.add(stop);
       } else if (stopDate.isAtSameMomentAs(todayDate)) {
         grouped['today']!.add(stop);
-      } else if (stopDate.isAtSameMomentAs(tomorrow)) {
-        grouped['tomorrow']!.add(stop);
-      } else if (stopDate.isAfter(tomorrow) &&
-          stopDate.isBefore(todayDate.add(const Duration(days: 7)))) {
-        // Only upcoming routes within next 7 days
-        grouped['upcoming']!.add(stop);
       }
     }
 
@@ -164,10 +160,7 @@ class _AdminInspectorRoutesWidgetState
     final groupedRoutes = _getGroupedRoutes();
 
     // Calculate total stops
-    final totalStops = groupedRoutes.values.fold<int>(
-      0,
-      (sum, list) => sum + list.length,
-    );
+    final totalStops = _routeData?.stops.length ?? 0;
 
     if (totalStops == 0) {
       return Container(
@@ -260,38 +253,6 @@ class _AdminInspectorRoutesWidgetState
       widgets.add(const SizedBox(height: 16));
     }
 
-    // Tomorrow
-    if (groupedRoutes['tomorrow']!.isNotEmpty) {
-      widgets.add(
-        _buildSectionHeader(
-          LocaleKeys.tomorrow.tr(),
-          Icons.event,
-          Colors.orange,
-          groupedRoutes['tomorrow']!.length,
-        ),
-      );
-      widgets.addAll(
-        groupedRoutes['tomorrow']!.map((stop) => _buildRouteCard(stop, 0)),
-      );
-      widgets.add(const SizedBox(height: 16));
-    }
-
-    // Upcoming
-    if (groupedRoutes['upcoming']!.isNotEmpty) {
-      widgets.add(
-        _buildSectionHeader(
-          'Upcoming Days',
-          Icons.schedule,
-          Colors.blue,
-          groupedRoutes['upcoming']!.length,
-        ),
-      );
-      widgets.addAll(
-        groupedRoutes['upcoming']!.map((stop) => _buildRouteCard(stop, 0)),
-      );
-      widgets.add(const SizedBox(height: 16));
-    }
-
     // Missed
     if (groupedRoutes['missed']!.isNotEmpty) {
       widgets.add(
@@ -321,7 +282,20 @@ class _AdminInspectorRoutesWidgetState
       widgets.addAll(
         groupedRoutes['completed']!.map((stop) => _buildRouteCard(stop, 0)),
       );
+      widgets.add(const SizedBox(height: 16));
     }
+
+    // Upcoming Days with Chips
+    final upcomingCount =
+        _routeData?.stops.where((s) {
+          final stopDate = _parseDate(s.timeSlot);
+          if (stopDate == null || s.isCompleted) return false;
+          final today = DateTime.now();
+          final todayDate = DateTime(today.year, today.month, today.day);
+          return stopDate.isAfter(todayDate);
+        }).length ??
+        0;
+    widgets.add(_buildUpcomingDaysSection(upcomingCount));
 
     return widgets;
   }
@@ -363,6 +337,156 @@ class _AdminInspectorRoutesWidgetState
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildUpcomingDaysSection(int totalCount) {
+    if (_routeData == null) return const SizedBox.shrink();
+
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          LocaleKeys.upcoming_days.tr(),
+          Icons.calendar_month_outlined,
+          Colors.blueAccent,
+          totalCount,
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.only(bottom: 12),
+          child: Row(
+            children: List.generate(8, (index) {
+              final date = todayDate.add(Duration(days: index + 1));
+              final dateKey = DateFormat('yyyy-MM-dd').format(date);
+              final count = _routeData!.stops
+                  .where((s) => s.timeSlot == dateKey && !s.isCompleted)
+                  .length;
+              final isSelected = _selectedDateKey == dateKey;
+
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: _buildDateChip(date, count, isSelected, dateKey),
+              );
+            }),
+          ),
+        ),
+        ..._buildFilteredUpcomingList(),
+      ],
+    );
+  }
+
+  List<Widget> _buildFilteredUpcomingList() {
+    final selectedStops = _routeData!.stops
+        .where((s) => s.timeSlot == _selectedDateKey && !s.isCompleted)
+        .toList();
+
+    if (selectedStops.isEmpty) {
+      return [
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Text(
+              LocaleKeys.no_stops_scheduled.tr(),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.3),
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ),
+      ];
+    }
+
+    return selectedStops.map((stop) => _buildRouteCard(stop, 0)).toList();
+  }
+
+  Widget _buildDateChip(
+    DateTime date,
+    int count,
+    bool isSelected,
+    String dateKey,
+  ) {
+    final dayName = DateFormat('EEE', context.locale.toString()).format(date);
+    final dayNum = DateFormat('d', context.locale.toString()).format(date);
+    final isFree = count == 0;
+
+    return GestureDetector(
+      onTap: () => setState(() => _selectedDateKey = dateKey),
+      child: Container(
+        width: 58,
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isFree
+                    ? Colors.green.withValues(alpha: 0.15)
+                    : AppColors.primaryRed.withValues(alpha: 0.15))
+              : (isFree
+                    ? Colors.green.withValues(alpha: 0.05)
+                    : Colors.white.withValues(alpha: 0.05)),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected
+                ? (isFree ? Colors.green : AppColors.primaryRed)
+                : (isFree
+                      ? Colors.green.withValues(alpha: 0.3)
+                      : Colors.white.withValues(alpha: 0.1)),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(
+              dayName.toUpperCase(),
+              style: TextStyle(
+                color: isSelected
+                    ? (isFree ? Colors.green : AppColors.primaryRed)
+                    : (isFree
+                          ? Colors.green.withValues(alpha: 0.7)
+                          : Colors.white60),
+                fontSize: 9,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              dayNum,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+              decoration: BoxDecoration(
+                color: isFree
+                    ? (isSelected
+                          ? Colors.green
+                          : Colors.green.withValues(alpha: 0.2))
+                    : (count > 0
+                          ? (isSelected ? AppColors.primaryRed : Colors.white24)
+                          : Colors.transparent),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                isFree ? LocaleKeys.free.tr().toUpperCase() : '$count',
+                style: TextStyle(
+                  color: (isFree || count > 0)
+                      ? Colors.white
+                      : Colors.transparent,
+                  fontSize: isFree ? 7 : 9,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -566,7 +690,7 @@ class _AdminInspectorRoutesWidgetState
     try {
       final date = _parseDate(timeSlot);
       if (date != null) {
-        return DateFormat('EEE, MMM d').format(date);
+        return DateFormat('EEE, MMM d', context.locale.toString()).format(date);
       }
     } catch (_) {}
     return timeSlot;

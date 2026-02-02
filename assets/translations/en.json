@@ -1111,5 +1111,7 @@
   "update_request_approved_title": "Update Request Approved",
   "update_request_approved_body": "Your update request for branch has been approved.",
   "all_routes": "All",
-  "pleaseSelectDueDate": "Please select due date"
+  "pleaseSelectDueDate": "Please select due date",
+  "upcoming_days": "Upcoming Days",
+  "no_stops_scheduled": "No stops scheduled for this day"
 }

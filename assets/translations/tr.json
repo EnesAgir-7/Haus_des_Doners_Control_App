@@ -1081,5 +1081,7 @@
   "update_request_approved_title": "Güncelleme İsteği Onaylandı",
   "update_request_approved_body": "Şube için güncelleme isteğiniz onaylandı.",
   "all_routes": "Tümü",
-  "pleaseSelectDueDate": "Lütfen son tarihi seçin"
+  "pleaseSelectDueDate": "Lütfen son tarihi seçin",
+  "upcoming_days": "Gelecek Günler",
+  "no_stops_scheduled": "Bu gün için planlanmış durak yok"
 }

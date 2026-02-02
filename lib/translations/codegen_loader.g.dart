@@ -1111,7 +1111,9 @@ class CodegenLoader extends AssetLoader{
   "update_request_approved_title": "Änderungsantrag genehmigt",
   "update_request_approved_body": "Ihr Änderungsantrag für die Filiale wurde genehmigt.",
   "all_routes": "Alle",
-  "pleaseSelectDueDate": "Bitte wählen Sie ein Fälligkeitsdatum aus"
+  "pleaseSelectDueDate": "Bitte wählen Sie ein Fälligkeitsdatum aus",
+  "upcoming_days": "Kommende Tage",
+  "no_stops_scheduled": "Für diesen Tag sind keine Stopps geplant"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -2226,7 +2228,9 @@ static const Map<String,dynamic> _en = {
   "update_request_approved_title": "Update Request Approved",
   "update_request_approved_body": "Your update request for branch has been approved.",
   "all_routes": "All",
-  "pleaseSelectDueDate": "Please select due date"
+  "pleaseSelectDueDate": "Please select due date",
+  "upcoming_days": "Upcoming Days",
+  "no_stops_scheduled": "No stops scheduled for this day"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -3311,7 +3315,9 @@ static const Map<String,dynamic> _tr = {
   "update_request_approved_title": "Güncelleme İsteği Onaylandı",
   "update_request_approved_body": "Şube için güncelleme isteğiniz onaylandı.",
   "all_routes": "Tümü",
-  "pleaseSelectDueDate": "Lütfen son tarihi seçin"
+  "pleaseSelectDueDate": "Lütfen son tarihi seçin",
+  "upcoming_days": "Gelecek Günler",
+  "no_stops_scheduled": "Bu gün için planlanmış durak yok"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

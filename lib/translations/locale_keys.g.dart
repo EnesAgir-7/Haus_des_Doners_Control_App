@@ -1100,5 +1100,7 @@ abstract class  LocaleKeys {
   static const update_request_approved_body = 'update_request_approved_body';
   static const all_routes = 'all_routes';
   static const pleaseSelectDueDate = 'pleaseSelectDueDate';
+  static const upcoming_days = 'upcoming_days';
+  static const no_stops_scheduled = 'no_stops_scheduled';
 
 }
