@@ -181,7 +181,7 @@ class InspectorBranchService {
       // Update branch doc
       batch.update(branchDocRef, {
         BranchFields.stop: updatedStop.toMap(),
-        BranchFields.createdAt: Timestamp.fromDate(now),
+        BranchFields.updatedAt: Timestamp.fromDate(now),
       });
 
       // Commit the batch
@@ -275,7 +275,7 @@ class InspectorBranchService {
       // ✅ Use the same stopToSave (with correct order)
       batch.update(branchDocRef, {
         BranchFields.stop: stopToSave.toMap(),
-        RouteFields.updatedAt: Timestamp.fromDate(now),
+        BranchFields.updatedAt: Timestamp.fromDate(now),
       });
 
       await batch.commit();

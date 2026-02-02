@@ -385,9 +385,9 @@ class _ScreenRoutesState extends State<ScreenRoutes> {
         }).length;
 
       default:
-        // Handle day1 to day7
+        // Handle day1 to day8
         final dayOffset = filter.index - RouteFilter.day1.index;
-        if (dayOffset >= 0 && dayOffset < 7) {
+        if (dayOffset >= 0 && dayOffset < 8) {
           final targetDate = todayDate.add(Duration(days: dayOffset));
           final targetKey = DateFormat('yyyy-MM-dd').format(targetDate);
           return provider.stops
