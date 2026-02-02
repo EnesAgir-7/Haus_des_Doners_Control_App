@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:haus_des_control/Modules/branch/firebase_services/branch_update_request_service.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_app_bar.dart';
 import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
@@ -170,7 +171,7 @@ class ScreenRequestDetails extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  request.status.toUpperCase(),
+                  _getStatusLabel(request.status),
                   style: TextStyle(
                     color: statusColor,
                     fontWeight: FontWeight.bold,
@@ -183,6 +184,19 @@ class ScreenRequestDetails extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getStatusLabel(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return LocaleKeys.status_pending.tr();
+      case 'approved':
+        return LocaleKeys.status_approved.tr();
+      case 'rejected':
+        return LocaleKeys.status_rejected.tr();
+      default:
+        return status.toUpperCase();
+    }
   }
 
   Widget _buildInfoChip(IconData icon, String text, Color color) {
@@ -617,9 +631,9 @@ class ScreenRequestDetails extends StatelessWidget {
 
       case DataTypes.datetime:
         if (value is Timestamp) {
-          return DateFormat('MMM dd, yyyy').format(value.toDate());
+          return DateFormat.yMMMd().format(value.toDate());
         } else if (value is DateTime) {
-          return DateFormat('MMM dd, yyyy').format(value);
+          return DateFormat.yMMMd().format(value);
         }
         return value.toString();
 
@@ -654,6 +668,6 @@ class ScreenRequestDetails extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    return DateFormat('MMM dd, yyyy HH:mm').format(date);
+    return DateFormat.yMMMd().add_Hm().format(date);
   }
 }

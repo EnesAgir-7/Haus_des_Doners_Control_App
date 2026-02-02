@@ -79,6 +79,8 @@
   "status_completed": "Completed",
   "status_in_progress": "In Progress",
   "status_pending": "Pending",
+  "status_approved": "Approved",
+  "status_rejected": "Rejected",
   "overdue_days": "{count} days overdue",
   "today": "Today",
   "tomorrow": "Tomorrow",

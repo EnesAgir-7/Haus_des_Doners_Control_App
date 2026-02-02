@@ -79,6 +79,8 @@
   "status_completed": "Tamamlandı",
   "status_in_progress": "Devam Ediyor",
   "status_pending": "Bekliyor",
+  "status_approved": "Onaylandı",
+  "status_rejected": "Reddedildi",
   "overdue_days": "{count} gün gecikmiş",
   "today": "Bugün",
   "tomorrow": "Yarın",

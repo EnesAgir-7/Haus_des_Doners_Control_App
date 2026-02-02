@@ -83,6 +83,8 @@ abstract class  LocaleKeys {
   static const status_completed = 'status_completed';
   static const status_in_progress = 'status_in_progress';
   static const status_pending = 'status_pending';
+  static const status_approved = 'status_approved';
+  static const status_rejected = 'status_rejected';
   static const overdue_days = 'overdue_days';
   static const today = 'today';
   static const tomorrow = 'tomorrow';
