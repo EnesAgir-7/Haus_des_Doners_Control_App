@@ -5,8 +5,7 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_update_request_model.dart';
 import '../../../models/branch_model.dart';
-import '../../../translations/locale_keys.g.dart';
-
+import '../../../translations/locale_keys.g.dart' as LK;
 
 class DataTypes {
   static const String string = 'string';
@@ -24,41 +23,49 @@ class BranchUpdateRequestService {
   // Collection reference
   CollectionReference get _collection => _db.collection(_collectionName);
 
-  // Check if branch has pending request
-  Future<bool> hasPendingRequest(String branchId) async {
+  // Check if branch has pending request (for single doc check if needed)
+  Future<bool> hasPendingRequest(String requestId) async {
     try {
-      final doc = await _collection.doc(branchId).get();
-
-      if (!doc.exists) {
-        return false;
-      }
-
+      final doc = await _collection.doc(requestId).get();
+      if (!doc.exists) return false;
       final data = doc.data() as Map<String, dynamic>?;
-
       if (data == null) return false;
-
       return data['status'] == 'pending';
     } catch (e) {
-      throw Exception('${LocaleKeys.error_checking_pending_request.tr()}$e');
+      throw Exception('${LK.LocaleKeys.error_checking_pending_request.tr()}$e');
+    }
+  }
+
+  // Check if branch HAS at least one pending request in the collection
+  Future<bool> hasAnyPendingRequest(String branchId) async {
+    try {
+      final snapshot = await _collection
+          .where('branchId', isEqualTo: branchId)
+          .where('status', isEqualTo: 'pending')
+          .limit(1)
+          .get();
+
+      return snapshot.docs.isNotEmpty;
+    } catch (e) {
+      throw Exception('${LK.LocaleKeys.error_checking_pending_request.tr()}$e');
     }
   }
 
   // Get pending request for branch
   Future<BranchUpdateRequestModel?> getPendingRequest(String branchId) async {
     try {
-      final doc = await _collection.doc(branchId).get();
+      final snapshot = await _collection
+          .where('branchId', isEqualTo: branchId)
+          .where('status', isEqualTo: 'pending')
+          .limit(1)
+          .get();
 
-      if (!doc.exists) return null;
-
-      final data = doc.data() as Map<String, dynamic>?; // Proper cast
-      if (data == null) return null;
-
-      if (data['status'] != 'pending') return null;
+      if (snapshot.docs.isEmpty) return null;
 
       // Pass the data + id to your model factory
-      return BranchUpdateRequestModel.fromFirestore(doc);
+      return BranchUpdateRequestModel.fromFirestore(snapshot.docs.first);
     } catch (e) {
-      throw Exception('${LocaleKeys.error_getting_pending_request.tr()}$e');
+      throw Exception('${LK.LocaleKeys.error_getting_pending_request.tr()}$e');
     }
   }
 
@@ -72,14 +79,17 @@ class BranchUpdateRequestService {
   }) async {
     try {
       // Check if already has pending request
-      final hasPending = await hasPendingRequest(branchId);
+      final hasPending = await hasAnyPendingRequest(branchId);
       if (hasPending) {
-        throw Exception(LocaleKeys.already_pending_request.tr());
+        throw Exception(LK.LocaleKeys.already_pending_request.tr());
       }
+
+      // Unique ID including timestamp for history
+      final requestId = "${branchId}_${DateTime.now().millisecondsSinceEpoch}";
 
       // Create request model
       final request = BranchUpdateRequestModel(
-        id: branchId,
+        id: requestId,
         branchId: branchId,
         branchName: branchName,
         requestedBy: requestedBy,
@@ -89,24 +99,25 @@ class BranchUpdateRequestService {
         changes: changes,
       );
 
-      // Store doc using branchId as document ID
-      await _collection.doc(branchId).set(request.toMap());
+      // Store doc using timestamped ID
+      await _collection.doc(requestId).set(request.toMap());
       NotificationHelper.instance.sendNotificationToTopic(
         topic: AppConstants.adminTopic,
-        title: LocaleKeys.branch_update_request_title.tr(),
-        body: '${LocaleKeys.branch_update_request_body.tr()} $branchName.',
+        title: LK.LocaleKeys.branch_update_request_title.tr(),
+        body: '${LK.LocaleKeys.branch_update_request_body.tr()} $branchName.',
         data: {
           'type': 'branch_update_request',
           'branchId': branchId,
+          'requestId': requestId,
           'timestamp': DateTime.now().toIso8601String(),
         },
       );
 
-      return branchId;
+      return requestId;
     } on FirebaseException catch (e) {
       throw Exception('Firebase error: ${e.message}');
     } catch (e) {
-      throw Exception('${LocaleKeys.error_creating_update_request.tr()}$e');
+      throw Exception('${LK.LocaleKeys.error_creating_update_request.tr()}$e');
     }
   }
 
@@ -116,25 +127,25 @@ class BranchUpdateRequestService {
       // Fetch request
       final doc = await _collection.doc(requestId).get();
       if (!doc.exists) {
-        throw Exception(LocaleKeys.request_not_found.tr());
+        throw Exception(LK.LocaleKeys.request_not_found.tr());
       }
 
       final data = doc.data() as Map<String, dynamic>?; // Safe cast
       if (data == null) {
-        throw Exception(LocaleKeys.invalid_request_format.tr());
+        throw Exception(LK.LocaleKeys.invalid_request_format.tr());
       }
 
       // Only allow deleting pending requests
       if (data['status'] != 'pending') {
-        throw Exception(LocaleKeys.only_pending_can_be_deleted.tr());
+        throw Exception(LK.LocaleKeys.only_pending_can_be_deleted.tr());
       }
 
       // Delete the request
       await _collection.doc(requestId).delete();
     } on FirebaseException catch (e) {
-      throw Exception('${LocaleKeys.firebase_error.tr()}${e.message}');
+      throw Exception('${LK.LocaleKeys.firebase_error.tr()}${e.message}');
     } catch (e) {
-      throw Exception('${LocaleKeys.error_deleting_request.tr()}$e');
+      throw Exception('${LK.LocaleKeys.error_deleting_request.tr()}$e');
     }
   }
 
@@ -158,7 +169,7 @@ class BranchUpdateRequestService {
           .map((doc) => BranchUpdateRequestModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      throw Exception('${LocaleKeys.error_getting_branch_requests.tr()}$e');
+      throw Exception('${LK.LocaleKeys.error_getting_branch_requests.tr()}$e');
     }
   }
 
@@ -173,7 +184,7 @@ class BranchUpdateRequestService {
     if (oldBranch.name != newBranch.name) {
       changes[BranchFields.name] = FieldChange(
         fieldKey: BranchFields.name,
-        fieldName: LocaleKeys.branchName.tr(),
+        fieldName: LK.LocaleKeys.branchName, // Key instead of translated name
         oldValue: oldBranch.name,
         newValue: newBranch.name,
         fieldType: DataTypes.string,
@@ -183,7 +194,7 @@ class BranchUpdateRequestService {
     if (oldBranch.address != newBranch.address) {
       changes[BranchFields.address] = FieldChange(
         fieldKey: BranchFields.address,
-        fieldName: LocaleKeys.address.tr(),
+        fieldName: LK.LocaleKeys.address,
         oldValue: oldBranch.address,
         newValue: newBranch.address,
         fieldType: DataTypes.string,
@@ -193,7 +204,7 @@ class BranchUpdateRequestService {
     if (oldBranch.contactName != newBranch.contactName) {
       changes[BranchFields.contactName] = FieldChange(
         fieldKey: BranchFields.contactName,
-        fieldName: LocaleKeys.contactName.tr(),
+        fieldName: LK.LocaleKeys.contactName,
         oldValue: oldBranch.contactName,
         newValue: newBranch.contactName,
         fieldType: DataTypes.string,
@@ -203,19 +214,9 @@ class BranchUpdateRequestService {
     if (oldBranch.contactPhone != newBranch.contactPhone) {
       changes[BranchFields.contactPhone] = FieldChange(
         fieldKey: BranchFields.contactPhone,
-        fieldName: LocaleKeys.contactPhone.tr(),
+        fieldName: LK.LocaleKeys.contactPhone,
         oldValue: oldBranch.contactPhone,
         newValue: newBranch.contactPhone,
-        fieldType: DataTypes.string,
-      );
-    }
-
-    if (oldBranch.branchEmail != newBranch.branchEmail) {
-      changes[BranchFields.branchEmail] = FieldChange(
-        fieldKey: BranchFields.branchEmail,
-        fieldName: LocaleKeys.branchEmail.tr(),
-        oldValue: oldBranch.branchEmail ?? '',
-        newValue: newBranch.branchEmail ?? '',
         fieldType: DataTypes.string,
       );
     }
@@ -225,7 +226,7 @@ class BranchUpdateRequestService {
         oldBranch.gps.longitude != newBranch.gps.longitude) {
       changes[BranchFields.gps] = FieldChange(
         fieldKey: BranchFields.gps,
-        fieldName: LocaleKeys.gps.tr(),
+        fieldName: LK.LocaleKeys.gps,
         oldValue: oldBranch.gps,
         newValue: newBranch.gps,
         fieldType: DataTypes.geopoint,
@@ -239,7 +240,7 @@ class BranchUpdateRequestService {
             newBranch.openingHours?.closingTime) {
       changes[BranchFields.openingHours] = FieldChange(
         fieldKey: BranchFields.openingHours,
-        fieldName: LocaleKeys.openingHoursDays.tr(),
+        fieldName: LK.LocaleKeys.openingHoursDays,
         oldValue: oldBranch.openingHours?.toMap(),
         newValue: newBranch.openingHours?.toMap(),
         fieldType: DataTypes.map,
@@ -250,7 +251,7 @@ class BranchUpdateRequestService {
     if (!_listEquals(oldBranch.openingDays, newBranch.openingDays)) {
       changes[BranchFields.openingDays] = FieldChange(
         fieldKey: BranchFields.openingDays,
-        fieldName: LocaleKeys.openingDays.tr(),
+        fieldName: LK.LocaleKeys.openingDays,
         oldValue: oldBranch.openingDays ?? [],
         newValue: newBranch.openingDays ?? [],
         fieldType: DataTypes.list,
@@ -261,7 +262,7 @@ class BranchUpdateRequestService {
     if (oldBranch.openingDay != newBranch.openingDay) {
       changes[BranchFields.openingDay] = FieldChange(
         fieldKey: BranchFields.openingDay,
-        fieldName: LocaleKeys.openingDay.tr(),
+        fieldName: LK.LocaleKeys.openingDay,
         oldValue: oldBranch.openingDay,
         newValue: newBranch.openingDay,
         fieldType: DataTypes.datetime,
@@ -272,7 +273,7 @@ class BranchUpdateRequestService {
     if (oldBranch.donerPrices != newBranch.donerPrices) {
       changes[BranchFields.donerPrices] = FieldChange(
         fieldKey: BranchFields.donerPrices,
-        fieldName: LocaleKeys.donerPrices.tr(),
+        fieldName: LK.LocaleKeys.donerPrices,
         oldValue: oldBranch.donerPrices ?? '',
         newValue: newBranch.donerPrices ?? '',
         fieldType: DataTypes.string,
@@ -283,7 +284,7 @@ class BranchUpdateRequestService {
     if (oldBranch.software != newBranch.software) {
       changes[BranchFields.software] = FieldChange(
         fieldKey: BranchFields.software,
-        fieldName: LocaleKeys.software.tr(),
+        fieldName: LK.LocaleKeys.software,
         oldValue: oldBranch.software ?? '',
         newValue: newBranch.software ?? '',
         fieldType: DataTypes.string,
@@ -294,7 +295,7 @@ class BranchUpdateRequestService {
     if (oldBranch.shopInformation != newBranch.shopInformation) {
       changes[BranchFields.shopInformation] = FieldChange(
         fieldKey: BranchFields.shopInformation,
-        fieldName: LocaleKeys.shopInformation.tr(),
+        fieldName: LK.LocaleKeys.shopInformation,
         oldValue: oldBranch.shopInformation ?? '',
         newValue: newBranch.shopInformation ?? '',
         fieldType: DataTypes.string,
@@ -308,7 +309,7 @@ class BranchUpdateRequestService {
     )) {
       changes[BranchFields.branchOwners] = FieldChange(
         fieldKey: BranchFields.branchOwners,
-        fieldName: LocaleKeys.branchOwners.tr(),
+        fieldName: LK.LocaleKeys.branchOwners,
         oldValue: oldBranch.branchOwners?.map((e) => e.toMap()).toList() ?? [],
         newValue: newBranch.branchOwners?.map((e) => e.toMap()).toList() ?? [],
         fieldType: DataTypes.list,
@@ -322,7 +323,7 @@ class BranchUpdateRequestService {
     )) {
       changes[BranchFields.branchManagers] = FieldChange(
         fieldKey: BranchFields.branchManagers,
-        fieldName: LocaleKeys.branchManagers.tr(),
+        fieldName: LK.LocaleKeys.branchManagers,
         oldValue:
             oldBranch.branchManagers?.map((e) => e.toMap()).toList() ?? [],
         newValue:
@@ -335,7 +336,7 @@ class BranchUpdateRequestService {
     if (!_contactPersonListEquals(oldBranch.suppliers, newBranch.suppliers)) {
       changes[BranchFields.suppliers] = FieldChange(
         fieldKey: BranchFields.suppliers,
-        fieldName: LocaleKeys.suppliers.tr(),
+        fieldName: LK.LocaleKeys.suppliers,
         oldValue: oldBranch.suppliers?.map((e) => e.toMap()).toList() ?? [],
         newValue: newBranch.suppliers?.map((e) => e.toMap()).toList() ?? [],
         fieldType: DataTypes.list,

@@ -12,6 +12,7 @@ import '../../../core/constants/firebase_constants.dart';
 import '../../../models/branch_model.dart';
 import '../branch_providers/provider_branch_update_request.dart';
 import '../../admin/screens/screen_admin_request_details.dart';
+import 'screen_branch_request_history.dart';
 
 class ScreenBranchRequestEdit extends StatefulWidget {
   final BranchModel branch;
@@ -30,7 +31,6 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
   late TextEditingController _contactPhoneController;
   late TextEditingController _latitudeController;
   late TextEditingController _longitudeController;
-  late TextEditingController _branchEmailController;
   late TextEditingController _openingTimeController;
   late TextEditingController _closingTimeController;
   late TextEditingController _donerPricesController;
@@ -72,7 +72,6 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     _longitudeController = TextEditingController(
       text: b.gps.longitude.toString(),
     );
-    _branchEmailController = TextEditingController(text: b.branchEmail ?? '');
     _openingTimeController = TextEditingController(
       text: b.openingHours?.openingTime ?? '',
     );
@@ -107,7 +106,6 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     _contactPhoneController.dispose();
     _latitudeController.dispose();
     _longitudeController.dispose();
-    _branchEmailController.dispose();
     _openingTimeController.dispose();
     _closingTimeController.dispose();
     _donerPricesController.dispose();
@@ -133,7 +131,6 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
       address: _addressController.text.trim(),
       contactName: _contactNameController.text.trim(),
       contactPhone: _contactPhoneController.text.trim(),
-      branchEmail: _branchEmailController.text.trim(),
       gps:
           (double.tryParse(_latitudeController.text.trim()) != null &&
               double.tryParse(_longitudeController.text.trim()) != null)
@@ -143,8 +140,8 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
             )
           : widget.branch.gps,
       openingHours: OpeningHours(
-        openingTime: _openingTimeController.text.trim(),
-        closingTime: _closingTimeController.text.trim(),
+        openingTime: _normalizeTime(_openingTimeController.text.trim()),
+        closingTime: _normalizeTime(_closingTimeController.text.trim()),
       ),
       openingDays: _selectedOpeningDays,
       openingDay: _selectedOpeningDay,
@@ -588,6 +585,21 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
     );
   }
 
+  String _normalizeTime(String timeStr) {
+    if (timeStr.isEmpty) return "";
+    try {
+      // If it contains am/pm, try to parse and format as 24h
+      if (timeStr.toLowerCase().contains('m')) {
+        final format = DateFormat.jm(); // Default locale am/pm
+        final date = format.parse(timeStr);
+        return DateFormat('HH:mm').format(date);
+      }
+    } catch (e) {
+      debugPrint('Error normalizing time: $e');
+    }
+    return timeStr;
+  }
+
   Widget _buildOpeningDaysSelector() {
     return Wrap(
       spacing: 8,
@@ -708,7 +720,22 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryDark,
-      appBar: CustomAppBar(title: LocaleKeys.update_request.tr()),
+      appBar: CustomAppBar(
+        title: LocaleKeys.update_request.tr(),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    ScreenBranchRequestHistory(branchId: widget.branch.id),
+              ),
+            ),
+            icon: const Icon(Icons.history, color: Colors.white),
+            tooltip: LocaleKeys.request_history.tr(),
+          ),
+        ],
+      ),
       body: Form(
         key: _formKey,
         child: Column(
@@ -740,24 +767,7 @@ class _ScreenBranchRequestEditState extends State<ScreenBranchRequestEdit> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 16),
-                    _buildTextField(
-                      controller: _branchEmailController,
-                      label: LocaleKeys.branchEmail.tr(),
-                      hint: LocaleKeys.enterBranchEmail.tr(),
-                      icon: Icons.email,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return LocaleKeys.branchEmailRequired.tr();
-                        }
-                        if (!value.contains('@')) {
-                          return LocaleKeys.enterValidEmail.tr();
-                        }
-                        return null;
-                      },
-                    ),
-
+                    /*  Email removed as it is admin-controlled */
                     const SizedBox(height: 24),
                     // Location
                     _buildSectionHeader(

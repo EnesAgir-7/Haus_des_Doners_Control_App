@@ -248,7 +248,7 @@ class ScreenBranchRequestDetails extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  change.fieldName,
+                  change.fieldName.tr(),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,

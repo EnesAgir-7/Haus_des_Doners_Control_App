@@ -1099,5 +1099,6 @@
   "all_routes": "Alle",
   "pleaseSelectDueDate": "Bitte wählen Sie ein Fälligkeitsdatum aus",
   "upcoming_days": "Kommende Tage",
-  "no_stops_scheduled": "Für diesen Tag sind keine Stopps geplant"
+  "no_stops_scheduled": "Für diesen Tag sind keine Stopps geplant",
+  "request_history": "Anfrageverlauf"
 }

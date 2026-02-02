@@ -1085,5 +1085,6 @@
   "all_routes": "Tümü",
   "pleaseSelectDueDate": "Lütfen son tarihi seçin",
   "upcoming_days": "Gelecek Günler",
-  "no_stops_scheduled": "Bu gün için planlanmış durak yok"
+  "no_stops_scheduled": "Bu gün için planlanmış durak yok",
+  "request_history": "İstek Geçmişi"
 }

@@ -1115,5 +1115,6 @@
   "all_routes": "All",
   "pleaseSelectDueDate": "Please select due date",
   "upcoming_days": "Upcoming Days",
-  "no_stops_scheduled": "No stops scheduled for this day"
+  "no_stops_scheduled": "No stops scheduled for this day",
+  "request_history": "Request History"
 }
