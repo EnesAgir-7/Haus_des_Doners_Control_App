@@ -709,6 +709,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                                     );
                                   },
                                   child: _buildEnhancedQuestionCard(
+                                    index: entry.key,
                                     maxScore: entry.value.maxScore,
                                     title: entry.value.title,
                                     category: entry.value.categoryId,
@@ -895,6 +896,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   }
 
   Widget _buildEnhancedQuestionCard({
+    required int index,
     required String title,
     required String category,
     required int score,
@@ -1008,12 +1010,17 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                         : Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(
-                    Icons.checklist_rounded,
-                    color: score > 0
-                        ? ratings[score - 1]['color'] as Color
-                        : Colors.white54,
-                    size: 20,
+                  child: Center(
+                    child: Text(
+                      '${index + 1}',
+                      style: TextStyle(
+                        color: score > 0
+                            ? ratings[score - 1]['color'] as Color
+                            : Colors.white54,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
