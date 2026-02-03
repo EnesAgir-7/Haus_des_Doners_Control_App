@@ -37,14 +37,32 @@ class FCMHelper {
 
   String? get fcmToken => _fcmToken;
   bool get isInitialized => _isInitialized;
+  bool get hasToken => _fcmToken != null && _fcmToken!.isNotEmpty;
 
-  /// Initialize FCM
+  /// Wait for FCM token to be available (with timeout)
+  Future<String?> waitForToken({
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    if (hasToken) return _fcmToken;
+
+    final startTime = DateTime.now();
+    while (!hasToken) {
+      if (DateTime.now().difference(startTime) > timeout) {
+        console('⚠️ Timeout waiting for FCM token');
+        return null;
+      }
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+    return _fcmToken;
+  }
+
+  /// Initialize FCM with retry logic
   Future<void> initialize({
     required Function(RemoteMessage) onMessageReceived,
     Function(RemoteMessage)? onMessageOpenedApp,
   }) async {
     if (_isInitialized) {
-      console('FCM already initialized');
+      console('✅ FCM already initialized');
       return;
     }
 
@@ -68,20 +86,19 @@ class FCMHelper {
         _firebaseMessagingBackgroundHandler,
       );
 
-      // Get FCM token
-      _fcmToken = await _messaging.getToken();
-      console('FCM Token: $_fcmToken');
+      // ✅ GET FCM TOKEN WITH RETRY LOGIC (non-blocking)
+      _getFCMTokenWithRetry();
 
       // Listen to token refresh
       _messaging.onTokenRefresh.listen((newToken) {
         _fcmToken = newToken;
-        console('FCM Token refreshed: $newToken');
+        console('🔄 FCM Token refreshed: $newToken');
       });
 
       // ✅ FIXED: Handle foreground messages WITHOUT showing local notification
       // System now handles display automatically via notification payload
       FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-        console('Foreground message received: ${message.messageId}');
+        console('📩 Foreground message received: ${message.messageId}');
 
         if (Platform.isAndroid) {
           await _showLocalNotification(message);
@@ -93,7 +110,7 @@ class FCMHelper {
 
       // Handle notification tap when app is in background
       FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-        console('Notification opened app: ${message.messageId}');
+        console('👆 Notification opened app: ${message.messageId}');
         // ✅ RESET BADGE WHEN NOTIFICATION TRAPS THE APP
         resetBadgeCount();
 
@@ -105,6 +122,7 @@ class FCMHelper {
       // Check for initial message (app opened from terminated state)
       RemoteMessage? initialMessage = await _messaging.getInitialMessage();
       if (initialMessage != null) {
+        console('🚀 App opened from notification: ${initialMessage.messageId}');
         // ✅ RESET BADGE WHEN OPENED FROM INITIAL MESSAGE
         await resetBadgeCount();
 
@@ -114,13 +132,59 @@ class FCMHelper {
       }
 
       _isInitialized = true;
-      console('FCM initialized successfully');
+      console('✅ FCM initialized successfully (token retrieval in progress)');
 
       // ✅ RESET BADGE ON INITIALIZATION
       await resetBadgeCount();
     } catch (e) {
-      console('FCM initialization error: $e');
-      rethrow;
+      console('❌ FCM initialization error: $e', type: DebugType.error);
+      // DON'T rethrow - let app continue working
+      // FCM will retry token retrieval in background
+    }
+  }
+
+  /// Get FCM token with retry logic (max 3 attempts with exponential backoff)
+  Future<void> _getFCMTokenWithRetry({
+    int attempt = 1,
+    int maxAttempts = 3,
+  }) async {
+    try {
+      console(
+        '🔑 Attempting to get FCM token (attempt $attempt/$maxAttempts)...',
+      );
+
+      _fcmToken = await _messaging.getToken();
+
+      if (_fcmToken != null && _fcmToken!.isNotEmpty) {
+        console('✅ FCM Token retrieved successfully: $_fcmToken');
+      } else {
+        throw Exception('Token is null or empty');
+      }
+    } catch (e) {
+      console(
+        '⚠️ FCM token retrieval failed (attempt $attempt/$maxAttempts): $e',
+      );
+
+      if (attempt < maxAttempts) {
+        // Exponential backoff: 2s, 4s, 8s
+        final delaySeconds = 2 * attempt;
+        console('⏳ Retrying in $delaySeconds seconds...');
+
+        await Future.delayed(Duration(seconds: delaySeconds));
+
+        // Retry recursively
+        await _getFCMTokenWithRetry(
+          attempt: attempt + 1,
+          maxAttempts: maxAttempts,
+        );
+      } else {
+        console(
+          '❌ FCM token retrieval failed after $maxAttempts attempts. '
+          'Topic subscriptions will not work until token is available.',
+          type: DebugType.error,
+        );
+        // Don't throw - app continues to work without FCM
+      }
     }
   }
 

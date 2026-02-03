@@ -78,16 +78,21 @@ void main() async {
     ),
   );
 
-  // Initialize FCM
-  FCMHelper.instance.initialize(
-    onMessageReceived: (RemoteMessage message) {
-      // console('Message received: ${message.notification?.title}');
-    },
-    onMessageOpenedApp: (RemoteMessage message) {
-      // console('Notification opened: ${message.data}');
-      // Navigate based on message.data
-    },
-  );
+  // Initialize FCM (non-blocking with automatic retry)
+  FCMHelper.instance
+      .initialize(
+        onMessageReceived: (RemoteMessage message) {
+          // console('Message received: ${message.notification?.title}');
+        },
+        onMessageOpenedApp: (RemoteMessage message) {
+          // console('Notification opened: ${message.data}');
+          // Navigate based on message.data
+        },
+      )
+      .catchError((e) {
+        console('⚠️ FCM initialization failed, will retry automatically: $e');
+        // App continues working, FCM will retry in background
+      });
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

@@ -69,11 +69,21 @@ class NotificationHelper {
   /// Subscribe to topic
   Future<void> subscribeToTopic(String topic) async {
     try {
+      // ✅ Wait for FCM token to be available before subscribing
+      if (!fcmHelper.hasToken) {
+        console('⏳ Waiting for FCM token before subscribing to topic...');
+        final token = await fcmHelper.waitForToken();
+        if (token == null) {
+          console('⚠️ Cannot subscribe to topic - FCM token not available');
+          return;
+        }
+      }
+
       final envTopic = _getEnvTopic(topic);
       await fcmHelper.messaging.subscribeToTopic(envTopic);
-      console('Subscribed to topic: $envTopic');
+      console('✅ Subscribed to topic: $envTopic');
     } catch (e) {
-      console('Failed to subscribe to topic: $e');
+      console('❌ Failed to subscribe to topic: $e');
     }
   }
 
