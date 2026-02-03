@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../app_env.dart';
@@ -262,21 +263,13 @@ class FCMHelper {
 
     try {
       console('Resetting app icon badge count');
-      final dynamic platformPlugin = _localNotifications
-          .resolvePlatformSpecificImplementation();
-
-      if (platformPlugin != null) {
-        try {
-          await platformPlugin.clearBadge();
-          console('Badge cleared using clearBadge()');
-          return;
-        } catch (_) {}
-        try {
-          await platformPlugin.setApplicationIconBadgeNumber(0);
-          console('Badge cleared using setApplicationIconBadgeNumber(0)');
-          return;
-        } catch (_) {}
+      final bool supported = await FlutterAppBadger.isAppBadgeSupported();
+      if (supported) {
+        FlutterAppBadger.removeBadge();
+        console('Badge cleared using FlutterAppBadger');
+        return;
       }
+      console('App badge not supported on this device');
     } catch (e) {
       console('Failed to reset badge count: $e');
     }
