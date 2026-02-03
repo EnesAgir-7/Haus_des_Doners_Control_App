@@ -414,8 +414,8 @@ class ProviderAuth extends ChangeNotifier {
         // Fire and forget background tasks
         unawaited(() async {
           try {
+            // ✅ A. Perform Firestore/FCM operations first while still authenticated
             final List<Future> cloudTasks = [
-              _authHelper.signOut(),
               NotificationHelper.instance.unsubscribeFromAllTopics(role),
             ];
 
@@ -423,16 +423,23 @@ class ProviderAuth extends ChangeNotifier {
               cloudTasks.add(_removeFCMToken(uid, currentToken, role));
             }
 
+            // Wait for data-dependent tasks to finish before signing out
             await Future.wait(cloudTasks).timeout(
               const Duration(seconds: 10),
               onTimeout: () {
-                console('⚠️ Background logout tasks timed out');
+                console('⚠️ Background data cleanup timed out');
                 return [];
               },
             );
+
+            // ✅ B. Final Sign Out (destroys the session)
+            await _authHelper.signOut();
+
             console('✅ Cloud logout complete');
           } catch (e) {
             console('❌ Background logout error: $e');
+            // If anything fails, still try to sign out to be safe
+            await _authHelper.signOut().catchError((_) {});
           }
         }());
       } else {
