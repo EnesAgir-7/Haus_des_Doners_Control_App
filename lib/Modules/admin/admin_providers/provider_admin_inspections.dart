@@ -23,7 +23,7 @@ class ProviderAdminInspections extends ChangeNotifier {
 
   // Pagination
   int _currentPage = 0;
-  final int _pageSize = 50;
+  final int _pageSize = 30;
   bool _hasMore = true;
 
   // Filters and sorting
