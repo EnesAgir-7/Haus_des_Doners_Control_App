@@ -20,9 +20,12 @@ import '../core/console.dart';
 
 class ProviderCleanupService {
   /// Cleans up all provider streams based on the logged-in user's role
-  static Future<void> cleanupAllProviders(BuildContext context) async {
+  static Future<void> cleanupAllProviders(
+    BuildContext context, {
+    String? role,
+  }) async {
     try {
-      final userRole = loggedInUser?.role;
+      final userRole = role ?? loggedInUser?.role;
 
       if (userRole == null) {
         console('⚠️ No user role found, skipping provider cleanup');

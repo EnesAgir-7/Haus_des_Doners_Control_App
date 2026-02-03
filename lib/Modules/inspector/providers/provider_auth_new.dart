@@ -93,26 +93,31 @@ class ProviderAuth extends ChangeNotifier {
       userModel = UserModel.fromFirestore(doc);
       loggedInUser = userModel;
 
-      // Subscribe to FCM topics based on role
-      await NotificationHelper.instance.subscribeUserToRoleTopics(
-        userModel!.role,
-      );
+      // ✅ Parallelize post-login initialization tasks
+      // Don't wait for these to block the UI if they take too long
+      // Note: syncFCMToken depends on userModel being set
+      Future.wait([
+            NotificationHelper.instance.subscribeUserToRoleTopics(
+              userModel!.role,
+            ),
+            LocalStorageHelper.instance.saveData(
+              cacheUserKey,
+              userModel!.toMap(),
+            ),
+            if (FCMHelper.instance.fcmToken != null)
+              _syncFCMToken(
+                user.uid,
+                FCMHelper.instance.fcmToken!,
+                userModel!.role,
+              )
+            else
+              Future.value(),
+          ])
+          .then((_) => console('✅ Post-login background tasks completed'))
+          .catchError((e) => console('❌ Error in post-login tasks: $e'));
 
-      // Start listener FIRST (before sync)
+      // Start listener (can be in background)
       _startTokenRefreshListener();
-
-      // Sync FCM token
-      final fcmToken = FCMHelper.instance.fcmToken;
-      if (fcmToken != null) {
-        await _syncFCMToken(user.uid, fcmToken, userModel!.role);
-      } else {
-        console('⚠️ FCM token not available');
-      }
-
-      await LocalStorageHelper.instance.saveData(
-        cacheUserKey,
-        userModel!.toMap(),
-      );
 
       return true;
     } catch (e) {
@@ -378,33 +383,65 @@ class ProviderAuth extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await ProviderCleanupService.cleanupAllProviders(context);
+      // ✅ 1. Capture info needed for cleanup before clearing local state
+      final uid = userModel?.id;
+      final role = userModel?.role;
+      final currentToken = FCMHelper.instance.fcmToken;
+
+      console('🧹 Starting logout cleanup for role: $role');
+
+      // ✅ 2. CANCEL STREAMS FIRST
+      // This MUST happen before signOut to avoid PERMISSION_DENIED errors.
+      // We pass the captured role to ensure it works even if global state is cleared.
+      if (context.mounted) {
+        await ProviderCleanupService.cleanupAllProviders(context, role: role);
+      }
+
       await _tokenRefreshSubscription?.cancel();
       _tokenRefreshSubscription = null;
 
-      // Unsubscribe from topics
-      if (userModel != null) {
-        await NotificationHelper.instance.unsubscribeFromAllTopics(
-          userModel!.role,
-        );
-      }
-
-      // Remove current token
-      final currentToken = FCMHelper.instance.fcmToken;
-      if (userModel != null && currentToken != null) {
-        await _removeFCMToken(userModel!.id, currentToken, userModel!.role);
-      }
-
+      // ✅ 3. Clear local state and cache
+      // This ensures the user is "logged out" locally immediately.
+      await LocalStorageHelper.instance.removeData(cacheUserKey);
       userModel = null;
       loggedInUser = null;
       _lastSyncedToken = null;
-      await _authHelper.signOut();
-      await LocalStorageHelper.instance.removeData(cacheUserKey);
+      notifyListeners();
 
-      console('✅ Logout complete');
+      // ✅ 4. Run cloud/network cleanup in background
+      // These can take time, so we run them together.
+      if (uid != null && role != null) {
+        // Fire and forget background tasks
+        unawaited(() async {
+          try {
+            final List<Future> cloudTasks = [
+              _authHelper.signOut(),
+              NotificationHelper.instance.unsubscribeFromAllTopics(role),
+            ];
+
+            if (currentToken != null) {
+              cloudTasks.add(_removeFCMToken(uid, currentToken, role));
+            }
+
+            await Future.wait(cloudTasks).timeout(
+              const Duration(seconds: 10),
+              onTimeout: () {
+                console('⚠️ Background logout tasks timed out');
+                return [];
+              },
+            );
+            console('✅ Cloud logout complete');
+          } catch (e) {
+            console('❌ Background logout error: $e');
+          }
+        }());
+      } else {
+        await _authHelper.signOut();
+      }
+
+      console('✅ Local logout complete');
     } catch (e) {
       console('❌ Logout error: $e');
-      rethrow;
     } finally {
       _isLoading = false;
       notifyListeners();
