@@ -46,13 +46,13 @@
 	<true/>
 
 	<key>NSCameraUsageDescription</key>
-	<string>This app needs camera access to take photos</string>
+	<string>HdD Control requires camera access to capture photos for inspection reports.</string>
 
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs photo library access to select image</string>
+	<string>HdD Control requires photo library access to upload photos and documents for branch inspections and administrative reports.</string>
 
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We need permission to save PDF reports to your photo library</string>
+	<string>HdD Control requires permission to save generated PDF reports and Excel sheets to your device.</string>
 
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We use your location to show your position on the map and help you find nearby branches.</string>
