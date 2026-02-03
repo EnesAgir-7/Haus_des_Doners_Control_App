@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:app_badge_plus/app_badge_plus.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../app_env.dart';
@@ -176,6 +176,8 @@ class FCMHelper {
               data: Map<String, dynamic>.from(data),
             );
             onMessageOpenedApp(message);
+            // ✅ Reset badge when local notification is tapped
+            resetBadgeCount();
           } catch (e) {
             console('Error parsing notification payload: $e');
           }
@@ -257,19 +259,23 @@ class FCMHelper {
     }
   }
 
-  /// ✅ Reset app icon badge count (specifically for iOS)
+  /// ✅ Reset app icon badge count (Cross-platform)
   Future<void> resetBadgeCount() async {
-    if (!Platform.isIOS) return;
-
     try {
       console('Resetting app icon badge count');
-      final bool supported = await FlutterAppBadger.isAppBadgeSupported();
-      if (supported) {
-        FlutterAppBadger.removeBadge();
-        console('Badge cleared using FlutterAppBadger');
-        return;
+
+      // Clear the numeric badge (mostly iOS)
+      if (await AppBadgePlus.isSupported()) {
+        AppBadgePlus.updateBadge(0);
+        console('Badge count set to 0 via AppBadgePlus');
       }
-      console('App badge not supported on this device');
+
+      // On Android, badges (notification dots) are tied to active notifications.
+      // Clearing all notifications will remove the badge dot.
+      if (Platform.isAndroid) {
+        await _localNotifications.cancelAll();
+        console('All Android notifications cleared to reset badge dot');
+      }
     } catch (e) {
       console('Failed to reset badge count: $e');
     }
