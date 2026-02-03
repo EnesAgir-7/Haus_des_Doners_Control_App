@@ -1115,5 +1115,8 @@ abstract class  LocaleKeys {
   static const unsaved_changes_message = 'unsaved_changes_message';
   static const save_draft = 'save_draft';
   static const discard_changes = 'discard_changes';
+  static const confirm_discard_title = 'confirm_discard_title';
+  static const confirm_discard_message = 'confirm_discard_message';
+  static const yes_discard = 'yes_discard';
 
 }

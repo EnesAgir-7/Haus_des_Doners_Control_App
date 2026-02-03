@@ -1126,7 +1126,10 @@ class CodegenLoader extends AssetLoader{
   "unsaved_changes_title": "Ungespeicherte Änderungen",
   "unsaved_changes_message": "Sie haben ungespeicherte Änderungen in Ihrem Bericht. Möchten Sie diese als Entwurf speichern oder verwerfen?",
   "save_draft": "Entwurf speichern",
-  "discard_changes": "Verwerfen"
+  "discard_changes": "Verwerfen",
+  "confirm_discard_title": "Verwerfen bestätigen",
+  "confirm_discard_message": "Sind Sie absolut sicher, dass Sie Ihre gesamte Arbeit verwerfen möchten? Diese Aktion kann nicht rückgängig gemacht werden und Ihr gesamter Fortschritt geht dauerhaft verloren.",
+  "yes_discard": "Ja, verwerfen"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -2256,7 +2259,10 @@ static const Map<String,dynamic> _en = {
   "unsaved_changes_title": "Unsaved Changes",
   "unsaved_changes_message": "You have unsaved changes in your report. Would you like to save them as a draft or discard them?",
   "save_draft": "Save Draft",
-  "discard_changes": "Discard"
+  "discard_changes": "Discard",
+  "confirm_discard_title": "Confirm Discard",
+  "confirm_discard_message": "Are you absolutely sure you want to discard all your work? This action cannot be undone and all your progress will be lost permanently.",
+  "yes_discard": "Yes, Discard"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -3356,7 +3362,10 @@ static const Map<String,dynamic> _tr = {
   "unsaved_changes_title": "Kaydedilmemiş Değişiklikler",
   "unsaved_changes_message": "Raporunuzda kaydedilmemiş değişiklikler var. Bunları taslak olarak kaydetmek mi yoksa silmek mi istersiniz?",
   "save_draft": "Taslağı Kaydet",
-  "discard_changes": "Sil"
+  "discard_changes": "Sil",
+  "confirm_discard_title": "Silmeyi Onayla",
+  "confirm_discard_message": "Tüm çalışmanızı silmek istediğinizden kesinlikle emin misiniz? Bu işlem geri alınamaz ve tüm ilerlemeniz kalıcı olarak kaybolacaktır.",
+  "yes_discard": "Evet, Sil"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

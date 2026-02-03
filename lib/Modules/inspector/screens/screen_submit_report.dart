@@ -427,10 +427,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     }
   }
 
-  Future<bool?> _showSaveDraftDialog() async {
+  Future<bool?> _showConfirmDiscardDialog() async {
     return await showDialog<bool>(
       context: context,
-      barrierDismissible: true, // Allow dismissal to continue working
+      barrierDismissible: true,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.lightBlack,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -440,19 +440,19 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.amber,
+                Icons.delete_forever_rounded,
+                color: Colors.redAccent,
                 size: 28,
               ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
-                "unsaved_changes_title".tr(),
+                "confirm_discard_title".tr(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -460,17 +460,12 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                 ),
               ),
             ),
-            IconButton(
-              icon: Icon(Icons.close, color: Colors.grey.shade400),
-              onPressed: () => Navigator.pop(context, null), // Dismiss dialog
-              tooltip: "continue_working".tr(),
-            ),
           ],
         ),
         content: Padding(
           padding: const EdgeInsets.only(top: 12),
           child: Text(
-            "unsaved_changes_message".tr(),
+            "confirm_discard_message".tr(),
             style: TextStyle(
               color: Colors.grey.shade300,
               fontSize: 16,
@@ -494,7 +489,125 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                     ),
                   ),
                   child: Text(
-                    "discard_changes".tr(),
+                    "cancel".tr(),
+                    style: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "yes_discard".tr(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool?> _showSaveDraftDialog() async {
+    return await showDialog<bool>(
+      context: context,
+      barrierDismissible: true, // Allow dismissal to continue working
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.lightBlack,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 8, 8),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.amber,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                LocaleKeys.unsaved_changes_title.tr(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.close, color: Colors.grey.shade400),
+              onPressed: () => Navigator.pop(context, null), // Dismiss dialog
+              tooltip: LocaleKeys.continue_working.tr(),
+            ),
+          ],
+        ),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Text(
+            LocaleKeys.unsaved_changes_message.tr(),
+            style: TextStyle(
+              color: Colors.grey.shade300,
+              fontSize: 16,
+              height: 1.5,
+            ),
+          ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () async {
+                    // Save the navigator before async operations
+                    final navigator = Navigator.of(context);
+
+                    // Step 1: Show confirmation dialog (keep first dialog open)
+                    final confirmDiscard = await _showConfirmDiscardDialog();
+
+                    // Step 2: If user confirmed, close the first dialog with false (discard)
+                    // If user cancelled, do nothing (first dialog stays open)
+                    if (confirmDiscard == true) {
+                      // User confirmed discard - close dialog and return false
+                      navigator.pop(false);
+                    }
+                    // If confirmDiscard is false/null, user stays in the first dialog
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.grey.shade700),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    LocaleKeys.discard_changes.tr(),
                     style: TextStyle(
                       color: Colors.grey.shade400,
                       fontWeight: FontWeight.w600,
@@ -516,7 +629,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                     ),
                   ),
                   child: Text(
-                    "save_draft".tr(),
+                    LocaleKeys.save_draft.tr(),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,

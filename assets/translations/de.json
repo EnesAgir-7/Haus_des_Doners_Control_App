@@ -1110,5 +1110,8 @@
   "unsaved_changes_title": "Ungespeicherte Änderungen",
   "unsaved_changes_message": "Sie haben ungespeicherte Änderungen in Ihrem Bericht. Möchten Sie diese als Entwurf speichern oder verwerfen?",
   "save_draft": "Entwurf speichern",
-  "discard_changes": "Verwerfen"
+  "discard_changes": "Verwerfen",
+  "confirm_discard_title": "Verwerfen bestätigen",
+  "confirm_discard_message": "Sind Sie absolut sicher, dass Sie Ihre gesamte Arbeit verwerfen möchten? Diese Aktion kann nicht rückgängig gemacht werden und Ihr gesamter Fortschritt geht dauerhaft verloren.",
+  "yes_discard": "Ja, verwerfen"
 }

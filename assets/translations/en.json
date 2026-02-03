@@ -1126,5 +1126,8 @@
   "unsaved_changes_title": "Unsaved Changes",
   "unsaved_changes_message": "You have unsaved changes in your report. Would you like to save them as a draft or discard them?",
   "save_draft": "Save Draft",
-  "discard_changes": "Discard"
+  "discard_changes": "Discard",
+  "confirm_discard_title": "Confirm Discard",
+  "confirm_discard_message": "Are you absolutely sure you want to discard all your work? This action cannot be undone and all your progress will be lost permanently.",
+  "yes_discard": "Yes, Discard"
 }

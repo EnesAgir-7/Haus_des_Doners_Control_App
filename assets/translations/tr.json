@@ -1096,5 +1096,8 @@
   "unsaved_changes_title": "Kaydedilmemiş Değişiklikler",
   "unsaved_changes_message": "Raporunuzda kaydedilmemiş değişiklikler var. Bunları taslak olarak kaydetmek mi yoksa silmek mi istersiniz?",
   "save_draft": "Taslağı Kaydet",
-  "discard_changes": "Sil"
+  "discard_changes": "Sil",
+  "confirm_discard_title": "Silmeyi Onayla",
+  "confirm_discard_message": "Tüm çalışmanızı silmek istediğinizden kesinlikle emin misiniz? Bu işlem geri alınamaz ve tüm ilerlemeniz kalıcı olarak kaybolacaktır.",
+  "yes_discard": "Evet, Sil"
 }
