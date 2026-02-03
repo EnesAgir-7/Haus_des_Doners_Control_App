@@ -230,7 +230,7 @@ class FCMHelper {
 
     // ✅ ADD: Handle notification tap
     await _localNotifications.initialize(
-      initSettings,
+      settings: initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         if (response.payload != null && onMessageOpenedApp != null) {
           try {
@@ -304,10 +304,10 @@ class FCMHelper {
     final body = message.data['body'] ?? message.notification?.body ?? '';
 
     await _localNotifications.show(
-      message.hashCode,
-      title,
-      body,
-      notificationDetails,
+      id: message.hashCode,
+      title: title,
+      body: body,
+      notificationDetails: notificationDetails,
       payload: jsonEncode(message.data),
     );
   }
