@@ -1129,5 +1129,13 @@
   "discard_changes": "Discard",
   "confirm_discard_title": "Confirm Discard",
   "confirm_discard_message": "Are you absolutely sure you want to discard all your work? This action cannot be undone and all your progress will be lost permanently.",
-  "yes_discard": "Yes, Discard"
+  "yes_discard": "Yes, Discard",
+  "export_monthly_rankings": "Export Monthly Rankings",
+  "select_month_to_export": "Select Month to Export",
+  "monthly_branch_rankings_title": "Monthly Branch Rankings - {month} {year}",
+  "top_3_branches": "Top 3 Performing Branches",
+  "bottom_3_branches": "Bottom 3 Branches Need Improvement",
+  "rank": "Rank",
+  "branch_score": "Score",
+  "no_inspections_for_month": "No inspections found for {month} {year}"
 }

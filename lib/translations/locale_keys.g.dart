@@ -1118,5 +1118,13 @@ abstract class  LocaleKeys {
   static const confirm_discard_title = 'confirm_discard_title';
   static const confirm_discard_message = 'confirm_discard_message';
   static const yes_discard = 'yes_discard';
+  static const export_monthly_rankings = 'export_monthly_rankings';
+  static const select_month_to_export = 'select_month_to_export';
+  static const monthly_branch_rankings_title = 'monthly_branch_rankings_title';
+  static const top_3_branches = 'top_3_branches';
+  static const bottom_3_branches = 'bottom_3_branches';
+  static const rank = 'rank';
+  static const branch_score = 'branch_score';
+  static const no_inspections_for_month = 'no_inspections_for_month';
 
 }

@@ -1113,5 +1113,13 @@
   "discard_changes": "Verwerfen",
   "confirm_discard_title": "Verwerfen bestätigen",
   "confirm_discard_message": "Sind Sie absolut sicher, dass Sie Ihre gesamte Arbeit verwerfen möchten? Diese Aktion kann nicht rückgängig gemacht werden und Ihr gesamter Fortschritt geht dauerhaft verloren.",
-  "yes_discard": "Ja, verwerfen"
+  "yes_discard": "Ja, verwerfen",
+  "export_monthly_rankings": "Monatliche Rangliste exportieren",
+  "select_month_to_export": "Monat für Export auswählen",
+  "monthly_branch_rankings_title": "Monatliche Filialrangliste - {month} {year}",
+  "top_3_branches": "Top 3 Leistungsstärkste Filialen",
+  "bottom_3_branches": "Untere 3 Filialen benötigen Verbesserung",
+  "rank": "Rang",
+  "branch_score": "Punktzahl",
+  "no_inspections_for_month": "Keine Inspektionen für {month} {year} gefunden"
 }

@@ -7,6 +7,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/inspection_model.dart';
 import 'package:intl/intl.dart';
+import '../helpers/app_helpers.dart';
 
 class ExcelExportService {
   /// Converts a list of inspections to a beautified Excel format and shares it.
@@ -307,6 +308,313 @@ class ExcelExportService {
     }
   }
 
+  /// Export all branches' monthly inspection records with top/bottom 3 rankings
+  static Future<void> exportMonthlyBranchRankings({
+    required List<InspectionModel> inspections,
+    required String monthName,
+    required int year,
+  }) async {
+    try {
+      if (inspections.isEmpty) {
+        throw Exception('No inspections data to export');
+      }
+
+      // Group inspections by branch
+      Map<String, List<InspectionModel>> branchInspections = {};
+      for (var inspection in inspections) {
+        if (!branchInspections.containsKey(inspection.branchId)) {
+          branchInspections[inspection.branchId] = [];
+        }
+        branchInspections[inspection.branchId]!.add(inspection);
+      }
+
+      // Calculate rankings using last inspection per branch
+      List<_BranchRanking> rankings = [];
+      for (var entry in branchInspections.entries) {
+        final lastInspection = entry.value.first; // Already sorted descending
+        final percentageStr = calculatePerformancePercent(lastInspection.score);
+        final percentage = double.tryParse(percentageStr) ?? 0.0;
+
+        rankings.add(
+          _BranchRanking(
+            branchName: lastInspection.branchName,
+            score: lastInspection.score,
+            percentage: percentage,
+          ),
+        );
+      }
+
+      // Sort by percentage descending (best first)
+      rankings.sort((a, b) => b.percentage.compareTo(a.percentage));
+
+      // 1. Create Excel workbook
+      var excel = Excel.createExcel();
+      Sheet sheet = excel['Sheet1'];
+
+      // 2. Define Styles
+      CellStyle headerStyle = CellStyle(
+        bold: true,
+        backgroundColorHex: ExcelColor.fromHexString('#BFC9D2'),
+        fontFamily: getFontFamily(FontFamily.Arial),
+      );
+
+      CellStyle titleStyle = CellStyle(
+        bold: true,
+        fontSize: 14,
+        fontFamily: getFontFamily(FontFamily.Arial),
+      );
+
+      CellStyle infoLabelStyle = CellStyle(
+        bold: true,
+        fontFamily: getFontFamily(FontFamily.Arial),
+      );
+
+      CellStyle rankingHeaderStyle = CellStyle(
+        bold: true,
+        fontSize: 12,
+        backgroundColorHex: ExcelColor.fromHexString('#4CAF50'),
+        fontFamily: getFontFamily(FontFamily.Arial),
+      );
+
+      CellStyle warningHeaderStyle = CellStyle(
+        bold: true,
+        fontSize: 12,
+        backgroundColorHex: ExcelColor.fromHexString('#FF9800'),
+        fontFamily: getFontFamily(FontFamily.Arial),
+      );
+
+      // 3. Add Header Section
+      int currentRow = 0;
+      // Merge title across 4 columns
+      sheet.merge(
+        CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: currentRow),
+        CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: currentRow),
+      );
+      _addCell(
+        sheet,
+        0,
+        currentRow,
+        'MONTHLY BRANCH RANKINGS REPORT',
+        style: titleStyle,
+      );
+      currentRow++;
+
+      _addCell(sheet, 0, currentRow, 'Month:', style: infoLabelStyle);
+      _addCell(sheet, 1, currentRow, '$monthName $year');
+      currentRow++;
+
+      _addCell(sheet, 0, currentRow, 'Total Branches:', style: infoLabelStyle);
+      _addCell(sheet, 1, currentRow, rankings.length);
+      currentRow++;
+
+      _addCell(
+        sheet,
+        0,
+        currentRow,
+        'Total Inspections:',
+        style: infoLabelStyle,
+      );
+      _addCell(sheet, 1, currentRow, inspections.length);
+      currentRow++;
+
+      _addCell(sheet, 0, currentRow, 'Generated At:', style: infoLabelStyle);
+      _addCell(
+        sheet,
+        1,
+        currentRow,
+        DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now()),
+      );
+      currentRow += 2;
+
+      // 4. Add Top 3 Branches Section
+      // Merge cells for section header (A to D)
+      sheet.merge(
+        CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: currentRow),
+        CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: currentRow),
+      );
+      _addCell(
+        sheet,
+        0,
+        currentRow,
+        '🏆 TOP 3 PERFORMING BRANCHES',
+        style: rankingHeaderStyle,
+      );
+      currentRow++;
+
+      _addCell(sheet, 0, currentRow, 'Rank', style: headerStyle);
+      _addCell(sheet, 1, currentRow, 'Branch Name', style: headerStyle);
+      _addCell(sheet, 2, currentRow, 'Score', style: headerStyle);
+      _addCell(sheet, 3, currentRow, 'Percentage', style: headerStyle);
+      currentRow++;
+
+      final top3 = rankings.take(3).toList();
+      for (int i = 0; i < top3.length; i++) {
+        _addCell(sheet, 0, currentRow, i + 1);
+        _addCell(sheet, 1, currentRow, top3[i].branchName);
+        _addCell(sheet, 2, currentRow, top3[i].score);
+        _addCell(
+          sheet,
+          3,
+          currentRow,
+          '${top3[i].percentage.toStringAsFixed(0)}%',
+        );
+        currentRow++;
+      }
+      currentRow++;
+
+      // 5. Add Bottom 3 Branches Section
+      // Merge cells for section header (A to D)
+      sheet.merge(
+        CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: currentRow),
+        CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: currentRow),
+      );
+      _addCell(
+        sheet,
+        0,
+        currentRow,
+        '⚠️ BOTTOM 3 BRANCHES (NEED IMPROVEMENT)',
+        style: warningHeaderStyle,
+      );
+      currentRow++;
+
+      _addCell(sheet, 0, currentRow, 'Rank', style: headerStyle);
+      _addCell(sheet, 1, currentRow, 'Branch Name', style: headerStyle);
+      _addCell(sheet, 2, currentRow, 'Score', style: headerStyle);
+      _addCell(sheet, 3, currentRow, 'Percentage', style: headerStyle);
+      currentRow++;
+
+      final bottom3 = rankings.reversed.take(3).toList().reversed.toList();
+      int bottomStartRank = rankings.length - bottom3.length + 1;
+      for (int i = 0; i < bottom3.length; i++) {
+        _addCell(sheet, 0, currentRow, bottomStartRank + i);
+        _addCell(sheet, 1, currentRow, bottom3[i].branchName);
+        _addCell(sheet, 2, currentRow, bottom3[i].score);
+        _addCell(
+          sheet,
+          3,
+          currentRow,
+          '${bottom3[i].percentage.toStringAsFixed(0)}%',
+        );
+        currentRow++;
+      }
+      currentRow += 2;
+
+      // 6. Add All Inspections Details
+      _addCell(
+        sheet,
+        0,
+        currentRow,
+        'ALL INSPECTION RECORDS',
+        style: titleStyle,
+      );
+      currentRow++;
+
+      // Collect all category columns
+      Set<String> categoryNames = {};
+      for (var inspection in inspections) {
+        categoryNames.addAll(inspection.categories.keys);
+      }
+      List<String> sortedCategories = categoryNames.toList()..sort();
+
+      // Build table headers
+      List<String> tableHeaders = [
+        'Branch Name',
+        'Inspector Name',
+        'Status',
+        'Scheduled Time',
+        'Completed Time',
+        'Overall Score',
+        'Representative Name',
+        'Overall Notes',
+        'Created At',
+      ];
+
+      for (var catName in sortedCategories) {
+        tableHeaders.add('$catName Score');
+        tableHeaders.add('$catName Notes');
+      }
+      tableHeaders.add('PDF Report URL');
+
+      for (int i = 0; i < tableHeaders.length; i++) {
+        _addCell(sheet, i, currentRow, tableHeaders[i], style: headerStyle);
+      }
+      currentRow++;
+
+      // 7. Sort inspections by score (highest to lowest) and add data rows
+      List<InspectionModel> sortedInspections = List.from(inspections);
+      sortedInspections.sort((a, b) {
+        // Extract numeric value from score string (e.g., "82.0/136" -> 82.0)
+        double scoreA = double.tryParse(a.score.split('/').first) ?? 0;
+        double scoreB = double.tryParse(b.score.split('/').first) ?? 0;
+        return scoreB.compareTo(scoreA); // Descending order
+      });
+
+      for (var inspection in sortedInspections) {
+        String formattedOverallScore = inspection.score.contains('/')
+            ? ' ${inspection.score}'
+            : inspection.score;
+
+        List<dynamic> rowValues = [
+          inspection.branchName,
+          inspection.inspectorName,
+          inspection.status,
+          inspection.scheduledTime,
+          inspection.completedTime != null
+              ? DateFormat('yyyy-MM-dd HH:mm').format(inspection.completedTime!)
+              : '',
+          formattedOverallScore,
+          inspection.branchRepresentativeName ?? '',
+          inspection.overallNotes,
+          DateFormat('yyyy-MM-dd HH:mm').format(inspection.createdAt),
+        ];
+
+        for (var catName in sortedCategories) {
+          final categoryData = inspection.categories[catName];
+          if (categoryData != null) {
+            String formattedCatScore = categoryData.score.contains('/')
+                ? ' ${categoryData.score}'
+                : categoryData.score;
+            rowValues.add(formattedCatScore);
+            rowValues.add(categoryData.notes);
+          } else {
+            rowValues.add('N/A');
+            rowValues.add('');
+          }
+        }
+        rowValues.add(inspection.pdfReportUrl ?? '');
+
+        for (int i = 0; i < rowValues.length; i++) {
+          _addCell(sheet, i, currentRow, rowValues[i]);
+        }
+        currentRow++;
+      }
+
+      // 8. Save and Share
+      final List<int>? fileBytes = excel.save();
+      if (fileBytes == null) {
+        throw Exception('Failed to generate Excel file bytes');
+      }
+
+      final String timestamp = DateFormat(
+        'yyyyMMdd_HHmmss',
+      ).format(DateTime.now());
+      final String fileName =
+          'Monthly_Rankings_${monthName}_${year}_$timestamp.xlsx'.replaceAll(
+            ' ',
+            '_',
+          );
+
+      await _saveAndShareFile(
+        bytes: fileBytes,
+        fileName: fileName,
+        shareTitle: 'Monthly Branch Rankings - $monthName $year',
+      );
+    } catch (e) {
+      debugPrint('Excel Export Error: $e');
+      rethrow;
+    }
+  }
+
   static void _addCell(
     Sheet sheet,
     int col,
@@ -392,4 +700,17 @@ class ExcelExportService {
       ),
     );
   }
+}
+
+// Helper class for branch ranking
+class _BranchRanking {
+  final String branchName;
+  final String score;
+  final double percentage;
+
+  _BranchRanking({
+    required this.branchName,
+    required this.score,
+    required this.percentage,
+  });
 }

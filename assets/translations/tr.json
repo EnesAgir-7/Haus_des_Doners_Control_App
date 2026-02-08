@@ -1099,5 +1099,13 @@
   "discard_changes": "Sil",
   "confirm_discard_title": "Silmeyi Onayla",
   "confirm_discard_message": "Tüm çalışmanızı silmek istediğinizden kesinlikle emin misiniz? Bu işlem geri alınamaz ve tüm ilerlemeniz kalıcı olarak kaybolacaktır.",
-  "yes_discard": "Evet, Sil"
+  "yes_discard": "Evet, Sil",
+  "export_monthly_rankings": "Aylık Sıralamayı Dışa Aktar",
+  "select_month_to_export": "Dışa Aktarılacak Ayı Seç",
+  "monthly_branch_rankings_title": "Aylık Şube Sıralaması - {month} {year}",
+  "top_3_branches": "En İyi 3 Performans Gösteren Şube",
+  "bottom_3_branches": "İyileştirme Gereken Alt 3 Şube",
+  "rank": "Sıra",
+  "branch_score": "Puan",
+  "no_inspections_for_month": "{month} {year} için denetim bulunamadı"
 }

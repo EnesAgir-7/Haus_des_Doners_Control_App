@@ -10,12 +10,14 @@ class BranchActionsMenuButton extends StatelessWidget {
   final VoidCallback onCreateAnnouncement;
   final VoidCallback onUpdateRequests;
   final VoidCallback onTrainingVideos;
+  final VoidCallback onMonthlyExport;
 
   const BranchActionsMenuButton({
     Key? key,
     required this.onCreateAnnouncement,
     required this.onUpdateRequests,
     required this.onTrainingVideos,
+    required this.onMonthlyExport,
   }) : super(key: key);
 
   @override
@@ -157,6 +159,53 @@ class BranchActionsMenuButton extends StatelessWidget {
           ),
         ),
 
+        // Monthly Export
+        PopupMenuItem<String>(
+          value: 'monthly_export',
+          padding: EdgeInsets.zero,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.file_download,
+                    color: Colors.green,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    LocaleKeys.export_monthly_rankings.tr(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        // Divider
+        PopupMenuItem<String>(
+          enabled: false,
+          padding: EdgeInsets.zero,
+          height: 1,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            height: 1,
+            color: Colors.white.withValues(alpha: 0.1),
+          ),
+        ),
+
         // Lightweight requests item using aggregation count() (returns only count, no full docs)
         PopupMenuItem<String>(
           value: 'requests',
@@ -237,6 +286,9 @@ class BranchActionsMenuButton extends StatelessWidget {
             break;
           case 'training_videos':
             onTrainingVideos();
+            break;
+          case 'monthly_export':
+            onMonthlyExport();
             break;
         }
       },

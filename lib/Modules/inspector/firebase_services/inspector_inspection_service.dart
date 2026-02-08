@@ -218,6 +218,37 @@ class InspectorInspectionService {
     }
   }
 
+  // Get all inspections for a specific month across all branches (for admin)
+  Future<List<InspectionModel>> getAllInspectionsByMonth(
+    int year,
+    int month,
+  ) async {
+    try {
+      final startOfMonth = DateTime(year, month, 1);
+      final endOfMonth = DateTime(year, month + 1, 1);
+
+      final snapshot = await _db
+          .collection(_collection)
+          .where(
+            InspectionFields.completedTime,
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+          )
+          .where(
+            InspectionFields.completedTime,
+            isLessThan: Timestamp.fromDate(endOfMonth),
+          )
+          .orderBy(InspectionFields.completedTime, descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => InspectionModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error getting all inspections by month: $e');
+      return [];
+    }
+  }
+
   // Get today's inspections for inspector
   Future<List<InspectionModel>> getTodaysInspections(String inspectorId) async {
     try {

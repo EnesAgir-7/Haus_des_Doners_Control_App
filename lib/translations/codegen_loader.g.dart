@@ -1129,7 +1129,15 @@ class CodegenLoader extends AssetLoader{
   "discard_changes": "Verwerfen",
   "confirm_discard_title": "Verwerfen bestätigen",
   "confirm_discard_message": "Sind Sie absolut sicher, dass Sie Ihre gesamte Arbeit verwerfen möchten? Diese Aktion kann nicht rückgängig gemacht werden und Ihr gesamter Fortschritt geht dauerhaft verloren.",
-  "yes_discard": "Ja, verwerfen"
+  "yes_discard": "Ja, verwerfen",
+  "export_monthly_rankings": "Monatliche Rangliste exportieren",
+  "select_month_to_export": "Monat für Export auswählen",
+  "monthly_branch_rankings_title": "Monatliche Filialrangliste - {month} {year}",
+  "top_3_branches": "Top 3 Leistungsstärkste Filialen",
+  "bottom_3_branches": "Untere 3 Filialen benötigen Verbesserung",
+  "rank": "Rang",
+  "branch_score": "Punktzahl",
+  "no_inspections_for_month": "Keine Inspektionen für {month} {year} gefunden"
 };
 static const Map<String,dynamic> _en = {
   "panel": "Home",
@@ -2262,7 +2270,15 @@ static const Map<String,dynamic> _en = {
   "discard_changes": "Discard",
   "confirm_discard_title": "Confirm Discard",
   "confirm_discard_message": "Are you absolutely sure you want to discard all your work? This action cannot be undone and all your progress will be lost permanently.",
-  "yes_discard": "Yes, Discard"
+  "yes_discard": "Yes, Discard",
+  "export_monthly_rankings": "Export Monthly Rankings",
+  "select_month_to_export": "Select Month to Export",
+  "monthly_branch_rankings_title": "Monthly Branch Rankings - {month} {year}",
+  "top_3_branches": "Top 3 Performing Branches",
+  "bottom_3_branches": "Bottom 3 Branches Need Improvement",
+  "rank": "Rank",
+  "branch_score": "Score",
+  "no_inspections_for_month": "No inspections found for {month} {year}"
 };
 static const Map<String,dynamic> _tr = {
   "panel": "Panel",
@@ -3365,7 +3381,15 @@ static const Map<String,dynamic> _tr = {
   "discard_changes": "Sil",
   "confirm_discard_title": "Silmeyi Onayla",
   "confirm_discard_message": "Tüm çalışmanızı silmek istediğinizden kesinlikle emin misiniz? Bu işlem geri alınamaz ve tüm ilerlemeniz kalıcı olarak kaybolacaktır.",
-  "yes_discard": "Evet, Sil"
+  "yes_discard": "Evet, Sil",
+  "export_monthly_rankings": "Aylık Sıralamayı Dışa Aktar",
+  "select_month_to_export": "Dışa Aktarılacak Ayı Seç",
+  "monthly_branch_rankings_title": "Aylık Şube Sıralaması - {month} {year}",
+  "top_3_branches": "En İyi 3 Performans Gösteren Şube",
+  "bottom_3_branches": "İyileştirme Gereken Alt 3 Şube",
+  "rank": "Sıra",
+  "branch_score": "Puan",
+  "no_inspections_for_month": "{month} {year} için denetim bulunamadı"
 };
 static const Map<String, Map<String,dynamic>> mapLocales = {"de": _de, "en": _en, "tr": _tr};
 }

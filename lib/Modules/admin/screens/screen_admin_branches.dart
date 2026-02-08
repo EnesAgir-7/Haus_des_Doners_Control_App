@@ -4,9 +4,12 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:haus_des_control/Modules/admin/screens/screen_admin_add_branch.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_services/excel_export_service.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../helpers/app_helpers.dart';
 import '../../../translations/locale_keys.g.dart';
+import '../../inspector/firebase_services/inspector_inspection_service.dart';
 import '../admin_providers/provider_admin_branches.dart';
 import '../widgets/admin_all_branches_menu_button.dart';
 import '../widgets/admin_branch_card.dart';
@@ -23,6 +26,9 @@ class ScreenAdminBranches extends StatefulWidget {
 
 class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
   final _searchController = TextEditingController();
+  final InspectorInspectionService _inspectionService =
+      InspectorInspectionService();
+  bool _isExporting = false;
 
   @override
   void initState() {
@@ -99,6 +105,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
                     ),
                   );
                 },
+                onMonthlyExport: _showMonthSelectionDialog,
               ),
             ],
           ),
@@ -487,5 +494,125 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
         // );
       },
     );
+  }
+
+  void _showMonthSelectionDialog() {
+    if (_isExporting) return;
+
+    // Generate last 12 months
+    final months = generateLast12Months();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.lightBlack,
+        title: Text(
+          LocaleKeys.select_month_to_export.tr(),
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: months.length,
+            itemBuilder: (context, index) {
+              final monthKey = months[index];
+              final parts = monthKey.split('-');
+              final month = int.parse(parts[0]);
+              final year = int.parse(parts[1]);
+              final monthName = getMonthNameFromKey(monthKey);
+
+              return ListTile(
+                leading: const Icon(
+                  Icons.calendar_today,
+                  color: AppColors.primaryRed,
+                ),
+                title: Text(
+                  '$monthName $year',
+                  style: const TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  _exportMonthlyBranchRankings(year, month, monthName);
+                },
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              LocaleKeys.cancel.tr(),
+              style: const TextStyle(color: Colors.white70),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _exportMonthlyBranchRankings(
+    int year,
+    int month,
+    String monthName,
+  ) async {
+    setState(() => _isExporting = true);
+
+    try {
+      // Fetch all inspections for the selected month
+      final inspections = await _inspectionService.getAllInspectionsByMonth(
+        year,
+        month,
+      );
+
+      if (!mounted) return;
+
+      if (inspections.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              LocaleKeys.no_inspections_for_month.tr(
+                namedArgs: {'month': monthName, 'year': year.toString()},
+              ),
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        setState(() => _isExporting = false);
+        return;
+      }
+
+      // Export using the Excel service
+      await ExcelExportService.exportMonthlyBranchRankings(
+        inspections: inspections,
+        monthName: monthName,
+        year: year,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(LocaleKeys.export_success.tr()),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            LocaleKeys.export_failed.tr(namedArgs: {'error': e.toString()}),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
+    }
   }
 }
