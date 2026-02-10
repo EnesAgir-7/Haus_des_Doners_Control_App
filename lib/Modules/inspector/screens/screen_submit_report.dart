@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
+import 'package:haus_des_control/common_services/crashlytics_service.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
@@ -177,17 +178,19 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             notes[categoryId] = note;
           }
 
-          // Get photos and convert to base64
+          // Get photos and store file paths (not photo data!)
+          // This prevents memory crashes with many photos
           final photos = provider.getCategoryPhotos(categoryId);
           if (photos.isNotEmpty) {
             final photoList = <String>[];
             for (final photo in photos) {
               try {
-                final bytes = await photo.readAsBytes();
-                final base64String = base64Encode(bytes);
-                photoList.add(base64String);
+                // Just store the file path, not the photo data
+                // This reduces memory usage from ~10MB per photo to ~100 bytes
+                photoList.add(photo.path);
               } catch (e) {
-                // Skip photos that can't be read
+                // Skip photos that can't be accessed
+                console('Warning: Could not access photo path: $e');
                 continue;
               }
             }
@@ -231,7 +234,18 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       }
 
       return savedHash;
-    } catch (e) {
+    } catch (e, st) {
+      // 📊 Log failure to Crashlytics with context
+      CrashlyticsService().logError(
+        e,
+        st,
+        reason: 'Failed to save draft report',
+        context: {
+          'branchId': widget.branchId ?? widget.selectedBranch?.id ?? 'unknown',
+          'categoryCount': provider.selectedTemplate?.categories.length ?? 0,
+        },
+      );
+
       if (mounted) {
         console("Failed to save draft: $e");
         // showSnakBarr(context, 'Failed to save draft');
@@ -289,23 +303,26 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       // ✅ CRITICAL: Also update the provider's enabled categories for validation
       provider.setEnabledCategories(_enabledCategories);
 
-      // Load photos - Note: We need to add photos one by one since there's no bulk setter
+      // Load photos from file paths (not base64!)
       final photosData = draftData['photos'] as Map<String, dynamic>? ?? {};
       for (final entry in photosData.entries) {
         final categoryId = entry.key;
-        final photoList = entry.value as List<dynamic>;
+        final photoPathList = entry.value as List<dynamic>;
 
-        for (final photoBase64 in photoList) {
+        for (final photoPath in photoPathList) {
           try {
-            final bytes = base64Decode(photoBase64 as String);
-            final tempDir = await Directory.systemTemp.createTemp();
-            final tempFile = File(
-              '${tempDir.path}/draft_photo_${DateTime.now().millisecondsSinceEpoch}.jpg',
-            );
-            await tempFile.writeAsBytes(bytes);
-            provider.addCategoryPhoto(categoryId, tempFile);
+            // Load photo directly from stored path
+            final photoFile = File(photoPath as String);
+
+            // Verify file still exists before adding
+            if (await photoFile.exists()) {
+              provider.addCategoryPhoto(categoryId, photoFile);
+            } else {
+              console('Warning: Draft photo not found at path: $photoPath');
+            }
           } catch (e) {
-            // Skip corrupted photos
+            // Skip photos that can't be loaded
+            console('Warning: Failed to load draft photo: $e');
             continue;
           }
         }
@@ -336,7 +353,17 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       if (mounted) {
         showSnakBarr(context, LocaleKeys.draft_report_loaded.tr());
       }
-    } catch (e) {
+    } catch (e, st) {
+      // 📊 Log failure to Crashlytics
+      CrashlyticsService().logError(
+        e,
+        st,
+        reason: 'Failed to load draft report',
+        context: {
+          'branchId': widget.branchId ?? widget.selectedBranch?.id ?? 'unknown',
+        },
+      );
+
       if (mounted) {
         showSnakBarr(context, LocaleKeys.generic_error.tr());
       }
@@ -724,8 +751,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
       final allowedImages = selectedImages.take(remaining);
 
       for (final image in allowedImages) {
-        final file = File(image.path);
-        provider.addCategoryPhoto(category, file);
+        final originalFile = File(image.path);
+
+        // Immediate compression for efficiency (draft storage & submission speed)
+        final compressedFile = await provider.compressImage(originalFile);
+        provider.addCategoryPhoto(category, compressedFile);
       }
     } catch (e, st) {
       debugPrint('Error picking from gallery: $e\n$st');
@@ -745,7 +775,7 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
       if (photo == null || !mounted) return;
 
-      final file = File(photo.path);
+      final originalFile = File(photo.path);
       final provider = context.read<ProviderControl>();
 
       if (provider.getCategoryPhotos(category).length >= 4) {
@@ -753,7 +783,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         return;
       }
 
-      provider.addCategoryPhoto(category, file);
+      // Immediate compression for efficiency
+      final compressedFile = await provider.compressImage(originalFile);
+      provider.addCategoryPhoto(category, compressedFile);
     } catch (e, st) {
       debugPrint('Error taking photo: $e\n$st');
       if (mounted) {

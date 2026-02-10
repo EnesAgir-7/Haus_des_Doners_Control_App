@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -45,11 +46,20 @@ class InspectorOneDriveService {
     };
     console(body);
     try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: body,
-      );
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: body,
+          )
+          .timeout(
+            const Duration(seconds: 60), // 60 second timeout for token requests
+            onTimeout: () {
+              throw TimeoutException(
+                'Token request timed out after 60 seconds',
+              );
+            },
+          );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -67,6 +77,9 @@ class InspectorOneDriveService {
           '${LocaleKeys.failedToGetAccessToken.tr()}: ${error['error_description'] ?? response.body}',
         );
       }
+    } on TimeoutException {
+      print('❌ Token request timed out');
+      rethrow;
     } catch (e) {
       print('❌ Token request failed: $e');
       rethrow;
@@ -327,22 +340,40 @@ class InspectorOneDriveService {
       '${OneDriveConfig.graphApiBaseUrl}/${_driveRoot()}:/$fullPath:/content',
     );
 
-    final response = await http.put(
-      url,
-      headers: {
-        'Authorization': 'Bearer $_accessToken',
-        'Content-Type': lookupMimeType(fileName) ?? 'application/octet-stream',
-      },
-      body: bytes,
-    );
+    try {
+      final response = await http
+          .put(
+            url,
+            headers: {
+              'Authorization': 'Bearer $_accessToken',
+              'Content-Type':
+                  lookupMimeType(fileName) ?? 'application/octet-stream',
+            },
+            body: bytes,
+          )
+          .timeout(
+            const Duration(seconds: 600), // 10 minutes timeout for large files
+            onTimeout: () {
+              throw TimeoutException(
+                'Upload timed out after 600 seconds (10 minutes) for file: $fileName',
+              );
+            },
+          );
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      print('✅ Upload successful: $fileName');
-    } else {
-      final error = jsonDecode(response.body);
-      throw Exception(
-        '${LocaleKeys.uploadFailed.tr()} "$fileName": ${error['error']?['message'] ?? response.body}',
-      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print('✅ Upload successful: $fileName');
+      } else {
+        final error = jsonDecode(response.body);
+        throw Exception(
+          '${LocaleKeys.uploadFailed.tr()} "$fileName": ${error['error']?['message'] ?? response.body}',
+        );
+      }
+    } on TimeoutException {
+      print('❌ Upload timeout for $fileName after 600 seconds (10 minutes)');
+      rethrow;
+    } catch (e) {
+      print('❌ Upload failed for $fileName: $e');
+      rethrow;
     }
   }
 
@@ -488,15 +519,38 @@ class InspectorOneDriveService {
     final folderPath = await createImagesFolder(branchName, timestamp);
 
     for (int i = 0; i < images.length; i++) {
-      try {
-        await _uploadFile(file: images[i], remotePath: folderPath);
+      int attempts = 0;
+      bool uploaded = false;
+      Exception? lastError;
 
-        if (onProgress != null) {
-          onProgress(i + 1, images.length);
+      while (attempts < 3 && !uploaded) {
+        try {
+          await _uploadFile(file: images[i], remotePath: folderPath);
+          uploaded = true;
+
+          if (onProgress != null) {
+            onProgress(i + 1, images.length);
+          }
+        } catch (e) {
+          attempts++;
+          lastError = e as Exception;
+          print('❌ Failed to upload image ${i + 1} (attempt $attempts): $e');
+
+          if (attempts < 3) {
+            // Exponential backoff: 2s, 4s, 8s
+            final delaySeconds = attempts * 2;
+            print(
+              '🔄 Retrying upload for image ${i + 1} in ${delaySeconds}s...',
+            );
+            await Future.delayed(Duration(seconds: delaySeconds));
+          }
         }
-      } catch (e) {
-        print('❌ Failed to upload image ${i + 1}: $e');
-        rethrow;
+      }
+
+      if (!uploaded) {
+        throw Exception(
+          'Failed to upload image ${i + 1} after 3 attempts: ${lastError ?? "Unknown error"}',
+        );
       }
     }
   }

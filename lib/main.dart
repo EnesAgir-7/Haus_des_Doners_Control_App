@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -13,6 +14,7 @@ import 'package:haus_des_control/Modules/admin/screens/admin_bottom_nav_bar.dart
 import 'package:haus_des_control/Modules/inspector/providers/provider_route.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_tasks.dart';
 import 'package:haus_des_control/Modules/inspector/providers/provider_vehicle.dart';
+import 'package:haus_des_control/common_services/crashlytics_service.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:haus_des_control/core/constants/app_constants.dart';
 import 'package:haus_des_control/core/constants/firebase_constants.dart';
@@ -59,59 +61,78 @@ import 'routes/app_routes.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-  AppEnvironment.printEnvironment();
+      AppEnvironment.printEnvironment();
 
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(options: AppEnvironment.firebaseOptions);
-  }
-  await RemoteConfigService().initialize();
-  await AppUpdateService().initialize();
-  await EasyLocalization.ensureInitialized();
-  await dotenv.load(fileName: ".env");
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(options: AppEnvironment.firebaseOptions);
+      }
 
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      systemNavigationBarColor: AppColors.primaryDark,
-      systemNavigationBarIconBrightness: Brightness.light,
-    ),
-  );
+      // ✅ Initialize Crashlytics for crash reporting
+      CrashlyticsService.initialize();
 
-  // Initialize FCM (non-blocking with automatic retry)
-  FCMHelper.instance
-      .initialize(
-        onMessageReceived: (RemoteMessage message) {
-          // console('Message received: ${message.notification?.title}');
-        },
-        onMessageOpenedApp: (RemoteMessage message) {
-          // console('Notification opened: ${message.data}');
-          // Navigate based on message.data
-        },
-      )
-      .catchError((e) {
-        console('⚠️ FCM initialization failed, will retry automatically: $e');
-        // App continues working, FCM will retry in background
+      await RemoteConfigService().initialize();
+      await AppUpdateService().initialize();
+      await EasyLocalization.ensureInitialized();
+      await dotenv.load(fileName: ".env");
+
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          systemNavigationBarColor: AppColors.primaryDark,
+          systemNavigationBarIconBrightness: Brightness.light,
+        ),
+      );
+
+      // Initialize FCM (non-blocking with automatic retry)
+      FCMHelper.instance
+          .initialize(
+            onMessageReceived: (RemoteMessage message) {
+              // console('Message received: ${message.notification?.title}');
+            },
+            onMessageOpenedApp: (RemoteMessage message) {
+              // console('Notification opened: ${message.data}');
+              // Navigate based on message.data
+            },
+          )
+          .catchError((e) {
+            console(
+              '⚠️ FCM initialization failed, will retry automatically: $e',
+            );
+            // App continues working, FCM will retry in background
+          });
+
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]).then((v) {
+        runApp(
+          EasyLocalization(
+            path: 'assets/translations',
+            assetLoader: const CodegenLoader(),
+            supportedLocales: const [Locale('en'), Locale('de'), Locale('tr')],
+            fallbackLocale: const Locale('de'),
+            saveLocale: true,
+            startLocale: const Locale('de'),
+            useOnlyLangCode: true,
+            useFallbackTranslationsForEmptyResources: true,
+            child: const MyApp(),
+          ),
+        );
       });
-
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]).then((v) {
-    runApp(
-      EasyLocalization(
-        path: 'assets/translations',
-        assetLoader: const CodegenLoader(),
-        supportedLocales: const [Locale('en'), Locale('de'), Locale('tr')],
-        fallbackLocale: const Locale('de'),
-        saveLocale: true,
-        startLocale: const Locale('de'),
-        useOnlyLangCode: true,
-        useFallbackTranslationsForEmptyResources: true,
-        child: const MyApp(),
-      ),
-    );
-  });
+    },
+    (error, stack) {
+      // Catch errors outside of Flutter framework
+      CrashlyticsService().logError(
+        error,
+        stack,
+        reason: 'Uncaught error',
+        fatal: true,
+      );
+    },
+  );
 }
 
 class MyApp extends StatelessWidget {
