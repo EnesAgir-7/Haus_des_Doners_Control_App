@@ -13,6 +13,7 @@ import 'package:haus_des_control/common_services/crashlytics_service.dart';
 import 'package:haus_des_control/models/draft_report.dart';
 import 'package:haus_des_control/services/draft_storage_service.dart';
 import 'package:haus_des_control/services/file_storage_service.dart';
+import '../widgets/image_preview_screen.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
@@ -1616,14 +1617,32 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                                                     ),
                                                   ],
                                                 ),
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(16),
-                                                  child: Image.file(
-                                                    photos[index],
-                                                    width: 110,
-                                                    height: 110,
-                                                    fit: BoxFit.cover,
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            ImagePreviewScreen(
+                                                              imageFile:
+                                                                  photos[index],
+                                                              imageTitle:
+                                                                  'Photo ${index + 1}',
+                                                            ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  child: ClipRRect(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          16,
+                                                        ),
+                                                    child: Image.file(
+                                                      photos[index],
+                                                      width: 110,
+                                                      height: 110,
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
