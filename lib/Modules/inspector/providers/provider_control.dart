@@ -610,9 +610,9 @@ class ProviderControl extends ChangeNotifier {
       final compressedBytes =
           await FlutterImageCompress.compressWithFile(
             imageFile.absolute.path,
-            quality: 70, // Adjust quality as needed
-            minWidth: 1920,
-            minHeight: 1080,
+            quality: 65, // Balanced compression for smaller size
+            minWidth: 1600,
+            minHeight: 900,
           ).timeout(
             const Duration(seconds: 30),
             onTimeout: () {
@@ -936,5 +936,3 @@ class ProviderControl extends ChangeNotifier {
     );
   }
 }
-
-
