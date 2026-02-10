@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -9,9 +8,11 @@ import 'package:haus_des_control/Modules/inspector/widgets/custom_toast.dart';
 import 'package:haus_des_control/core/console.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:signature/signature.dart';
 import 'package:haus_des_control/common_services/crashlytics_service.dart';
+import 'package:haus_des_control/models/draft_report.dart';
+import 'package:haus_des_control/services/draft_storage_service.dart';
+import 'package:haus_des_control/services/file_storage_service.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_constants.dart';
@@ -54,6 +55,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   Timer? _autoSaveTimer;
   String? _lastSavedHash;
   bool _isSaveDialogOpen = false;
+
+  // Hive storage services
+  final DraftStorageService _draftStorageService = DraftStorageService();
+  final FileStorageService _fileStorageService = FileStorageService();
 
   @override
   void initState() {
@@ -101,9 +106,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
     super.dispose();
   }
 
-  // Draft saving and loading methods
-  String _getDraftKey() {
-    return 'draft_report_${widget.branchId ?? widget.selectedBranch?.id ?? 'unknown'}';
+  // Get branch ID for draft storage
+  String _getBranchId() {
+    return widget.branchId ?? widget.selectedBranch?.id ?? 'unknown';
   }
 
   bool _hasUnsavedData(ProviderControl provider) {
@@ -152,13 +157,12 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
   Future<String?> _saveDraftReport(ProviderControl provider) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final draftKey = _getDraftKey();
+      final branchId = _getBranchId();
 
       // Collect data from all categories
       final scores = <String, int>{};
       final notes = <String, String>{};
-      final photosData = <String, List<String>>{};
+      final photoPaths = <String, List<String>>{};
 
       if (provider.selectedTemplate != null) {
         for (final category in provider.selectedTemplate!.categories) {
@@ -178,77 +182,101 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             notes[categoryId] = note;
           }
 
-          // Get photos and store file paths (not photo data!)
-          // This prevents memory crashes with many photos
+          // Get photos and copy to permanent storage
           final photos = provider.getCategoryPhotos(categoryId);
           if (photos.isNotEmpty) {
             final photoList = <String>[];
             for (final photo in photos) {
               try {
-                // Just store the file path, not the photo data
-                // This reduces memory usage from ~10MB per photo to ~100 bytes
-                photoList.add(photo.path);
+                // ✅ Copy to permanent app directory (not temp!)
+                final permanentPath = await _fileStorageService
+                    .copyImageToPermanentStorage(photo);
+                photoList.add(permanentPath);
               } catch (e) {
-                // Skip photos that can't be accessed
-                console('Warning: Could not access photo path: $e');
+                console(
+                  '⚠️ Warning: Could not copy photo to permanent storage: $e',
+                );
                 continue;
               }
             }
             if (photoList.isNotEmpty) {
-              photosData[categoryId] = photoList;
+              photoPaths[categoryId] = photoList;
             }
           }
         }
       }
 
-      final draftData = {
-        'scores': scores,
-        'notes': notes,
-        'overallNotes': _overallNotesController.text,
-        'photos': photosData,
-        // Persist which questions are enabled/disabled
-        'enabledCategories': _enabledCategories.map(
-          (key, value) => MapEntry(key, value),
-        ),
-        'inspectorSignature': provider.inspectorSignature != null
-            ? base64Encode(provider.inspectorSignature!)
-            : null,
-        'branchSignature': provider.branchSignature != null
-            ? base64Encode(provider.branchSignature!)
-            : null,
-        'branchRepName': _branchRepNameController.text,
-        'savedAt': DateTime.now().toIso8601String(),
-        'branchId': widget.branchId ?? widget.selectedBranch?.id ?? '',
-        'branchTemplateId': widget.branchTemplateId ?? '',
-      };
+      // Save signatures as files (not base64!)
+      String? inspectorSigPath;
+      String? branchSigPath;
 
-      final jsonData = jsonEncode(draftData);
-      await prefs.setString(draftKey, jsonData);
+      if (provider.inspectorSignature != null) {
+        try {
+          inspectorSigPath = await _fileStorageService
+              .saveSignatureToPermanentStorage(
+                provider.inspectorSignature!,
+                'inspector_sig',
+              );
+        } catch (e) {
+          console('⚠️ Failed to save inspector signature: $e');
+        }
+      }
+
+      if (provider.branchSignature != null) {
+        try {
+          branchSigPath = await _fileStorageService
+              .saveSignatureToPermanentStorage(
+                provider.branchSignature!,
+                'branch_sig',
+              );
+        } catch (e) {
+          console('⚠️ Failed to save branch signature: $e');
+        }
+      }
+
+      // Create Hive draft model
+      final draft = DraftReport(
+        branchId: branchId,
+        branchTemplateId: widget.branchTemplateId ?? '',
+        scores: scores,
+        notes: notes,
+        photoPaths: photoPaths,
+        inspectorSignaturePath: inspectorSigPath,
+        branchSignaturePath: branchSigPath,
+        overallNotes: _overallNotesController.text,
+        enabledCategories: Map.from(_enabledCategories),
+        savedAt: DateTime.now(),
+        branchRepName: _branchRepNameController.text,
+      );
+
+      // Save to Hive database
+      final success = await _draftStorageService.saveDraft(draft);
+
+      if (!success) {
+        throw Exception('Failed to save draft to database');
+      }
 
       // Generate hash of what was saved
       final savedHash = _generateStateHash(provider);
 
       if (mounted) {
-        console("Draft saved successfully");
-        // showSnakBarr(context, 'Draft saved successfully');
+        console("✅ Draft saved successfully to Hive");
       }
 
       return savedHash;
     } catch (e, st) {
-      // 📊 Log failure to Crashlytics with context
       CrashlyticsService().logError(
         e,
         st,
-        reason: 'Failed to save draft report',
+        reason: 'Failed to save draft report to Hive',
         context: {
-          'branchId': widget.branchId ?? widget.selectedBranch?.id ?? 'unknown',
+          'branchId': _getBranchId(),
           'categoryCount': provider.selectedTemplate?.categories.length ?? 0,
         },
       );
 
       if (mounted) {
-        console("Failed to save draft: $e");
-        // showSnakBarr(context, 'Failed to save draft');
+        console("❌ Failed to save draft: $e");
       }
       return null;
     }
@@ -256,97 +284,95 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
   Future<void> _loadDraftReport(ProviderControl provider) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final draftKey = _getDraftKey();
+      final branchId = _getBranchId();
 
-      final jsonData = prefs.getString(draftKey);
-      if (jsonData == null) return;
+      // ✅ Try migration from SharedPreferences first (one-time operation)
+      await _draftStorageService.migrateFromSharedPreferences(branchId);
 
-      final draftData = jsonDecode(jsonData) as Map<String, dynamic>;
+      // Load draft from Hive
+      final draft = await _draftStorageService.loadDraft(branchId);
+      if (draft == null) {
+        console('ℹ️ No draft found');
+        return;
+      }
 
       // Load scores
-      final scores = draftData['scores'] as Map<String, dynamic>? ?? {};
-      for (final entry in scores.entries) {
-        provider.setCategoryScore(entry.key, entry.value as int);
+      for (final entry in draft.scores.entries) {
+        provider.setCategoryScore(entry.key, entry.value);
       }
 
       // Load notes
-      final notes = draftData['notes'] as Map<String, dynamic>? ?? {};
-      for (final entry in notes.entries) {
-        final noteText = entry.value as String;
-        provider.setCategoryNotes(entry.key, noteText);
+      for (final entry in draft.notes.entries) {
+        provider.setCategoryNotes(entry.key, entry.value);
         // Also set the controller text
         if (!_categoryNotesControllers.containsKey(entry.key)) {
           _categoryNotesControllers[entry.key] = TextEditingController();
         }
-        _categoryNotesControllers[entry.key]!.text = noteText;
+        _categoryNotesControllers[entry.key]!.text = entry.value;
       }
 
       // Load overall notes
-      final overallNotes = draftData['overallNotes'] as String? ?? '';
-      _overallNotesController.text = overallNotes;
+      _overallNotesController.text = draft.overallNotes ?? '';
 
       // Load branch representative name
-      final branchRepName = draftData['branchRepName'] as String? ?? '';
-      _branchRepNameController.text = branchRepName;
-      provider.setBranchRepresentativeName(branchRepName);
+      _branchRepNameController.text = draft.branchRepName ?? '';
+      provider.setBranchRepresentativeName(draft.branchRepName);
 
-      // Load enabled/disabled state for questions (optional)
-      final enabledCategories =
-          draftData['enabledCategories'] as Map<String, dynamic>? ?? {};
+      // Load enabled/disabled state for questions
       _enabledCategories
         ..clear()
-        ..addAll(
-          enabledCategories.map((key, value) => MapEntry(key, value as bool)),
-        );
+        ..addAll(draft.enabledCategories);
 
-      // ✅ CRITICAL: Also update the provider's enabled categories for validation
+      // ✅ Update the provider's enabled categories for validation
       provider.setEnabledCategories(_enabledCategories);
 
-      // Load photos from file paths (not base64!)
-      final photosData = draftData['photos'] as Map<String, dynamic>? ?? {};
-      for (final entry in photosData.entries) {
+      // Load photos from permanent file paths
+      for (final entry in draft.photoPaths.entries) {
         final categoryId = entry.key;
-        final photoPathList = entry.value as List<dynamic>;
+        final photoPathList = entry.value;
 
         for (final photoPath in photoPathList) {
           try {
-            // Load photo directly from stored path
-            final photoFile = File(photoPath as String);
+            final photoFile = File(photoPath);
 
             // Verify file still exists before adding
             if (await photoFile.exists()) {
               provider.addCategoryPhoto(categoryId, photoFile);
             } else {
-              console('Warning: Draft photo not found at path: $photoPath');
+              console('⚠️ Draft photo not found at path: $photoPath');
             }
           } catch (e) {
-            // Skip photos that can't be loaded
-            console('Warning: Failed to load draft photo: $e');
+            console('⚠️ Failed to load draft photo: $e');
             continue;
           }
         }
       }
 
-      // Load signatures
-      final inspectorSignatureBase64 =
-          draftData['inspectorSignature'] as String?;
-      if (inspectorSignatureBase64 != null) {
+      // Load inspector signature from file
+      if (draft.inspectorSignaturePath != null) {
         try {
-          provider.setInspectorSignature(
-            base64Decode(inspectorSignatureBase64),
+          final sigBytes = await _fileStorageService.loadSignatureFromFile(
+            draft.inspectorSignaturePath!,
           );
+          if (sigBytes != null) {
+            provider.setInspectorSignature(sigBytes);
+          }
         } catch (e) {
-          // Skip corrupted signature
+          console('⚠️ Failed to load inspector signature: $e');
         }
       }
 
-      final branchSignatureBase64 = draftData['branchSignature'] as String?;
-      if (branchSignatureBase64 != null) {
+      // Load branch signature from file
+      if (draft.branchSignaturePath != null) {
         try {
-          provider.setBranchSignature(base64Decode(branchSignatureBase64));
+          final sigBytes = await _fileStorageService.loadSignatureFromFile(
+            draft.branchSignaturePath!,
+          );
+          if (sigBytes != null) {
+            provider.setBranchSignature(sigBytes);
+          }
         } catch (e) {
-          // Skip corrupted signature
+          console('⚠️ Failed to load branch signature: $e');
         }
       }
 
@@ -354,14 +380,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         showSnakBarr(context, LocaleKeys.draft_report_loaded.tr());
       }
     } catch (e, st) {
-      // 📊 Log failure to Crashlytics
       CrashlyticsService().logError(
         e,
         st,
-        reason: 'Failed to load draft report',
-        context: {
-          'branchId': widget.branchId ?? widget.selectedBranch?.id ?? 'unknown',
-        },
+        reason: 'Failed to load draft report from Hive',
+        context: {'branchId': _getBranchId()},
       );
 
       if (mounted) {
@@ -372,13 +395,14 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
 
   Future<void> _clearDraftReport() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final draftKey = _getDraftKey();
-      await prefs.remove(draftKey);
+      final branchId = _getBranchId();
+      await _draftStorageService.deleteDraft(branchId);
       _lastSavedHash = null;
       _enabledCategories.clear();
+      console('✅ Draft cleared successfully');
     } catch (e) {
-      // Ignore errors when clearing draft
+      console('⚠️ Error clearing draft: $e');
+      // Ignore errors when clearing draft - best effort
     }
   }
 

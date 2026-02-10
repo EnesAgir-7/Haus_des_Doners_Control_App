@@ -57,6 +57,7 @@ import 'core/constants/app_colors.dart';
 import 'core/global_focus_manager.dart';
 import 'core/theme/app_theme.dart';
 import 'routes/app_routes.dart';
+import 'services/draft_storage_service.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -73,6 +74,9 @@ void main() async {
 
       // ✅ Initialize Crashlytics for crash reporting
       CrashlyticsService.initialize();
+
+      // ✅ Initialize Hive database for draft storage
+      await DraftStorageService.initialize();
 
       await RemoteConfigService().initialize();
       await AppUpdateService().initialize();
