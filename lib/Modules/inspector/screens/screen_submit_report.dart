@@ -956,21 +956,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
                                         entry.value.categoryId,
                                         val,
                                       );
-                                      // Also update the controller
-                                      if (!_categoryNotesControllers
-                                          .containsKey(
-                                            entry.value.categoryId,
-                                          )) {
-                                        _categoryNotesControllers[entry
-                                                .value
-                                                .categoryId] =
-                                            TextEditingController();
-                                      }
-                                      _categoryNotesControllers[entry
-                                                  .value
-                                                  .categoryId]!
-                                              .text =
-                                          val;
+                                      // NOTE: Do NOT set controller.text = val here.
+                                      // The controller already holds the correct value
+                                      // (it drives the TextField). Setting .text directly
+                                      // resets the cursor to the end, breaking in-place
+                                      // editing of misspelled words.
                                     },
                                     onPhotoRemoved: (val) =>
                                         provider.removeCategoryPhoto(
