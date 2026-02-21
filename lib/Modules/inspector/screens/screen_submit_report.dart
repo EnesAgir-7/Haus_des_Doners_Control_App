@@ -189,6 +189,13 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
             final photoList = <String>[];
             for (final photo in photos) {
               try {
+                // ✅ Check if photo is already in permanent storage to avoid duplicates
+                // Files in permanent storage are in the 'draft_images' directory
+                if (photo.path.contains('/draft_images/')) {
+                  photoList.add(photo.path);
+                  continue;
+                }
+
                 // ✅ Copy to permanent app directory (not temp!)
                 final permanentPath = await _fileStorageService
                     .copyImageToPermanentStorage(photo);
@@ -312,8 +319,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         _categoryNotesControllers[entry.key]!.text = entry.value;
       }
 
-      // Load overall notes
-      _overallNotesController.text = draft.overallNotes ?? '';
+      // Load overall notes and sync with provider
+      final loadedOverallNotes = draft.overallNotes ?? '';
+      _overallNotesController.text = loadedOverallNotes;
+      provider.setOverallNotes(loadedOverallNotes);
 
       // Load branch representative name
       _branchRepNameController.text = draft.branchRepName ?? '';
@@ -423,9 +432,10 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         final notes = controller?.text ?? provider.getCategoryNotes(categoryId);
         buffer.write('notes_$categoryId:$notes|');
 
-        // Add photo count
+        // Add photo paths for better change detection (detect swaps)
         final photos = provider.getCategoryPhotos(categoryId);
-        buffer.write('photos_$categoryId:${photos.length}|');
+        final photoPaths = photos.map((f) => f.path).join(',');
+        buffer.write('photos_$categoryId:$photoPaths|');
 
         // Add enabled/disabled state
         final isEnabled = _enabledCategories[categoryId] ?? true;
@@ -2563,7 +2573,9 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
   }
 
   Future<void> _submitInspection(ProviderControl provider) async {
-    for (var category in provider.selectedTemplate!.categories) {
+    final categories = provider.selectedTemplate!.categories;
+    for (int i = 0; i < categories.length; i++) {
+      final category = categories[i];
       // Skip disabled questions – they are treated as not applicable
       final isEnabled = _enabledCategories[category.categoryId] ?? true;
       if (!isEnabled) continue;
@@ -2578,10 +2590,11 @@ class _ScreenSubmitReportState extends State<ScreenSubmitReport>
         final missingPhotos = photos.isEmpty;
 
         if (missingNotes || missingPhotos) {
+          final questionNumber = i + 1;
           final message = StringBuffer(
             LocaleKeys.categoryRequires.tr().replaceFirst(
               '{categoryName}',
-              category.title,
+              'Q$questionNumber · ${category.title}',
             ),
           );
           if (missingNotes) message.write(' ${LocaleKeys.note.tr()}');
