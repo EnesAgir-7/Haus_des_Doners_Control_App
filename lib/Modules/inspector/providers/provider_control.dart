@@ -776,19 +776,19 @@ class ProviderControl extends ChangeNotifier {
         }
       }
 
-      // Prepare category data
+      // Prepare category data using points (0-100) instead of raw marks (1-5)
       final List<CategoryScore> categoryScores = selectedTemplate!.categories
           .map((category) {
             final categoryId = category.categoryId;
             final isEnabled = _enabledCategories[categoryId] ?? true;
             final isSkipped = !isEnabled; // Question is skipped if disabled
-            final score = _scores[categoryId] ?? 0;
+            final mark = _scores[categoryId] ?? 0;
 
             return CategoryScore(
-              maxScore: 5, // Show raw mark scale (1-5)
+              maxScore: 100, // Show points scale
               categoryId: categoryId,
               title: category.title,
-              score: score, // Pass raw mark (1, 2, 3, 4, 5)
+              score: mapScoreToPoints(mark), // Convert mark to points
               notes: _notes[categoryId] ?? '',
               photoCount: (_photos[categoryId] ?? []).length,
               isSkipped: isSkipped, // Mark as skipped if disabled
@@ -858,25 +858,9 @@ class ProviderControl extends ChangeNotifier {
           })
           .toList();
 
-      // Calculate total score excluding skipped questions
-      final enabledScore = selectedTemplate!.categories.fold<double>(0.0, (
-        sum,
-        cat,
-      ) {
-        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
-        if (!isEnabled) return sum;
-        return sum + (_scores[cat.categoryId] ?? 0).toDouble();
-      });
-
-      // Calculate max possible score excluding skipped questions
-      final enabledMaxScore = selectedTemplate!.categories.fold<double>(0.0, (
-        sum,
-        cat,
-      ) {
-        final isEnabled = _enabledCategories[cat.categoryId] ?? true;
-        if (!isEnabled) return sum;
-        return sum + cat.maxScore.toDouble();
-      });
+      // Use consistent points-based getters for header
+      final enabledScore = totalScore;
+      final enabledMaxScore = maxPossibleScore.toDouble();
 
       // Create PDF generator
       final pdfGenerator = InspectionPDFGenerator(
