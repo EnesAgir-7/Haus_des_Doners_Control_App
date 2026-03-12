@@ -30,3 +30,4 @@ key.properties
 *.env
 ios/Flutter/Debug.xcconfig
 ios/Flutter/Release.xcconfig
+ios/Flutter/DartDefines.xcconfig
