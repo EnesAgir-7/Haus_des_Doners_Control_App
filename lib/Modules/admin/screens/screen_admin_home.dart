@@ -9,8 +9,8 @@ import 'package:tuple/tuple.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/firebase_constants.dart';
 import '../../../translations/locale_keys.g.dart';
-import '../../inspector/providers/provider_tasks.dart';
 import '../admin_providers/provider_admin_bottombar.dart';
+import '../admin_providers/provider_admin_tasks.dart';
 import '../admin_providers/provider_admin_vehicle.dart';
 import '../widgets/admin_recent_inspections_section.dart';
 
@@ -40,7 +40,9 @@ class _ScreenAdminHomeState extends State<ScreenAdminHome>
     );
     _animController.forward();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProviderAdminTasks>().initialize();
+    });
   }
 
   @override
@@ -231,9 +233,9 @@ class DashboardCard extends StatelessWidget {
                   );
                 },
               ),
-              Selector<ProviderTasks, Tuple2<bool, int>>(
+              Selector<ProviderAdminTasks, Tuple2<bool, int>>(
                 selector: (_, provider) =>
-                    Tuple2(provider.isLoading, provider.tasks.length),
+                    Tuple2(provider.isLoading, provider.allTasks.length),
                 builder: (_, data, __) {
                   final isLoading = data.item1;
                   final count = data.item2;
