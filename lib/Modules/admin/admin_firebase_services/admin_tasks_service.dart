@@ -82,6 +82,7 @@ class AdminTaskService {
           batch: batch,
           inspectorId: task.assignedInspectorId,
           updates: {IHF.tasksTotal: FieldValue.increment(-1)},
+          targetDate: task.createdAt,
         );
       }
 
@@ -325,6 +326,7 @@ class AdminTaskService {
           if (isCurrentlyCompleted)
             IHF.tasksCompleted: FieldValue.increment(-1),
         },
+        targetDate: currentTask.createdAt,
       );
 
       // Increment for new inspector (using FINAL status)
@@ -335,6 +337,7 @@ class AdminTaskService {
           IHF.tasksTotal: FieldValue.increment(1),
           if (willBeCompleted) IHF.tasksCompleted: FieldValue.increment(1),
         },
+        targetDate: currentTask.createdAt,
       );
     }
     // Only handle status changes if inspector didn't change
@@ -345,6 +348,7 @@ class AdminTaskService {
           batch: batch,
           inspectorId: currentTask.assignedInspectorId,
           updates: {IHF.tasksCompleted: FieldValue.increment(1)},
+          targetDate: currentTask.createdAt,
         );
       }
       // Task marked as not completed
@@ -353,6 +357,7 @@ class AdminTaskService {
           batch: batch,
           inspectorId: currentTask.assignedInspectorId,
           updates: {IHF.tasksCompleted: FieldValue.increment(-1)},
+          targetDate: currentTask.createdAt,
         );
       }
     }

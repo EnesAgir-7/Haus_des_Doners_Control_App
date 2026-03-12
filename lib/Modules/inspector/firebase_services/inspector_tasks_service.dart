@@ -46,11 +46,17 @@ class InspectorTaskService {
 
       // 2️⃣ If task is completed → update inspector history
       if (newStatus.toLowerCase() == AppConstants.completed) {
-        await AdminUserService().updateInspectorHistoryBatch(
-          batch: batch,
-          inspectorId: inspectorId,
-          updates: {IHF.tasksCompleted: FieldValue.increment(1)},
-        );
+        final taskDoc = await taskRef.get();
+        if (taskDoc.exists) {
+          final createdAt =
+              (taskDoc.data()?[TaskFields.createdAt] as Timestamp?)?.toDate();
+          await AdminUserService().updateInspectorHistoryBatch(
+            batch: batch,
+            inspectorId: inspectorId,
+            updates: {IHF.tasksCompleted: FieldValue.increment(1)},
+            targetDate: createdAt,
+          );
+        }
       }
 
       // 3️⃣ Commit the batch

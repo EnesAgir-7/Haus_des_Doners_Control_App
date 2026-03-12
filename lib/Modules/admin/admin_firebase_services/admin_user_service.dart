@@ -169,6 +169,7 @@ class AdminUserService {
     required WriteBatch batch,
     required String inspectorId,
     required Map<String, dynamic> updates,
+    DateTime? targetDate,
   }) async {
     console("Updating Inspector History Batch");
 
@@ -177,7 +178,9 @@ class AdminUserService {
         .doc(inspectorId);
 
     final now = DateTime.now();
-    final monthKey = '${now.month.toString().padLeft(2, '0')}-${now.year}';
+    final dateToUse = targetDate ?? now;
+    final monthKey =
+        '${dateToUse.month.toString().padLeft(2, '0')}-${dateToUse.year}';
 
     // Reference to the month subcollection document
     final monthRef = inspectorRef.collection('months').doc(monthKey);
