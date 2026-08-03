@@ -27,12 +27,22 @@ class ScreenBranches extends StatefulWidget {
 }
 
 class _ScreenBranchesState extends State<ScreenBranches> {
+  final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ProviderBranches>().initialize();
     });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -123,6 +133,8 @@ class _ScreenBranchesState extends State<ScreenBranches> {
 
   Widget _buildSearchBar(ProviderBranches provider) {
     return TextField(
+      controller: _searchController,
+      focusNode: _searchFocusNode,
       onChanged: provider.setSearchQuery,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
@@ -132,7 +144,11 @@ class _ScreenBranchesState extends State<ScreenBranches> {
         suffixIcon: provider.searchQuery.isNotEmpty
             ? IconButton(
                 icon: const Icon(Icons.clear, color: Colors.white54),
-                onPressed: () => provider.setSearchQuery(''),
+                onPressed: () {
+                  _searchController.clear();
+                  provider.setSearchQuery('');
+                  _searchFocusNode.unfocus();
+                },
               )
             : null,
         filled: true,

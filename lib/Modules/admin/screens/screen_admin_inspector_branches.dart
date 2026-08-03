@@ -27,6 +27,7 @@ class _ScreenAdminInspectorBranchesState
     extends State<ScreenAdminInspectorBranches> {
   final AdminBranchService _branchService = AdminBranchService();
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   String _searchQuery = '';
 
   List<BranchModel> _allBranches = []; // store all branches locally
@@ -63,6 +64,7 @@ class _ScreenAdminInspectorBranchesState
   void dispose() {
     _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -130,6 +132,7 @@ class _ScreenAdminInspectorBranchesState
           Expanded(
             child: TextField(
               controller: _searchController,
+              focusNode: _searchFocusNode,
               style: const TextStyle(color: Colors.white, fontSize: 15),
               decoration: InputDecoration(
                 fillColor: Colors.transparent,
@@ -151,9 +154,12 @@ class _ScreenAdminInspectorBranchesState
           if (_searchQuery.isNotEmpty)
             IconButton(
               onPressed: () {
+                _searchController.clear();
                 setState(() {
-                  _searchController.clear();
                   _searchQuery = '';
+                });
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  FocusScope.of(context).unfocus();
                 });
               },
               icon: const Icon(Icons.close_rounded, color: Colors.white60, size: 20),

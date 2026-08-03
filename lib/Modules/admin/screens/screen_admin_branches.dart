@@ -26,6 +26,7 @@ class ScreenAdminBranches extends StatefulWidget {
 
 class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
   final _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   final InspectorInspectionService _inspectionService =
       InspectorInspectionService();
   bool _isExporting = false;
@@ -41,6 +42,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
@@ -120,6 +122,7 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
   Widget _buildSearchBar() {
     return TextField(
       controller: _searchController,
+      focusNode: _searchFocusNode,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         hintText: LocaleKeys.search.tr(),
@@ -131,6 +134,9 @@ class _ScreenAdminBranchesState extends State<ScreenAdminBranches> {
                 onPressed: () {
                   _searchController.clear();
                   context.read<ProviderAdminBranches>().setSearchQuery('');
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    FocusScope.of(context).unfocus();
+                  });
                 },
               )
             : null,
